@@ -48,7 +48,7 @@ window.onload = function () {
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
-    document.getElementById('slider-div').innerHTML = '';
+    document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML = '<h2>Chart</h2>\n' +
         '<canvas id="myChart" width="300" height="200"></canvas>\n';
@@ -82,6 +82,14 @@ function chartType(chart) {
 }
 
 function line() {
+    // TODO: add multi-line support.
+    // document.getElementById('input-div').innerHTML =
+    //     '<form title="line" id="line-form">\n' +
+    //         '<input type="radio" name="" value="" ' +
+    //     '</form>\n';
+    //
+    // let lines = 1;
+
     let tableData = [
         {x: 0, y: 25},
         {x: 1, y: 16},
@@ -149,8 +157,8 @@ function line() {
 }
 
 function moon() {
-    document.getElementById('slider-div').innerHTML =
-        '<form title="moon" id="moon-form">\n' +
+    document.getElementById('input-div').innerHTML =
+        '<form title="Moon" id="moon-form">\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-2"><p>a</p></div>\n' +
                 '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
@@ -175,7 +183,7 @@ function moon() {
 
     // Link each slider with corresponding text box
     let moonForm = document.getElementById("moon-form");
-    linkInputs(moonForm.elements['a'], moonForm.elements['a-num'], 1, 750, 0.01, 300, true);
+    linkInputs(moonForm.elements['a'], moonForm.elements['a-num'], 1, 750, 0.01, 30, true);
     linkInputs(moonForm.elements['p'], moonForm.elements['p-num'], 2, 20, 0.01, 10);
     linkInputs(moonForm.elements['phase'], moonForm.elements['phase-num'], 0, 360, 1, 0);
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
@@ -265,6 +273,7 @@ function moon() {
 }
 
 function updateFormula(table, form, chart) {
+    // Can't just set min and max to the first values in the table because it might be invalid
     let min = NaN;
     let max = NaN;
     for (let i = 0; i < table.length; i++) {
@@ -306,7 +315,7 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.onchange = function () {
+        number.oninput = function () {
             slider.value = number.value;
         };
     } else {
@@ -324,7 +333,7 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
                 number.value = x;
             }
         };
-        number.onchange = function () {
+        number.oninput = function () {
             slider.value = Math.log(number.value);
         }
     }
@@ -416,6 +425,18 @@ function scatter() {
 }
 
 function venus() {
+    document.getElementById('input-div').innerHTML =
+        '<form title="Venus" id="venus-form">\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2"><p>x</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="x" name="x"></div>\n' +
+                '<div class="col-sm-4"><input type="number" title="x" name="x-num">"</div>\n' +
+            '</div>\n' +
+        '</form>\n';
+
+    let venusForm = document.getElementById("venus-form");
+    linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
+
     let tableData = [
         {x: 15, y: 0.7},
         {x: 30, y: 0.53},
@@ -458,7 +479,7 @@ function venus() {
                     pointRadius: 5,
                     pointHoverRadius: 7,
                 }, {
-                    data: geocentricData[1],
+                    // data: geocentricData[1],
                     borderColor: rgbString(colors['blue']),
                     backgroundColor: rgbString(colors['white'], 0),
                     borderWidth: 2,
@@ -467,7 +488,7 @@ function venus() {
                     fill: false,
                 }, {
                     label: 'Geocentric',
-                    data: geocentricData[0],
+                    // data: geocentricData[0],
                     borderColor: rgbString(colors['blue']),
                     backgroundColor: rgbString(colors['blue'], 0.5),
                     borderWidth: 2,
@@ -506,12 +527,17 @@ function venus() {
         }
     });
 
+    venusForm.oninput = function () {
+        geocentricData = geocentric(3, 60, venusForm.elements['x-num'].value);
+        myChart.update(0);
+    };
+
     updateLine(tableData, myChart);
 
     return [hot, myChart];
 }
 
-function geocentric(start, end, steps=500) {
+function geocentric(start, end, c, steps=500) {
     let top = [];
     let bot = [];
     let x = start;
@@ -539,7 +565,11 @@ function heliocentric(start, end, steps=500) {
         let alpha = Math.atan(108*Math.sin(theta) / (150 + 108*Math.cos(theta)));
         data.push({
             x: x,
-            y: (Math.PI - theta + alpha) / Math.PI,
+            y: (1 - Math.cos(Math.PI - theta + alpha))/ 2,
+
+            // Below is the percentage of illumination of the whole observable surface,
+            //   while the above is the actual phase calculation based on observed width over height.
+            // y: (Math.PI - theta + alpha) / Math.PI,
         });
         x += step;
     }
