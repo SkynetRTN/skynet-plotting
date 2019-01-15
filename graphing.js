@@ -1,4 +1,30 @@
 function line() {
+
+    var headers = ['x', 'y'];
+
+    var myData = [
+        [5.51, 25.72],
+        [7.93, 56.47],
+        [10.02, 101.53],
+        [11.59, 136.88],
+        [15.53, 136.09],
+    ];
+
+    console.log('rendering the spreadsheet');
+
+    var container = document.getElementById('input-table');
+    var hot = new Handsontable(container, {
+        data: myData,
+        rowHeaders: true,
+        colHeaders: headers,
+        filters: true,
+        dropdownMenu: true,
+        contextMenu: ['undo', 'redo', '---------', 'row_above', 'row_below', '---------', 'remove_row'],
+        fillHandle: {
+            autoInsertRow: true,
+        }
+    });
+
     let ctx = document.getElementById("myChart").getContext('2d');
     let myChart = new Chart(ctx, {
         type: 'bar',
@@ -6,7 +32,7 @@ function line() {
             labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
             datasets: [{
                 label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
+                data: [20, 19, 3, 5, 2, 3],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
@@ -36,6 +62,7 @@ function line() {
             }
         }
     });
+    console.log('doing chart');
 }
 
 function moon() {
@@ -70,8 +97,4 @@ function moon() {
             }
         }
     });
-}
-
-function sine() {
-    let data = [];
 }

@@ -32,6 +32,10 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
         <!--Chart.js-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+        <!--Handsontable-->
+        <script src="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.css" rel="stylesheet" media="screen">
+
     </head>
 
     <body>
@@ -57,13 +61,12 @@
         </main>
 
         <!--Render the chart-->
-        <script src="graphing.js"></script>
-
+        <script src="./graphing.js"></script>
         <script>
             function chartType(chart) {
                 // rewrite HTML content of chart
                 document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
-                    "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n"
+                    "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n";
                 if (chart === "line") {
                     console.log("line clicked");
                     line();

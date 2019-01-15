@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dc0f7374-97b3-42a1-a32b-dd40782636e6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/iridescent.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/style.css" afterDir="false" />
+    <list default="true" id="dc0f7374-97b3-42a1-a32b-dd40782636e6" name="Default Changelist" comment="Adding the handsontable">
+      <change beforePath="$PROJECT_DIR$/.idea/ASTR-Graphing.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ASTR-Graphing.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphing.js" beforeDir="false" afterPath="$PROJECT_DIR$/graphing.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -20,69 +21,58 @@
     <session id="1432599950">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="2" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.open.time.2" value="1" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="css" value="1" />
-          <entry key="html" value="1" />
-          <entry key="js" value="2" />
+          <entry key="html" value="3" />
+          <entry key="js" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="CSS" value="1" />
-          <entry key="HTML" value="1" />
-          <entry key="JavaScript" value="2" />
+          <entry key="HTML" value="3" />
+          <entry key="JavaScript" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="html" value="1012" />
-          <entry key="js" value="323" />
+          <entry key="html" value="1271" />
+          <entry key="js" value="418" />
+          <entry key="txt" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="HTML" value="1012" />
-          <entry key="JavaScript" value="323" />
+          <entry key="HTML" value="1271" />
+          <entry key="JavaScript" value="418" />
+          <entry key="PLAIN_TEXT" value="23" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="343">
-              <caret line="49" column="48" lean-forward="true" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/graphing.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="56" column="14" lean-forward="true" selection-start-line="56" selection-start-column="14" selection-end-line="56" selection-end-column="14" />
+            <state relative-caret-position="143">
+              <caret line="68" column="86" selection-start-line="68" selection-start-column="86" selection-end-line="68" selection-end-column="86" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_CONFIG_DIR$/javascript/extLibs/http_cdnjs.cloudflare.com_ajax_libs_Chart.js_2.4.0_Chart.js">
+        <entry file="file://$PROJECT_DIR$/graphing.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3">
-              <caret line="8391" column="34" lean-forward="true" selection-start-line="8391" selection-start-column="34" selection-end-line="8391" selection-end-column="34" />
-              <folding>
-                <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-              </folding>
+            <state relative-caret-position="148">
+              <caret line="15" column="8" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -93,6 +83,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CSS File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -111,6 +102,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/style.css" />
+        <option value="$PROJECT_DIR$/hello.html" />
         <option value="$PROJECT_DIR$/graphing.js" />
         <option value="$PROJECT_DIR$/index.html" />
       </list>
@@ -122,9 +114,10 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="75" />
     <option name="y" value="23" />
-    <option name="width" value="1440" />
+    <option name="width" value="1280" />
     <option name="height" value="825" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -154,6 +147,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
@@ -184,20 +178,22 @@
       <option name="presentableId" value="Default" />
       <updated>1547133616988</updated>
       <workItem from="1547133618178" duration="4339000" />
-      <workItem from="1547215802309" duration="4121000" />
+      <workItem from="1547215802309" duration="6398000" />
+      <workItem from="1547562199634" duration="2403000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8460000" />
+    <option name="totallyTimeSpent" value="13140000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="825" extended-state="0" />
+    <frame x="0" y="23" width="1440" height="825" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24031007" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21282594" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info active="true" anchor="bottom" id="Messages" visible="true" weight="0.3287858" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -220,6 +216,10 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Adding the handsontable" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding the handsontable" />
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/style.css">
       <provider selected="true" editor-type-id="text-editor" />
@@ -228,25 +228,27 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3">
           <caret line="8391" column="34" lean-forward="true" selection-start-line="8391" selection-start-column="34" selection-end-line="8391" selection-end-column="34" />
-          <folding>
-            <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#li#0;n#!!top" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
+    <entry file="file://$PROJECT_DIR$/hello.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
-          <caret line="49" column="48" lean-forward="true" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
+        <state relative-caret-position="80">
+          <caret line="5" column="7" lean-forward="true" selection-start-line="5" selection-start-column="7" selection-end-line="5" selection-end-column="7" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/graphing.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="56" column="14" lean-forward="true" selection-start-line="56" selection-start-column="14" selection-end-line="56" selection-end-column="14" />
+        <state relative-caret-position="148">
+          <caret line="15" column="8" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="143">
+          <caret line="68" column="86" selection-start-line="68" selection-start-column="86" selection-end-line="68" selection-end-column="86" />
         </state>
       </provider>
     </entry>
