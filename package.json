@@ -1,0 +1,23 @@
+{
+  "name": "astr-graphing",
+  "version": "1.0.0",
+  "description": "A graphing/charting tool for ASTR 101 at UNC Chapel Hill",
+  "main": "graphing.js",
+  "dependencies": {
+    "file-saver": "^2.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/endurancist/ASTR-Graphing.git"
+  },
+  "author": "Shengjie Xu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/endurancist/ASTR-Graphing/issues"
+  },
+  "homepage": "https://github.com/endurancist/ASTR-Graphing#readme"
+}

@@ -7,23 +7,6 @@
         <link rel="stylesheet" href="style.css">
         <title>ASTR 101 Graphing</title>
 
-        <style>
-            body {
-                font-family: "Helvetica Neue", sans-serif;
-            }
-            main {
-                margin: 3em auto 5em;
-            }
-            h2 {
-                text-align: center;
-                font-size: 1.5em;
-            }
-            .chart-type-list li {
-                /*display: inline;*/
-                /*padding: 0.3em;*/
-            }
-        </style>
-
         <!--Load relevant libraries-->
         <!--jQuery-->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -45,10 +28,10 @@
                     <h2>Input area</h2>
                     <form title="input">
                         <ul class="chart-type-list">
-                            <li><input type="radio" name="chart-type" value="line" onclick="chartType('line')">Line</li>
-                            <li><input type="radio" name="chart-type" value="moon" onclick="chartType('moon')">Moon</li>
-                            <li><input type="radio" name="chart-type" value="venus">Venus</li>
-                            <li><input type="radio" name="chart-type" value="scatter">scatter</li>
+                            <li><input type="radio" name="chart-type" title="line" onclick="chartType('line')">Line</li>
+                            <li><input type="radio" name="chart-type" title="moon" onclick="chartType('moon')">Moon</li>
+                            <li><input type="radio" name="chart-type" title="venus">Venus</li>
+                            <li><input type="radio" name="chart-type" title="scatter">scatter</li>
                         </ul>
                     </form>
                     <div id="input-table"></div>
@@ -65,8 +48,10 @@
         <script>
             function chartType(chart) {
                 // rewrite HTML content of chart
+                document.getElementById('input-table').innerHTML = '';
                 document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
-                    "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n";
+                    "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n" +
+                    "<button id=\"save-button\">Save Chart Image</button>";
                 if (chart === "line") {
                     console.log("line clicked");
                     line();
