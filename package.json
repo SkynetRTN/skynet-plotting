@@ -2,9 +2,14 @@
   "name": "astr-graphing",
   "version": "1.0.0",
   "description": "A graphing/charting tool for ASTR 101 at UNC Chapel Hill",
-  "main": "graphing.js",
+  "main": "main.js",
   "dependencies": {
-    "file-saver": "^2.0.0"
+    "bootstrap": "^4.2.1",
+    "chart.js": "^2.7.3",
+    "file-saver": "^2.0.0",
+    "handsontable": "^6.2.2",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.6"
   },
   "devDependencies": {},
   "scripts": {

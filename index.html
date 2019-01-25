@@ -3,63 +3,38 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="node_modules/handsontable/dist/handsontable.full.min.css" media="screen">
         <link rel="stylesheet" href="style.css">
         <title>ASTR 101 Graphing</title>
-
-        <!--Load relevant libraries-->
-        <!--jQuery-->
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <!--These two required by bootstrap-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-        <!--Chart.js-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-        <!--Handsontable-->
-        <script src="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/handsontable@6.2.2/dist/handsontable.full.min.css" rel="stylesheet" media="screen">
-
+        <script src="node_modules/jquery/dist/jquery.slim.min.js"></script>
+        <script src="node_modules/popper.js/dist/umd/popper.min.js"></script>
+        <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="node_modules/file-saver/dist/FileSaver.min.js"></script>
+        <script src="node_modules/chart.js/dist/Chart.min.js"></script>
+        <script src="node_modules/handsontable/dist/handsontable.full.min.js"></script>
+        <script src="main.js"></script>
+        <!--<script src="bundle.js"></script>-->
     </head>
-
     <body>
         <main class="container">
             <div class="row">
                 <div class="col-sm-4">
-                    <h2>Input area</h2>
-                    <form title="input">
-                        <ul class="chart-type-list">
-                            <li><input type="radio" name="chart-type" title="line" onclick="chartType('line')">Line</li>
-                            <li><input type="radio" name="chart-type" title="moon" onclick="chartType('moon')">Moon</li>
-                            <li><input type="radio" name="chart-type" title="venus">Venus</li>
-                            <li><input type="radio" name="chart-type" title="scatter">scatter</li>
-                        </ul>
+                    <h2>Data</h2>
+                    <form title="input" id="chart-type-form">
+                        <select name="chart" title="select chart">
+                            <option value="line" title="line" selected>Line</option>
+                            <option value="moon" title="moon">Moon</option>
+                            <option value="scatter" title="scatter">Scatter</option>
+                            <option value="venus" title="venus">Venus</option>>
+                            <option value="double" title="double">Double</option>
+                        </select>
                     </form>
                     <div id="input-table"></div>
+                    <p class="caption">Note: you can copy/paste data into the table.</p>
                 </div>
-                <div class="col-sm-8" id="chart-div">
-                    <h2>Chart</h2>
-                    <canvas id="myChart" width="300" height="200"></canvas>
-                </div>
+                <div class="col-sm-8" id="chart-div"></div>
             </div>
         </main>
-
-        <!--Render the chart-->
-        <script src="./graphing.js"></script>
-        <script>
-            function chartType(chart) {
-                // rewrite HTML content of chart
-                document.getElementById('input-table').innerHTML = '';
-                document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
-                    "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n" +
-                    "<button id=\"save-button\">Save Chart Image</button>";
-                if (chart === "line") {
-                    console.log("line clicked");
-                    line();
-                } else if (chart === "moon") {
-                    console.log("moon clicked");
-                    moon();
-                }
-            }
-        </script>
     </body>
 </html>
