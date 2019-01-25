@@ -136,11 +136,39 @@ function line() {
 }
 
 function moon() {
-
+    
 }
 
 function scatter() {
-    // let tableData =
+    alert('reached scatter');
+
+    let tableData = [];
+    for (let i = 0; i < 20; i++) {
+        tableData[i]['la'] = Math.random() * 40.0 - 20.0;
+        tableData[i]['lo'] = Math.random() * 40.0 - 20.0;
+        tableData[i]['di'] = Math.random() * 20.0;
+    }
+
+    console.log(tableData);
+
+    let container = document.getElementById('input-table');
+    let hot = new Handsontable(container, {
+        data: tableData,
+        rowHeaders: true,
+        colHeaders: ['Latitude', 'Longitude', 'Distance'],
+        maxCols: 3,
+        height: 395,
+        width: '100%',
+        contextMenu: ['undo', 'redo', '---------', 'row_above', 'row_below', '---------', 'remove_row'],
+        columns: [
+            {data: 'la', type: 'numeric'},
+            {data: 'lo', type: 'numeric'},
+            {data: 'di', type: 'numeric'},
+        ],
+        fillHandle: {
+            autoInsertRow: true,
+        }
+    });
 }
 
 function venus() {
