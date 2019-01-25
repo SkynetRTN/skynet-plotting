@@ -11,6 +11,7 @@ const colors = {
     'red':      '#cf4e49',
     'yellow':   '#ced139',
     'purple':   '#c382d1',
+    'gray':     '#9a9a9b',
 };
 
 window.onload = function() {
@@ -25,8 +26,7 @@ function chartType(chart) {
     // rewrite HTML content of table & chart
     document.getElementById('input-table').innerHTML = '';
     document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
-        "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n" +
-        "<button id=\"save-button\">Save Chart Image</button>";
+        "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n";
 
     // Enabling download function
     document.getElementById('save-button').onclick = function() {
@@ -36,17 +36,24 @@ function chartType(chart) {
         });
     };
 
+    let objects;
+
     if (chart === "line") {
-        line();
+        objects = line();
     } else if (chart === "moon") {
-        moon();
+        objects = moon();
     } else if (chart === "scatter") {
-        scatter();
+        objects = scatter();
     } else if (chart === "venus") {
-        venus();
+        objects = venus();
     } else {
-        double();
+        objects = double();
     }
+
+    let addRow = document.getElementById('add-row-button');
+    Handsontable.dom.addEvent(addRow, 'click', function() {
+        objects[0].alter('insert_row');
+    });
 }
 
 function line() {
@@ -61,21 +68,6 @@ function line() {
         {x: 7, y: 16},
         {x: 8, y: 25},
         {x: 9, y: 36},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
@@ -139,6 +131,8 @@ function line() {
     });
 
     updateChart(tableData, myChart);
+
+    return [hot, myChart];
 }
 
 function moon() {
@@ -146,7 +140,7 @@ function moon() {
 }
 
 function scatter() {
-
+    // let tableData =
 }
 
 function venus() {

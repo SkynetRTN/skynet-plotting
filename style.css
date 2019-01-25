@@ -12,6 +12,7 @@ h2 {
 p.caption {
     /*font-size: 0.8em;*/
     font-style: italic;
+    color: #9A9A9B;
 }
 #chart-type-form select {
     width: 100%;
@@ -20,3 +21,7 @@ p.caption {
 #input-table {
     margin: 1em 0;
 }
+/*#button-row .right-column {*/
+    /*display: flex;*/
+    /*justify-content: flex-end;*/
+/*}*/
