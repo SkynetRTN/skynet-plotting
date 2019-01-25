@@ -16,7 +16,7 @@ window.onload = function() {
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
-    document.getElementById('input-table').innerHTML = '';
+    document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
         "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n" +
         "<button id=\"save-button\">Save Chart Image</button>";
@@ -78,7 +78,7 @@ function line() {
 
     let chartData = [];
 
-    let container = document.getElementById('input-table');
+    let container = document.getElementById('table-div');
     let hot = new Handsontable(container, {
         data: tableData,
         rowHeaders: true,

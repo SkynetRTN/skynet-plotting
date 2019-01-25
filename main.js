@@ -24,7 +24,7 @@ window.onload = function() {
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
-    document.getElementById('input-table').innerHTML = '';
+    document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
         "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n";
 
@@ -77,7 +77,7 @@ function line() {
 
     let chartData = [];
 
-    let container = document.getElementById('input-table');
+    let container = document.getElementById('table-div');
     let hot = new Handsontable(container, {
         data: tableData,
         rowHeaders: true,
@@ -136,22 +136,22 @@ function line() {
 }
 
 function moon() {
-    
+
 }
 
 function scatter() {
-    alert('reached scatter');
-
-    let tableData = [];
+    let tableData = [{}];
     for (let i = 0; i < 20; i++) {
-        tableData[i]['la'] = Math.random() * 40.0 - 20.0;
-        tableData[i]['lo'] = Math.random() * 40.0 - 20.0;
-        tableData[i]['di'] = Math.random() * 20.0;
+        tableData[i] = {
+            'la': Math.random() * 40.0 - 20.0,
+            'lo': Math.random() * 40.0 - 20.0,
+            'di': Math.random() * 20.0,
+        };
     }
 
     console.log(tableData);
 
-    let container = document.getElementById('input-table');
+    let container = document.getElementById('table-div');
     let hot = new Handsontable(container, {
         data: tableData,
         rowHeaders: true,
