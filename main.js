@@ -12,6 +12,28 @@ const colors = {
     'yellow':   '#ced139',
     'purple':   '#c382d1',
     'gray':     '#9a9a9b',
+    'orange':   '#ff8e21',
+    'bright':   '#ffee51',
+    'white':    '#ffffff',
+    'black':    '#000000',
+};
+
+const tableCommonOptions = {
+    rowHeaders: true,
+    height: 395,
+    width: '100%',
+    contextMenu: [
+        'undo',
+        'redo',
+        '---------',
+        'row_above',
+        'row_below',
+        '---------',
+        'remove_row'
+    ],
+    fillHandle: {
+        autoInsertRow: true,
+    }
 };
 
 window.onload = function() {
@@ -78,22 +100,15 @@ function line() {
     let chartData = [];
 
     let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, {
+    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        rowHeaders: true,
         colHeaders: ['x', 'y'],
         maxCols: 2,
-        height: 395,
-        width: '100%',
-        contextMenu: ['undo', 'redo', '---------', 'row_above', 'row_below', '---------', 'remove_row'],
         columns: [
             {data: 'x', type: 'numeric'},
             {data: 'y', type: 'numeric'},
         ],
-        fillHandle: {
-            autoInsertRow: true,
-        }
-    });
+    }));
 
     let ctx = document.getElementById("myChart").getContext('2d');
     let myChart = new Chart(ctx, {
@@ -102,11 +117,11 @@ function line() {
             datasets: [{
                 label: 'y value',
                 data: chartData,
-                borderColor: 'rgba(65, 163, 209, 1)',
+                borderColor: rgbString(colors['blue']),
                 borderWidth: 2,
                 lineTension: 0.1,
                 fill: false,
-                backgroundColor: 'rgba(0, 0, 0, 0)',
+                backgroundColor: rgbString(colors['white'], 1),
             }]
         },
         options: {
@@ -115,22 +130,17 @@ function line() {
                     type: 'linear',
                     position: 'bottom',
                 }],
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true
-                    }
-                }]
             }
         }
     });
 
     hot.updateSettings({
         afterChange: function() {
-            updateChart(tableData, myChart);
+            updateLine(tableData, myChart);
         }
     });
 
-    updateChart(tableData, myChart);
+    updateLine(tableData, myChart);
 
     return [hot, myChart];
 }
@@ -140,8 +150,8 @@ function moon() {
 }
 
 function scatter() {
-    let tableData = [{}];
-    for (let i = 0; i < 20; i++) {
+    let tableData = [];
+    for (let i = 0; i < 15; i++) {
         tableData[i] = {
             'la': Math.random() * 40.0 - 20.0,
             'lo': Math.random() * 40.0 - 20.0,
@@ -149,26 +159,60 @@ function scatter() {
         };
     }
 
-    console.log(tableData);
+    let chartData = [];
 
     let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, {
+    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        rowHeaders: true,
         colHeaders: ['Latitude', 'Longitude', 'Distance'],
         maxCols: 3,
-        height: 395,
-        width: '100%',
-        contextMenu: ['undo', 'redo', '---------', 'row_above', 'row_below', '---------', 'remove_row'],
         columns: [
-            {data: 'la', type: 'numeric'},
-            {data: 'lo', type: 'numeric'},
-            {data: 'di', type: 'numeric'},
+            {data: 'la', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'lo', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'di', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        fillHandle: {
-            autoInsertRow: true,
+    }));
+
+    let ctx = document.getElementById("myChart").getContext('2d');
+    let myChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: rgbString(colors['orange']),
+                    pointRadius: 6,
+                    pointBorderWidth: 2,
+                },
+                {
+                    label: 'Sun',
+                    data: [{x: 0, y: 0}],
+                    backgroundColor: rgbString(colors['bright']),
+                    pointRadius: 10,
+                    pointBorderWidth: 2,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom'
+                }]
+            }
         }
     });
+
+    hot.updateSettings({
+        afterChange: function() {
+            updateScatter(tableData, myChart);
+        }
+    });
+
+    updateScatter(tableData, myChart);
+
+    return [hot, myChart];
 }
 
 function venus() {
@@ -179,31 +223,47 @@ function double() {
 
 }
 
-function updateChart(table, myChart) {
+function updateLine(table, myChart) {
     let start = 0;
     let chart = myChart.data.datasets[0].data;
-    console.log(chart);
     for (let i = 0; i < table.length; i++) {
-        if (table[i]['x'] === "" || table[i]['y'] === "") {
+        if (table[i]['x'] === '' || table[i]['y'] === '') {
             continue;
         }
-        // console.log('reach, start = ' + start);
-        chart[start] = {x: table[i]['x'], y: table[i]['y']};
-        start += 1;
+        chart[start++] = {x: table[i]['x'], y: table[i]['y']};
     }
-    // console.log('length = ' + chart.length + ', start = ' + start);
     while (chart.length !== start) {
         chart.pop();
     }
-    // console.log(chart);
     myChart.update(0);
 }
 
-function rgbString(rgb) {
+function updateScatter(table, myChart) {
+    let start = 0;
+    let chart = myChart.data.datasets[0].data;
+    for (let i = 0; i < table.length; i++) {
+        let la = table[i]['la'];
+        let lo = table[i]['lo'];
+        let di = table[i]['di'];
+        if (la === '' || lo === '' || di === '') {
+            continue;
+        }
+        chart[start++] = {
+            x: Math.cos(la / 180 * Math.PI) * di * Math.cos(lo / 180 * Math.PI),
+            y: Math.cos(la / 180 * Math.PI) * di * Math.sin(lo / 180 * Math.PI),
+        }
+    }
+    while (chart.length !== start) {
+        chart.pop();
+    }
+    myChart.update(0);
+}
+
+function rgbString(rgb, opacity = 1) {
     let r = hexToDecimal(rgb, 1, 2);
     let g = hexToDecimal(rgb, 3, 4);
     let b = hexToDecimal(rgb, 5, 6);
-    return 'rgba(' + r + ', ' + g + ', ' + b + ', 0)';
+    return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + opacity + ')';
 }
 
 function hexToDecimal(hex, s, t) {
@@ -211,9 +271,9 @@ function hexToDecimal(hex, s, t) {
     for (let i = s; i <= t; i++) {
         result <<= 4;
         if (hex[i] >= '0' && hex[i] <='9') {
-            result += hex[i] - '0';
+            result += hex[i].charCodeAt(0) - '0'.charCodeAt(0);
         } else {
-            result += hex[i] - 'A' + 10;
+            result += hex[i].charCodeAt(0) - 'a'.charCodeAt(0) + 10;
         }
     }
     return result;

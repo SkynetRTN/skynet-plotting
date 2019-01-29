@@ -10,7 +10,7 @@ h2 {
     font-size: 1.5em;
 }
 p.caption {
-    /*font-size: 0.8em;*/
+    /*font-size: 90%;*/
     font-style: italic;
     color: #9A9A9B;
 }
@@ -20,6 +20,7 @@ p.caption {
 }
 #table-div {
     margin: 1em 0;
+    /*font-size: 90%;*/
 }
 button {
 
