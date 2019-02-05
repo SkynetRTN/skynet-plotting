@@ -6,6 +6,8 @@
 
 // initialize the page
 
+"use strict";
+
 const colors = {
     'blue':     '#41a3d1',
     'red':      '#cf4e49',
@@ -36,9 +38,9 @@ const tableCommonOptions = {
     }
 };
 
-window.onload = function() {
+window.onload = function () {
     let form = document.getElementById('chart-type-form');
-    form.onchange = function() {
+    form.onchange = function () {
         chartType(form.elements['chart'].value);
     };
     chartType(form.elements['chart'].value);
@@ -46,12 +48,13 @@ window.onload = function() {
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
+    document.getElementById('slider-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
-    document.getElementById("chart-div").innerHTML = "<h2>Chart</h2>\n" +
-        "<canvas id=\"myChart\" width=\"300\" height=\"200\"></canvas>\n";
+    document.getElementById("chart-div").innerHTML = '<h2>Chart</h2>\n' +
+        '<canvas id="myChart" width="300" height="200"></canvas>\n';
 
     // Enabling download function
-    document.getElementById('save-button').onclick = function() {
+    document.getElementById('save-button').onclick = function () {
         let canvas = document.getElementById('myChart');
         canvas.toBlob(function(blob) {
             saveAs(blob, "chart.png");
@@ -73,7 +76,7 @@ function chartType(chart) {
     }
 
     let addRow = document.getElementById('add-row-button');
-    Handsontable.dom.addEvent(addRow, 'click', function() {
+    Handsontable.dom.addEvent(addRow, 'click', function () {
         objects[0].alter('insert_row');
     });
 }
@@ -135,7 +138,7 @@ function line() {
     });
 
     hot.updateSettings({
-        afterChange: function() {
+        afterChange: function () {
             updateLine(tableData, myChart);
         }
     });
@@ -146,7 +149,203 @@ function line() {
 }
 
 function moon() {
+    document.getElementById('slider-div').innerHTML =
+        '<form title="moon" id="moon-form">\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2"><p>a</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
+                '<div class="col-sm-4"><input type="number" title="a" name="a-num">"</div>\n' +
+            '</div>\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2"><p>P</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="P" name="p"></div>\n' +
+                '<div class="col-sm-4"><input type="number" title="P" name="p-num">d</div>\n' +
+            '</div>\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2"><p>Phase</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"></div>\n' +
+                '<div class="col-sm-4"><input type="number" title="Phase" name="phase-num">°</div>\n' +
+            '</div>\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2"><p>Tilt</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
+                '<div class="col-sm-4"><input type="number" title="Tilt" name="tilt-num"">°</div>\n' +
+            '</div>\n' +
+        '</form>\n';
 
+    // Link each slider with corresponding text box
+    let moonForm = document.getElementById("moon-form");
+    linkInputs(moonForm.elements['a'], moonForm.elements['a-num'], 1, 750, 0.01, 300, true);
+    linkInputs(moonForm.elements['p'], moonForm.elements['p-num'], 2, 20, 0.01, 10);
+    linkInputs(moonForm.elements['phase'], moonForm.elements['phase-num'], 0, 360, 1, 0);
+    linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
+
+    let tableData = [
+        {x: 1, y: Math.random() * 100 + 150},
+        {x: 2, y: Math.random() * 100 + 150},
+        {x: 3, y: Math.random() * 100 + 150},
+        {x: 4, y: Math.random() * 100 + 150},
+        {x: 5, y: Math.random() * 100 + 150},
+        {x: 6, y: Math.random() * 100 + 150},
+        {x: 7, y: Math.random() * 100 + 150},
+        {x: 8, y: Math.random() * 100 + 150},
+        {x: 9, y: Math.random() * 100 + 150},
+        {x: 10, y: Math.random() * 100 + 150},
+    ];
+
+    let chartData = [];
+    let formula = [];
+
+    // create table
+    let container = document.getElementById('table-div');
+    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+        data: tableData,
+        colHeaders: ['Julian Date', 'Distance'],
+        maxCols: 2,
+        columns: [
+            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+        ],
+        height: 280,
+    }));
+
+    // create chart
+    let ctx = document.getElementById("myChart").getContext('2d');
+    let myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: rgbString(colors['red']),
+                    fill: false,
+                    showLine: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }, {
+                    label: 'Prediction',
+                    data: formula,
+                    borderColor: rgbString(colors['blue']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    pointRadius: 0,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom',
+                }],
+            }
+        }
+    });
+
+    // link chart to table
+    hot.updateSettings({
+        afterChange: function () {
+            updateLine(tableData, myChart);
+            updateFormula(tableData, moonForm, myChart);
+        }
+    });
+
+    // link chart to input form (slider + text)
+    moonForm.oninput = function () {
+        updateFormula(tableData, moonForm, myChart);
+    };
+
+    updateLine(tableData, myChart);
+    updateFormula(tableData, moonForm, myChart);
+
+    return [hot, myChart];
+}
+
+function updateFormula(table, form, chart) {
+    let min = NaN;
+    let max = NaN;
+    for (let i = 0; i < table.length; i++) {
+        if (table[i]['x'] === '' || table[i]['y'] === '') {
+            continue;
+        }
+        if (table[i]['x'] > max || isNaN(max)) {
+            max = table[i]['x'];
+        }
+        if (table[i]['x'] < min || isNaN(min)) {
+            min = table[i]['x'];
+            console.log('updated min at i = ' + i);
+        }
+    }
+    console.log("min = " + min + " and max = " + max);
+    chart.data.datasets[1].data = trigGenerator(
+        form.elements['a-num'].value,
+        form.elements['p-num'].value,
+        form.elements['phase-num'].value,
+        form.elements['tilt-num'].value,
+        min - 2,
+        max + 2,
+        500
+    );
+    chart.update(0);
+}
+
+function linkInputs(slider, number, min, max, step, value, log=false) {
+    number.min = min;
+    number.max = max;
+    number.step = step;
+    number.value = value;
+    if (!log) {
+        slider.min = min;
+        slider.max = max;
+        slider.step = step;
+        slider.value = value;
+
+        slider.oninput = function () {
+            number.value = slider.value;
+        };
+        number.onchange = function () {
+            slider.value = number.value;
+        };
+    } else {
+        slider.min = Math.log(min * 0.999);
+        slider.max = Math.log(max * 1.001);
+        slider.step = (Math.log(max)-Math.log(min)) / ((max-min)/step);
+        slider.value = Math.log(value);
+        slider.oninput = function () {
+            let x = Math.exp(slider.value);
+            if (x > max) {
+                number.value = max;
+            } else if (x < min) {
+                number.value = min;
+            } else {
+                number.value = x;
+            }
+        };
+        number.onchange = function () {
+            slider.value = Math.log(number.value);
+        }
+    }
+}
+
+function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
+    let data = [];
+    let x = start;
+    let step = (end - start) / steps;
+    for (let i = 0; i < steps; i++) {
+        let theta = x / p * Math.PI * 2 - rad(phase);
+        let alpha = rad(tilt);
+        data.push({
+            x: x,
+            // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
+            y: a * Math.sqrt(Math.pow(Math.cos(theta), 2) +
+                Math.pow(Math.sin(theta), 2) * Math.pow(Math.sin(alpha), 2)),
+        });
+        x += step;
+    }
+    return data;
 }
 
 function scatter() {
@@ -206,7 +405,7 @@ function scatter() {
     });
 
     hot.updateSettings({
-        afterChange: function() {
+        afterChange: function () {
             updateScatter(tableData, myChart);
         }
     });
@@ -217,7 +416,134 @@ function scatter() {
 }
 
 function venus() {
+    let tableData = [
+        {x: 15, y: 0.7},
+        {x: 30, y: 0.53},
+        {x: 45, y: 0.27},
+        {x: 60, y: 0},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+    ];
 
+    let chartData = [];
+    let geocentricData = geocentric(3, 60);
+    let heliocentricData = heliocentric(3, 60);
+
+    // create table
+    let container = document.getElementById('table-div');
+    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+        data: tableData,
+        colHeaders: ['Angular Diameter', 'Phase'],
+        maxCols: 2,
+        columns: [
+            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+        ],
+        height: 280,
+    }));
+
+    // create chart
+    let ctx = document.getElementById("myChart").getContext('2d');
+    let myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: rgbString(colors['orange']),
+                    fill: false,
+                    showLine: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }, {
+                    data: geocentricData[1],
+                    borderColor: rgbString(colors['blue']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    pointRadius: 0,
+                    fill: false,
+                }, {
+                    label: 'Geocentric',
+                    data: geocentricData[0],
+                    borderColor: rgbString(colors['blue']),
+                    backgroundColor: rgbString(colors['blue'], 0.5),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    pointRadius: 0,
+                    fill: '-1',
+                }, {
+                    label: 'Heliocentric',
+                    data: heliocentricData,
+                    borderColor: rgbString(colors['red']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    pointRadius: 0,
+                    fill: false,
+                }
+            ]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom',
+                }],
+                yAxes: [{
+                    // stacked: true,
+                }]
+            }
+        }
+    });
+
+    // link chart to table
+    hot.updateSettings({
+        afterChange: function () {
+            updateLine(tableData, myChart);
+        }
+    });
+
+    updateLine(tableData, myChart);
+
+    return [hot, myChart];
+}
+
+function geocentric(start, end, steps=500) {
+    let top = [];
+    let bot = [];
+    let x = start;
+    let step = (end - start) / steps;
+    for (let i = 0; i < steps; i++) {
+        top.push({
+            x: x,
+            y: Math.max(0.5 - Math.pow(x - 30, 2) / 1800, 0),
+        });
+        bot.push({
+            x: x,
+            y: Math.max(0.25 - Math.pow(x - 30, 2) / 3600, 0),
+        });
+        x += step;
+    }
+    return [top, bot];
+}
+
+function heliocentric(start, end, steps=500) {
+    let data = [];
+    let x = start;
+    let step = (end - start) / steps;
+    for (let i = 0; i < steps; i++) {
+        let theta = Math.acos((1.4641 / Math.pow(rad(x/3600), 2) - 341640000) / 324000000);
+        let alpha = Math.atan(108*Math.sin(theta) / (150 + 108*Math.cos(theta)));
+        data.push({
+            x: x,
+            y: (Math.PI - theta + alpha) / Math.PI,
+        });
+        x += step;
+    }
+    return data;
 }
 
 function dual() {
@@ -290,7 +616,7 @@ function dual() {
     });
 
     hot.updateSettings({
-        afterChange: function() {
+        afterChange: function () {
             updateDual(tableData, myChart, 0);
             updateDual(tableData, myChart, 1);
         }
@@ -302,7 +628,7 @@ function dual() {
     return [hot, myChart];
 }
 
-function updateLine(table, myChart, dataSet = 0) {
+function updateLine(table, myChart, dataSet=0) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
@@ -338,7 +664,7 @@ function updateScatter(table, myChart) {
     myChart.update(0);
 }
 
-function updateDual(table, myChart, dataSet = 0) {
+function updateDual(table, myChart, dataSet=0) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
@@ -355,7 +681,11 @@ function updateDual(table, myChart, dataSet = 0) {
     myChart.update(0);
 }
 
-function rgbString(rgb, opacity = 1) {
+function rad(degree) {
+    return degree / 180 * Math.PI;
+}
+
+function rgbString(rgb, opacity=1) {
     let r = hexToDecimal(rgb, 1, 2);
     let g = hexToDecimal(rgb, 3, 4);
     let b = hexToDecimal(rgb, 5, 6);
