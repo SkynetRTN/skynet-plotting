@@ -75,6 +75,11 @@ function chartType(chart) {
         objects = dual();
     }
 
+    /**
+     * TODO: Find a way to align add-row-button while still putting it directly below
+     * the table element, so that in smaller screen it will be next to the table instead
+     * of being under the chart with the save-button.
+     */
     let addRow = document.getElementById('add-row-button');
     Handsontable.dom.addEvent(addRow, 'click', function () {
         objects[0].alter('insert_row');
@@ -82,30 +87,37 @@ function chartType(chart) {
 }
 
 function line() {
-    // TODO: add multi-line support.
-    // document.getElementById('input-div').innerHTML =
-    //     '<form title="line" id="line-form">\n' +
-    //         '<input type="radio" name="" value="" ' +
-    //     '</form>\n';
-    //
-    // let lines = 1;
+    document.getElementById('input-div').innerHTML =
+        '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
+            '<div class="flex-container">\n' +
+                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="1">1</div>\n' +
+                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="2">2</div>\n' +
+                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="3">3</div>\n' +
+                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="4">4</div>\n' +
+                '<div class="flex-item-grow1"><input type="checkbox" name="magnitude">Magnitude?</div>\n' +
+            '</div>' +
+        '</form>\n';
+
+    let lineForm = document.getElementById('line-form');
+
+    let lines = 1;
 
     let tableData = [
-        {x: 0, y: 25},
-        {x: 1, y: 16},
-        {x: 2, y: 9},
-        {x: 3, y: 4},
-        {x: 4, y: 1},
-        {x: 5, y: 4},
-        {x: 6, y: 9},
-        {x: 7, y: 16},
-        {x: 8, y: 25},
-        {x: 9, y: 36},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
-        {x: '', y: ''},
+        {x: 0,  y1: 25, y2: '', y3: '', y4: ''},
+        {x: 1,  y1: 16, y2: '', y3: '', y4: ''},
+        {x: 2,  y1: 9,  y2: '', y3: '', y4: ''},
+        {x: 3,  y1: 4,  y2: '', y3: '', y4: ''},
+        {x: 4,  y1: 1,  y2: '', y3: '', y4: ''},
+        {x: 5,  y1: 4,  y2: '', y3: '', y4: ''},
+        {x: 6,  y1: 9,  y2: '', y3: '', y4: ''},
+        {x: 7,  y1: 16, y2: '', y3: '', y4: ''},
+        {x: 8,  y1: 25, y2: '', y3: '', y4: ''},
+        {x: 9,  y1: 36, y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
     ];
 
     let chartData = [];
@@ -113,7 +125,7 @@ function line() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['x', 'y'],
+        colHeaders: ['x', 'y1'],
         maxCols: 2,
         columns: [
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
@@ -126,7 +138,7 @@ function line() {
         type: 'line',
         data: {
             datasets: [{
-                label: 'y value',
+                label: 'y1',
                 data: chartData,
                 borderColor: rgbString(colors['blue']),
                 backgroundColor: rgbString(colors['white'], 0),
@@ -152,6 +164,14 @@ function line() {
     });
 
     updateLine(tableData, myChart);
+
+    lineForm.onchange = function () {
+        if (lineForm.elements['lineCount'].value === lines) {
+            myChart.update()
+        } else {
+
+        }
+    };
 
     return [hot, myChart];
 }
@@ -189,15 +209,15 @@ function moon() {
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
 
     let tableData = [
-        {x: 1, y: Math.random() * 100 + 150},
-        {x: 2, y: Math.random() * 100 + 150},
-        {x: 3, y: Math.random() * 100 + 150},
-        {x: 4, y: Math.random() * 100 + 150},
-        {x: 5, y: Math.random() * 100 + 150},
-        {x: 6, y: Math.random() * 100 + 150},
-        {x: 7, y: Math.random() * 100 + 150},
-        {x: 8, y: Math.random() * 100 + 150},
-        {x: 9, y: Math.random() * 100 + 150},
+        {x: 1,  y: Math.random() * 100 + 150},
+        {x: 2,  y: Math.random() * 100 + 150},
+        {x: 3,  y: Math.random() * 100 + 150},
+        {x: 4,  y: Math.random() * 100 + 150},
+        {x: 5,  y: Math.random() * 100 + 150},
+        {x: 6,  y: Math.random() * 100 + 150},
+        {x: 7,  y: Math.random() * 100 + 150},
+        {x: 8,  y: Math.random() * 100 + 150},
+        {x: 9,  y: Math.random() * 100 + 150},
         {x: 10, y: Math.random() * 100 + 150},
     ];
 
@@ -349,8 +369,8 @@ function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
         data.push({
             x: x,
             // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
-            y: a * Math.sqrt(Math.pow(Math.cos(theta), 2) +
-                Math.pow(Math.sin(theta), 2) * Math.pow(Math.sin(alpha), 2)),
+            y: a * Math.sqrt(sqr(Math.cos(theta)) +
+                sqr(Math.sin(theta)) * sqr(Math.sin(alpha))),
         });
         x += step;
     }
@@ -425,17 +445,22 @@ function scatter() {
 }
 
 function venus() {
-    document.getElementById('input-div').innerHTML =
-        '<form title="Venus" id="venus-form">\n' +
-            '<div class="row">\n' +
-                '<div class="col-sm-2"><p>x</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="x" name="x"></div>\n' +
-                '<div class="col-sm-4"><input type="number" title="x" name="x-num">"</div>\n' +
-            '</div>\n' +
-        '</form>\n';
+    /**
+     * The following lines are used for exploring the effect of changing x have in geocentric model.
+     * The final value selected for rendering the chart is x = 0.445 (upper) and x = 0.8 (lower).
+     * To use it enable the 'venusForm.oninput = function ()' part as well in the end of venus() function.
+     */
+    // document.getElementById('input-div').innerHTML =
+    //     '<form title="Venus" id="venus-form">\n' +
+    //         '<div class="row">\n' +
+    //             '<div class="col-sm-2"><p>x</p></div>\n' +
+    //             '<div class="col-sm-6"><input type="range" title="x" name="x"></div>\n' +
+    //             '<div class="col-sm-4"><input type="number" title="x" name="x-num"></div>\n' +
+    //         '</div>\n' +
+    //     '</form>\n';
 
-    let venusForm = document.getElementById("venus-form");
-    linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
+    // let venusForm = document.getElementById("venus-form");
+    // linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
 
     let tableData = [
         {x: 15, y: 0.7},
@@ -448,8 +473,6 @@ function venus() {
     ];
 
     let chartData = [];
-    let geocentricData = geocentric(3, 60);
-    let heliocentricData = heliocentric(3, 60);
 
     // create table
     let container = document.getElementById('table-div');
@@ -479,7 +502,7 @@ function venus() {
                     pointRadius: 5,
                     pointHoverRadius: 7,
                 }, {
-                    // data: geocentricData[1],
+                    data: geocentric(10.15, 60, 0.8),
                     borderColor: rgbString(colors['blue']),
                     backgroundColor: rgbString(colors['white'], 0),
                     borderWidth: 2,
@@ -488,7 +511,7 @@ function venus() {
                     fill: false,
                 }, {
                     label: 'Geocentric',
-                    // data: geocentricData[0],
+                    data: geocentric(10.15, 60, 0.445),
                     borderColor: rgbString(colors['blue']),
                     backgroundColor: rgbString(colors['blue'], 0.5),
                     borderWidth: 2,
@@ -497,7 +520,7 @@ function venus() {
                     fill: '-1',
                 }, {
                     label: 'Heliocentric',
-                    data: heliocentricData,
+                    data: heliocentric(10.15, 60),
                     borderColor: rgbString(colors['red']),
                     backgroundColor: rgbString(colors['white'], 0),
                     borderWidth: 2,
@@ -508,13 +531,27 @@ function venus() {
             ]
         },
         options: {
+            legend: {
+                labels: {
+                    filter: function (legendItem, chartData) {
+                        return legendItem.datasetIndex !== 1;
+                    }
+                }
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
                     position: 'bottom',
+                    ticks: {
+                        suggestedMin: 5,
+                        suggestedMax: 65,
+                    }
                 }],
                 yAxes: [{
                     // stacked: true,
+                    ticks: {
+                        // suggestedMin: -2,
+                    }
                 }]
             }
         }
@@ -527,51 +564,69 @@ function venus() {
         }
     });
 
-    venusForm.oninput = function () {
-        geocentricData = geocentric(3, 60, venusForm.elements['x-num'].value);
-        myChart.update(0);
-    };
+    // venusForm.oninput = function () {
+    //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
+    //     // console.log(geocentricData);
+    //     myChart.update(0);
+    // };
 
     updateLine(tableData, myChart);
 
     return [hot, myChart];
 }
 
-function geocentric(start, end, c, steps=500) {
-    let top = [];
-    let bot = [];
-    let x = start;
+// Distance from Sun to Earth in km
+const dE = 1.496e8;
+
+// Distance from Sun to Venus in km
+const dV = 1.082e8;
+
+// Diameter of Venus in km
+const DV = 1.210e4;
+
+// Max angular separation between Venus and Sun in radians.
+const beta = rad(45);
+
+// Angular diameter of Venus as its closest in arc-seconds.
+const maxA = 60;
+
+function geocentric(start, end, x, steps=2000) {
+    let data = [];
+    let a = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        top.push({
-            x: x,
-            y: Math.max(0.5 - Math.pow(x - 30, 2) / 1800, 0),
+        let d = (1 - x) * (1 - Math.sin(beta)) * maxA * dE / a;
+
+        // In geocentric model dV is a variable, so we need to override it
+        let dV = Math.sqrt((1 - x) * sqr(Math.sin(beta)) * sqr(dE) + x * sqr(dE) - x / (1 - x) * sqr(d));
+
+        let cosPhi = (sqr(d) + sqr(dV) - sqr(dE)) / (2 * d * dV);
+
+        data.push({
+            x: a,
+            y: (1 + cosPhi) / 2 > 0 ? (1 + cosPhi) / 2 : '',
         });
-        bot.push({
-            x: x,
-            y: Math.max(0.25 - Math.pow(x - 30, 2) / 3600, 0),
-        });
-        x += step;
+        a += step;
     }
-    return [top, bot];
+    return data;
 }
 
 function heliocentric(start, end, steps=500) {
     let data = [];
-    let x = start;
+    let a = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let theta = Math.acos((1.4641 / Math.pow(rad(x/3600), 2) - 341640000) / 324000000);
-        let alpha = Math.atan(108*Math.sin(theta) / (150 + 108*Math.cos(theta)));
+        let theta = Math.acos((sqr(DV) / sqr(rad(a/3600)) - (sqr(dE) + sqr(dV))) / (2 * dE * dV));
+        let alpha = Math.atan(dV*Math.sin(theta) / (dE + dV*Math.cos(theta)));
         data.push({
-            x: x,
+            x: a,
             y: (1 - Math.cos(Math.PI - theta + alpha))/ 2,
 
             // Below is the percentage of illumination of the whole observable surface,
             //   while the above is the actual phase calculation based on observed width over height.
             // y: (Math.PI - theta + alpha) / Math.PI,
         });
-        x += step;
+        a += step;
     }
     return data;
 }
@@ -658,14 +713,14 @@ function dual() {
     return [hot, myChart];
 }
 
-function updateLine(table, myChart, dataSet=0) {
+function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
-        if (table[i]['x'] === '' || table[i]['y'] === '') {
+        if (table[i][xKey] === '' || table[i][yKey] === '') {
             continue;
         }
-        chart[start++] = {x: table[i]['x'], y: table[i]['y']};
+        chart[start++] = {x: table[i][xKey], y: table[i][yKey]};
     }
     while (chart.length !== start) {
         chart.pop();
@@ -713,6 +768,10 @@ function updateDual(table, myChart, dataSet=0) {
 
 function rad(degree) {
     return degree / 180 * Math.PI;
+}
+
+function sqr(n) {
+    return Math.pow(n, 2);
 }
 
 function rgbString(rgb, opacity=1) {
