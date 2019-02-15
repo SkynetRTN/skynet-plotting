@@ -6,7 +6,7 @@
 
 // initialize the page
 
-"use strict";
+'use strict';
 
 const colors = {
     'blue':     '#41a3d1',
@@ -36,6 +36,17 @@ const tableCommonOptions = {
     fillHandle: {
         autoInsertRow: true,
     }
+};
+
+Chart.defaults.global.tooltips.mode = 'nearest';
+Chart.defaults.global.tooltips.callbacks.title = function (tooltipItems, data) {
+    return Math.round(tooltipItems[0].xLabel * 100) / 100;
+};
+Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
+    return Math.round(tooltipItem.yLabel * 100) / 100;
+};
+Chart.defaults.global.legend.onClick = function (e) {
+    e.stopPropagation();
 };
 
 window.onload = function () {
@@ -87,7 +98,7 @@ function chartType(chart) {
 }
 
 function line() {
-    document.getElementById('input-div').innerHTML =
+    document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
             '<div class="flex-container">\n' +
                 '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="1" checked>1</div>\n' +
@@ -96,7 +107,7 @@ function line() {
                 '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="4">4</div>\n' +
                 '<div class="flex-item-grow1"><input type="checkbox" name="magnitude">Magnitude Scale?</div>\n' +
             '</div>' +
-        '</form>\n';
+        '</form>\n');
 
     let lineForm = document.getElementById('line-form');
 
@@ -178,7 +189,9 @@ function line() {
             ]
         },
         options: {
-            events: [],
+            hover: {
+                mode: 'nearest'
+            },
             legend: {
                 onClick: function (e) {
                     e.stopPropagation();
@@ -241,7 +254,7 @@ function line() {
 }
 
 function moon() {
-    document.getElementById('input-div').innerHTML =
+    document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Moon" id="moon-form">\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-2"><p>a</p></div>\n' +
@@ -263,7 +276,7 @@ function moon() {
                 '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
                 '<div class="col-sm-4"><input type="number" title="Tilt" name="tilt-num"">°</div>\n' +
             '</div>\n' +
-        '</form>\n';
+        '</form>\n');
 
     // Link each slider with corresponding text box
     let moonForm = document.getElementById("moon-form");
@@ -328,7 +341,9 @@ function moon() {
             ]
         },
         options: {
-            events: [],
+            hover: {
+                mode: 'nearest'
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -415,7 +430,7 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
             } else if (x < min) {
                 number.value = min;
             } else {
-                number.value = x.toFixed(2);
+                number.value = Math.round(x * 100) / 100;
             }
         };
         number.oninput = function () {
@@ -489,7 +504,9 @@ function scatter() {
             ],
         },
         options: {
-            events: [],
+            hover: {
+                mode: 'nearest'
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -597,7 +614,9 @@ function venus() {
             ]
         },
         options: {
-            events: [],
+            hover: {
+                mode: 'nearest'
+            },
             legend: {
                 labels: {
                     filter: function (legendItem, chartData) {
@@ -758,7 +777,9 @@ function dual() {
             ]
         },
         options: {
-            events: [],
+            hover: {
+                mode: 'nearest'
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -782,7 +803,6 @@ function dual() {
 }
 
 function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
-    console.log(yKey);
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
@@ -794,7 +814,6 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
     while (chart.length !== start) {
         chart.pop();
     }
-    console.log(chart);
     myChart.update(0);
 }
 
