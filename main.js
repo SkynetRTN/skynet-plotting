@@ -90,11 +90,11 @@ function line() {
     document.getElementById('input-div').innerHTML =
         '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
             '<div class="flex-container">\n' +
-                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="1">1</div>\n' +
+                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="1" checked>1</div>\n' +
                 '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="2">2</div>\n' +
                 '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="3">3</div>\n' +
                 '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="4">4</div>\n' +
-                '<div class="flex-item-grow1"><input type="checkbox" name="magnitude">Magnitude?</div>\n' +
+                '<div class="flex-item-grow1"><input type="checkbox" name="magnitude">Magnitude Scale?</div>\n' +
             '</div>' +
         '</form>\n';
 
@@ -125,11 +125,11 @@ function line() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['x', 'y1'],
-        maxCols: 2,
+        colHeaders: ['x', 'y1', 'y2', 'y3', 'y4'],
+        maxCols: 5,
         columns: [
-            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
-            {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'x',  type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y1', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     }));
 
@@ -137,40 +137,104 @@ function line() {
     let myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            datasets: [{
-                label: 'y1',
-                data: chartData,
-                borderColor: rgbString(colors['blue']),
-                backgroundColor: rgbString(colors['white'], 0),
-                borderWidth: 2,
-                lineTension: 0.1,
-                fill: false,
-            }]
+            datasets: [
+                {
+                    label: 'y1',
+                    data: chartData[0],
+                    borderColor: rgbString(colors['blue']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    fill: false,
+                    hidden: false,
+                }, {
+                    label: 'y2',
+                    data: chartData[1],
+                    borderColor: rgbString(colors['red']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    fill: false,
+                    hidden: true,
+                }, {
+                    label: 'y3',
+                    data: chartData[2],
+                    borderColor: rgbString(colors['purple']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    fill: false,
+                    hidden: true,
+                }, {
+                    label: 'y4',
+                    data: chartData[3],
+                    borderColor: rgbString(colors['orange']),
+                    backgroundColor: rgbString(colors['white'], 0),
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    fill: false,
+                    hidden: true,
+                }
+            ]
         },
         options: {
+            events: [],
+            legend: {
+                onClick: function (e) {
+                    e.stopPropagation();
+                },
+                labels: {
+                    filter: function (legendItem, chartData) {
+                        return !legendItem.hidden;
+                    }
+                }
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
                     position: 'bottom',
                 }],
+                yAxes: [{
+                    ticks: {
+                        reverse: false,
+                    }
+                }]
             }
         }
     });
 
     hot.updateSettings({
         afterChange: function () {
-            updateLine(tableData, myChart);
+            for (let i = 0; i < lines; i++) {
+                updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
+            }
         }
     });
 
-    updateLine(tableData, myChart);
+    updateLine(tableData, myChart, 0, 'x', 'y1');
 
     lineForm.onchange = function () {
-        if (lineForm.elements['lineCount'].value === lines) {
-            myChart.update()
-        } else {
-
+        myChart.options.scales.yAxes[0].ticks.reverse = lineForm.elements['magnitude'].checked;
+        let lineCount = lineForm.elements['lineCount'].value;
+        if (lineCount !== lines) {
+            let newCols = [{data: 'x',  type: 'numeric', numericFormat: {pattern: {mantissa: 2}}}];
+            for (let i = 0; i < lineCount; i++) {
+                newCols.push({
+                    data: 'y' + (i+1), type: 'numeric', numericFormat: {pattern: {mantissa: 2}}
+                });
+            }
+            hot.updateSettings({
+                columns: newCols,
+            });
+            for (let i = 0; i < 4; i++) {
+                myChart.data.datasets[i].hidden = (i >= lineCount);
+            }
+            lines = lineCount;
+            for (let i = 0; i < lines; i++) {
+                updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
+            }
         }
+        myChart.update(0);
     };
 
     return [hot, myChart];
@@ -264,6 +328,7 @@ function moon() {
             ]
         },
         options: {
+            events: [],
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -424,6 +489,7 @@ function scatter() {
             ],
         },
         options: {
+            events: [],
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -531,6 +597,7 @@ function venus() {
             ]
         },
         options: {
+            events: [],
             legend: {
                 labels: {
                     filter: function (legendItem, chartData) {
@@ -691,6 +758,7 @@ function dual() {
             ]
         },
         options: {
+            events: [],
             scales: {
                 xAxes: [{
                     type: 'linear',
@@ -714,6 +782,7 @@ function dual() {
 }
 
 function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
+    console.log(yKey);
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
@@ -725,6 +794,7 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
     while (chart.length !== start) {
         chart.pop();
     }
+    console.log(chart);
     myChart.update(0);
 }
 
