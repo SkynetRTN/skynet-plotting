@@ -528,6 +528,14 @@ function scatter() {
             hover: {
                 mode: 'nearest'
             },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return '(' + Math.round(tooltipItem.xLabel * 100) / 100 + ', ' +
+                            Math.round(tooltipItem.yLabel * 100) / 100 + ')';
+                    },
+                },
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',
