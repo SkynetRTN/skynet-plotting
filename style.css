@@ -36,6 +36,15 @@ p.caption {
 .flex-item-grow1 {
     flex-grow: 1;
 }
+
+.text input {
+    float: right;
+}
+
+.number input {
+    float: right;
+    width: 100%;
+}
 /*#button-row .right-column {*/
     /*display: flex;*/
     /*justify-content: flex-end;*/

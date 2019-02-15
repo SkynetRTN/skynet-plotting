@@ -38,31 +38,46 @@ const tableCommonOptions = {
     }
 };
 
-Chart.defaults.global.tooltips.mode = 'nearest';
-Chart.defaults.global.tooltips.callbacks.title = function (tooltipItems, data) {
-    return Math.round(tooltipItems[0].xLabel * 100) / 100;
-};
-Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
-    return Math.round(tooltipItem.yLabel * 100) / 100;
-};
-Chart.defaults.global.legend.onClick = function (e) {
-    e.stopPropagation();
-};
-
 window.onload = function () {
     let form = document.getElementById('chart-type-form');
     form.onchange = function () {
         chartType(form.elements['chart'].value);
     };
     chartType(form.elements['chart'].value);
+
+    Chart.defaults.global.tooltips.mode = 'nearest';
+    Chart.defaults.global.tooltips.callbacks.title = function (tooltipItems, data) {
+        return Math.round(tooltipItems[0].xLabel * 100) / 100;
+    };
+    Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
+        return Math.round(tooltipItem.yLabel * 100) / 100;
+    };
+    Chart.defaults.global.legend.onClick = function (e) {
+        e.stopPropagation();
+    };
 };
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
-    document.getElementById("chart-div").innerHTML = '<h2>Chart</h2>\n' +
-        '<canvas id="myChart" width="300" height="200"></canvas>\n';
+    document.getElementById("chart-div").innerHTML =
+        '<h2>Chart</h2>\n' +
+        '<canvas id="myChart" width="300" height="200"></canvas>\n' +
+        '<form id="chart-info-form" class="text">\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2">Title</div>\n' +
+                '<div class="col-sm-4"><input type="text" title="Title" name="title" value="Title"></div>\n' +
+                '<div class="col-sm-2">Data</div>\n' +
+                '<div class="col-sm-4"><input type="text" title="Data" name="data" value="Data"></div>\n' +
+            '</div>\n' +
+            '<div class="row">\n' +
+                '<div class="col-sm-2">X Axis</div>\n' +
+                '<div class="col-sm-4"><input type="text" title="X Axis" name="xAxis" value="X"></div>\n' +
+                '<div class="col-sm-2">Y Axis</div>\n' +
+                '<div class="col-sm-4"><input type="text" title="Y Axis" name="yAxis" value="Y"></div>\n' +
+            '</div>\n' +
+        '</form>\n';
 
     // Enabling download function
     document.getElementById('save-button').onclick = function () {
@@ -95,6 +110,12 @@ function chartType(chart) {
     Handsontable.dom.addEvent(addRow, 'click', function () {
         objects[0].alter('insert_row');
     });
+
+    let chartInfoForm = document.getElementById('chart-info-form');
+    chartInfoForm.oninput = function () {
+        updateChartInfo(objects[1], chartInfoForm);
+    };
+    updateChartInfo(objects[1], chartInfoForm);
 }
 
 function line() {
@@ -255,26 +276,26 @@ function line() {
 
 function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Moon" id="moon-form">\n' +
+        '<form title="Moon" id="moon-form" class="number">\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-2"><p>a</p></div>\n' +
+                '<div class="col-sm-3"><p>a (")</p></div>\n' +
                 '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
-                '<div class="col-sm-4"><input type="number" title="a" name="a-num">"</div>\n' +
+                '<div class="col-sm-3"><input type="number" title="a" name="a-num"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-2"><p>P</p></div>\n' +
+                '<div class="col-sm-3"><p>P (d)</p></div>\n' +
                 '<div class="col-sm-6"><input type="range" title="P" name="p"></div>\n' +
-                '<div class="col-sm-4"><input type="number" title="P" name="p-num">d</div>\n' +
+                '<div class="col-sm-3"><input type="number" title="P" name="p-num"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-2"><p>Phase</p></div>\n' +
+                '<div class="col-sm-3"><p>Phase (°)</p></div>\n' +
                 '<div class="col-sm-6"><input type="range" title="Phase" name="phase"></div>\n' +
-                '<div class="col-sm-4"><input type="number" title="Phase" name="phase-num">°</div>\n' +
+                '<div class="col-sm-3"><input type="number" title="Phase" name="phase-num"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-2"><p>Tilt</p></div>\n' +
+                '<div class="col-sm-3"><p>Tilt (°)</p></div>\n' +
                 '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
-                '<div class="col-sm-4"><input type="number" title="Tilt" name="tilt-num"">°</div>\n' +
+                '<div class="col-sm-3"><input type="number" title="Tilt" name="tilt-num"></div>\n' +
             '</div>\n' +
         '</form>\n');
 
@@ -881,4 +902,15 @@ function hexToDecimal(hex, s, t) {
         }
     }
     return result;
+}
+
+function updateChartInfo(myChart, form) {
+    myChart.options.title.display = true;
+    myChart.options.title.text = form.elements['title'].value;
+    myChart.data.datasets[0].label = form.elements['data'].value;
+    myChart.options.scales.xAxes[0].scaleLabel.display = true;
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = form.elements['xAxis'].value;
+    myChart.options.scales.yAxes[0].scaleLabel.display = true;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
+    myChart.update(0);
 }
