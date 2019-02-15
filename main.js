@@ -47,10 +47,11 @@ window.onload = function () {
 
     Chart.defaults.global.tooltips.mode = 'nearest';
     Chart.defaults.global.tooltips.callbacks.title = function (tooltipItems, data) {
-        return Math.round(tooltipItems[0].xLabel * 100) / 100;
+        return null;
     };
     Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
-        return Math.round(tooltipItem.yLabel * 100) / 100;
+        return '(' + Math.round(tooltipItem.xLabel * 100) / 100 + ', ' +
+            Math.round(tooltipItem.yLabel * 100) / 100 + ')';
     };
     Chart.defaults.global.legend.onClick = function (e) {
         e.stopPropagation();
@@ -395,18 +396,21 @@ function moon() {
 
 function updateFormula(table, form, chart) {
     // Can't just set min and max to the first values in the table because it might be invalid
-    let min = NaN;
-    let max = NaN;
+    let min = null;
+    let max = null;
     for (let i = 0; i < table.length; i++) {
-        if (table[i]['x'] === '' || table[i]['y'] === '') {
+        let x = table[i]['x'];
+        let y = table[i]['y'];
+        if (x === '' || y === '' || x === null || y === null) {
             continue;
         }
-        if (table[i]['x'] > max || isNaN(max)) {
-            max = table[i]['x'];
+        if (max === null || x > max) {
+            max = x;
         }
-        if (table[i]['x'] < min || isNaN(min)) {
-            min = table[i]['x'];
-            console.log('updated min at i = ' + i);
+        if (min === null || x < min) {
+            min = x;
+            console.log('updated min at i = ' + i + ', x = ' + x);
+            console.log(table);
         }
     }
     console.log("min = " + min + " and max = " + max);
