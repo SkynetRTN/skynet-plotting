@@ -415,7 +415,7 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
             } else if (x < min) {
                 number.value = min;
             } else {
-                number.value = x;
+                number.value = x.toFixed(2);
             }
         };
         number.oninput = function () {

@@ -2,33 +2,37 @@ body {
     font-family: "Helvetica Neue", sans-serif;
     /*background-color: #41a3d1;*/
 }
+
 main {
     margin: 3em;
 }
+
 h2 {
     text-align: center;
     font-size: 1.5em;
 }
+
 p.caption {
     /*font-size: 90%;*/
     font-style: italic;
     color: #9A9A9B;
 }
+
 #chart-type-form select {
     width: 100%;
     margin-bottom: 1em;
     /*margin: 0 auto 1em;*/
 }
+
 #table-div {
     /*margin: 1em 0;*/
     /*font-size: 90%;*/
 }
-button {
 
-}
 .flex-container {
     display: flex;
 }
+
 .flex-item-grow1 {
     flex-grow: 1;
 }
