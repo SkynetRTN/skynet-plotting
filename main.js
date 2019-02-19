@@ -180,6 +180,7 @@ function line() {
                     lineTension: 0.1,
                     fill: false,
                     hidden: false,
+                    immutableLabel: false,
                 }, {
                     label: 'y2',
                     data: chartData[1],
@@ -189,6 +190,7 @@ function line() {
                     lineTension: 0.1,
                     fill: false,
                     hidden: true,
+                    immutableLabel: false,
                 }, {
                     label: 'y3',
                     data: chartData[2],
@@ -198,6 +200,7 @@ function line() {
                     lineTension: 0.1,
                     fill: false,
                     hidden: true,
+                    immutableLabel: false,
                 }, {
                     label: 'y4',
                     data: chartData[3],
@@ -207,6 +210,7 @@ function line() {
                     lineTension: 0.1,
                     fill: false,
                     hidden: true,
+                    immutableLabel: false,
                 }
             ]
         },
@@ -350,6 +354,7 @@ function moon() {
                     showLine: false,
                     pointRadius: 5,
                     pointHoverRadius: 7,
+                    immutableLabel: false,
                 }, {
                     label: 'Prediction',
                     data: formula,
@@ -359,6 +364,7 @@ function moon() {
                     lineTension: 0.1,
                     pointRadius: 0,
                     fill: false,
+                    immutableLabel: true,
                 }
             ]
         },
@@ -518,6 +524,7 @@ function scatter() {
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
+                    immutableLabel: false,
                 }, {
                     label: 'Sun',
                     data: [{x: 0, y: 0}],
@@ -525,6 +532,7 @@ function scatter() {
                     pointRadius: 10,
                     pointHoverRadius: 12,
                     pointBorderWidth: 2,
+                    immutableLabel: true,
                 },
             ],
         },
@@ -617,6 +625,7 @@ function venus() {
                     showLine: false,
                     pointRadius: 5,
                     pointHoverRadius: 7,
+                    immutableLabel: false,
                 }, {
                     data: geocentric(10.15, 60, 0.8),
                     borderColor: rgbString(colors['blue']),
@@ -625,6 +634,7 @@ function venus() {
                     lineTension: 0.1,
                     pointRadius: 0,
                     fill: false,
+                    immutableLabel: true,
                 }, {
                     label: 'Geocentric',
                     data: geocentric(10.15, 60, 0.445),
@@ -634,6 +644,7 @@ function venus() {
                     lineTension: 0.1,
                     pointRadius: 0,
                     fill: '-1',
+                    immutableLabel: true,
                 }, {
                     label: 'Heliocentric',
                     data: heliocentric(10.15, 60),
@@ -643,6 +654,7 @@ function venus() {
                     lineTension: 0.1,
                     pointRadius: 0,
                     fill: false,
+                    immutableLabel: true,
                 }
             ]
         },
@@ -798,6 +810,7 @@ function dual() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     fill: false,
+                    immutableLabel: false,
                 }, {
                     label: 'y2',
                     data: chartData2,
@@ -806,6 +819,7 @@ function dual() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     fill: false,
+                    immutableLabel: false,
                 }
             ]
         },
@@ -920,9 +934,36 @@ function updateChartInfo(myChart, form) {
     myChart.options.title.display = true;
     myChart.options.title.text = form.elements['title'].value;
     myChart.data.datasets[0].label = form.elements['data'].value;
+    let labels = mySplit(form.elements['data'].value, ',');
+    for (let i = 0; i < labels.length && i < myChart.data.datasets.length; i++) {
+        if (!myChart.data.datasets[i].immutableLabel) {
+            myChart.data.datasets[i].label = labels[i];
+        }
+    }
     myChart.options.scales.xAxes[0].scaleLabel.display = true;
     myChart.options.scales.xAxes[0].scaleLabel.labelString = form.elements['xAxis'].value;
     myChart.options.scales.yAxes[0].scaleLabel.display = true;
     myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
     myChart.update(0);
+}
+
+function mySplit(str, char) {
+    let answer = [];
+    let strings = str.split(char);
+    for (let i = 0; i < strings.length; i++) {
+        answer.push(removeSpaces(strings[i]));
+    }
+    return answer;
+}
+
+function removeSpaces(str) {
+    let start = 0;
+    let end = str.length - 1;
+    while (start < str.length && str[start] === ' ') start++;
+    while (end >= 0 && str[end] === ' ') end--;
+    if (start === str.length) {
+        return '';
+    } else {
+        return str.substr(start, end - start + 1);
+    }
 }
