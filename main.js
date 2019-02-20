@@ -67,16 +67,26 @@ function chartType(chart) {
         '<canvas id="myChart" width="300" height="200"></canvas>\n' +
         '<form id="chart-info-form" class="text">\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-2">Title</div>\n' +
-                '<div class="col-sm-4"><input type="text" title="Title" name="title" value="Title"></div>\n' +
-                '<div class="col-sm-2">Data</div>\n' +
-                '<div class="col-sm-4"><input type="text" title="Data" name="data" value="Data"></div>\n' +
-            '</div>\n' +
-            '<div class="row">\n' +
-                '<div class="col-sm-2">X Axis</div>\n' +
-                '<div class="col-sm-4"><input type="text" title="X Axis" name="xAxis" value="X"></div>\n' +
-                '<div class="col-sm-2">Y Axis</div>\n' +
-                '<div class="col-sm-4"><input type="text" title="Y Axis" name="yAxis" value="Y"></div>\n' +
+                '<div class="col-sm-6">\n' +
+                    '<div class="row">\n' +
+                        '<div class="col-sm-4">Title</div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title"></div>\n' +
+                    '</div>\n' +
+                    '<div class="row">\n' +
+                        '<div class="col-sm-4">Data</div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data"></div>\n' +
+                    '</div>\n' +
+                '</div>\n' +
+                '<div class="col-sm-6">\n' +
+                    '<div class="row">\n' +
+                        '<div class="col-sm-4">X Axis</div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X"></div>\n' +
+                    '</div>\n' +
+                    '<div class="row">\n' +
+                        '<div class="col-sm-4">Y Axis</div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y"></div>\n' +
+                    '</div>\n' +
+                '</div>\n' +
             '</div>\n' +
         '</form>\n';
 
@@ -251,6 +261,7 @@ function line() {
     });
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     lineForm.onchange = function () {
         myChart.options.scales.yAxes[0].ticks.reverse = lineForm.elements['magnitude'].checked;
@@ -274,6 +285,7 @@ function line() {
             }
         }
         myChart.update(0);
+        updateLabels(myChart, document.getElementById('chart-info-form'));
     };
 
     return [hot, myChart];
@@ -810,6 +822,7 @@ function dual() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     fill: false,
+                    hidden: false,
                     immutableLabel: false,
                 }, {
                     label: 'y2',
@@ -819,6 +832,7 @@ function dual() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     fill: false,
+                    hidden: false,
                     immutableLabel: false,
                 }
             ]
@@ -845,6 +859,8 @@ function dual() {
 
     updateDual(tableData, myChart, 0);
     updateDual(tableData, myChart, 1);
+
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
 }
@@ -945,6 +961,17 @@ function updateChartInfo(myChart, form) {
     myChart.options.scales.yAxes[0].scaleLabel.display = true;
     myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
     myChart.update(0);
+}
+
+function updateLabels(myChart, form) {
+    let labels = myChart.data.datasets[0].label;
+    for (let i = 1; i < myChart.data.datasets.length; i++) {
+        console.log(i + ' ' + myChart.data.datasets[i].hidden + ' ' + myChart.data.datasets[i].immutableLabel);
+        if (myChart.data.datasets[i].hidden === false && myChart.data.datasets[i].immutableLabel === false) {
+            labels += ', ' + myChart.data.datasets[i].label;
+        }
+    }
+    form.elements['data'].value = labels;
 }
 
 function mySplit(str, char) {
