@@ -735,7 +735,7 @@ const beta = rad(45);
 // Angular diameter of Venus as its closest in arc-seconds.
 const maxA = 60;
 
-function geocentric(start, end, x, steps=2000) {
+function geocentric(start, end, x, steps=500) {
     let data = [];
     let a = start;
     let step = (end - start) / steps;
