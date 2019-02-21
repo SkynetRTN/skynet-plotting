@@ -389,6 +389,11 @@ function moon() {
                     type: 'linear',
                     position: 'bottom',
                 }],
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                    },
+                }],
             }
         }
     });
@@ -427,11 +432,8 @@ function updateFormula(table, form, chart) {
         }
         if (min === null || x < min) {
             min = x;
-            console.log('updated min at i = ' + i + ', x = ' + x);
-            console.log(table);
         }
     }
-    console.log("min = " + min + " and max = " + max);
     chart.data.datasets[1].data = trigGenerator(
         form.elements['a-num'].value,
         form.elements['p-num'].value,
@@ -966,7 +968,6 @@ function updateChartInfo(myChart, form) {
 function updateLabels(myChart, form) {
     let labels = myChart.data.datasets[0].label;
     for (let i = 1; i < myChart.data.datasets.length; i++) {
-        console.log(i + ' ' + myChart.data.datasets[i].hidden + ' ' + myChart.data.datasets[i].immutableLabel);
         if (myChart.data.datasets[i].hidden === false && myChart.data.datasets[i].immutableLabel === false) {
             labels += ', ' + myChart.data.datasets[i].label;
         }
