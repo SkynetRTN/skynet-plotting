@@ -1,14 +1,14 @@
-// const Jquery = require('jquery');
-// const Bootstrap = require('bootstrap');
-// const Chartjs = require('chart.js');
-// const Handsontable = require('handsontable');
-// const FileSaver = require('file-saver');
+// var Jquery = require('jquery');
+// var Bootstrap = require('bootstrap');
+// var Chartjs = require('chart.js');
+// var Handsontable = require('handsontable');
+// var FileSaver = require('file-saver');
 
 // initialize the page
 
 'use strict';
 
-const colors = {
+var colors = {
     'blue':     '#41a3d1',
     'red':      '#cf4e49',
     'yellow':   '#ced139',
@@ -20,7 +20,7 @@ const colors = {
     'black':    '#000000',
 };
 
-const tableCommonOptions = {
+var tableCommonOptions = {
     rowHeaders: true,
     height: 395,
     width: '100%',
@@ -721,19 +721,19 @@ function venus() {
 }
 
 // Distance from Sun to Earth in km
-const dE = 1.496e8;
+var dE = 1.496e8;
 
 // Distance from Sun to Venus in km
-const dV = 1.082e8;
+var dV = 1.082e8;
 
 // Diameter of Venus in km
-const DV = 1.210e4;
+var DV = 1.210e4;
 
 // Max angular separation between Venus and Sun in radians.
-const beta = rad(45);
+var beta = rad(45);
 
 // Angular diameter of Venus as its closest in arc-seconds.
-const maxA = 60;
+var maxA = 60;
 
 function geocentric(start, end, x, steps=500) {
     let data = [];
