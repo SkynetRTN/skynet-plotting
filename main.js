@@ -1,14 +1,14 @@
-// var Jquery = require('jquery');
-// var Bootstrap = require('bootstrap');
-// var Chartjs = require('chart.js');
-// var Handsontable = require('handsontable');
-// var FileSaver = require('file-saver');
+// const Jquery = require('jquery');
+// const Bootstrap = require('bootstrap');
+// const Chartjs = require('chart.js');
+// const Handsontable = require('handsontable');
+// const FileSaver = require('file-saver');
 
 // initialize the page
 
 'use strict';
 
-var colors = {
+const colors = {
     'blue':     '#41a3d1',
     'red':      '#cf4e49',
     'yellow':   '#ced139',
@@ -20,7 +20,7 @@ var colors = {
     'black':    '#000000',
 };
 
-var tableCommonOptions = {
+const tableCommonOptions = {
     rowHeaders: true,
     height: 395,
     width: '100%',
@@ -93,7 +93,26 @@ function chartType(chart) {
     // Enabling download function
     document.getElementById('save-button').onclick = function () {
         let canvas = document.getElementById('myChart');
-        canvas.toBlob(function(blob) {
+
+        //create a dummy CANVAS
+
+        let destinationCanvas = document.createElement("canvas");
+        destinationCanvas.width = canvas.width;
+        destinationCanvas.height = canvas.height;
+
+        let destCtx = destinationCanvas.getContext('2d');
+
+        //create a rectangle with the desired color
+        destCtx.fillStyle = "#FFFFFF";
+        destCtx.fillRect(0,0, canvas.width, canvas.height);
+
+        //draw the original canvas onto the destination canvas
+        destCtx.drawImage(canvas, 0, 0);
+
+        //finally use the destinationCanvas.toDataURL() method to get the desired output;
+        destinationCanvas.toDataURL();
+
+        destinationCanvas.toBlob(function(blob) {
             saveAs(blob, "chart.png");
         });
     };
@@ -721,19 +740,19 @@ function venus() {
 }
 
 // Distance from Sun to Earth in km
-var dE = 1.496e8;
+const dE = 1.496e8;
 
 // Distance from Sun to Venus in km
-var dV = 1.082e8;
+const dV = 1.082e8;
 
 // Diameter of Venus in km
-var DV = 1.210e4;
+const DV = 1.210e4;
 
 // Max angular separation between Venus and Sun in radians.
-var beta = rad(45);
+const beta = rad(45);
 
 // Angular diameter of Venus as its closest in arc-seconds.
-var maxA = 60;
+const maxA = 60;
 
 function geocentric(start, end, x, steps=500) {
     let data = [];
