@@ -70,21 +70,21 @@ function chartType(chart) {
                 '<div class="col-sm-6">\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Title</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="text field"></div>\n' +
                     '</div>\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Data</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="text field"></div>\n' +
                     '</div>\n' +
                 '</div>\n' +
                 '<div class="col-sm-6">\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">X Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X" class="text field"></div>\n' +
                     '</div>\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Y Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y" class="text field"></div>\n' +
                     '</div>\n' +
                 '</div>\n' +
             '</div>\n' +
@@ -94,24 +94,21 @@ function chartType(chart) {
     document.getElementById('save-button').onclick = function () {
         let canvas = document.getElementById('myChart');
 
-        //create a dummy CANVAS
-
+        // Create a dummy canvas
         let destinationCanvas = document.createElement("canvas");
         destinationCanvas.width = canvas.width;
         destinationCanvas.height = canvas.height;
 
         let destCtx = destinationCanvas.getContext('2d');
 
-        //create a rectangle with the desired color
+        // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
         destCtx.fillRect(0,0, canvas.width, canvas.height);
 
-        //draw the original canvas onto the destination canvas
+        // Draw the original canvas onto the destination canvas
         destCtx.drawImage(canvas, 0, 0);
 
-        //finally use the destinationCanvas.toDataURL() method to get the desired output;
-        destinationCanvas.toDataURL();
-
+        // Download the dummy canvas
         destinationCanvas.toBlob(function(blob) {
             saveAs(blob, "chart.png");
         });
@@ -312,26 +309,26 @@ function line() {
 
 function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Moon" id="moon-form" class="number">\n' +
+        '<form title="Moon" id="moon-form">\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3"><p>a (")</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
-                '<div class="col-sm-3"><input type="number" title="a" name="a-num"></div>\n' +
+                '<div class="col-sm-3" style="padding-right: 0;"><p>a (")</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="a" name="a" class="slider"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="a" name="a-num" class="number field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3"><p>P (d)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="P" name="p"></div>\n' +
-                '<div class="col-sm-3"><input type="number" title="P" name="p-num"></div>\n' +
+                '<div class="col-sm-3" style="padding-right: 0;"><p>P (d)</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="P" name="p"  class="slider"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="P" name="p-num" class="number field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3"><p>Phase (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"></div>\n' +
-                '<div class="col-sm-3"><input type="number" title="Phase" name="phase-num"></div>\n' +
+                '<div class="col-sm-3" style="padding-right: 0;"><p>Phase (°)</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"  class="slider"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Phase" name="phase-num" class="number field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3"><p>Tilt (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
-                '<div class="col-sm-3"><input type="number" title="Tilt" name="tilt-num"></div>\n' +
+                '<div class="col-sm-3" style="padding-right: 0;"><p>Tilt (°)</p></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"  class="slider"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Tilt" name="tilt-num" class="number field"></div>\n' +
             '</div>\n' +
         '</form>\n');
 
