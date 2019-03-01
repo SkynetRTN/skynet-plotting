@@ -1,11 +1,3 @@
-// const Jquery = require('jquery');
-// const Bootstrap = require('bootstrap');
-// const Chartjs = require('chart.js');
-// const Handsontable = require('handsontable');
-// const FileSaver = require('file-saver');
-
-// initialize the page
-
 'use strict';
 
 const colors = {
