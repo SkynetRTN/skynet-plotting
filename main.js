@@ -38,7 +38,7 @@ const tableCommonOptions = {
     }
 };
 
-window.onload = function () {
+let init = function () {
     let form = document.getElementById('chart-type-form');
     form.onchange = function () {
         chartType(form.elements['chart'].value);
@@ -56,7 +56,27 @@ window.onload = function () {
     Chart.defaults.global.legend.onClick = function (e) {
         e.stopPropagation();
     };
+
+    // Following code for working with Edge
+    if (!HTMLCanvasElement.prototype.toBlob) {
+        Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+            value: function (callback, type, quality) {
+                let dataURL = this.toDataURL(type, quality).split(',')[1];
+                setTimeout(function() {
+                    let binStr = atob( dataURL ),
+                        len = binStr.length,
+                        arr = new Uint8Array(len);
+                    for (let i = 0; i < len; i++ ) {
+                        arr[i] = binStr.charCodeAt(i);
+                    }
+                    callback( new Blob( [arr], {type: type || 'image/png'} ) );
+                });
+            }
+        });
+    }
 };
+
+window.onload = init;
 
 function chartType(chart) {
     // rewrite HTML content of table & chart
@@ -70,21 +90,21 @@ function chartType(chart) {
                 '<div class="col-sm-6">\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Title</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="text field"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="field"></div>\n' +
                     '</div>\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Data</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="text field"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="field"></div>\n' +
                     '</div>\n' +
                 '</div>\n' +
                 '<div class="col-sm-6">\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">X Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X" class="text field"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X" class="field"></div>\n' +
                     '</div>\n' +
                     '<div class="row">\n' +
                         '<div class="col-sm-4">Y Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y" class="text field"></div>\n' +
+                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y" class="field"></div>\n' +
                     '</div>\n' +
                 '</div>\n' +
             '</div>\n' +
@@ -312,23 +332,23 @@ function moon() {
         '<form title="Moon" id="moon-form">\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-3" style="padding-right: 0;"><p>a (")</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="a" name="a" class="slider"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="a" name="a-num" class="number field"></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="a" name="a-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-3" style="padding-right: 0;"><p>P (d)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="P" name="p"  class="slider"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="P" name="p-num" class="number field"></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="P" name="p"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="P" name="p-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-3" style="padding-right: 0;"><p>Phase (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"  class="slider"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Phase" name="phase-num" class="number field"></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Phase" name="phase-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
                 '<div class="col-sm-3" style="padding-right: 0;"><p>Tilt (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"  class="slider"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Tilt" name="tilt-num" class="number field"></div>\n' +
+                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
+                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Tilt" name="tilt-num" class="field"></div>\n' +
             '</div>\n' +
         '</form>\n');
 

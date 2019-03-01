@@ -54,12 +54,12 @@ input.field:focus {
     background-color: #e7e7e7;
 }
 
-input.text {
+input[type=text] {
     padding: 0 0.5em;
     margin: 0.1em 0;
 }
 
-input.number {
+input[type=number] {
     padding-left: 0.5em;
 }
 
@@ -85,7 +85,7 @@ button:hover {
     background-color: #e7e7e7;
 }
 
-.slider {
+input[type=range] {
     -webkit-appearance: none;
     width: 100%;
     height: 10px;
@@ -100,11 +100,11 @@ button:hover {
 }
 
 /* Mouse-over effects */
-.slider:hover {
+input[type=range]:hover {
     opacity: 1; /* Fully shown on mouse-over */
 }
 
-.slider::-webkit-slider-thumb {
+input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 20px;
     height: 20px;
@@ -113,7 +113,7 @@ button:hover {
     cursor: pointer;
 }
 
-.slider::-moz-range-thumb {
+input[type=range]::-moz-range-thumb {
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -121,7 +121,7 @@ button:hover {
     cursor: pointer;
 }
 
-.slider::-ms-thumb {
+input[type=range]::-ms-thumb {
     width: 20px;
     height: 20px;
     border-radius: 50%;
