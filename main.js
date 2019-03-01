@@ -1,5 +1,11 @@
 'use strict';
 
+/**
+ * TODO: Redesign the page, makes the left side a lifted space with chart type selection at top
+ * and all data input. The right side would have the chart related operations. Remove the headings
+ * "Data" and "Chart", and add a title bar at the top of the page.
+ */
+
 // The hexToDecimal() function only accepts lower case (can make it supports upper case)
 const colors = {
     'blue':     '#41a3d1',
