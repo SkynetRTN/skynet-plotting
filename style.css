@@ -129,6 +129,8 @@ button {
 
 button:focus {
     outline: none;
+    opacity: 1;
+    background-color: #E7E7E7;
 }
 
 button:hover {
@@ -156,6 +158,7 @@ input[type=range]:hover {
 
 input[type=range]:focus {
     outline: none;
+    opacity: 1;
 }
 
 input[type=range]::-webkit-slider-thumb {
@@ -170,6 +173,7 @@ input[type=range]::-webkit-slider-thumb {
 
 input[type=range]::-moz-range-track {
     background-color: transparent;
+    /*outline: none;*/
 }
 
 input[type=range]::-moz-range-thumb {
