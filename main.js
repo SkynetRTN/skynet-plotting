@@ -1,11 +1,12 @@
 'use strict';
 
+// The hexToDecimal() function only accepts lower case (can make it supports upper case)
 const colors = {
     'blue':     '#41a3d1',
     'red':      '#cf4e49',
     'yellow':   '#ced139',
     'purple':   '#c382d1',
-    'gray':     '#9a9a9b',
+    'gray':     '#9a9a9a',
     'orange':   '#ff8e21',
     'bright':   '#ffee51',
     'white':    '#ffffff',
@@ -161,11 +162,11 @@ function line() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
             '<div class="flex-container">\n' +
-                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="1" checked>1</div>\n' +
-                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="2">2</div>\n' +
-                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="3">3</div>\n' +
-                '<div class="flex-item-grow1"><input type="radio" name="lineCount" value="4">4</div>\n' +
-                '<div class="flex-item-grow1"><input type="checkbox" name="magnitude">Magnitude Scale?</div>\n' +
+                '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="1" checked><span>1</span></label></div>\n' +
+                '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="2"><span>2</span></label></div>\n' +
+                '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="3"><span>3</span></label></div>\n' +
+                '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="4"><span>4</span></label></div>\n' +
+                '<div class="flex-item-grow1"><label><input type="checkbox" name="magnitude"><span>Magnitude Scale?</span></label></div>\n' +
             '</div>' +
         '</form>\n');
 
