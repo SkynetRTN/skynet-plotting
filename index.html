@@ -20,14 +20,14 @@
         <main class="container">
             <div class="row">
                 <div class="col-lg-4">
-                    <h2>Data</h2>
+                    <!--<h2>Data</h2>-->
                     <form title="input" id="chart-type-form">
                         <select name="chart" title="select chart">
-                            <option value="line" title="line" selected>Line</option>
-                            <option value="moon" title="moon">Moon</option>
-                            <option value="scatter" title="scatter">Scatter</option>
-                            <option value="venus" title="venus">Venus</option>
-                            <option value="dual" title="dual">Dual</option>
+                            <option value="curve" title="Curve" selected>Curve</option>
+                            <option value="moon" title="Moon">Moon</option>
+                            <option value="venus" title="Venus">Venus</option>
+                            <option value="scatter" title="Scatter">Scatter</option>
+                            <option value="dual" title="Dual">Dual</option>
                         </select>
                     </form>
                     <div id="input-div"></div>
@@ -35,7 +35,7 @@
                     <p class="caption">Note: you can copy/paste data into the table.</p>
                 </div>
                 <div class="col-lg-8">
-                    <h2>Chart</h2>
+                    <!--<h2>Chart</h2>-->
                     <div id="chart-div">
                         <canvas id="myChart" width="300" height="200"></canvas>
                     </div>
@@ -43,22 +43,22 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="row">
-                                    <div class="col-sm-4">Title</div>
-                                    <div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="field"></div>
+                                    <div class="col-sm-3">Title</div>
+                                    <div class="col-sm-9"><input type="text" title="Title" name="title" value="Title" class="field"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-4">Data</div>
-                                    <div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="field"></div>
+                                    <div class="col-sm-3">Data</div>
+                                    <div class="col-sm-9"><input type="text" title="Data" name="data" value="Data" class="field"></div>
                                 </div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="row">
-                                    <div class="col-sm-4">X Axis</div>
-                                    <div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X" class="field"></div>
+                                    <div class="col-sm-3">X Axis</div>
+                                    <div class="col-sm-9"><input type="text" title="X Axis" name="xAxis" value="X" class="field"></div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-sm-4">Y Axis</div>
-                                    <div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y" class="field"></div>
+                                    <div class="col-sm-3">Y Axis</div>
+                                    <div class="col-sm-9"><input type="text" title="Y Axis" name="yAxis" value="Y" class="field"></div>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                     <button id="add-row-button">Add Row</button>
                 </div>
                 <div class="col-lg-8 right-column">
-                    <div><button id="save-button">Save Chart Image</button></div>
+                    <div><button id="save-button">Save Plot</button></div>
                 </div>
             </div>
         </main>

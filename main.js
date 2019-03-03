@@ -110,8 +110,8 @@ function chartType(chart) {
 
     let objects;
 
-    if (chart === "line") {
-        objects = line();
+    if (chart === "curve") {
+        objects = curve();
     } else if (chart === "moon") {
         objects = moon();
     } else if (chart === "scatter") {
@@ -139,7 +139,7 @@ function chartType(chart) {
     updateChartInfo(objects[1], chartInfoForm);
 }
 
-function line() {
+function curve() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
             '<div class="flex-container">\n' +
@@ -960,6 +960,8 @@ function hexToDecimal(hex, s, t) {
 
 function updateChartInfo(myChart, form) {
     myChart.options.title.display = true;
+    myChart.options.title.fontSize = 18;
+    myChart.options.title.fontColor = colors['black'];
     myChart.options.title.text = form.elements['title'].value;
     myChart.data.datasets[0].label = form.elements['data'].value;
     let labels = mySplit(form.elements['data'].value, ',');
