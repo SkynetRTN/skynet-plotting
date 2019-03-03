@@ -49,8 +49,8 @@ let init = function () {
         return null;
     };
     Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
-        return '(' + Math.round(tooltipItem.xLabel * 100) / 100 + ', ' +
-            Math.round(tooltipItem.yLabel * 100) / 100 + ')';
+        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+            round(tooltipItem.yLabel, 2) + ')';
     };
     Chart.defaults.global.legend.onClick = function (e) {
         e.stopPropagation();
@@ -141,13 +141,13 @@ function chartType(chart) {
 
 function curve() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="line" id="line-form" style="padding-bottom: 1em">\n' +
+        '<form title="Lines" id="line-form" style="padding-bottom: 1em">\n' +
             '<div class="flex-container">\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="1" checked><span>1</span></label></div>\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="2"><span>2</span></label></div>\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="3"><span>3</span></label></div>\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="4"><span>4</span></label></div>\n' +
-                '<div class="flex-item-grow1"><label><input type="checkbox" name="magnitude"><span>Magnitude Scale?</span></label></div>\n' +
+                '<div class="flex-item-grow1"><label><input type="checkbox" name="magnitude"><span>Magnitudes</span></label></div>\n' +
             '</div>' +
         '</form>\n');
 
@@ -333,18 +333,8 @@ function moon() {
     linkInputs(moonForm.elements['phase'], moonForm.elements['phase-num'], 0, 360, 1, 0);
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
 
-    let tableData = [
-        {x: 1,  y: Math.random() * 100 + 150},
-        {x: 2,  y: Math.random() * 100 + 150},
-        {x: 3,  y: Math.random() * 100 + 150},
-        {x: 4,  y: Math.random() * 100 + 150},
-        {x: 5,  y: Math.random() * 100 + 150},
-        {x: 6,  y: Math.random() * 100 + 150},
-        {x: 7,  y: Math.random() * 100 + 150},
-        {x: 8,  y: Math.random() * 100 + 150},
-        {x: 9,  y: Math.random() * 100 + 150},
-        {x: 10, y: Math.random() * 100 + 150},
-    ];
+    let tableData = generateMoonData();
+    console.log(tableData);
 
     let chartData = [];
     let formula = [];
@@ -353,7 +343,7 @@ function moon() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Julian Date', 'Distance'],
+        colHeaders: ['Julian Date', 'Angular Distance'],
         maxCols: 2,
         columns: [
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
@@ -485,7 +475,7 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
             } else if (x < min) {
                 number.value = min;
             } else {
-                number.value = Math.round(x * 100) / 100;
+                number.value = round(x, 2);
             }
         };
         number.oninput = function () {
@@ -504,20 +494,46 @@ function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
         data.push({
             x: x,
             // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
-            y: a * Math.sqrt(sqr(Math.cos(theta)) +
-                sqr(Math.sin(theta)) * sqr(Math.sin(alpha))),
+            y: a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))),
         });
         x += step;
     }
     return data;
 }
 
+function generateMoonData() {
+    /**
+     *  ln(750) = 6.62
+     *  ln(1) = 0
+     */
+    let a = Math.exp(Math.random() * 4 + 1.62);
+    let p = Math.random() * 10 + 5;
+    let phase = Math.random() * 360;
+    let tilt = Math.random() * 45;
+
+    let returnData = [];
+
+    for (let i = 0; i < 10; i++) {
+        let x = i * 2 + Math.random() * 2;
+        let theta = x / p * Math.PI * 2 - rad(phase);
+        let alpha = rad(tilt);
+        returnData[i] = {
+            x: x,
+            y: (a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
+                * (1 + Math.random() * 0.05),
+        }
+    }
+
+    console.log('Cheat code:', round(a, 2), round(p, 2), round(phase, 0), round(tilt, 0));
+    return returnData;
+}
+
 function scatter() {
     let tableData = [];
     for (let i = 0; i < 15; i++) {
         tableData[i] = {
-            'la': Math.random() * 40.0 - 20.0,
             'lo': Math.random() * 40.0 - 20.0,
+            'la': Math.random() * 40.0 - 20.0,
             'di': Math.random() * 20.0,
         };
     }
@@ -527,11 +543,11 @@ function scatter() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Latitude', 'Longitude', 'Distance'],
+        colHeaders: ['Longitude', 'Latitude', 'Distance'],
         maxCols: 3,
         columns: [
-            {data: 'la', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'lo', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'la', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'di', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     }));
@@ -567,8 +583,8 @@ function scatter() {
             tooltips: {
                 callbacks: {
                     label: function (tooltipItem, data) {
-                        return '(' + Math.round(tooltipItem.xLabel * 100) / 100 + ', ' +
-                            Math.round(tooltipItem.yLabel * 100) / 100 + ')';
+                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+                            round(tooltipItem.yLabel, 2) + ')';
                     },
                 },
             },
@@ -896,8 +912,8 @@ function updateScatter(table, myChart) {
     let start = 0;
     let chart = myChart.data.datasets[0].data;
     for (let i = 0; i < table.length; i++) {
-        let la = table[i]['la'];
         let lo = table[i]['lo'];
+        let la = table[i]['la'];
         let di = table[i]['di'];
         if (la === '' || lo === '' || di === '') {
             continue;
@@ -936,6 +952,10 @@ function rad(degree) {
 
 function sqr(n) {
     return Math.pow(n, 2);
+}
+
+function round(value, digits) {
+    return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
 }
 
 function rgbString(rgb, opacity=1) {
