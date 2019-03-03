@@ -82,32 +82,7 @@ function chartType(chart) {
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML =
-        '<h2>Chart</h2>\n' +
-        '<canvas id="myChart" width="300" height="200"></canvas>\n' +
-        '<form id="chart-info-form" class="text">\n' +
-            '<div class="row">\n' +
-                '<div class="col-sm-6">\n' +
-                    '<div class="row">\n' +
-                        '<div class="col-sm-4">Title</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="field"></div>\n' +
-                    '</div>\n' +
-                    '<div class="row">\n' +
-                        '<div class="col-sm-4">Data</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="field"></div>\n' +
-                    '</div>\n' +
-                '</div>\n' +
-                '<div class="col-sm-6">\n' +
-                    '<div class="row">\n' +
-                        '<div class="col-sm-4">X Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="X" class="field"></div>\n' +
-                    '</div>\n' +
-                    '<div class="row">\n' +
-                        '<div class="col-sm-4">Y Axis</div>\n' +
-                        '<div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="Y" class="field"></div>\n' +
-                    '</div>\n' +
-                '</div>\n' +
-            '</div>\n' +
-        '</form>\n';
+        '<canvas id="myChart" width="300" height="200"></canvas>\n';
 
     // Enabling download function
     document.getElementById('save-button').onclick = function () {
