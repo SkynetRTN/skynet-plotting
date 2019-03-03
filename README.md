@@ -1,1 +1,1 @@
-# ASTR-Graphing
+# ASTR-Plotting
