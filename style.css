@@ -9,7 +9,6 @@ main {
 h2 {
     text-align: center;
     font-size: 1.5em;
-    /*font-weight: bold;*/
 }
 
 #chart-type-form select {
@@ -31,6 +30,10 @@ p.caption {
 
 .flex-item-grow1 {
     flex-grow: 1;
+}
+
+.flex-item-grow0 {
+    flex-grow: 0;
 }
 
 label span {
@@ -148,7 +151,7 @@ button {
 button:focus {
     outline: none;
     opacity: 1;
-    background-color: #E7E7E7;
+    /*background-color: #E7E7E7;*/
 }
 
 button:hover {

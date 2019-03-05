@@ -21,7 +21,7 @@ const colors = {
 
 const tableCommonOptions = {
     rowHeaders: true,
-    height: 455,
+    maxHeight: 455,
     width: '100%',
     stretchH: 'all',
     contextMenu: [
@@ -44,18 +44,6 @@ let init = function () {
         chartType(form.elements['chart'].value);
     };
     chartType(form.elements['chart'].value);
-
-    Chart.defaults.global.tooltips.mode = 'nearest';
-    Chart.defaults.global.tooltips.callbacks.title = function (tooltipItems, data) {
-        return null;
-    };
-    Chart.defaults.global.tooltips.callbacks.label = function (tooltipItem, data) {
-        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-            round(tooltipItem.yLabel, 2) + ')';
-    };
-    Chart.defaults.global.legend.onClick = function (e) {
-        e.stopPropagation();
-    };
 
     // Following code for working with Edge
     if (!HTMLCanvasElement.prototype.toBlob) {
@@ -123,15 +111,19 @@ function chartType(chart) {
         objects = dual();
     }
 
+    updateTableHeight(objects[0]);
+    initializeChart(objects[1], objects[0]);
+
     /**
      * TODO: Find a way to align add-row-button while still putting it directly below
      * the table element, so that in smaller screen it will be next to the table instead
      * of being under the chart with the save-button.
      */
     let addRow = document.getElementById('add-row-button');
-    Handsontable.dom.addEvent(addRow, 'click', function () {
+    addRow.onclick = function () {
         objects[0].alter('insert_row');
-    });
+        updateTableHeight(objects[0]);
+    };
 
     let chartInfoForm = document.getElementById('chart-info-form');
     chartInfoForm.oninput = function () {
@@ -148,7 +140,7 @@ function curve() {
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="2"><span>2</span></label></div>\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="3"><span>3</span></label></div>\n' +
                 '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="4"><span>4</span></label></div>\n' +
-                '<div class="flex-item-grow1"><label><input type="checkbox" name="magnitude"><span>Magnitudes</span></label></div>\n' +
+                '<div class="flex-item-grow0"><label><input type="checkbox" name="magnitude"><span>Magnitudes</span></label></div>\n' +
             '</div>' +
         '</form>\n');
 
@@ -268,6 +260,7 @@ function curve() {
             for (let i = 0; i < lines; i++) {
                 updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
             }
+            updateTableHeight(hot);
         }
     });
 
@@ -357,7 +350,7 @@ function moon() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        height: 340,
+        maxHeight: 340,
     }));
 
     // create chart
@@ -411,6 +404,7 @@ function moon() {
         afterChange: function () {
             updateLine(tableData, myChart);
             updateFormula(tableData, moonForm, myChart);
+            updateTableHeight(hot);
         }
     });
 
@@ -608,6 +602,7 @@ function scatter() {
     hot.updateSettings({
         afterChange: function () {
             updateScatter(tableData, myChart);
+            updateTableHeight(hot);
         }
     });
 
@@ -656,7 +651,7 @@ function venus() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        height: 340,
+        maxHeight: 340,
     }));
 
     // create chart
@@ -740,6 +735,7 @@ function venus() {
     hot.updateSettings({
         afterChange: function () {
             updateLine(tableData, myChart);
+            updateTableHeight(hot);
         }
     });
 
@@ -890,6 +886,7 @@ function dual() {
         afterChange: function () {
             updateDual(tableData, myChart, 0);
             updateDual(tableData, myChart, 1);
+            updateTableHeight(hot);
         }
     });
 
@@ -899,6 +896,42 @@ function dual() {
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
+}
+
+const rowHeight = 23;
+const rowHeaderHeight = 27;
+
+function updateTableHeight(table) {
+    // let maxHeight = table.getSettings().maxHeight;
+
+    let typeForm = document.getElementById('chart-type-form').offsetHeight;
+    let inputDiv = document.getElementById('input-div').offsetHeight;
+    let chartDiv = document.getElementById('chart-div').offsetHeight;
+    let infoForm = document.getElementById('chart-info-form').offsetHeight;
+    let maxHeight = chartDiv + infoForm - typeForm - inputDiv;
+
+    let height = Math.min(maxHeight, table.countRows() * rowHeight + rowHeaderHeight);
+    console.log(maxHeight);
+    table.updateSettings({
+        height: height,
+    })
+}
+
+function initializeChart(chart, table) {
+    chart.options.tooltips.mode = 'nearest';
+    chart.options.tooltips.callbacks.title = function (tooltipItems, data) {
+        return null;
+    };
+    chart.options.tooltips.callbacks.label = function (tooltipItem, data) {
+        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+            round(tooltipItem.yLabel, 2) + ')';
+    };
+    chart.options.legend.onClick = function (e) {
+        e.stopPropagation();
+    };
+    chart.options.onResize = function () {
+        updateTableHeight(table);
+    }
 }
 
 function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
