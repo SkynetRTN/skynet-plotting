@@ -21,8 +21,9 @@ const colors = {
 
 const tableCommonOptions = {
     rowHeaders: true,
-    height: 395,
+    height: 455,
     width: '100%',
+    stretchH: 'all',
     contextMenu: [
         'undo',
         'redo',
@@ -349,7 +350,7 @@ function moon() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        height: 280,
+        height: 340,
     }));
 
     // create chart
@@ -648,7 +649,7 @@ function venus() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        height: 280,
+        height: 340,
     }));
 
     // create chart
