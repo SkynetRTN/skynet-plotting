@@ -58,6 +58,24 @@ label:hover span {
     opacity: 1;
 }
 
+#moon-form .row {
+    margin-bottom: 0.5em;
+}
+
+#moon-form .des {
+    line-height: 1.7em;
+    padding-right: 0;
+}
+
+#moon-form .range {
+    padding-top: 10px;
+    margin-bottom: 1em;
+}
+
+#moon-form .text {
+    padding-left: 0;
+}
+
 input {
     float: right;
     width: 100%;
@@ -147,8 +165,6 @@ input[type=range] {
     opacity: 0.7;
     -webkit-transition: .2s;
     transition: opacity .2s;
-    position: relative;
-    top: 20%;
 }
 
 /* Mouse-over effects */

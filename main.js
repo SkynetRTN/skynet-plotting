@@ -286,6 +286,13 @@ function curve() {
             }
             hot.updateSettings({
                 columns: newCols,
+                stretchH: 'none',
+            });
+
+            // Turning off stretchH and then turn it back on -- a workaround
+            //   to fix the horizontal scroll bar issue when adding more cols.
+            hot.updateSettings({
+                stretchH: 'all',
             });
             for (let i = 0; i < 4; i++) {
                 myChart.data.datasets[i].hidden = (i >= lineCount);
@@ -306,24 +313,24 @@ function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Moon" id="moon-form">\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3" style="padding-right: 0;"><p>a (")</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="a" name="a"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="a" name="a-num" class="field"></div>\n' +
+                '<div class="col-sm-3 des">a (")</div>\n' +
+                '<div class="col-sm-6 range"><input type="range" title="a" name="a"></div>\n' +
+                '<div class="col-sm-3 text"><input type="number" title="a" name="a-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3" style="padding-right: 0;"><p>P (d)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="P" name="p"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="P" name="p-num" class="field"></div>\n' +
+                '<div class="col-sm-3 des">P (d)</div>\n' +
+                '<div class="col-sm-6 range"><input type="range" title="P" name="p"></div>\n' +
+                '<div class="col-sm-3 text"><input type="number" title="P" name="p-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3" style="padding-right: 0;"><p>Phase (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Phase" name="phase"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Phase" name="phase-num" class="field"></div>\n' +
+                '<div class="col-sm-3 des">Phase (°)</div>\n' +
+                '<div class="col-sm-6 range"><input type="range" title="Phase" name="phase"></div>\n' +
+                '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase-num" class="field"></div>\n' +
             '</div>\n' +
             '<div class="row">\n' +
-                '<div class="col-sm-3" style="padding-right: 0;"><p>Tilt (°)</p></div>\n' +
-                '<div class="col-sm-6"><input type="range" title="Tilt" name="tilt"></div>\n' +
-                '<div class="col-sm-3" style="padding-left: 0;"><input type="number" title="Tilt" name="tilt-num" class="field"></div>\n' +
+                '<div class="col-sm-3 des">Tilt (°)</div>\n' +
+                '<div class="col-sm-6 range"><input type="range" title="Tilt" name="tilt"></div>\n' +
+                '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt-num" class="field"></div>\n' +
             '</div>\n' +
         '</form>\n');
 
