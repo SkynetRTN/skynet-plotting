@@ -281,13 +281,15 @@ function curve() {
                     data: 'y' + (i+1), type: 'numeric', numericFormat: {pattern: {mantissa: 2}}
                 });
             }
-            hot.updateSettings({
-                columns: newCols,
-                stretchH: 'none',
-            });
 
             // Turning off stretchH and then turn it back on -- a workaround
             //   to fix the horizontal scroll bar issue when adding more cols.
+            hot.updateSettings({
+                stretchH: 'none',
+            });
+            hot.updateSettings({
+                columns: newCols,
+            });
             hot.updateSettings({
                 stretchH: 'all',
             });
@@ -916,13 +918,12 @@ const rowHeights = 23;
 const columnHeaderHeight = 26;
 
 function updateTableHeight(table) {
-
     let typeForm = document.getElementById('chart-type-form').offsetHeight;
     let inputDiv = document.getElementById('input-div').offsetHeight;
     let chartDiv = document.getElementById('chart-div').offsetHeight;
     let infoForm = document.getElementById('chart-info-form').offsetHeight;
     let maxHeight = chartDiv + infoForm - typeForm - inputDiv;
-    let minHeight = Math.min(5, table.countRows) * rowHeights + columnHeaderHeight + 1;
+    let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 1;
 
     let height = table.countRows() * rowHeights + columnHeaderHeight + 1;
 
@@ -933,8 +934,14 @@ function updateTableHeight(table) {
         height = minHeight;
     }
     table.updateSettings({
+        stretchH: 'none',
+    });
+    table.updateSettings({
         height: height,
-    })
+    });
+    table.updateSettings({
+        stretchH: 'all',
+    });
 }
 
 function initializeChart(chart, table) {
