@@ -20,7 +20,6 @@
         <main class="container">
             <div class="row">
                 <div class="col-lg-4" id="input-col">
-                    <!--<h2>Data</h2>-->
                     <form title="input" id="chart-type-form">
                         <select name="chart" title="select chart">
                             <option value="curve" title="Curve" selected>Curve</option>
@@ -32,10 +31,8 @@
                     </form>
                     <div id="input-div"></div>
                     <div id="table-div"></div>
-                    <!--<p class="caption">Note: you can copy/paste data into the table.</p>-->
                 </div>
                 <div class="col-lg-8" id="chart-col">
-                    <!--<h2>Chart</h2>-->
                     <div id="chart-div">
                         <canvas id="myChart" width="300" height="200"></canvas>
                     </div>
@@ -74,5 +71,41 @@
                 </div>
             </div>
         </main>
+        <script defer>
+            // Following code for detecting IE
+            let version = detectIE();
+            if (version !== false) {
+                if (version < 12) {
+                    document.body.innerHTML =
+                        '<h2 class="ie">We Are Sorry</h2>\n' +
+                        '<p class="ie">Internet Explorer is not supported by this site. Please either upgrade to a modern ' +
+                        'browser such as <a href="https://www.google.com/chrome/">Chrome</a>, ' +
+                        '<a href="https://www.mozilla.org/en-US/firefox/">Firefox</a>, or ' +
+                        '<a href="https://www.microsoft.com/en-us/windows/microsoft-edge">Edge</a>, ' +
+                        'or use this <a href="https://skynet.unc.edu/ASTR101L/graph/">alternate site</a>.</p>';
+                }
+            }
+            function detectIE() {
+                let ua = window.navigator.userAgent;
+                let msie = ua.indexOf('MSIE ');
+                if (msie > 0) {
+                    // IE 10 or older => return version number
+                    return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+                }
+                let trident = ua.indexOf('Trident/');
+                if (trident > 0) {
+                    // IE 11 => return version number
+                    let rv = ua.indexOf('rv:');
+                    return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+                }
+                let edge = ua.indexOf('Edge/');
+                if (edge > 0) {
+                    // Edge (IE 12+) => return version number
+                    return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+                }
+                // Other browsers
+                return false;
+            }
+        </script>
     </body>
 </html>

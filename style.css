@@ -203,3 +203,14 @@ input[type=range]::-moz-range-thumb {
     cursor: pointer;
     border: none;
 }
+
+h2.ie {
+    margin: 3em auto 1em;
+    font-size: 48px;
+    font-weight: bold;
+}
+
+p.ie {
+    margin: 1em 5em;
+    text-align: center;
+}
