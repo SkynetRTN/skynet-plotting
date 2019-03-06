@@ -20,8 +20,9 @@ const colors = {
 };
 
 const tableCommonOptions = {
+    rowHeights: 23,
+    columnHeaderHeight: 26,
     rowHeaders: true,
-    maxHeight: 455,
     width: '100%',
     stretchH: 'all',
     contextMenu: [
@@ -35,7 +36,7 @@ const tableCommonOptions = {
     ],
     fillHandle: {
         autoInsertRow: true,
-    }
+    },
 };
 
 let init = function () {
@@ -261,6 +262,9 @@ function curve() {
                 updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
             }
             updateTableHeight(hot);
+        },
+        afterRemoveRow: function () {
+            updateTableHeight(hot);
         }
     });
 
@@ -350,7 +354,6 @@ function moon() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        maxHeight: 340,
     }));
 
     // create chart
@@ -404,6 +407,9 @@ function moon() {
         afterChange: function () {
             updateLine(tableData, myChart);
             updateFormula(tableData, moonForm, myChart);
+            updateTableHeight(hot);
+        },
+        afterRemoveRow: function () {
             updateTableHeight(hot);
         }
     });
@@ -603,6 +609,9 @@ function scatter() {
         afterChange: function () {
             updateScatter(tableData, myChart);
             updateTableHeight(hot);
+        },
+        afterRemoveRow: function () {
+            updateTableHeight(hot);
         }
     });
 
@@ -651,7 +660,6 @@ function venus() {
             {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
             {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
-        maxHeight: 340,
     }));
 
     // create chart
@@ -735,6 +743,9 @@ function venus() {
     hot.updateSettings({
         afterChange: function () {
             updateLine(tableData, myChart);
+            updateTableHeight(hot);
+        },
+        afterRemoveRow: function () {
             updateTableHeight(hot);
         }
     });
@@ -887,6 +898,9 @@ function dual() {
             updateDual(tableData, myChart, 0);
             updateDual(tableData, myChart, 1);
             updateTableHeight(hot);
+        },
+        afterRemoveRow: function () {
+            updateTableHeight(hot);
         }
     });
 
@@ -898,20 +912,26 @@ function dual() {
     return [hot, myChart];
 }
 
-const rowHeight = 23;
-const rowHeaderHeight = 27;
+const rowHeights = 23;
+const columnHeaderHeight = 26;
 
 function updateTableHeight(table) {
-    // let maxHeight = table.getSettings().maxHeight;
 
     let typeForm = document.getElementById('chart-type-form').offsetHeight;
     let inputDiv = document.getElementById('input-div').offsetHeight;
     let chartDiv = document.getElementById('chart-div').offsetHeight;
     let infoForm = document.getElementById('chart-info-form').offsetHeight;
     let maxHeight = chartDiv + infoForm - typeForm - inputDiv;
+    let minHeight = Math.min(5, table.countRows) * rowHeights + columnHeaderHeight + 1;
 
-    let height = Math.min(maxHeight, table.countRows() * rowHeight + rowHeaderHeight);
-    console.log(maxHeight);
+    let height = table.countRows() * rowHeights + columnHeaderHeight + 1;
+
+    if (height > maxHeight) {
+        height = maxHeight;
+    }
+    if (height < minHeight) {
+        height = minHeight;
+    }
     table.updateSettings({
         height: height,
     })
