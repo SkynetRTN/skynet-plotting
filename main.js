@@ -256,16 +256,16 @@ function curve() {
         }
     });
 
-    hot.updateSettings({
-        afterChange: function () {
-            for (let i = 0; i < lines; i++) {
-                updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
-            }
-            updateTableHeight(hot);
-        },
-        afterRemoveRow: function () {
-            updateTableHeight(hot);
+    let update = function () {
+        updateTableHeight(hot);
+        for (let i = 0; i < lines; i++) {
+            updateLine(tableData, myChart, i, 'x', 'y' + (i+1));
         }
+    };
+
+    hot.updateSettings({
+        afterChange: update,
+        afterRemoveRow: update,
     });
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
@@ -404,16 +404,16 @@ function moon() {
         }
     });
 
+    let update = function () {
+        updateTableHeight(hot);
+        updateLine(tableData, myChart);
+        updateFormula(tableData, moonForm, myChart);
+    };
+
     // link chart to table
     hot.updateSettings({
-        afterChange: function () {
-            updateLine(tableData, myChart);
-            updateFormula(tableData, moonForm, myChart);
-            updateTableHeight(hot);
-        },
-        afterRemoveRow: function () {
-            updateTableHeight(hot);
-        }
+        afterChange: update,
+        afterRemoveRow: update,
     });
 
     // link chart to input form (slider + text)
@@ -607,14 +607,14 @@ function scatter() {
         }
     });
 
+    let update = function () {
+        updateScatter(tableData, myChart);
+        updateTableHeight(hot);
+    };
+
     hot.updateSettings({
-        afterChange: function () {
-            updateScatter(tableData, myChart);
-            updateTableHeight(hot);
-        },
-        afterRemoveRow: function () {
-            updateTableHeight(hot);
-        }
+        afterChange: update,
+        afterRemoveRow: update,
     });
 
     updateScatter(tableData, myChart);
@@ -741,15 +741,15 @@ function venus() {
         }
     });
 
+    let update = function () {
+        updateLine(tableData, myChart);
+        updateTableHeight(hot);
+    };
+
     // link chart to table
     hot.updateSettings({
-        afterChange: function () {
-            updateLine(tableData, myChart);
-            updateTableHeight(hot);
-        },
-        afterRemoveRow: function () {
-            updateTableHeight(hot);
-        }
+        afterChange: update,
+        afterRemoveRow: update,
     });
 
     // venusForm.oninput = function () {
@@ -895,15 +895,15 @@ function dual() {
         }
     });
 
+    let update = function () {
+        updateDual(tableData, myChart, 0);
+        updateDual(tableData, myChart, 1);
+        updateTableHeight(hot);
+    };
+
     hot.updateSettings({
-        afterChange: function () {
-            updateDual(tableData, myChart, 0);
-            updateDual(tableData, myChart, 1);
-            updateTableHeight(hot);
-        },
-        afterRemoveRow: function () {
-            updateTableHeight(hot);
-        }
+        afterChange: update,
+        afterRemoveRow: update,
     });
 
     updateDual(tableData, myChart, 0);
@@ -922,17 +922,15 @@ function updateTableHeight(table) {
     let inputDiv = document.getElementById('input-div').offsetHeight;
     let chartDiv = document.getElementById('chart-div').offsetHeight;
     let infoForm = document.getElementById('chart-info-form').offsetHeight;
-    let maxHeight = chartDiv + infoForm - typeForm - inputDiv;
-    let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 1;
+    let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
+    let maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
 
-    let height = table.countRows() * rowHeights + columnHeaderHeight + 1;
+    let height = table.countRows() * rowHeights + columnHeaderHeight + 5;
 
     if (height > maxHeight) {
         height = maxHeight;
     }
-    if (height < minHeight) {
-        height = minHeight;
-    }
+
     table.updateSettings({
         stretchH: 'none',
     });
