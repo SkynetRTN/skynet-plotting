@@ -648,6 +648,9 @@ function venus() {
         {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
     ];
 
     let chartData = [];
@@ -918,10 +921,10 @@ const rowHeights = 23;
 const columnHeaderHeight = 26;
 
 function updateTableHeight(table) {
-    let typeForm = document.getElementById('chart-type-form').offsetHeight;
-    let inputDiv = document.getElementById('input-div').offsetHeight;
-    let chartDiv = document.getElementById('chart-div').offsetHeight;
-    let infoForm = document.getElementById('chart-info-form').offsetHeight;
+    let typeForm = document.getElementById('chart-type-form').clientHeight;
+    let inputDiv = document.getElementById('input-div').clientHeight;
+    let chartDiv = document.getElementById('chart-div').clientHeight;
+    let infoForm = document.getElementById('chart-info-form').clientHeight;
     let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
     let maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
 
@@ -1048,6 +1051,8 @@ function updateChartInfo(myChart, form) {
     myChart.options.title.display = true;
     myChart.options.title.fontSize = 18;
     myChart.options.title.fontColor = colors['black'];
+    myChart.options.title.fontStyle = '';
+    myChart.options.title.fontFamily = "'Lato', 'Arial', sans-serif";
     myChart.options.title.text = form.elements['title'].value;
     myChart.data.datasets[0].label = form.elements['data'].value;
     let labels = mySplit(form.elements['data'].value, ',');

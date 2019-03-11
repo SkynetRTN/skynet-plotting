@@ -13,6 +13,7 @@ h2 {
 
 #chart-type-form select {
     width: 100%;
+    margin-top: 0.7em;
     margin-bottom: 1em;
 }
 
@@ -34,6 +35,10 @@ p.caption {
 
 .flex-item-grow0 {
     flex-grow: 0;
+}
+
+label {
+    margin: 0;
 }
 
 label span {
@@ -130,6 +135,18 @@ input[type=number]::-webkit-inner-spin-button {
 
 input[type=number] {
     -moz-appearance:textfield;
+}
+
+#chart-info-form {
+    margin-top: 1em;
+}
+
+#chart-info-form .des {
+    line-height: 2em;
+}
+
+#chart-info-form .row {
+    margin-bottom: 0.3em;
 }
 
 #button-row {
