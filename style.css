@@ -138,7 +138,7 @@ input[type=number] {
 }
 
 #chart-info-form {
-    margin-top: 1em;
+    margin-top: 0.5em;
 }
 
 #chart-info-form .des {
@@ -150,7 +150,7 @@ input[type=number] {
 }
 
 #button-row {
-    margin-top: 1em;
+    margin-top: 0.5em;
 }
 
 button {
