@@ -423,6 +423,7 @@ function moon() {
 
     updateLine(tableData, myChart);
     updateFormula(tableData, moonForm, myChart);
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
 }
@@ -618,6 +619,7 @@ function scatter() {
     });
 
     updateScatter(tableData, myChart);
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
 }
@@ -645,6 +647,11 @@ function venus() {
         {x: 30, y: 0.53},
         {x: 45, y: 0.27},
         {x: 60, y: 0},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
@@ -762,6 +769,7 @@ function venus() {
     // };
 
     updateLine(tableData, myChart);
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
 }
