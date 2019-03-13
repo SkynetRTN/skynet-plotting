@@ -165,6 +165,8 @@ function curve() {
         {x: '', y1: '', y2: '', y3: '', y4: ''},
         {x: '', y1: '', y2: '', y3: '', y4: ''},
         {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
+        {x: '', y1: '', y2: '', y3: '', y4: ''},
     ];
 
     let chartData = [];
@@ -541,7 +543,7 @@ function generateMoonData() {
 
 function scatter() {
     let tableData = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 17; i++) {
         tableData[i] = {
             'lo': Math.random() * 40.0 - 20.0,
             'la': Math.random() * 40.0 - 20.0,
@@ -647,6 +649,8 @@ function venus() {
         {x: 30, y: 0.53},
         {x: 45, y: 0.27},
         {x: 60, y: 0},
+        {x: '', y: ''},
+        {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
         {x: '', y: ''},
@@ -847,6 +851,8 @@ function dual() {
         {x1: '', y1: '', x2: 13, y2: Math.sqrt(1300)},
         {x1: '', y1: '', x2: 14, y2: Math.sqrt(1400)},
         {x1: '', y1: '', x2: 15, y2: Math.sqrt(1500)},
+        {x1: '', y1: '', x2: 16, y2: Math.sqrt(1600)},
+        {x1: '', y1: '', x2: 17, y2: Math.sqrt(1700)},
     ];
 
     let chartData1 = [];
