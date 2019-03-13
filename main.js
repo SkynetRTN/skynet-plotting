@@ -123,7 +123,6 @@ function chartType(chart) {
     let addRow = document.getElementById('add-row-button');
     addRow.onclick = function () {
         objects[0].alter('insert_row');
-        updateTableHeight(objects[0]);
     };
 
     let chartInfoForm = document.getElementById('chart-info-form');
@@ -160,8 +159,6 @@ function curve() {
         {x: 7,  y1: 16, y2: '', y3: '', y4: ''},
         {x: 8,  y1: 25, y2: '', y3: '', y4: ''},
         {x: 9,  y1: 36, y2: '', y3: '', y4: ''},
-        {x: '', y1: '', y2: '', y3: '', y4: ''},
-        {x: '', y1: '', y2: '', y3: '', y4: ''},
         {x: '', y1: '', y2: '', y3: '', y4: ''},
         {x: '', y1: '', y2: '', y3: '', y4: ''},
         {x: '', y1: '', y2: '', y3: '', y4: ''},
@@ -268,6 +265,7 @@ function curve() {
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
+        afterCreateRow: update,
     });
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
@@ -416,6 +414,7 @@ function moon() {
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
+        afterCreateRow: update,
     });
 
     // link chart to input form (slider + text)
@@ -618,6 +617,7 @@ function scatter() {
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
+        afterCreateRow: update,
     });
 
     updateScatter(tableData, myChart);
@@ -764,6 +764,7 @@ function venus() {
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
+        afterCreateRow: update,
     });
 
     // venusForm.oninput = function () {
@@ -921,6 +922,7 @@ function dual() {
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
+        afterCreateRow: update,
     });
 
     updateDual(tableData, myChart, 0);
