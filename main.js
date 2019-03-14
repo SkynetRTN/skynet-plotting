@@ -1090,7 +1090,8 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     for (let i = 0; i < table.length; i++) {
-        if (table[i][xKey] === '' || table[i][yKey] === '') {
+        if (table[i][xKey] === '' || table[i][yKey] === '' ||
+            table[i][xKey] === null || table[i][yKey] === null) {
             continue;
         }
         chart[start++] = {x: table[i][xKey], y: table[i][yKey]};
@@ -1114,7 +1115,8 @@ function updateScatter(table, myChart) {
         let lo = table[i]['lo'];
         let la = table[i]['la'];
         let di = table[i]['di'];
-        if (la === '' || lo === '' || di === '') {
+        if (la === '' || lo === '' || di === '' ||
+            la === null || lo === null || di === null) {
             continue;
         }
         chart[start++] = {
