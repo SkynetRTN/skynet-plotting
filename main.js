@@ -353,7 +353,6 @@ function moon() {
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
 
     let tableData = generateMoonData();
-    console.log(tableData);
 
     let chartData = [];
     let formula = [];
