@@ -1139,10 +1139,10 @@ function updateScatter(table, myChart) {
         chart.pop();
     }
 
-    minX -= 1;
-    maxX += 1;
-    minY -= 1;
-    maxY += 1;
+    minX -= 3;
+    maxX += 3;
+    minY -= 3;
+    maxY += 3;
 
     // This is the ratio of the length of X axis over the length of Y axis
     const screenRatio = 1.8;
@@ -1160,10 +1160,10 @@ function updateScatter(table, myChart) {
         minY = m - d * dataRatio / screenRatio;
     }
 
-    myChart.options.scales.xAxes[0].ticks.suggestedMin = Math.floor(minX);
-    myChart.options.scales.xAxes[0].ticks.suggestedMax = Math.ceil(maxX);
-    myChart.options.scales.yAxes[0].ticks.suggestedMin = Math.floor(minY);
-    myChart.options.scales.yAxes[0].ticks.suggestedMax = Math.ceil(maxY);
+    myChart.options.scales.xAxes[0].ticks.min = Math.floor(minX);
+    myChart.options.scales.xAxes[0].ticks.max = Math.ceil(maxX);
+    myChart.options.scales.yAxes[0].ticks.min = Math.floor(minY);
+    myChart.options.scales.yAxes[0].ticks.max = Math.ceil(maxY);
     myChart.options.scales.xAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
     myChart.options.scales.yAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
 
