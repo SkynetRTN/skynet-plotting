@@ -1109,8 +1109,13 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
  */
 function updateScatter(table, myChart) {
     let start = 0;
-    let min = NaN;
-    let max = NaN;
+
+    // The initial value of mins and maxs are 0 becaues the Sun is located at (0, 0)
+    let minX = 0;
+    let maxX = 0;
+    let minY = 0;
+    let maxY = 0;
+
     let chart = myChart.data.datasets[0].data;
     for (let i = 0; i < table.length; i++) {
         let lo = table[i]['lo'];
@@ -1124,21 +1129,44 @@ function updateScatter(table, myChart) {
             x: Math.cos(la / 180 * Math.PI) * di * Math.cos(lo / 180 * Math.PI),
             y: Math.cos(la / 180 * Math.PI) * di * Math.sin(lo / 180 * Math.PI),
         };
-        if (i === 0) {
-            min = Math.min(chart[start - 1].x, chart[start - 1].y);
-            max = Math.max(chart[start - 1].x, chart[start - 1].y);
-        } else {
-            min = Math.min(chart[start - 1].x, chart[start - 1].y, min);
-            max = Math.max(chart[start - 1].x, chart[start - 1].y, max);
-        }
+
+        minX = Math.min(chart[start - 1].x, minX);
+        maxX = Math.max(chart[start - 1].x, maxX);
+        minY = Math.min(chart[start - 1].y, minY);
+        maxY = Math.max(chart[start - 1].y, maxY);
     }
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.options.scales.xAxes[0].ticks.suggestedMin = min;
-    myChart.options.scales.xAxes[0].ticks.suggestedMax = max;
-    myChart.options.scales.yAxes[0].ticks.suggestedMin = min;
-    myChart.options.scales.yAxes[0].ticks.suggestedMax = max;
+
+    minX -= 1;
+    maxX += 1;
+    minY -= 1;
+    maxY += 1;
+
+    // This is the ratio of the length of X axis over the length of Y axis
+    const screenRatio = 1.8;
+    let dataRatio = (maxX - minX) / (maxY - minY);
+
+    if (dataRatio < screenRatio) {
+        let m = (maxX + minX) / 2;
+        let d = (maxX - minX) / 2;
+        maxX = m + d / dataRatio * screenRatio;
+        minX = m - d / dataRatio * screenRatio;
+    } else {
+        let m = (maxY + minY) / 2;
+        let d = (maxY - minY) / 2;
+        maxY = m + d * dataRatio / screenRatio;
+        minY = m - d * dataRatio / screenRatio;
+    }
+
+    myChart.options.scales.xAxes[0].ticks.suggestedMin = Math.floor(minX);
+    myChart.options.scales.xAxes[0].ticks.suggestedMax = Math.ceil(maxX);
+    myChart.options.scales.yAxes[0].ticks.suggestedMin = Math.floor(minY);
+    myChart.options.scales.yAxes[0].ticks.suggestedMax = Math.ceil(maxY);
+    myChart.options.scales.xAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
+    myChart.options.scales.yAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
+
     myChart.update(0);
 }
 
