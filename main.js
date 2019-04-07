@@ -1109,6 +1109,8 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
  */
 function updateScatter(table, myChart) {
     let start = 0;
+    let min = NaN;
+    let max = NaN;
     let chart = myChart.data.datasets[0].data;
     for (let i = 0; i < table.length; i++) {
         let lo = table[i]['lo'];
@@ -1121,11 +1123,22 @@ function updateScatter(table, myChart) {
         chart[start++] = {
             x: Math.cos(la / 180 * Math.PI) * di * Math.cos(lo / 180 * Math.PI),
             y: Math.cos(la / 180 * Math.PI) * di * Math.sin(lo / 180 * Math.PI),
+        };
+        if (i === 0) {
+            min = Math.min(chart[start - 1].x, chart[start - 1].y);
+            max = Math.max(chart[start - 1].x, chart[start - 1].y);
+        } else {
+            min = Math.min(chart[start - 1].x, chart[start - 1].y, min);
+            max = Math.max(chart[start - 1].x, chart[start - 1].y, max);
         }
     }
     while (chart.length !== start) {
         chart.pop();
     }
+    myChart.options.scales.xAxes[0].ticks.suggestedMin = min;
+    myChart.options.scales.xAxes[0].ticks.suggestedMax = max;
+    myChart.options.scales.yAxes[0].ticks.suggestedMin = min;
+    myChart.options.scales.yAxes[0].ticks.suggestedMax = max;
     myChart.update(0);
 }
 
