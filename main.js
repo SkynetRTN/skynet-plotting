@@ -54,7 +54,7 @@ let init = function () {
         Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
             value: function (callback, type, quality) {
                 let dataURL = this.toDataURL(type, quality).split(',')[1];
-                setTimeout(function() {
+                setTimeout(function () {
                     let binStr = atob( dataURL ),
                         len = binStr.length,
                         arr = new Uint8Array(len);
@@ -80,15 +80,21 @@ let init = function () {
 
         // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
-        destCtx.fillRect(0,0, canvas.width, canvas.height);
+        destCtx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw the original canvas onto the destination canvas
         destCtx.drawImage(canvas, 0, 0);
 
-        // Download the dummy canvas
-        destinationCanvas.toBlob(function(blob) {
-            saveAs(blob, "chart.png");
-        });
+        // // Download the dummy canvas
+        // destinationCanvas.toBlob(function (blob) {
+        //     saveAs(blob, "chart.png");
+        // });
+
+        let img = destinationCanvas.toDataURL('image/png', 0.5);
+        let dummyLink = document.createElement('a');
+        dummyLink.href = img;
+        dummyLink.download = 'chart.png';
+        dummyLink.click();
     };
 };
 
