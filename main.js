@@ -85,16 +85,22 @@ let init = function () {
         // Draw the original canvas onto the destination canvas
         destCtx.drawImage(canvas, 0, 0);
 
-        // // Download the dummy canvas
-        // destinationCanvas.toBlob(function (blob) {
-        //     saveAs(blob, "chart.png");
-        // });
+        // Download the dummy canvas
+        destinationCanvas.toBlob(function (blob) {
+            saveAs(blob, "chart.png");
+        });
 
-        let img = destinationCanvas.toDataURL('image/jpeg', 0.5);
-        let dummyLink = document.createElement('a');
-        dummyLink.href = img;
-        dummyLink.download = 'chart.jpg';
-        dummyLink.click();
+        // let img = document.createElement('img');
+        // img.src = destinationCanvas.toDataURL('image/jpeg', 0.5);
+        // let link = document.createElement('a');
+        // document.body.appendChild(img);
+        // link.href = window.URL.createObjectURL(img);
+        // link.download = 'chart.jpg';
+        // document.body.appendChild(link);
+        // link.click();
+        // document.body.removeChild(img);
+        // document.body.removeChild(link);
+
     };
 };
 
