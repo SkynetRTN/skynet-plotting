@@ -90,10 +90,10 @@ let init = function () {
         //     saveAs(blob, "chart.png");
         // });
 
-        let img = destinationCanvas.toDataURL('image/png', 0.5);
+        let img = destinationCanvas.toDataURL('image/jpeg', 0.5);
         let dummyLink = document.createElement('a');
         dummyLink.href = img;
-        dummyLink.download = 'chart.png';
+        dummyLink.download = 'chart.jpg';
         dummyLink.click();
     };
 };
