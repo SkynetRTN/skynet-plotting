@@ -428,9 +428,30 @@ function moon() {
         afterCreateRow: update,
     });
 
+    /**
+     *  This part of code limits the maximum fps of the chart to change, so that it
+     *  is possible to increase the sampling precision without hindering performance.
+     */
+    let lastChange = Date.now();
+    let lock = false;
+
+    let fps = 60;
+    let frameTime = Math.floor(1000 / fps);
+
     // link chart to input form (slider + text)
     moonForm.oninput = function () {
-        updateFormula(tableData, moonForm, myChart);
+        if (Date.now() - lastChange > frameTime) {
+            updateFormula(tableData, moonForm, myChart);
+            lock = false;
+            lastChange = Date.now();
+        } else if (!lock) {
+            setTimeout(function () {
+                updateFormula(tableData, moonForm, myChart);
+                lock = false;
+                lastChange = Date.now();
+            }, frameTime);
+            lock = true;
+        }
     };
 
     updateLine(tableData, myChart);
@@ -472,7 +493,7 @@ function updateFormula(table, form, chart) {
         form.elements['tilt-num'].value,
         min - 2,
         max + 2,
-        500
+        2000
     );
     chart.update(0);
 }
