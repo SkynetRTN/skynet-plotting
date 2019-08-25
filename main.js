@@ -88,7 +88,7 @@ let init = function () {
         // Download the dummy canvas
         destinationCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.jpg");
-        }, 'image/jpeg', 0.7);
+        }, 'image/jpeg', 0.3);
     };
 };
 
