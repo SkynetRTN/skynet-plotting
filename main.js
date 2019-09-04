@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * TODO: Redesign the page, makes the left side a lifted space with chart type selection at top
- * and all data input. The right side would have the chart related operations. Remove the headings
- * "Data" and "Chart", and add a title bar at the top of the page.
+ *  TODO: Redesign the page, makes the left side a lifted space with chart type selection at top
+ *  and all data input. The right side would have the chart related operations. Remove the headings
+ *  "Data" and "Chart", and add a title bar at the top of the page.
  */
 
 // The hexToDecimal() function only accepts lower case (can make it supports upper case)
@@ -40,7 +40,7 @@ const tableCommonOptions = {
 };
 
 /**
- * This function initialize the page when the website loads
+ *  This function initialize the page when the website loads
  */
 let init = function () {
     let form = document.getElementById('chart-type-form');
@@ -95,9 +95,9 @@ let init = function () {
 window.onload = init;
 
 /**
- * This function runs once each time the type of the chart changes. It resets various parts of the page
- * (input field, table, and the chart) and initialize the components.
- * @param chart:    A string represents the type of chart to be rendered. This string comes from the
+ *  This function runs once each time the type of the chart changes. It resets various parts of the page
+ *  (input field, table, and the chart) and initialize the components.
+ *  @param chart:   A string represents the type of chart to be rendered. This string comes from the
  *                  chart-type-form
  */
 function chartType(chart) {
@@ -125,9 +125,9 @@ function chartType(chart) {
     initializeChart(objects[1], objects[0]);
 
     /**
-     * TODO: Find a way to align add-row-button while still putting it directly below
-     * the table element, so that in smaller screen it will be next to the table instead
-     * of being under the chart with the save-button.
+     *  TODO: Find a way to align add-row-button while still putting it directly below
+     *  the table element, so that in smaller screen it will be next to the table instead
+     *  of being under the chart with the save-button.
      */
     let addRow = document.getElementById('add-row-button');
     addRow.onclick = function () {
@@ -142,8 +142,8 @@ function chartType(chart) {
 }
 
 /**
- * The function for up to 4 curves in the same chart. The curves share the same x values.
- * @returns {any[]}
+ *  The function for up to 4 curves in the same chart. The curves share the same x values.
+ *  @returns {any[]}
  */
 function curve() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -317,8 +317,8 @@ function curve() {
 }
 
 /**
- * This function is for the moon of a planet.
- * @returns {any[]}:
+ *  This function is for the moon of a planet.
+ *  @returns {any[]}:
  */
 function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -462,12 +462,12 @@ function moon() {
 }
 
 /**
- * This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
- * relationship between a moon's angular distance and Julian date, and generates a dataset that
- * spans over the range determined by the max and min value present in the table.
- * @param table:    A table used to determine the max and min value for the range
- * @param form:     A form containing the 4 parameters (amplitude, period, phase, tilt)
- * @param chart:    The Chartjs object to be updated.
+ *  This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
+ *  relationship between a moon's angular distance and Julian date, and generates a dataset that
+ *  spans over the range determined by the max and min value present in the table.
+ *  @param table:   A table used to determine the max and min value for the range
+ *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
+ *  @param chart:   The Chartjs object to be updated.
  */
 function updateFormula(table, form, chart) {
     // Can't just set min and max to the first values in the table because it might be invalid
@@ -499,15 +499,15 @@ function updateFormula(table, form, chart) {
 }
 
 /**
- * This function links a <input type="range"> and a <input type="number"> together so changing the value
- * of one updates the other. This function also sets the min, max and step properties for both the inputs.
- * @param slider:   A <input type="range"> to be linked.
- * @param number:   A <input type"number"> to be linked.
- * @param min:      The min value for both inputs.
- * @param max:      The max value for both inputs.
- * @param step:     The step of changes for both inputs.
- * @param value:    The initial value of both inputs.
- * @param log:      A true or false value that determines whether the slider uses logarithmic scale.
+ *  This function links a <input type="range"> and a <input type="number"> together so changing the value
+ *  of one updates the other. This function also sets the min, max and step properties for both the inputs.
+ *  @param slider:  A <input type="range"> to be linked.
+ *  @param number:  A <input type"number"> to be linked.
+ *  @param min:     The min value for both inputs.
+ *  @param max:     The max value for both inputs.
+ *  @param step:    The step of changes for both inputs.
+ *  @param value:   The initial value of both inputs.
+ *  @param log:     A true or false value that determines whether the slider uses logarithmic scale.
  */
 function linkInputs(slider, number, min, max, step, value, log=false) {
     number.min = min;
@@ -548,16 +548,16 @@ function linkInputs(slider, number, min, max, step, value, log=false) {
 }
 
 /**
- * This function generates the data used for function "updateFormula" with the four parameters provided.
+ *  This function generates the data used for function "updateFormula" with the four parameters provided.
  *
- * @param a:        Amplitude of the moon's orbit
- * @param p:        The period of the moon's orbit
- * @param phase:    The phase of the orbit
- * @param tilt:     The tilt of the orbit
- * @param start:    The starting point of the data points
- * @param end:      The end point of the data points
- * @param steps:    Steps generated to be returned in the array. Default is 500
- * @returns {Array}
+ *  @param a:       Amplitude of the moon's orbit
+ *  @param p:       The period of the moon's orbit
+ *  @param phase:   The phase of the orbit
+ *  @param tilt:    The tilt of the orbit
+ *  @param start:   The starting point of the data points
+ *  @param end:     The end point of the data points
+ *  @param steps:   Steps generated to be returned in the array. Default is 500
+ *  @returns {Array}
  */
 function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
     let data = [];
@@ -577,9 +577,9 @@ function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
 }
 
 /**
- * This function returns an array of data points that represent a moon's orbit with randomly
- * generated parameters. This function also introduce a 5% noise to all data points.
- * @returns {Array}
+ *  This function returns an array of data points that represent a moon's orbit with randomly
+ *  generated parameters. This function also introduce a 5% noise to all data points.
+ *  @returns    {Array}
  */
 function generateMoonData() {
     /**
@@ -609,8 +609,8 @@ function generateMoonData() {
 }
 
 /**
- * Function for scatter chart.
- * @returns {any[]}
+ *  Function for scatter chart.
+ *  @returns {any[]}
  */
 function scatter() {
     let tableData = [];
@@ -699,14 +699,14 @@ function scatter() {
 }
 
 /**
- * Function for comparing data points with both Heliocentric and geocentric models.
- * @returns {any[]}
+ *  Function for comparing data points with both Heliocentric and geocentric models.
+ *  @returns {any[]}
  */
 function venus() {
     /**
-     * The following lines are used for exploring the effect of changing x have in geocentric model.
-     * The final value selected for rendering the chart is x = 0.445 (upper) and x = 0.8 (lower).
-     * To use it enable the 'venusForm.oninput = function ()' part as well in the end of venus() function.
+     *  The following lines are used for exploring the effect of changing x have in geocentric model.
+     *  The final value selected for rendering the chart is x = 0.445 (upper) and x = 0.8 (lower).
+     *  To use it enable the 'venusForm.oninput = function ()' part as well in the end of venus() function.
      */
     // document.getElementById('input-div').innerHTML =
     //     '<form title="Venus" id="venus-form">\n' +
@@ -871,13 +871,13 @@ const beta = rad(45);
 const maxA = 60;
 
 /**
- * This function generates the data points for the Geocentric model.
- * @param start:    The start point of data points.
- * @param end:      The end point of data points.
- * @param x:        The parameter x that represents the ratio of distance of Sun to Venus versus the
+ *  This function generates the data points for the Geocentric model.
+ *  @param start:   The start point of data points.
+ *  @param end:     The end point of data points.
+ *  @param x:       The parameter x that represents the ratio of distance of Sun to Venus versus the
  *                  distance of Sun to Earth.
- * @param steps:    The number of data points to be generated. Default is 500.
- * @returns {Array}
+ *  @param steps:   The number of data points to be generated. Default is 500.
+ *  @returns {Array}
  */
 function geocentric(start, end, x, steps=500) {
     let data = [];
@@ -901,11 +901,11 @@ function geocentric(start, end, x, steps=500) {
 }
 
 /**
- * This function generates the data points for the Heliocentric model.
- * @param start:    The start point of data points.
- * @param end:      The end point of data points.
- * @param steps:    The number of data points to be generated. Default is 500.
- * @returns {Array}
+ *  This function generates the data points for the Heliocentric model.
+ *  @param start:   The start point of data points.
+ *  @param end:     The end point of data points.
+ *  @param steps:   The number of data points to be generated. Default is 500.
+ *  @returns {Array}
  */
 function heliocentric(start, end, steps=500) {
     let data = [];
@@ -928,8 +928,8 @@ function heliocentric(start, end, steps=500) {
 }
 
 /**
- * Function for two curves with independent x values.
- * @returns {any[]}
+ *  Function for two curves with independent x values.
+ *  @returns {any[]}
  */
 function dual() {
     let tableData = [
@@ -1033,9 +1033,9 @@ const rowHeights = 23;
 const columnHeaderHeight = 26;
 
 /**
- * This function updates the height for the Handsontable object based on the number of rows it has.
- * The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
- * @param table:    The Handsontable object whose height is to be updated.
+ *  This function updates the height for the Handsontable object based on the number of rows it has.
+ *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
+ *  @param table:   The Handsontable object whose height is to be updated.
  */
 function updateTableHeight(table) {
     let typeForm = document.getElementById('chart-type-form').clientHeight;
@@ -1058,10 +1058,10 @@ function updateTableHeight(table) {
 }
 
 /**
- * This function initializes some settings for the chart and table objects. It runs once with chartType
- * each time the type of chart changes
- * @param chart:    The Chartjs object
- * @param table:    The Handsontable object
+ *  This function initializes some settings for the chart and table objects. It runs once with chartType
+ *  each time the type of chart changes
+ *  @param chart:   The Chartjs object
+ *  @param table:   The Handsontable object
  */
 function initializeChart(chart, table) {
     // Setting properties about the title.
@@ -1097,14 +1097,14 @@ function initializeChart(chart, table) {
 }
 
 /**
- * This function takes the data in a dictionary object and updates a Chartjs object with the data. The
- * dataset number for the Chartjs object and the keys for the x and y values are given in order to
- * correctly update when there are multiple datasets in the Chartjs object or in the dictionary.
- * @param table:    The dictionary object that provides data
- * @param myChart:  The Chartjs object
- * @param dataSet:  The number of line to be updated in the Chartjs object.
- * @param xKey:     The key for x values in the dictionary.
- * @param yKey:     The key for y values in the dictionary.
+ *  This function takes the data in a dictionary object and updates a Chartjs object with the data. The
+ *  dataset number for the Chartjs object and the keys for the x and y values are given in order to
+ *  correctly update when there are multiple datasets in the Chartjs object or in the dictionary.
+ *  @param table:   The dictionary object that provides data
+ *  @param myChart: The Chartjs object
+ *  @param dataSet: The number of line to be updated in the Chartjs object.
+ *  @param xKey:    The key for x values in the dictionary.
+ *  @param yKey:    The key for y values in the dictionary.
  */
 function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
     let start = 0;
@@ -1123,10 +1123,10 @@ function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
 }
 
 /**
- * This function is similar to updateLine but transforms longitude, latitude and distance to x and y
- * coordinates to be rendered in the chart.
- * @param table:    The dictionary object holding longitude, latitude and distance
- * @param myChart:  The Chartjs object to be updated.
+ *  This function is similar to updateLine but transforms longitude, latitude and distance to x and y
+ *  coordinates to be rendered in the chart.
+ *  @param table:   The dictionary object holding longitude, latitude and distance
+ *  @param myChart: The Chartjs object to be updated.
  */
 function updateScatter(table, myChart) {
     let start = 0;
@@ -1192,10 +1192,10 @@ function updateScatter(table, myChart) {
 }
 
 /**
- * This function takes a Chartjs object and a form containing information (Title, data labels, X axis label,
- * Y axis label) about the chart, and updates corresponding properties of the chart.
- * @param myChart:  The Chartjs object to be updated.
- * @param form:     The form containing information about the chart.
+ *  This function takes a Chartjs object and a form containing information (Title, data labels, X axis label,
+ *  Y axis label) about the chart, and updates corresponding properties of the chart.
+ *  @param myChart: The Chartjs object to be updated.
+ *  @param form:    The form containing information about the chart.
  */
 function updateChartInfo(myChart, form) {
     myChart.options.title.text = form.elements['title'].value;
@@ -1211,10 +1211,10 @@ function updateChartInfo(myChart, form) {
 }
 
 /**
- * This function is similar to the updateChartInfo function but takes the labels from the chart and updates
- * the the data property of the form with the labels.
- * @param myChart:  The Chartjs object
- * @param form:     The form to be updated.
+ *  This function is similar to the updateChartInfo function but takes the labels from the chart and updates
+ *  the the data property of the form with the labels.
+ *  @param myChart: The Chartjs object
+ *  @param form:    The form to be updated.
  */
 function updateLabels(myChart, form) {
     let labels = myChart.data.datasets[0].label;
@@ -1227,11 +1227,11 @@ function updateLabels(myChart, form) {
 }
 
 /**
- * This function split a string into several strings separated by a specified character. Leading and trailing
- * spaces of each separated string are removed.
- * @param str:      The string to be slitted.
- * @param char:     The character used to separate strings.
- * @returns {Array}
+ *  This function split a string into several strings separated by a specified character. Leading and trailing
+ *  spaces of each separated string are removed.
+ *  @param str:     The string to be slitted.
+ *  @param char:    The character used to separate strings.
+ *  @returns {Array}
  */
 function mySplit(str, char) {
     let answer = [];
@@ -1243,9 +1243,9 @@ function mySplit(str, char) {
 }
 
 /**
- * Remove the leading and trailing spaces of a given string.
- * @param str:      The string whose leading and trailing spaces are to be removed.
- * @returns {string}
+ *  Remove the leading and trailing spaces of a given string.
+ *  @param str:     The string whose leading and trailing spaces are to be removed.
+ *  @returns {string}
  */
 function removeSpaces(str) {
     let start = 0;
@@ -1260,11 +1260,11 @@ function removeSpaces(str) {
 }
 
 /**
- * This function takes a string containing a hexadecimal number and return a rgb string represented
- * by the value of rgb.
- * @param rgb:      A string containing a hexadecimal number which represents a rgb value.
- * @param opacity:  Opacity of the returned rgb string. Default is 1.
- * @returns {string}
+ *  This function takes a string containing a hexadecimal number and return a rgb string represented
+ *  by the value of rgb.
+ *  @param rgb:     A string containing a hexadecimal number which represents a rgb value.
+ *  @param opacity: Opacity of the returned rgb string. Default is 1.
+ *  @returns {string}
  */
 function rgbString(rgb, opacity=1) {
     let r = hexToDecimal(rgb, 1, 2);
@@ -1274,12 +1274,12 @@ function rgbString(rgb, opacity=1) {
 }
 
 /**
- * This function takes a portion of string which contains a hexadecimal number and returns a decimal
- * number of the same value with the hex number.
- * @param hex:      The whole string.
- * @param s:        The starting position of the portion of the string. Inclusive.
- * @param t:        The ending position of the portion of the string. Inclusive.
- * @returns {number}
+ *  This function takes a portion of string which contains a hexadecimal number and returns a decimal
+ *  number of the same value with the hex number.
+ *  @param hex:     The whole string.
+ *  @param s:       The starting position of the portion of the string. Inclusive.
+ *  @param t:       The ending position of the portion of the string. Inclusive.
+ *  @returns {number}
  */
 function hexToDecimal(hex, s, t) {
     let result = 0;
@@ -1295,28 +1295,28 @@ function hexToDecimal(hex, s, t) {
 }
 
 /**
- * This function takes an angle in degrees and returns it in radians.
- * @param degree:   An angle in degrees
- * @returns {number}
+ *  This function takes an angle in degrees and returns it in radians.
+ *  @param degree:  An angle in degrees
+ *  @returns {number}
  */
 function rad(degree) {
     return degree / 180 * Math.PI;
 }
 
 /**
- * This function returns the square of the input n.
- * @param n:        The input number to be squared.
- * @returns {number}
+ *  This function returns the square of the input n.
+ *  @param n:       The input number to be squared.
+ *  @returns {number}
  */
 function sqr(n) {
     return Math.pow(n, 2);
 }
 
 /**
- * This function takes a floating point number and round it to a specified decimal places.
- * @param value:    The value to be rounded.
- * @param digits:   The decimal places to round the value.
- * @returns {number}
+ *  This function takes a floating point number and round it to a specified decimal places.
+ *  @param value:   The value to be rounded.
+ *  @param digits:  The decimal places to round the value.
+ *  @returns {number}
  */
 function round(value, digits) {
     return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
