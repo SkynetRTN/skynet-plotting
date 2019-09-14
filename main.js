@@ -49,7 +49,7 @@ let init = function () {
     };
     chartType(form.elements['chart'].value);
 
-    // Following code for working with Edge
+    // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
         Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
             value: function (callback, type, quality) {
