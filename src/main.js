@@ -441,10 +441,12 @@ function moon() {
     // link chart to input form (slider + text)
     moonForm.oninput = function () {
         if (Date.now() - lastChange > frameTime) {
+            // Immediate update.
             updateFormula(tableData, moonForm, myChart);
             lock = false;
             lastChange = Date.now();
         } else if (!lock) {
+            // Delayed update to ensure the newest changes are recorded.
             setTimeout(function () {
                 updateFormula(tableData, moonForm, myChart);
                 lock = false;
@@ -564,7 +566,7 @@ function trigGenerator(a, p, phase, tilt, start, end, steps=500) {
     let x = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let theta = x / p * Math.PI * 2 - rad(phase);
+        let theta = (x - start - 2) / p * Math.PI * 2 - rad(phase);
         let alpha = rad(tilt);
         data.push({
             x: x,
