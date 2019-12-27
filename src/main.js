@@ -90,6 +90,29 @@ let init = function () {
             saveAs(blob, "chart.jpg");
         }, 'image/jpeg', 0.3);
     };
+
+    document.getElementById('save-png').onclick = function () {
+        let canvas = document.getElementById('myChart');
+
+        // Create a dummy canvas
+        let destinationCanvas = document.createElement("canvas");
+        destinationCanvas.width = canvas.width;
+        destinationCanvas.height = canvas.height;
+
+        let destCtx = destinationCanvas.getContext('2d');
+
+        // Create a rectangle with the desired color
+        destCtx.fillStyle = "#FFFFFF";
+        destCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the original canvas onto the destination canvas
+        destCtx.drawImage(canvas, 0, 0);
+
+        // Download the dummy canvas
+        destinationCanvas.toBlob(function (blob) {
+            saveAs(blob, "chart.png");
+        });
+    };
 };
 
 window.onload = init;
