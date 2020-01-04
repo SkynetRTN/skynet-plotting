@@ -408,7 +408,7 @@ function moon() {
                     pointHoverRadius: 7,
                     immutableLabel: false,
                 }, {
-                    label: 'Prediction',
+                    label: 'Model',
                     data: formula,
                     borderColor: rgbString(colors['blue']),
                     backgroundColor: rgbString(colors['white'], 0),
