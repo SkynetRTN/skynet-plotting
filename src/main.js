@@ -24,16 +24,42 @@ window.onload = function () {
             value: function (callback, type, quality) {
                 let dataURL = this.toDataURL(type, quality).split(',')[1];
                 setTimeout(function () {
-                    let binStr = atob( dataURL ),
+                    let binStr = atob(dataURL),
                         len = binStr.length,
                         arr = new Uint8Array(len);
-                    for (let i = 0; i < len; i++ ) {
+                    for (let i = 0; i < len; i++) {
                         arr[i] = binStr.charCodeAt(i);
                     }
-                    callback( new Blob( [arr], {type: type || 'image/png'} ) );
+                    callback(new Blob([arr], { type: type || 'image/png' }));
                 });
             }
         });
+    }
+
+    // Handling updated file
+    const fileUpload = document.getElementById('file-upload');
+    fileUpload.onchange = function () {
+        const file = this.files[0];
+        // File type validation
+        if (!file.type.match("(text/csv|application/vnd.ms-excel)") ||
+            !file.name.match(".*\.csv")) {
+            console.log(file.type);
+            console.log(file.name);
+            alert("Please upload a CSV file.");
+            return;
+        }
+        let reader = new FileReader();
+        reader.onload = () => {
+            let data = reader.result.split("\n");
+            let columns = data[0].split(",");
+
+        }
+        reader.readAsText(file);
+    }
+
+    // Enabling CSV upload function
+    document.getElementById('file-upload-button').onclick = function () {
+        fileUpload.click();
     }
 
     // Enabling download function
@@ -41,11 +67,11 @@ window.onload = function () {
         let canvas = document.getElementById('myChart');
 
         // Create a dummy canvas
-        let destinationCanvas = document.createElement("canvas");
-        destinationCanvas.width = canvas.width;
-        destinationCanvas.height = canvas.height;
+        let destCanvas = document.createElement("canvas");
+        destCanvas.width = canvas.width;
+        destCanvas.height = canvas.height;
 
-        let destCtx = destinationCanvas.getContext('2d');
+        let destCtx = destCanvas.getContext('2d');
 
         // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
@@ -55,7 +81,7 @@ window.onload = function () {
         destCtx.drawImage(canvas, 0, 0);
 
         // Download the dummy canvas
-        destinationCanvas.toBlob(function (blob) {
+        destCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.jpg");
         }, 'image/jpeg', 0.3);
     };
@@ -64,11 +90,11 @@ window.onload = function () {
         let canvas = document.getElementById('myChart');
 
         // Create a dummy canvas
-        let destinationCanvas = document.createElement("canvas");
-        destinationCanvas.width = canvas.width;
-        destinationCanvas.height = canvas.height;
+        let destCanvas = document.createElement("canvas");
+        destCanvas.width = canvas.width;
+        destCanvas.height = canvas.height;
 
-        let destCtx = destinationCanvas.getContext('2d');
+        let destCtx = destCanvas.getContext('2d');
 
         // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
@@ -78,9 +104,9 @@ window.onload = function () {
         destCtx.drawImage(canvas, 0, 0);
 
         // Download the dummy canvas
-        destinationCanvas.toBlob(function (blob) {
+        destCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.png");
-        });
+        }, 'image/png');
     };
 };
 
