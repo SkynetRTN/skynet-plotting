@@ -7,7 +7,7 @@
  *  @returns {number}
  */
 export function round(value, digits) {
-  return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
+    return Math.round(value * Math.pow(10, digits)) / Math.pow(10, digits);
 }
 
 /**
@@ -16,7 +16,7 @@ export function round(value, digits) {
  *  @returns {number}
  */
 export function sqr(n) {
-  return Math.pow(n, 2);
+    return Math.pow(n, 2);
 }
 
 /**
@@ -25,5 +25,5 @@ export function sqr(n) {
  *  @returns {number}
  */
 export function rad(degree) {
-  return degree / 180 * Math.PI;
+    return degree / 180 * Math.PI;
 }

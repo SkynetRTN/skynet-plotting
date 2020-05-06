@@ -10,20 +10,20 @@
  *  @param xKey:    The key for x values in the dictionary.
  *  @param yKey:    The key for y values in the dictionary.
  */
-export function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
-  let start = 0;
-  let chart = myChart.data.datasets[dataSet].data;
-  for (let i = 0; i < table.length; i++) {
-      if (table[i][xKey] === '' || table[i][yKey] === '' ||
-          table[i][xKey] === null || table[i][yKey] === null) {
-          continue;
-      }
-      chart[start++] = {x: table[i][xKey], y: table[i][yKey]};
-  }
-  while (chart.length !== start) {
-      chart.pop();
-  }
-  myChart.update(0);
+export function updateLine(table, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
+    let start = 0;
+    let chart = myChart.data.datasets[dataSet].data;
+    for (let i = 0; i < table.length; i++) {
+        if (table[i][xKey] === '' || table[i][yKey] === '' ||
+            table[i][xKey] === null || table[i][yKey] === null) {
+            continue;
+        }
+        chart[start++] = { x: table[i][xKey], y: table[i][yKey] };
+    }
+    while (chart.length !== start) {
+        chart.pop();
+    }
+    myChart.update(0);
 }
 
 /**
@@ -32,13 +32,13 @@ export function updateLine(table, myChart, dataSet=0, xKey='x', yKey='y') {
  *  @param form:    The form to be updated.
  */
 export function updateLabels(myChart, form) {
-  let labels = myChart.data.datasets[0].label;
-  for (let i = 1; i < myChart.data.datasets.length; i++) {
-      if (myChart.data.datasets[i].hidden === false && myChart.data.datasets[i].immutableLabel === false) {
-          labels += ', ' + myChart.data.datasets[i].label;
-      }
-  }
-  form.elements['data'].value = labels;
+    let labels = myChart.data.datasets[0].label;
+    for (let i = 1; i < myChart.data.datasets.length; i++) {
+        if (myChart.data.datasets[i].hidden === false && myChart.data.datasets[i].immutableLabel === false) {
+            labels += ', ' + myChart.data.datasets[i].label;
+        }
+    }
+    form.elements['data'].value = labels;
 }
 
 const rowHeights = 23;
@@ -50,21 +50,22 @@ const columnHeaderHeight = 26;
  *  @param table:   The Handsontable object whose height is to be updated.
  */
 export function updateTableHeight(table) {
-  let typeForm = document.getElementById('chart-type-form').clientHeight;
-  let inputDiv = document.getElementById('input-div').clientHeight;
-  let chartDiv = document.getElementById('chart-div').clientHeight;
-  let infoForm = document.getElementById('chart-info-form').clientHeight;
+    let typeForm = document.getElementById('chart-type-form').clientHeight;
+    let inputDiv = document.getElementById('input-div').clientHeight;
+    let chartDiv = document.getElementById('chart-div').clientHeight;
+    let infoForm = document.getElementById('chart-info-form').clientHeight;
 
-  let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
-  let maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
-  let height = table.countRows() * rowHeights + columnHeaderHeight + 5;
+    let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
+    let maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
+    let height = table.countRows() * rowHeights + columnHeaderHeight + 5;
 
-  if (height > maxHeight) {
-      height = maxHeight;
-  }
+    if (height > maxHeight) {
+        height = maxHeight;
+    }
 
-  table.updateSettings({stretchH: 'none',});
-  table.updateSettings({height: height,});
-  table.updateSettings({stretchH: 'all',
-  });
+    table.updateSettings({ stretchH: 'none', });
+    table.updateSettings({ height: height, });
+    table.updateSettings({
+        stretchH: 'all',
+    });
 }
