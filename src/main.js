@@ -7,7 +7,7 @@ import { dual } from "./chart-dual.js";
 import { moon } from "./chart-moon.js";
 import { scatter } from "./chart-scatter.js";
 import { venus } from "./chart-venus.js";
-import { variable } from "./chart-variable.js";
+import { variable, variableFileUpload } from "./chart-variable.js";
 
 /**
  *  Initializing the page when the website loads
@@ -37,28 +37,8 @@ window.onload = function () {
         });
     }
 
-    // Handling updated file
-    const fileUpload = document.getElementById('file-upload');
-    fileUpload.onchange = function () {
-        const file = this.files[0];
-        // File type validation
-        if (!file.type.match("(text/csv|application/vnd.ms-excel)") ||
-            !file.name.match(".*\.csv")) {
-            console.log(file.type);
-            console.log(file.name);
-            alert("Please upload a CSV file.");
-            return;
-        }
-        let reader = new FileReader();
-        reader.onload = () => {
-            let data = reader.result.split("\n");
-            let columns = data[0].split(",");
-
-        }
-        reader.readAsText(file);
-    }
-
     // Enabling CSV upload function
+    let fileUpload = this.document.getElementById('file-upload');
     document.getElementById('file-upload-button').onclick = function () {
         fileUpload.click();
     }
@@ -140,6 +120,9 @@ function chartType(chart) {
     } else {
         objects = variable();
         document.getElementById("file-upload-button").style.display = "inline";
+        document.getElementById("file-upload").onchange = function (evt) {
+            variableFileUpload(evt, objects[1], objects[0]);
+        }
     }
 
     updateTableHeight(objects[0]);
@@ -220,3 +203,4 @@ function updateChartInfo(myChart, form) {
     myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
     myChart.update(0);
 }
+

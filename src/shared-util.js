@@ -4,21 +4,21 @@
  *  This function takes the data in a dictionary object and updates a Chartjs object with the data. The
  *  dataset number for the Chartjs object and the keys for the x and y values are given in order to
  *  correctly update when there are multiple datasets in the Chartjs object or in the dictionary.
- *  @param table:   The dictionary object that provides data
+ *  @param tableData:   The dictionary object that provides data
  *  @param myChart: The Chartjs object
  *  @param dataSet: The number of line to be updated in the Chartjs object.
  *  @param xKey:    The key for x values in the dictionary.
  *  @param yKey:    The key for y values in the dictionary.
  */
-export function updateLine(table, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
+export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
-    for (let i = 0; i < table.length; i++) {
-        if (table[i][xKey] === '' || table[i][yKey] === '' ||
-            table[i][xKey] === null || table[i][yKey] === null) {
+    for (let i = 0; i < tableData.length; i++) {
+        if (tableData[i][xKey] === '' || tableData[i][yKey] === '' ||
+            tableData[i][xKey] === null || tableData[i][yKey] === null) {
             continue;
         }
-        chart[start++] = { x: table[i][xKey], y: table[i][yKey] };
+        chart[start++] = { x: tableData[i][xKey], y: tableData[i][yKey] };
     }
     while (chart.length !== start) {
         chart.pop();
