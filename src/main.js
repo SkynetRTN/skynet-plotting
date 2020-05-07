@@ -1,12 +1,13 @@
 'use strict';
 
-import { updateTableHeight } from "./shared-util.js"
-import { round } from "./my-math.js"
-import { curve } from "./chart-curve.js"
-import { dual } from "./chart-dual.js"
-import { moon } from "./chart-moon.js"
-import { scatter } from "./chart-scatter.js"
-import { venus } from "./chart-venus.js"
+import { updateTableHeight } from "./shared-util.js";
+import { round } from "./my-math.js";
+import { curve } from "./chart-curve.js";
+import { dual } from "./chart-dual.js";
+import { moon } from "./chart-moon.js";
+import { scatter } from "./chart-scatter.js";
+import { venus } from "./chart-venus.js";
+import { variable } from "./chart-variable.js";
 
 /**
  *  Initializing the page when the website loads
@@ -122,6 +123,7 @@ function chartType(chart) {
     document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML =
         '<canvas id="myChart" width="300" height="200"></canvas>\n';
+    document.getElementById("file-upload-button").style.display = "none";
 
     let objects;
 
@@ -133,8 +135,11 @@ function chartType(chart) {
         objects = scatter();
     } else if (chart === "venus") {
         objects = venus();
-    } else {
+    } else if (chart === "dual") {
         objects = dual();
+    } else {
+        objects = variable();
+        document.getElementById("file-upload-button").style.display = "inline";
     }
 
     updateTableHeight(objects[0]);
@@ -155,6 +160,7 @@ function chartType(chart) {
         updateChartInfo(objects[1], chartInfoForm);
     };
     updateChartInfo(objects[1], chartInfoForm);
+
 }
 
 /**

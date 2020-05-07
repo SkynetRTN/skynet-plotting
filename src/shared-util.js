@@ -41,15 +41,15 @@ export function updateLabels(myChart, form) {
     form.elements['data'].value = labels;
 }
 
-const rowHeights = 23;
-const columnHeaderHeight = 26;
-
 /**
  *  This function updates the height for the Handsontable object based on the number of rows it has.
  *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
  *  @param table:   The Handsontable object whose height is to be updated.
  */
 export function updateTableHeight(table) {
+    const rowHeights = 23;
+    const columnHeaderHeight = 26;
+
     let typeForm = document.getElementById('chart-type-form').clientHeight;
     let inputDiv = document.getElementById('input-div').clientHeight;
     let chartDiv = document.getElementById('chart-div').clientHeight;

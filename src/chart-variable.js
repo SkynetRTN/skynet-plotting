@@ -8,7 +8,7 @@ import { round } from "./my-math.js"
  *  Function for scatter chart.
  *  @returns {any[]}
  */
-export function scatter() {
+export function variable() {
 
 
     let tableData = [];
