@@ -11,6 +11,20 @@ h2 {
     font-size: 1.5em;
 }
 
+select {
+    border-radius: 10px;
+    border: 2px solid #E7E7E7;
+    -webkit-transition: all 0.1s;
+    transition: all 0.1s;
+    outline: none;
+    box-shadow: none;
+    padding: 3px;
+}
+
+select:hover {
+    background-color: #E7E7E7;
+}
+
 #chart-type-form select {
     width: 100%;
     margin-top: 0.7em;
@@ -60,13 +74,17 @@ label input:checked ~ span {
     opacity: 1;
 }
 
+label input:disabled ~ span {
+    opacity: 0.3; 
+}
+
 label:hover span {
     background-color: #E7E7E7;
     color: black;
     opacity: 1;
 }
 
-#moon-form .row {
+.row {
     margin-bottom: 0.5em;
 }
 
