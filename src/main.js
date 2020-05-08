@@ -40,6 +40,7 @@ window.onload = function () {
     // Enabling CSV upload function
     let fileUpload = this.document.getElementById('file-upload');
     document.getElementById('file-upload-button').onclick = function () {
+        fileUpload.value = null;
         fileUpload.click();
     }
 
