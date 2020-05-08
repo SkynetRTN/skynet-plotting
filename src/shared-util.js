@@ -32,10 +32,13 @@ export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = '
  *  @param form:    The form to be updated.
  */
 export function updateLabels(myChart, form) {
-    let labels = myChart.data.datasets[0].label;
-    for (let i = 1; i < myChart.data.datasets.length; i++) {
-        if (myChart.data.datasets[i].hidden === false && myChart.data.datasets[i].immutableLabel === false) {
-            labels += ', ' + myChart.data.datasets[i].label;
+    let labels = "";
+    for (let i = 0; i < myChart.data.datasets.length; i++) {
+        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
+            if (labels !== "") {
+                labels += ", ";
+            }
+            labels += myChart.data.datasets[i].label;
         }
     }
     form.elements['data'].value = labels;
