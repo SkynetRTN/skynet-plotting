@@ -1,12 +1,13 @@
 'use strict';
 
-import { updateTableHeight } from "./shared-util.js"
-import { round } from "./my-math.js"
-import { curve } from "./chart-curve.js"
-import { dual } from "./chart-dual.js"
-import { moon } from "./chart-moon.js"
-import { scatter } from "./chart-scatter.js"
-import { venus } from "./chart-venus.js"
+import { updateTableHeight } from "./shared-util.js";
+import { round } from "./my-math.js";
+import { curve } from "./chart-curve.js";
+import { dual } from "./chart-dual.js";
+import { moon } from "./chart-moon.js";
+import { scatter } from "./chart-scatter.js";
+import { venus } from "./chart-venus.js";
+import { variable, variableFileUpload } from "./chart-variable.js";
 
 /**
  *  Initializing the page when the website loads
@@ -24,16 +25,23 @@ window.onload = function () {
             value: function (callback, type, quality) {
                 let dataURL = this.toDataURL(type, quality).split(',')[1];
                 setTimeout(function () {
-                    let binStr = atob( dataURL ),
+                    let binStr = atob(dataURL),
                         len = binStr.length,
                         arr = new Uint8Array(len);
-                    for (let i = 0; i < len; i++ ) {
+                    for (let i = 0; i < len; i++) {
                         arr[i] = binStr.charCodeAt(i);
                     }
-                    callback( new Blob( [arr], {type: type || 'image/png'} ) );
+                    callback(new Blob([arr], { type: type || 'image/png' }));
                 });
             }
         });
+    }
+
+    // Enabling CSV upload function
+    let fileUpload = this.document.getElementById('file-upload');
+    document.getElementById('file-upload-button').onclick = function () {
+        fileUpload.value = null;
+        fileUpload.click();
     }
 
     // Enabling download function
@@ -41,11 +49,11 @@ window.onload = function () {
         let canvas = document.getElementById('myChart');
 
         // Create a dummy canvas
-        let destinationCanvas = document.createElement("canvas");
-        destinationCanvas.width = canvas.width;
-        destinationCanvas.height = canvas.height;
+        let destCanvas = document.createElement("canvas");
+        destCanvas.width = canvas.width;
+        destCanvas.height = canvas.height;
 
-        let destCtx = destinationCanvas.getContext('2d');
+        let destCtx = destCanvas.getContext('2d');
 
         // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
@@ -55,7 +63,7 @@ window.onload = function () {
         destCtx.drawImage(canvas, 0, 0);
 
         // Download the dummy canvas
-        destinationCanvas.toBlob(function (blob) {
+        destCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.jpg");
         }, 'image/jpeg', 0.3);
     };
@@ -64,11 +72,11 @@ window.onload = function () {
         let canvas = document.getElementById('myChart');
 
         // Create a dummy canvas
-        let destinationCanvas = document.createElement("canvas");
-        destinationCanvas.width = canvas.width;
-        destinationCanvas.height = canvas.height;
+        let destCanvas = document.createElement("canvas");
+        destCanvas.width = canvas.width;
+        destCanvas.height = canvas.height;
 
-        let destCtx = destinationCanvas.getContext('2d');
+        let destCtx = destCanvas.getContext('2d');
 
         // Create a rectangle with the desired color
         destCtx.fillStyle = "#FFFFFF";
@@ -78,9 +86,9 @@ window.onload = function () {
         destCtx.drawImage(canvas, 0, 0);
 
         // Download the dummy canvas
-        destinationCanvas.toBlob(function (blob) {
+        destCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.png");
-        });
+        }, 'image/png');
     };
 };
 
@@ -96,6 +104,7 @@ function chartType(chart) {
     document.getElementById('table-div').innerHTML = '';
     document.getElementById("chart-div").innerHTML =
         '<canvas id="myChart" width="300" height="200"></canvas>\n';
+    document.getElementById("file-upload-button").style.display = "none";
 
     let objects;
 
@@ -107,8 +116,14 @@ function chartType(chart) {
         objects = scatter();
     } else if (chart === "venus") {
         objects = venus();
-    } else {
+    } else if (chart === "dual") {
         objects = dual();
+    } else {
+        objects = variable();
+        document.getElementById("file-upload-button").style.display = "inline";
+        document.getElementById("file-upload").onchange = function (evt) {
+            variableFileUpload(evt, objects[0]);
+        }
     }
 
     updateTableHeight(objects[0]);
@@ -129,6 +144,7 @@ function chartType(chart) {
         updateChartInfo(objects[1], chartInfoForm);
     };
     updateChartInfo(objects[1], chartInfoForm);
+
 }
 
 /**
@@ -188,3 +204,4 @@ function updateChartInfo(myChart, form) {
     myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
     myChart.update(0);
 }
+
