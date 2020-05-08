@@ -468,12 +468,12 @@ function updateChart(myChart, ...dataIndices) {
     minY -= (maxY - minY) * marginRatio;
     maxY += (maxY - minY) * marginRatio;
 
-    myChart.options.scales.xAxes[0].ticks.min = minX;
-    myChart.options.scales.xAxes[0].ticks.max = maxX;
-    myChart.options.scales.xAxes[0].ticks.stepSize = (maxX - minX) / 12.6;
-    myChart.options.scales.yAxes[0].ticks.min = minY;
-    myChart.options.scales.yAxes[0].ticks.max = maxY;
-    myChart.options.scales.yAxes[0].ticks.stepSize = (maxY - minY) / 7;
+    // myChart.options.scales.xAxes[0].ticks.min = minX;
+    // myChart.options.scales.xAxes[0].ticks.max = maxX;
+    // myChart.options.scales.xAxes[0].ticks.stepSize = (maxX - minX) / 12.6;
+    // myChart.options.scales.yAxes[0].ticks.min = minY;
+    // myChart.options.scales.yAxes[0].ticks.max = maxY;
+    // myChart.options.scales.yAxes[0].ticks.stepSize = (maxY - minY) / 7;
 
     myChart.update(0);
 }
