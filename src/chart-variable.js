@@ -33,8 +33,6 @@ export function variable() {
         };
     }
 
-    let chartData = [];
-
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
@@ -54,10 +52,12 @@ export function variable() {
         data: {
             maxMJD: 0,
             minMJD: Number.POSITIVE_INFINITY,
+            fourier: false,
+            periodFolding: false,
             datasets: [
                 {
                     label: 'Sample1',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['blue'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -66,7 +66,7 @@ export function variable() {
                     hidden: false,
                 }, {
                     label: 'Sample2',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['red'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -75,7 +75,7 @@ export function variable() {
                     hidden: false,
                 }, {
                     label: 'Lightcurve',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['purple'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -84,16 +84,16 @@ export function variable() {
                     hidden: true,
                 }, {
                     label: 'Fourier',
-                    data: chartData,
-                    backgroundColor: colors['orange'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
+                    data: [],
+                    backgroundColor: colors['bright'],
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    pointBorderWidth: 0,
                     immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Period Folding',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['orange'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -155,10 +155,17 @@ export function variable() {
         let mode = variableForm.elements["mode"].value;
         if (mode === "lc") {
             showDiv("lightcurve-div");
+            updateChart(myChart, 2);
         } else if (mode === "ft") {
             showDiv("fourier-div");
+            if (myChart.data.fourier) {
+                updateChart(myChart, 3);
+            }
         } else {
             showDiv("period-folding-div");
+            if (myChart.data.periodFolding) {
+                updateChart(myChart, 4);
+            }
         }
         updateTableHeight(hot);
     }
@@ -229,6 +236,12 @@ function updateVariable(table, myChart) {
 
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
+    myChart.data.fourier = false;
+    myChart.data.periodFolding = false;
+    
+    for (let i = 0; i < 5; i++) {
+        myChart.data.datasets[i].data = [];
+    }
 
     let tableData = table.getData();
     let chartData = [];
@@ -274,7 +287,7 @@ function updateVariable(table, myChart) {
         }
     }
     updateChart(myChart, 0, 1);
-    
+
     let variableForm = document.getElementById("variable-form");
     variableForm.mode.value = "lc";
     variableForm.mode[1].disabled = true;
@@ -293,30 +306,31 @@ function updateVariable(table, myChart) {
  */
 function lightcurve(myChart) {
     console.log("lightcurve called");
-    let lcHTML = 
+    let lcHTML =
         '<form title="Lightcurve" id="lightcurve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6">Select Source: </div>\n' +
-        '<div class="col-sm-6"><select name="source" style="width: 100%;" title="Select Source">' +
+        '<div class="col-sm-6"><select name="source" style="width: 100%;" title="Select Source">\n' +
         '<option value="none" title="None" selected disabled>None</option>\n';
     for (let i = 0; i < 2; i++) {
         let label = myChart.data.datasets[i].label;
-        lcHTML += 
-            '<option value="' + label + 
-            '"title="' + label + 
+        lcHTML +=
+            '<option value="' + label +
+            '"title="' + label +
             '">' + label + '</option>\n';
     }
-    lcHTML += 
-        '</select></div></div>\n' +
+    lcHTML +=
+        '</select></div>\n' +
+        '</div>\n' +
         '<div class="row">\n' +
-            '<div class="col-sm-6">Reference Magnitude: </div>\n' +
-            '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="mag" title="Magnitude" value=0></input></div>\n' +
+        '<div class="col-sm-6">Reference Magnitude: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="mag" title="Magnitude" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
     document.getElementById('lightcurve-div').innerHTML = lcHTML;
     let variableForm = document.getElementById('variable-form');
     let lightcurveForm = document.getElementById('lightcurve-form');
-    lightcurveForm.onchange = function () {
+    lightcurveForm.oninput = function () {
         console.log("Selected sourche: ", this.source.value);
         console.log("Ref magnitude: ", [parseFloat(this.mag.value)]);
         if (this.source.value !== "none") {
@@ -345,18 +359,52 @@ function lightcurve(myChart) {
         }
     }
 
-    let fHTML = '';
+    let fHTML =
+        '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Start period: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=1></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Stop period: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=10></input></div>\n' +
+        '</div>\n' +
+        '</form>\n';
 
-    let pfHTML = 
+    document.getElementById("fourier-div").innerHTML = fHTML;
+    let fourierForm = document.getElementById("fourier-form");
+    fourierForm.oninput = function () {
+        let start = parseFloat(this.start.value);
+        let stop = parseFloat(this.stop.value);
+        if (start > stop) {
+            // alert("Please make sure the stop value is greater than the start value.");
+            return;
+        }
+        let fData = [];
+        const stepCount = 1000;
+        for (let i = 0; i < stepCount; i++) {
+            fData.push({
+                "x": (stop - start) / stepCount * i + start,
+                "y": Math.sin(Math.PI * (start - stop) / stepCount * i),
+            })
+        }
+
+        myChart.data.fourier = true;
+        myChart.data.datasets[3].data = fData;
+        updateChart(myChart, 3);
+    }
+
+    let pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6">Period Folding: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
+
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     let periodFoldingForm = document.getElementById("period-folding-form");
-    periodFoldingForm.onchange = function () {
+    periodFoldingForm.oninput = function () {
         let pf = parseFloat(this.pf.value);
         if (pf !== 0) {
             let datasets = myChart.data.datasets;
@@ -368,8 +416,13 @@ function lightcurve(myChart) {
                     "y": datasets[2].data[i]["y"],
                 });
             }
-            console.log(pfData);
+            // console.log(pfData);
+            myChart.data.periodFolding = true;
             myChart.data.datasets[4].data = pfData;
+            updateChart(myChart, 4);
+        } else {
+            myChart.data.periodFolding = true;
+            myChart.data.datasets[4].data = myChart.data.datasets[2].data;
             updateChart(myChart, 4);
         }
     }
@@ -382,8 +435,9 @@ function lightcurve(myChart) {
  * @param  {Number[]} dataIndex 
  */
 function updateChart(myChart, ...dataIndices) {
-    console.log("updateChart called");
-    console.log(dataIndices);
+    // console.log("updateChart called");
+    // console.log(dataIndices);
+
     let minX = Number.POSITIVE_INFINITY;
     let maxX = Number.NEGATIVE_INFINITY;
     let minY = Number.POSITIVE_INFINITY;
@@ -397,6 +451,9 @@ function updateChart(myChart, ...dataIndices) {
         myChart.data.datasets[dataIndex].hidden = false;
 
         let data = myChart.data.datasets[dataIndex].data;
+
+        // console.log(data);
+
         for (let i = 0; i < data.length; i++) {
             minX = Math.min(data[i].x, minX);
             maxX = Math.max(data[i].x, maxX);

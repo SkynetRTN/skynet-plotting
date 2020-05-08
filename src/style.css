@@ -18,7 +18,7 @@ select {
     transition: all 0.1s;
     outline: none;
     box-shadow: none;
-    padding: 3px;
+    padding: 2.6px;
 }
 
 select:hover {
@@ -29,9 +29,6 @@ select:hover {
     width: 100%;
     margin-top: 0.7em;
     margin-bottom: 1em;
-}
-
-#table-div {
 }
 
 p.caption {
