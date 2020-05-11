@@ -31,7 +31,7 @@ export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = '
  *  @param myChart: The Chartjs object
  *  @param form:    The form to be updated.
  */
-export function updateLabels(myChart, form) {
+export function updateLabels(myChart, form, immData = false, immTitle = false, immX = false, immY = false) {
     let labels = "";
     for (let i = 0; i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
@@ -41,7 +41,22 @@ export function updateLabels(myChart, form) {
             labels += myChart.data.datasets[i].label;
         }
     }
-    form.elements['data'].value = labels;
+    form.data.value = labels;
+
+    if (myChart.options.title.text) {
+        form.title.value = myChart.options.title.text;
+    }
+    if (myChart.options.scales.xAxes[0].scaleLabel.labelString) {
+        form.xAxis.value = myChart.options.scales.xAxes[0].scaleLabel.labelString;
+    }
+    if (myChart.options.scales.yAxes[0].scaleLabel.labelString) {
+        form.yAxis.value = myChart.options.scales.yAxes[0].scaleLabel.labelString;
+    }
+
+    form.data.disabled = immData;
+    form.title.disabled = immTitle;
+    form.xAxis.disabled = immX;
+    form.yAxis.disabled = immY;
 }
 
 /**
