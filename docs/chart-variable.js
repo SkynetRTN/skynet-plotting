@@ -13,12 +13,12 @@ export function variable() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="lc" checked><span>Lightcurve</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
         '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="ft" disabled><span>Fourier</span></label></div>\n' +
         '<div class="flex-item-grow0"><label><input type="radio" name="mode" value="pf" disabled><span>Period Folding</span></label></div>\n' +
         '</div>\n' +
         '</form>\n' +
-        '<div id="lightcurve-div"></div>\n' +
+        '<div id="light-curve-div"></div>\n' +
         '<div id="fourier-div"></div>\n' +
         '<div id="period-folding-div"></div>\n'
     );
@@ -26,23 +26,21 @@ export function variable() {
     let tableData = [];
     for (let i = 0; i < 14; i++) {
         tableData[i] = {
-            'id': i % 2 === 0 ? "Sample1" : "Sample2",
-            'mjd': i % 2 === 0 ? i * 10 + Math.random() * 10 - 5 : tableData[i - 1].mjd,
-            'mag': Math.random() * 20,
-            'error': Math.random() * 10 - 5,
+            'jd': i * 10 + Math.random() * 10 - 5,
+            'src1': Math.random() * 20,
+            'src2': Math.random() * 20,
         };
     }
 
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['ID', 'MJD', 'Mag', "Error"],
+        colHeaders: ['Julian Date', 'Sample1 Mag', 'Sample2 Mag'],
         maxCols: 3,
         columns: [
-            { data: 'id', type: 'text', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'mjd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'mag', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'error', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'src1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'src2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     }));
 
@@ -52,8 +50,6 @@ export function variable() {
         data: {
             maxMJD: 0,
             minMJD: Number.POSITIVE_INFINITY,
-            fourier: false,
-            periodFolding: false,
             datasets: [
                 {
                     label: 'Sample1',
@@ -62,7 +58,7 @@ export function variable() {
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
-                    immutableLabel: true,
+                    // immutableLabel: true,
                     hidden: false,
                 }, {
                     label: 'Sample2',
@@ -71,16 +67,16 @@ export function variable() {
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
-                    immutableLabel: true,
+                    // immutableLabel: true,
                     hidden: false,
                 }, {
-                    label: 'Lightcurve',
+                    label: 'Light Curve',
                     data: [],
                     backgroundColor: colors['purple'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
-                    immutableLabel: true,
+                    // immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Fourier',
@@ -89,7 +85,7 @@ export function variable() {
                     pointRadius: 3,
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
-                    immutableLabel: true,
+                    // immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Period Folding',
@@ -98,7 +94,7 @@ export function variable() {
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
-                    immutableLabel: true,
+                    // immutableLabel: true,
                     hidden: true,
                 }
             ]
@@ -145,30 +141,34 @@ export function variable() {
         afterCreateRow: update,
     });
 
-    updateVariable(hot, myChart);
-    updateLabels(myChart, document.getElementById('chart-info-form'));
-
-    updateTableHeight(hot);
-
+    lightCurve(myChart);
+    
     let variableForm = document.getElementById("variable-form");
     variableForm.onchange = function () {
         let mode = variableForm.elements["mode"].value;
         if (mode === "lc") {
-            showDiv("lightcurve-div");
-            updateChart(myChart, 2);
+            showDiv("light-curve-div");
+            let lightCurveForm = document.getElementById("light-curve-form");
+            lightCurveForm.oninput();
         } else if (mode === "ft") {
             showDiv("fourier-div");
-            if (myChart.data.fourier) {
-                updateChart(myChart, 3);
-            }
+            let fourierForm = document.getElementById("fourier-form");
+            fourierForm.oninput();
         } else {
             showDiv("period-folding-div");
-            if (myChart.data.periodFolding) {
-                updateChart(myChart, 4);
-            }
+            let periodFoldingForm = document.getElementById("period-folding-form");
+            periodFoldingForm.oninput();
         }
         updateTableHeight(hot);
     }
+    
+    myChart.options.title.text = "Variable"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+    
+    updateVariable(hot, myChart);
+    updateTableHeight(hot);
 
     return [hot, myChart];
 }
@@ -180,7 +180,7 @@ export function variable() {
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
  */
-export function variableFileUpload(evt, table) {
+export function variableFileUpload(evt, table, myChart) {
     console.log("variableFileUpload called");
     let file = evt.target.files[0];
 
@@ -204,24 +204,49 @@ export function variableFileUpload(evt, table) {
         // Need to trim because of weired end-of-line issues (potentially a Windows problem).
         let columns = data[0].trim().split(",");
 
-        let id = columns.indexOf("id");
-        let mjd = columns.indexOf("mjd");
-        let mag = columns.indexOf("mag");
-        let error = columns.indexOf("mag_error");
+        let id_col = columns.indexOf("id");
+        let mjd_col = columns.indexOf("mjd");
+        let mag_col = columns.indexOf("mag");
+
+        let src1 = data[1].split(",")[id_col];
+        let src2 = data[2].split(",")[id_col];
+
+        table.updateSettings({
+            colHeaders: ['Julian Date', src1 + " Mag", src2 + " Mag"],
+        })
 
         let tableData = [];
-        for (let i = 1; i < data.length; i++) {
-            let entry = data[i].split(",");
+        for (let i = 0; i < (data.length - 1) / 2; i++) {
+            let entry1 = data[i * 2 + 1].split(",");
+            let entry2 = data[i * 2 + 2].split(",");
+
+            let mjd1 = parseFloat(entry1[mjd_col]);
+            let mag1 = parseFloat(entry1[mag_col]);
+            let mag2 = parseFloat(entry2[mag_col]);
+            if (isNaN(mjd1) || isNaN(mag1) || isNaN(mag2)) {
+                continue;
+            }
             tableData.push({
-                "id": entry[id],
-                "mjd": parseFloat(entry[mjd]),
-                "mag": parseFloat(entry[mag]),
-                "error": parseFloat(entry[error]),
+                "jd": mjd1,
+                "src1": mag1,
+                "src2": mag2,
             });
         }
         table.updateSettings({ data: tableData });
     }
     reader.readAsText(file);
+    
+    myChart.data.datasets[0].label = src1;
+    myChart.data.datasets[1].label = src2;
+    
+    myChart.options.title.text = "Variable"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
+
+    lightCurve(myChart);
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+
+    // updateVariable(table, myChart);
 }
 
 /**
@@ -236,66 +261,41 @@ function updateVariable(table, myChart) {
 
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
-    myChart.data.fourier = false;
-    myChart.data.periodFolding = false;
     
     for (let i = 0; i < 5; i++) {
         myChart.data.datasets[i].data = [];
     }
 
     let tableData = table.getData();
-    let chartData = [];
-
-    let index = {};
-    let count = 0;
+    let src1Data = [];
+    let src2Data = [];
 
     for (let i = 0; i < tableData.length; i++) {
-        let id = tableData[i][0];
-        let mjd = parseFloat(tableData[i][1]);
-        let mag = parseFloat(tableData[i][2]);
-        if (id === '' || mjd === '' || mag === '' ||
-            id === null || mjd === null || mag === null ||
-            isNaN(mjd) || isNaN(mag)) {
-            continue;
-        }
-        // Need to explicitly compare to "undefined". If use "(!index[id])", index[id] = 0 will evaluate
-        // as if it is undefined.
-        if (index[id] === undefined) {
-            if (count === 2) {
-                // More than 2 sources, ignore.
-                continue;
-            }
-            index[id] = count++;
-            chartData.push({
-                "label": id,
-                "data": [],
-            });
-        }
-        chartData[index[id]].data.push({
-            "x": mjd,
-            "y": mag,
-        });
-        myChart.data.maxMJD = Math.max(myChart.data.maxMJD, mjd);
-        myChart.data.minMJD = Math.min(myChart.data.minMJD, mjd);
+        let jd = tableData[i][0];
+        let src1 = tableData[i][1];
+        let src2 = tableData[i][2];
+
+        myChart.data.minMJD = Math.min(myChart.data.minMJD, jd);
+        myChart.data.maxMJD = Math.min(myChart.data.maxMJD, jd);
+
+        src1Data.push({
+            "x": jd,
+            "y": src1,
+        })
+        src2Data.push({
+            "x": jd,
+            "y": src2,
+        })
     }
 
-    for (let i = 0; i < 4; i++) {
-        myChart.data.datasets[i].hidden = i >= count;
-        if (chartData[i]) {
-            myChart.data.datasets[i].label = chartData[i].label;
-            myChart.data.datasets[i].data = chartData[i].data;
-        }
-    }
+    myChart.data.datasets[0].data = src1Data;
+    myChart.data.datasets[1].data = src2Data;
+
     updateChart(myChart, 0, 1);
 
     let variableForm = document.getElementById("variable-form");
     variableForm.mode.value = "lc";
-    variableForm.mode[1].disabled = true;
-    variableForm.mode[2].disabled = true;
-
-    showDiv("lightcurve-div");
-
-    lightcurve(myChart);
+    variableForm.onchange();
 }
 
 /**
@@ -304,13 +304,13 @@ function updateVariable(table, myChart) {
  * DATA FLOW: chart[0], chart[1] -> chart[2]
  * @param myChart The chart object
  */
-function lightcurve(myChart) {
-    console.log("lightcurve called");
+function lightCurve(myChart) {
+    console.log("lightCurve called");
     let lcHTML =
-        '<form title="Lightcurve" id="lightcurve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Select Source: </div>\n' +
-        '<div class="col-sm-6"><select name="source" style="width: 100%;" title="Select Source">\n' +
+        '<div class="col-sm-7">Select Variable Star: </div>\n' +
+        '<div class="col-sm-5"><select name="source" style="width: 100%;" title="Select Source">\n' +
         '<option value="none" title="None" selected disabled>None</option>\n';
     for (let i = 0; i < 2; i++) {
         let label = myChart.data.datasets[i].label;
@@ -323,17 +323,17 @@ function lightcurve(myChart) {
         '</select></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Reference Magnitude: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="mag" title="Magnitude" value=0></input></div>\n' +
+        '<div class="col-sm-7">Reference Star Actual Mag: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="mag" title="Magnitude" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
-    document.getElementById('lightcurve-div').innerHTML = lcHTML;
+    document.getElementById('light-curve-div').innerHTML = lcHTML;
     let variableForm = document.getElementById('variable-form');
-    let lightcurveForm = document.getElementById('lightcurve-form');
-    lightcurveForm.oninput = function () {
-        console.log("Selected sourche: ", this.source.value);
-        console.log("Ref magnitude: ", [parseFloat(this.mag.value)]);
-        if (this.source.value !== "none") {
+    let lightCurveForm = document.getElementById('light-curve-form');
+    lightCurveForm.oninput = function () {
+        if (this.source.value === "none") {
+            updateChart(myChart, 0, 1);
+        } else {
             let datasets = myChart.data.datasets;
             let src, ref;
             if (this.source.value === datasets[0].label) {
@@ -355,19 +355,28 @@ function lightcurve(myChart) {
             variableForm.elements['mode'][2].disabled = false;
 
             myChart.data.datasets[2].data = lcData;
+            
+            for (let i = 2; i < 5; i++) {
+                myChart.data.datasets[i].label = "Variable Star Mag + (" + this.mag.value + " - Reference Star Mag)";
+            }
+            myChart.options.title.text = "Light Curve";
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
+            myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
+
             updateChart(myChart, 2);
+            updateLabels(myChart, document.getElementById('chart-info-form'), true);
         }
     }
 
     let fHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Start period: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=1></input></div>\n' +
+        '<div class="col-sm-7">Start period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=0.1></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Stop period: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=10></input></div>\n' +
+        '<div class="col-sm-7">Stop period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=1></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 
@@ -388,43 +397,52 @@ function lightcurve(myChart) {
                 "y": Math.sin(Math.PI * (start - stop) / stepCount * i),
             })
         }
-
-        myChart.data.fourier = true;
+        myChart.options.title.text = "Fourier Transform";
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (days)";
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
         myChart.data.datasets[3].data = fData;
+        
         updateChart(myChart, 3);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
     }
 
     let pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Period Folding: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
+        '<div class="col-sm-7">Folding Period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = function () {
-        let pf = parseFloat(this.pf.value);
-        if (pf !== 0) {
+        let period = parseFloat(this.pf.value);
+        if (period !== 0) {
             let datasets = myChart.data.datasets;
             let minMJD = myChart.data.minMJD;
             let pfData = [];
             for (let i = 0; i < datasets[2].data.length; i++) {
                 pfData.push({
-                    "x": floatMod(datasets[2].data[i]["x"] - minMJD, pf * 2) + minMJD,
-                    "y": datasets[2].data[i]["y"],
+                    "x": floatMod(datasets[2].data[i].x - minMJD, period) + minMJD,
+                    "y": datasets[2].data[i].y,
                 });
+                pfData.push({
+                    "x": pfData[pfData.length - 1].x + period,
+                    "y": pfData[pfData.length - 1].y,
+                })
             }
             // console.log(pfData);
-            myChart.data.periodFolding = true;
             myChart.data.datasets[4].data = pfData;
-            updateChart(myChart, 4);
         } else {
-            myChart.data.periodFolding = true;
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
-            updateChart(myChart, 4);
         }
+        myChart.options.title.text = "Period Folding";
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
+
+        updateChart(myChart, 4);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
 }
 
@@ -438,35 +456,40 @@ function updateChart(myChart, ...dataIndices) {
     // console.log("updateChart called");
     // console.log(dataIndices);
 
-    let minX = Number.POSITIVE_INFINITY;
-    let maxX = Number.NEGATIVE_INFINITY;
-    let minY = Number.POSITIVE_INFINITY;
-    let maxY = Number.NEGATIVE_INFINITY;
+    // let minX = Number.POSITIVE_INFINITY;
+    // let maxX = Number.NEGATIVE_INFINITY;
+    // let minY = Number.POSITIVE_INFINITY;
+    // let maxY = Number.NEGATIVE_INFINITY;
 
     for (let i = 0; i < 5; i++) {
         myChart.data.datasets[i].hidden = true;
     }
 
+    myChart.options.scales.yAxes[0].ticks.reverse = true;
+
     for (const dataIndex of dataIndices) {
         myChart.data.datasets[dataIndex].hidden = false;
-
-        let data = myChart.data.datasets[dataIndex].data;
-
-        // console.log(data);
-
-        for (let i = 0; i < data.length; i++) {
-            minX = Math.min(data[i].x, minX);
-            maxX = Math.max(data[i].x, maxX);
-            minY = Math.min(data[i].y, minY);
-            maxY = Math.max(data[i].y, maxY);
+        if (dataIndex === 3) {
+            myChart.options.scales.yAxes[0].ticks.reverse = false;
         }
+
+        // let data = myChart.data.datasets[dataIndex].data;
+
+        // // console.log(data);
+
+        // for (let i = 0; i < data.length; i++) {
+        //     minX = Math.min(data[i].x, minX);
+        //     maxX = Math.max(data[i].x, maxX);
+        //     minY = Math.min(data[i].y, minY);
+        //     maxY = Math.max(data[i].y, maxY);
+        // }
     }
 
-    const marginRatio = 0.2;
-    minX -= (maxX - minX) * marginRatio;
-    maxX += (maxX - minX) * marginRatio;
-    minY -= (maxY - minY) * marginRatio;
-    maxY += (maxY - minY) * marginRatio;
+    // const marginRatio = 0.2;
+    // minX -= (maxX - minX) * marginRatio;
+    // maxX += (maxX - minX) * marginRatio;
+    // minY -= (maxY - minY) * marginRatio;
+    // maxY += (maxY - minY) * marginRatio;
 
     // myChart.options.scales.xAxes[0].ticks.min = minX;
     // myChart.options.scales.xAxes[0].ticks.max = maxX;
@@ -475,15 +498,23 @@ function updateChart(myChart, ...dataIndices) {
     // myChart.options.scales.yAxes[0].ticks.max = maxY;
     // myChart.options.scales.yAxes[0].ticks.stepSize = (maxY - minY) / 7;
 
+
     myChart.update(0);
 }
 
 function showDiv(id) {
-    document.getElementById("lightcurve-div").hidden = true;
+    document.getElementById("light-curve-div").hidden = true;
     document.getElementById("fourier-div").hidden = true;
     document.getElementById("period-folding-div").hidden = true;
 
+    document.getElementById("table-div").hidden = true;
+    document.getElementById("add-row-button").hidden = true;
+
     document.getElementById(id).hidden = false;
+    if (id === "light-curve-div") {
+        document.getElementById("table-div").hidden = false;
+        document.getElementById("add-row-button").hidden = false;
+    }
 }
 
 function floatMod(a, b) {

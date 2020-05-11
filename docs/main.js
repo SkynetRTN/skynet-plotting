@@ -122,7 +122,7 @@ function chartType(chart) {
         objects = variable();
         document.getElementById("file-upload-button").style.display = "inline";
         document.getElementById("file-upload").onchange = function (evt) {
-            variableFileUpload(evt, objects[0]);
+            variableFileUpload(evt, objects[0], objects[1]);
         }
     }
 
