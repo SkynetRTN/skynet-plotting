@@ -144,7 +144,6 @@ export function curve() {
     });
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
-    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     lineForm.onchange = function () {
         myChart.options.scales.yAxes[0].ticks.reverse = lineForm.elements['magnitude'].checked;
@@ -174,6 +173,11 @@ export function curve() {
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'));
     };
+
+    myChart.options.title.text = "Curve"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "X";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Y";
+    updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
 }

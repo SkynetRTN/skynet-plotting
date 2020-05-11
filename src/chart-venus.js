@@ -52,7 +52,7 @@ export function venus() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Angular Diameter', 'Phase'],
+        colHeaders: ['Angular Diameter', 'Phase of Venus'],
         maxCols: 2,
         columns: [
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -156,6 +156,10 @@ export function venus() {
     // };
 
     updateLine(tableData, myChart);
+    
+    myChart.options.title.text = "Venus"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Angular Diameter";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Phase of Venus";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
