@@ -2,6 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
+import { round } from "./my-math.js"
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.
@@ -107,14 +108,19 @@ export function curve() {
                 mode: 'nearest'
             },
             legend: {
-                onClick: function (e) {
-                    e.stopPropagation();
-                },
                 labels: {
                     filter: function (legendItem, chartData) {
                         return !legendItem.hidden;
                     }
                 }
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+                               round(tooltipItem.yLabel, 2) + ')';
+                    },
+                },
             },
             scales: {
                 xAxes: [{

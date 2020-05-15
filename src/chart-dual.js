@@ -2,6 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
+import { round } from "./my-math.js"
 
 /**
  *  Function for two curves with independent x values.
@@ -75,6 +76,14 @@ export function dual() {
         options: {
             hover: {
                 mode: 'nearest'
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+                               round(tooltipItem.yLabel, 2) + ')';
+                    },
+                },
             },
             scales: {
                 xAxes: [{

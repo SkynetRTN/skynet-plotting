@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
-import { sqr, rad } from "./my-math.js"
+import { round, sqr, rad } from "./my-math.js"
 
 /**
  *  Function for comparing data points with both Heliocentric and geocentric models.
@@ -117,6 +117,14 @@ export function venus() {
                         return legendItem.datasetIndex !== 1;
                     }
                 }
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+                               round(tooltipItem.yLabel, 2) + ')';
+                    },
+                },
             },
             scales: {
                 xAxes: [{

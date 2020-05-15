@@ -89,6 +89,14 @@ export function moon() {
             hover: {
                 mode: 'nearest'
             },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem, data) {
+                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+                               round(tooltipItem.yLabel, 2) + ')';
+                    },
+                },
+            },
             scales: {
                 xAxes: [{
                     type: 'linear',

@@ -168,10 +168,10 @@ function initializeChart(chart, table) {
     chart.options.tooltips.callbacks.title = function (tooltipItems, data) {
         return null;
     };
-    chart.options.tooltips.callbacks.label = function (tooltipItem, data) {
-        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-            round(tooltipItem.yLabel, 2) + ')';
-    };
+    // chart.options.tooltips.callbacks.label = function (tooltipItem, data) {
+    //     return '(' + round(tooltipItem.xLabel, 2) + ', ' +
+    //         round(tooltipItem.yLabel, 2) + ')';
+    // };
 
     // Disable hiding datasets by clicking their label in the legends.
     chart.options.legend.onClick = function (e) {
