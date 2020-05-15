@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
-import { round } from "./my-math.js"
+import { round } from "./my-math.mjs"
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.

@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./shared-util.js"
-import { round } from "./my-math.js"
+import { round } from "./my-math.mjs"
 
 /**
  *  Function for scatter chart.

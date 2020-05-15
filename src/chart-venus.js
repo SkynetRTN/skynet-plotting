@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
-import { round, sqr, rad } from "./my-math.js"
+import { round, sqr, rad } from "./my-math.mjs"
 
 /**
  *  Function for comparing data points with both Heliocentric and geocentric models.

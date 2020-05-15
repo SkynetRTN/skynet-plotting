@@ -31,10 +31,10 @@ export function rad(degree) {
 
 export let ArrMath = {
     max: function (arr) {
-        return Math.max.apply(arr);
+        return Math.max.apply(null, arr);
     },
     min: function (arr) {
-        return Math.min.apply(arr);
+        return Math.min.apply(null, arr);
     },
     sum: function (arr) {
         return arr.reduce((acc, cur) => acc + cur, 0);
