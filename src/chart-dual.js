@@ -109,9 +109,9 @@ export function dual() {
     updateLine(tableData, myChart, 0, 'x1', 'y1');
     updateLine(tableData, myChart, 1, 'x2', 'y2');
 
-    myChart.options.title.text = "Dual"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "X";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Y";
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

@@ -165,9 +165,9 @@ export function venus() {
 
     updateLine(tableData, myChart);
     
-    myChart.options.title.text = "Venus"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Angular Diameter";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Phase of Venus";
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

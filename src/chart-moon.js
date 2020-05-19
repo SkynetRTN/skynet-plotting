@@ -155,9 +155,9 @@ export function moon() {
     updateLine(tableData, myChart);
     updateFormula(tableData, moonForm, myChart);
     
-    myChart.options.title.text = "Moon"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Angular Separation";
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

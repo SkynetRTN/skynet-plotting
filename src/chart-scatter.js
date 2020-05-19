@@ -90,9 +90,9 @@ export function scatter() {
 
     updateScatter(tableData, myChart);
     
-    myChart.options.title.text = "Scatter"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "X";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Y";
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
