@@ -400,11 +400,11 @@ function lightCurve(myChart) {
     let fHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Start period: </div>\n' +
+        '<div class="col-sm-7">Start Period: </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=0.1></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Stop period: </div>\n' +
+        '<div class="col-sm-7">Stop Period: </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=1></input></div>\n' +
         '</div>\n' +
         '</form>\n';
@@ -424,7 +424,7 @@ function lightCurve(myChart) {
         let tArray = lcData.map(entry => entry.x);
         let yArray = lcData.map(entry => entry.y);
 
-        fData = lombScargle(tArray, yArray, start, stop, 1000);
+        fData = lombScargle(tArray, yArray, start, stop, 2000);
 
         myChart.data.datasets[3].data = fData;
         
