@@ -197,9 +197,10 @@ function initializeChart(chart, table) {
 function updateChartInfo(myChart, form) {
     myChart.options.title.text = form.elements['title'].value;
     let labels = form.elements['data'].value.split(",").map(item => item.trim());
-    for (let i = 0; i < labels.length && i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].immutableLabel) {
-            myChart.data.datasets[i].label = labels[i];
+    let p = 0;
+    for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
+        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
+            myChart.data.datasets[i].label = labels[p++];
         }
     }
     myChart.options.scales.xAxes[0].scaleLabel.labelString = form.elements['xAxis'].value;

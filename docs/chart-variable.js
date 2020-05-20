@@ -363,6 +363,7 @@ function lightCurve(myChart) {
     lightCurveForm.oninput = function () {
         if (this.source.value === "none") {
             updateChart(myChart, 0, 1);
+            updateLabels(myChart, document.getElementById('chart-info-form'), true);
             variableForm.elements['mode'][1].disabled = true;
             variableForm.elements['mode'][2].disabled = true;
         } else {
