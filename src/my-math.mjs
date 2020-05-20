@@ -85,13 +85,13 @@ export let ArrMath = {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
             console.assert(arr1.length === arr2.length, 
                 "Error: Dimension mismatch when subtracting two arrays.");
-            return arr1.map((x, i) => x + arr2[i]);
+            return arr1.map((x, i) => x - arr2[i]);
         } else if (Array.isArray(arr1)) {
-            return arr1.map(x => x + arr2);
+            return arr1.map(x => x - arr2);
         } else if (Array.isArray(arr2)) {
-            return arr2.map(x => x + arr1);
+            return arr2.map(x => x - arr1);
         } else {
-            return arr1 + arr2;
+            return arr1 - arr2;
         }
     },
     dot: function (arr1, arr2) {
