@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./shared-util.js"
-import { round } from "./my-math.js"
+import { round, ArrMath } from "./my-math.mjs"
 
 /**
  *  Returns generated table and chart for variable.
@@ -14,7 +14,7 @@ export function variable() {
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
         '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="ft" disabled><span>Fourier</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
         '<div class="flex-item-grow0"><label><input type="radio" name="mode" value="pf" disabled><span>Period Folding</span></label></div>\n' +
         '</div>\n' +
         '</form>\n' +
@@ -48,8 +48,14 @@ export function variable() {
     let myChart = new Chart(ctx, {
         type: 'scatter',
         data: {
-            maxMJD: 0,
+            maxMJD: Number.NEGATIVE_INFINITY,
             minMJD: Number.POSITIVE_INFINITY,
+            customLabels: {
+                title: "Title",
+                x: "x",
+                y: "y",
+                lastMode: "Variable",
+            },
             datasets: [
                 {
                     label: 'Sample1',
@@ -100,13 +106,7 @@ export function variable() {
             ]
         },
         options: {
-            hover: {
-                mode: 'nearest'
-            },
             legend: {
-                onClick: function (e) {
-                    e.stopPropagation();
-                },
                 labels: {
                     filter: function (legendItem, chartData) {
                         return !legendItem.hidden;
@@ -116,8 +116,8 @@ export function variable() {
             tooltips: {
                 callbacks: {
                     label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                            round(tooltipItem.yLabel, 2) + ')';
+                        return '(' + round(tooltipItem.xLabel, 4) + ', ' +
+                               round(tooltipItem.yLabel, 4) + ')';
                     },
                 },
             },
@@ -144,6 +144,7 @@ export function variable() {
     lightCurve(myChart);
     
     let variableForm = document.getElementById("variable-form");
+    let customLabels = myChart.data.customLabels;
     variableForm.onchange = function () {
         let mode = variableForm.elements["mode"].value;
         if (mode === "lc") {
@@ -159,12 +160,31 @@ export function variable() {
             let periodFoldingForm = document.getElementById("period-folding-form");
             periodFoldingForm.oninput();
         }
+        if (mode === "ft") {
+            customLabels.title = myChart.options.title.text;
+            customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
+            customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
+            
+            myChart.options.title.text = "Periodogram";
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (days)";
+            myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
+            myChart.update(0);
+            updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
+        } else if (customLabels.lastMode === "ft") {
+            myChart.options.title.text = customLabels.title;
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = customLabels.x;
+            myChart.options.scales.yAxes[0].scaleLabel.labelString = customLabels.y;
+            myChart.update(0);
+            updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        }
+        customLabels.lastMode = mode;
+
         updateTableHeight(hot);
     }
     
-    myChart.options.title.text = "Variable"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
     
     updateVariable(hot, myChart);
@@ -179,6 +199,7 @@ export function variable() {
  * DATA FLOW: file -> table
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
+ * @param {Chartjs} myChart
  */
 export function variableFileUpload(evt, table, myChart) {
     console.log("variableFileUpload called");
@@ -199,10 +220,13 @@ export function variableFileUpload(evt, table, myChart) {
 
     let reader = new FileReader();
     reader.onload = () => {
-        let data = reader.result.split("\n");
+        let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
 
         // Need to trim because of weired end-of-line issues (potentially a Windows problem).
         let columns = data[0].trim().split(",");
+
+        console.log(data);
+        console.log(columns);
 
         let id_col = columns.indexOf("id");
         let mjd_col = columns.indexOf("mjd");
@@ -232,21 +256,30 @@ export function variableFileUpload(evt, table, myChart) {
                 "src2": mag2,
             });
         }
+        myChart.data.datasets[0].label = src1;
+        myChart.data.datasets[1].label = src2;
+        
+        let variableForm = document.getElementById("variable-form");
+        variableForm.elements['mode'][1].disabled = true;
+        variableForm.elements['mode'][2].disabled = true;
+
+        myChart.data.customLabels.title = "Title"
+        myChart.data.customLabels.x = "x";
+        myChart.data.customLabels.y = "y";
+
+        myChart.options.title.text = "Title"
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        
+        lightCurve(myChart);
+
+        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
+        // in turn trigger update to the variable form and the light curve form, which needs to be cleared
+        // prior to being triggered by this upload.
         table.updateSettings({ data: tableData });
     }
     reader.readAsText(file);
-    
-    myChart.data.datasets[0].label = src1;
-    myChart.data.datasets[1].label = src2;
-    
-    myChart.options.title.text = "Variable"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
-
-    lightCurve(myChart);
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
-
-    // updateVariable(table, myChart);
 }
 
 /**
@@ -311,7 +344,7 @@ function lightCurve(myChart) {
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Variable Star: </div>\n' +
         '<div class="col-sm-5"><select name="source" style="width: 100%;" title="Select Source">\n' +
-        '<option value="none" title="None" selected disabled>None</option>\n';
+        '<option value="none" title="None" selected>None</option>\n';
     for (let i = 0; i < 2; i++) {
         let label = myChart.data.datasets[i].label;
         lcHTML +=
@@ -333,6 +366,8 @@ function lightCurve(myChart) {
     lightCurveForm.oninput = function () {
         if (this.source.value === "none") {
             updateChart(myChart, 0, 1);
+            variableForm.elements['mode'][1].disabled = true;
+            variableForm.elements['mode'][2].disabled = true;
         } else {
             let datasets = myChart.data.datasets;
             let src, ref;
@@ -359,9 +394,6 @@ function lightCurve(myChart) {
             for (let i = 2; i < 5; i++) {
                 myChart.data.datasets[i].label = "Variable Star Mag + (" + this.mag.value + " - Reference Star Mag)";
             }
-            myChart.options.title.text = "Light Curve";
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
-            myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
 
             updateChart(myChart, 2);
             updateLabels(myChart, document.getElementById('chart-info-form'), true);
@@ -390,20 +422,16 @@ function lightCurve(myChart) {
             return;
         }
         let fData = [];
-        const stepCount = 1000;
-        for (let i = 0; i < stepCount; i++) {
-            fData.push({
-                "x": (stop - start) / stepCount * i + start,
-                "y": Math.sin(Math.PI * (start - stop) / stepCount * i),
-            })
-        }
-        myChart.options.title.text = "Fourier Transform";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (days)";
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
+
+        let lcData = myChart.data.datasets[2].data;
+        let tArray = lcData.map(entry => entry.x);
+        let yArray = lcData.map(entry => entry.y);
+
+        fData = lombScargle(tArray, yArray, start, stop, 1000);
+
         myChart.data.datasets[3].data = fData;
         
         updateChart(myChart, 3);
-        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
     }
 
     let pfHTML =
@@ -424,7 +452,7 @@ function lightCurve(myChart) {
             let pfData = [];
             for (let i = 0; i < datasets[2].data.length; i++) {
                 pfData.push({
-                    "x": floatMod(datasets[2].data[i].x - minMJD, period) + minMJD,
+                    "x": floatMod(datasets[2].data[i].x - minMJD, period),
                     "y": datasets[2].data[i].y,
                 });
                 pfData.push({
@@ -437,9 +465,6 @@ function lightCurve(myChart) {
         } else {
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
         }
-        myChart.options.title.text = "Period Folding";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Julian Date";
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = "Magnitude";
 
         updateChart(myChart, 4);
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
@@ -472,6 +497,9 @@ function updateChart(myChart, ...dataIndices) {
         if (dataIndex === 3) {
             myChart.options.scales.yAxes[0].ticks.reverse = false;
         }
+        if (dataIndex === 2) {
+            console.log(myChart.data.datasets[2].data);
+        }
 
         // let data = myChart.data.datasets[dataIndex].data;
 
@@ -500,6 +528,61 @@ function updateChart(myChart, ...dataIndices) {
 
 
     myChart.update(0);
+}
+
+function lombScargle(ts, ys, start, stop, steps = 1000) {
+    if (ts.length != ys.length) {
+        alert("Dimension mismatch between time array and value array.");
+        return;
+    }
+
+    console.log("ts, ys", ts, ys);
+    let step = (stop - start) / steps;
+
+    let spectralPowerDensity = [];
+
+    let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+    let hResidue = ArrMath.sub(ys, ArrMath.mean(ys));
+    console.log("yMean", ArrMath.mean(ys));
+    console.log("hResidue", hResidue);
+    let twoVarOfY = 2 * ArrMath.var(ys);
+
+    console.log("hResidue", hResidue);
+    console.log("2 * var(ys):", twoVarOfY);
+    
+    let period = start;
+
+    // for (let i = 0; i < steps; i++) {
+        // let frequency = (stop - start) / steps * i + start;
+
+    while (period < stop) {
+        let frequency = 1 / period;
+
+        let omega = 2.0 * Math.PI * frequency;
+        let twoOmegaT = ArrMath.mul(2 * omega, ts);
+        let tau = Math.atan2(ArrMath.sum(ArrMath.sin(twoOmegaT)), ArrMath.sum(ArrMath.cos(twoOmegaT))) / (2.0 * omega);
+        let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
+
+        // if (i === 500) {
+        //     console.log("Omega: ", omega);
+        //     console.log("twoOmegaT: ", twoOmegaT);
+        //     console.log("Tau: ", tau);
+        //     console.log("omegaTMinusTau: ", omegaTMinusTau);
+        //     console.log("frequency:", frequency);
+        // }
+
+        spectralPowerDensity.push({
+            x: period,
+            y: (( Math.pow( ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0) ) /
+                ( ArrMath.dot(ArrMath.cos(omegaTMinusTau)) ) +
+                ( Math.pow( ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0) ) /
+                ( ArrMath.dot(ArrMath.sin(omegaTMinusTau)) )) / twoVarOfY,
+        });
+
+        period += step;
+    }
+
+    return spectralPowerDensity;
 }
 
 function showDiv(id) {
