@@ -9,7 +9,7 @@ import { round, ArrMath } from "./my-math.mjs"
  *  @returns {[Handsontable, Chartjs]} Returns the table and the chart object.
  */
 export function variable() {
-    console.log("root func called");
+    // console.log("root func called");
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
@@ -202,7 +202,7 @@ export function variable() {
  * @param {Chartjs} myChart
  */
 export function variableFileUpload(evt, table, myChart) {
-    console.log("variableFileUpload called");
+    // console.log("variableFileUpload called");
     let file = evt.target.files[0];
 
     if (file === undefined) {
@@ -224,9 +224,6 @@ export function variableFileUpload(evt, table, myChart) {
 
         // Need to trim because of weired end-of-line issues (potentially a Windows problem).
         let columns = data[0].trim().split(",");
-
-        console.log(data);
-        console.log(columns);
 
         let id_col = columns.indexOf("id");
         let mjd_col = columns.indexOf("mjd");
@@ -290,7 +287,7 @@ export function variableFileUpload(evt, table, myChart) {
  * @param {Chartjs} myChart The chart object
  */
 function updateVariable(table, myChart) {
-    console.log("updateVariable called");
+    // console.log("updateVariable called");
 
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
@@ -338,7 +335,7 @@ function updateVariable(table, myChart) {
  * @param myChart The chart object
  */
 function lightCurve(myChart) {
-    console.log("lightCurve called");
+    // console.log("lightCurve called");
     let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
@@ -460,7 +457,6 @@ function lightCurve(myChart) {
                     "y": pfData[pfData.length - 1].y,
                 })
             }
-            // console.log(pfData);
             myChart.data.datasets[4].data = pfData;
         } else {
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
@@ -475,11 +471,10 @@ function lightCurve(myChart) {
  * This function set up the chart by hiding all unnecessary datasets, and then adjust the chart scaling
  * to fit the data to be displayed.
  * @param {Chartjs object} myChart 
- * @param  {Number[]} dataIndex 
+ * @param {Number[]} dataIndex 
  */
 function updateChart(myChart, ...dataIndices) {
     // console.log("updateChart called");
-    // console.log(dataIndices);
 
     // let minX = Number.POSITIVE_INFINITY;
     // let maxX = Number.NEGATIVE_INFINITY;
@@ -497,13 +492,8 @@ function updateChart(myChart, ...dataIndices) {
         if (dataIndex === 3) {
             myChart.options.scales.yAxes[0].ticks.reverse = false;
         }
-        if (dataIndex === 2) {
-            console.log(myChart.data.datasets[2].data);
-        }
 
         // let data = myChart.data.datasets[dataIndex].data;
-
-        // // console.log(data);
 
         // for (let i = 0; i < data.length; i++) {
         //     minX = Math.min(data[i].x, minX);
@@ -526,50 +516,41 @@ function updateChart(myChart, ...dataIndices) {
     // myChart.options.scales.yAxes[0].ticks.max = maxY;
     // myChart.options.scales.yAxes[0].ticks.stepSize = (maxY - minY) / 7;
 
-
     myChart.update(0);
 }
 
+/**
+ * This function computes the Lomb Scargle periodogram for a given set of time/observation data.
+ * @param {array(number)} ts The array of time values
+ * @param {array{number}} ys They array of observation values. The length of ys and ts must match
+ * @param {number}  start the starting period
+ * @param {number} stop the stopin period
+ * @param {number} steps number of steps between start and stop. Default is 1000.
+ */
 function lombScargle(ts, ys, start, stop, steps = 1000) {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return;
     }
 
-    console.log("ts, ys", ts, ys);
     let step = (stop - start) / steps;
 
     let spectralPowerDensity = [];
 
     let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
     let hResidue = ArrMath.sub(ys, ArrMath.mean(ys));
-    console.log("yMean", ArrMath.mean(ys));
-    console.log("hResidue", hResidue);
     let twoVarOfY = 2 * ArrMath.var(ys);
-
-    console.log("hResidue", hResidue);
-    console.log("2 * var(ys):", twoVarOfY);
     
     let period = start;
 
-    // for (let i = 0; i < steps; i++) {
-        // let frequency = (stop - start) / steps * i + start;
-
     while (period < stop) {
+        // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
         let frequency = 1 / period;
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
         let tau = Math.atan2(ArrMath.sum(ArrMath.sin(twoOmegaT)), ArrMath.sum(ArrMath.cos(twoOmegaT))) / (2.0 * omega);
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
-
-        // if (i === 500) {
-        //     console.log("Omega: ", omega);
-        //     console.log("twoOmegaT: ", twoOmegaT);
-        //     console.log("Tau: ", tau);
-        //     console.log("omegaTMinusTau: ", omegaTMinusTau);
-        //     console.log("frequency:", frequency);
-        // }
 
         spectralPowerDensity.push({
             x: period,
@@ -585,6 +566,10 @@ function lombScargle(ts, ys, start, stop, steps = 1000) {
     return spectralPowerDensity;
 }
 
+/**
+ * This function serves as a switch for the visibility of the control div's for the different modes.
+ * @param {str} id The name of the div to be displayed.
+ */
 function showDiv(id) {
     document.getElementById("light-curve-div").hidden = true;
     document.getElementById("fourier-div").hidden = true;
@@ -600,6 +585,11 @@ function showDiv(id) {
     }
 }
 
+/**
+ * This function computes the floating point modulo.
+ * @param {number} a The dividend
+ * @param {number} b The divisor
+ */
 function floatMod(a, b) {
     while (a > b) {
         a -= b;
