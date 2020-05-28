@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight } from "./shared-util.js"
-import { round, sqr, rad } from "./my-math.mjs"
+import { round, sqr, rad } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.

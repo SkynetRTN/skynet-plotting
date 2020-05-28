@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./shared-util.js"
-import { round, ArrMath } from "./my-math.mjs"
+import { round, ArrMath } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for variable.
