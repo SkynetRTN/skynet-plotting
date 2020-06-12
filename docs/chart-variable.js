@@ -253,6 +253,8 @@ export function variableFileUpload(evt, table, myChart) {
                 "src2": mag2,
             });
         }
+        tableData.sort((a, b) => a.jd - b.jd);
+
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
         
