@@ -8,6 +8,7 @@ import { moon } from "./chart-moon.js";
 import { scatter } from "./chart-scatter.js";
 import { venus } from "./chart-venus.js";
 import { variable, variableFileUpload } from "./chart-variable.js";
+import { spectrum, spectrumFileUpload } from "./chart-spectrum.js";
 
 /**
  *  Initializing the page when the website loads
@@ -40,6 +41,8 @@ window.onload = function () {
     // Enabling CSV upload function
     let fileUpload = this.document.getElementById('file-upload');
     document.getElementById('file-upload-button').onclick = function () {
+        // Clearing the file upload API first by setting it to null, so that uploading actions are 
+        // always triggered even if the same file is uploaded again.
         fileUpload.value = null;
         fileUpload.click();
     }
@@ -120,11 +123,17 @@ function chartType(chart) {
         objects = venus();
     } else if (chart === "dual") {
         objects = dual();
-    } else {
+    } else if (chart === "variable") {
         objects = variable();
         document.getElementById("file-upload-button").style.display = "inline";
         document.getElementById("file-upload").onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1]);
+        }
+    } else {
+        objects = spectrum();
+        document.getElementById("file-upload-button").style.display = "inline";
+        document.getElementById("file-upload").onchange = function (evt) {
+            spectrumFileUpload(evt, objects[0], objects[1]);
         }
     }
 
