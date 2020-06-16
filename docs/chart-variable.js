@@ -35,7 +35,7 @@ export function variable() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Julian Date', 'Sample1 Mag', 'Sample2 Mag'],
+        colHeaders: ['Julian Date', 'Source1 Mag', 'Source2 Mag'],
         maxCols: 3,
         columns: [
             { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -58,7 +58,7 @@ export function variable() {
             },
             datasets: [
                 {
-                    label: 'Sample1',
+                    label: 'Source 1',
                     data: [],
                     backgroundColor: colors['blue'],
                     pointRadius: 6,
@@ -67,7 +67,7 @@ export function variable() {
                     // immutableLabel: true,
                     hidden: false,
                 }, {
-                    label: 'Sample2',
+                    label: 'Source 2',
                     data: [],
                     backgroundColor: colors['red'],
                     pointRadius: 6,

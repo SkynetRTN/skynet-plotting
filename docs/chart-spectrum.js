@@ -10,8 +10,8 @@ export function spectrum() {
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Channel: </div>\n' +
         '<div class="col-sm-5"><select name="channel" style="width: 100%;" title="Select Channel">\n' +
-        '<option value="x" title="XX1" selected>XX1</option>\n' +
-        '<option value="y" title="YY1">YY1</option>' +
+        '<option value="x" title="Channel 1" selected>Channel 1</option>\n' +
+        '<option value="y" title="Channel 2">Channel 2</option>' +
         '</div>'
     );
     
@@ -28,7 +28,7 @@ export function spectrum() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Wave Length', 'XX1', 'YY1'],
+        colHeaders: ['Wavelength', 'Channel 1', 'Channel 2'],
         maxCols: 3,
         columns: [
             { data: 'wl', type: 'numeric', numericFormat: { pattern: { mantissa: 4 } } },
@@ -43,7 +43,7 @@ export function spectrum() {
         data: {
             datasets: [
                 {
-                    label: 'XX1',
+                    label: 'Channel 1',
                     data: [],
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
@@ -52,7 +52,7 @@ export function spectrum() {
                     fill: false,
                     hidden: false,
                 }, {
-                    label: 'YY1',
+                    label: 'Channel 2',
                     data: [],
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
@@ -110,10 +110,12 @@ export function spectrum() {
             myChart.data.datasets[1].hidden = false;
         }
         myChart.update(0);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     return [hot, myChart];
 }
@@ -144,6 +146,10 @@ function updateSpectrum(table, myChart) {
 
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
+
+    let spectrumForm = document.getElementById("spectrum-form");
+    spectrumForm.elements["channel"].selectedIndex = 0;
+    spectrumForm.onchange();
 
     myChart.update(0);
 }
@@ -208,12 +214,12 @@ export function spectrumFileUpload(evt, table, myChart) {
     reader.readAsText(file);
 }
 
+const c = 299792458;
 /**
  * This function converts a specific light wave's frequency, in MHz, to its corresponding wavelength, in cm.
  * @param {number} freq The frequency of the light in MHz
  */
 function freqToWL(freq) {
-    const c = 3e8;
     return c / (freq * 1e4);
 }
 
@@ -222,6 +228,5 @@ function freqToWL(freq) {
  * @param {number} wl The wavelength of the light in centimeters
  */
 function wlToFreq(wl) {
-    const c = 3e8;
     return c / (wl * 1e4)
 }
