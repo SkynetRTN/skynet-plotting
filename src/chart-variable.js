@@ -210,7 +210,7 @@ export function variableFileUpload(evt, table, myChart) {
     }
 
     // File type validation
-    if (!file.type.match("(text/csv|application/vnd.ms-excel)") ||
+    if (!file.type.match("(text/csv|application/vnd.ms-excel)") &&
         !file.name.match(".*\.csv")) {
         console.log("Uploaded file type is: ", file.type);
         console.log("Uploaded file name is: ", file.name);
