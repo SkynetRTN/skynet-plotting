@@ -229,30 +229,44 @@ export function variableFileUpload(evt, table, myChart) {
         let mjd_col = columns.indexOf("mjd");
         let mag_col = columns.indexOf("mag");
 
-        let src1 = data[1].split(",")[id_col];
-        let src2 = data[2].split(",")[id_col];
+        let srcs = new Map();
+        for (let i = 1; i < data.length; i++) {
+            let entry = data[i].trim().split(',');
+            if (!srcs.has(entry[id_col])) {
+                srcs.set(entry[id_col], new Map());
+            }
+            srcs.get(entry[id_col]).set(entry[mjd_col], entry[mag_col]);
+        }
+
+        const itr = srcs.keys();
+        let src1 = itr.next().value;
+        let src2 = itr.next().value;
+        
+        if (!src1 || !src2) {
+            alert("Less than two sources are detected in the uploaded file.");
+            return;
+        }
 
         table.updateSettings({
             colHeaders: ['Julian Date', src1 + " Mag", src2 + " Mag"],
         })
 
         let tableData = [];
-        for (let i = 0; i < (data.length - 1) / 2; i++) {
-            let entry1 = data[i * 2 + 1].split(",");
-            let entry2 = data[i * 2 + 2].split(",");
 
-            let mjd1 = parseFloat(entry1[mjd_col]);
-            let mag1 = parseFloat(entry1[mag_col]);
-            let mag2 = parseFloat(entry2[mag_col]);
-            if (isNaN(mjd1) || isNaN(mag1) || isNaN(mag2)) {
+        for (const date of srcs.get(src1).keys()) {
+            let mjd = parseFloat(date);
+            let mag1 = parseFloat(srcs.get(src1).get(date));
+            let mag2 = parseFloat(srcs.get(src2).get(date));
+            if (isNaN(mjd) || isNaN(mag1) || isNaN(mag2)) {
                 continue;
             }
             tableData.push({
-                "jd": mjd1,
+                "jd": mjd,
                 "src1": mag1,
-                "src2": mag2,
+                "src2": mag2
             });
         }
+
         tableData.sort((a, b) => a.jd - b.jd);
 
         myChart.data.datasets[0].label = src1;
