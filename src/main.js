@@ -47,53 +47,54 @@ window.onload = function () {
         fileUpload.click();
     }
 
-    // Enabling download function
-    document.getElementById('save-button').onclick = function () {
-        let canvas = document.getElementById('myChart');
-
-        // Create a dummy canvas
-        let destCanvas = document.createElement("canvas");
-        destCanvas.width = canvas.width;
-        destCanvas.height = canvas.height;
-
-        let destCtx = destCanvas.getContext('2d');
-
-        // Create a rectangle with the desired color
-        destCtx.fillStyle = "#FFFFFF";
-        destCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the original canvas onto the destination canvas
-        destCtx.drawImage(canvas, 0, 0);
-
-        // Download the dummy canvas
-        destCanvas.toBlob(function (blob) {
-            saveAs(blob, "chart.jpg");
-        }, 'image/jpeg', 0.3);
+    // Enabling download function. Will trigger Honor Code Pledge interface before
+    //  students are allowed to download images.
+    document.getElementById('pledge-signed').onclick = () => {
+        let signature = document.getElementById('honor-pledge-form').elements['signature'].value;
+        if (signature === null || signature === '') {
+            document.getElementById('no-signature-alert').style.display = "block";
+        } else {
+            console.log($('#honor-pledge-modal'));
+            document.getElementById('no-signature-alert').style.display = "none";
+            // jQuery is required for this line of bootstrap functionality to work
+            $('#honor-pledge-modal').modal('hide');
+            saveImage("myChart", signature, true, 1.0);
+        }
     };
 
-    document.getElementById('save-png').onclick = function () {
-        let canvas = document.getElementById('myChart');
+    document.getElementById('save-button').onclick = () => {
+        document.getElementById('no-signature-alert').style.display = "none";
+    }
+};
 
-        // Create a dummy canvas
-        let destCanvas = document.createElement("canvas");
-        destCanvas.width = canvas.width;
-        destCanvas.height = canvas.height;
+function saveImage(canvasID, signature, jpg=true, quality=1.0) {
+    let canvas = document.getElementById(canvasID);
 
-        let destCtx = destCanvas.getContext('2d');
+    // Create a dummy canvas
+    let destCanvas = document.createElement("canvas");
+    destCanvas.width = canvas.width;
+    destCanvas.height = canvas.height;
 
-        // Create a rectangle with the desired color
-        destCtx.fillStyle = "#FFFFFF";
-        destCtx.fillRect(0, 0, canvas.width, canvas.height);
+    let destCtx = destCanvas.getContext('2d');
 
-        // Draw the original canvas onto the destination canvas
-        destCtx.drawImage(canvas, 0, 0);
+    // Create a rectangle with the desired color
+    destCtx.fillStyle = "#FFFFFF";
+    destCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Download the dummy canvas
+    // Draw the original canvas onto the destination canvas
+    destCtx.drawImage(canvas, 0, 0);
+
+    // Download the dummy canvas
+    if (jpg) {
+        destCanvas.toBlob(function (blob) {
+            saveAs(blob, "chart.jpg");
+        }, 'image/jpeg', quality);
+    } else {
         destCanvas.toBlob(function (blob) {
             saveAs(blob, "chart.png");
         }, 'image/png');
-    };
-};
+    }
+}
 
 /**
  *  This function runs once each time the type of the chart changes. It resets various parts of the page

@@ -68,8 +68,34 @@
         <input type="file" id="file-upload" style="display: none;">
       </div>
       <div class="col-lg-8 right-column">
-        <div><button id="save-png">Save PNG (Better Quality)</button>
-          <button id="save-button">Save JPG (Smaller Size)</button></div>
+          <button id="save-button" data-toggle="modal" data-target="#honor-pledge-modal">Save Image</button></div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="honor-pledge-modal" tabindex="-1" role="dialog" aria-labelledby="honor-pledge-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="honor-pledge-title">Honor Code Pledge</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="honor-pledge-form">
+              <p>REQUICED FOR RECEIVING CREDIT</p>
+              <p>Sign your name to attest to the fact that you made this graph yourself:</p>
+              <input type="text" class="field" title="Sing your name here" name="signature">
+            </form>
+          </div>
+          <div class="modal-footer" style="flex-direction: row-reverse; justify-content: space-between">
+            <button id="pledge-signed">Save Image</button>
+            <div id="no-signature-alert" class="alert alert-warning" role="alert" style="display: none;">
+              Please make sure to sign your name.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -87,7 +113,7 @@
     integrity="sha256-Z4iyG88gEZg+f1DRxNl1R9p585JurbB7UDgfid51Ty8=" crossorigin="anonymous"></script>
   <script type="module" src="main.js"></script>
   <script defer>
-    // Following code for detecting IE
+    // If IE is detected, show the unsupported message.
     let version = detectIE();
     if (version !== false) {
       if (version < 12) {
