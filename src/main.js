@@ -1,6 +1,6 @@
 'use strict';
 
-import { updateTableHeight } from "./shared-util.js";
+import { updateTableHeight, getDateString, dataURLtoBlob } from "./util.js";
 import { round } from "./my-math.js";
 import { curve } from "./chart-curve.js";
 import { dual } from "./chart-dual.js";
@@ -54,7 +54,6 @@ window.onload = function () {
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = "block";
         } else {
-            console.log($('#honor-pledge-modal'));
             document.getElementById('no-signature-alert').style.display = "none";
             // jQuery is required for this line of bootstrap functionality to work
             $('#honor-pledge-modal').modal('hide');
@@ -85,15 +84,19 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
     destCtx.drawImage(canvas, 0, 0);
 
     // Download the dummy canvas
-    if (jpg) {
-        destCanvas.toBlob(function (blob) {
-            saveAs(blob, "chart.jpg");
-        }, 'image/jpeg', quality);
-    } else {
-        destCanvas.toBlob(function (blob) {
-            saveAs(blob, "chart.png");
-        }, 'image/png');
-    }
+    let exifImage = addEXIFToImage(destCanvas.toDataURL("image/jpeg", 1.0), signature);
+    saveAs(dataURLtoBlob(exifImage), "chart.jpg");
+}
+
+function addEXIFToImage(jpegData, signature) {
+    let zeroth = {};
+    let exif = {};
+    zeroth[piexif.ImageIFD.Artist] = signature;
+    exif[piexif.ExifIFD.DateTimeOriginal] = getDateString();
+    
+    let exifObj = { "0th":zeroth, "Exif":exif };
+    let exifBytes = piexif.dump(exifObj);
+    return piexif.insert(exifBytes, jpegData);
 }
 
 /**
