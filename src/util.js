@@ -87,3 +87,38 @@ export function updateTableHeight(table) {
         stretchH: 'all',
     });
 }
+
+// Credits: https://stackoverflow.com/a/30407959/1154380
+export function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+
+/**
+ * Get the current date in the format of "YYYY:MM:DD HH:MM:SS"
+ */
+export function getDateString() {
+    let date = new Date();
+    let year = '' + date.getFullYear();
+    let month = dateAppendZero(date.getMonth());
+    let days = dateAppendZero(date.getDate());
+
+    let hour = dateAppendZero(date.getHours());
+    let minute = dateAppendZero(date.getMinutes());
+    let second = dateAppendZero(date.getSeconds());
+
+    return year + ':' + month + ':' + days + ' ' + hour + ':' + minute + ':' + second;
+}
+
+/**
+ * Pre-fix a number with '0' if it is less then 10. Otherwise just convert it to string.
+ * @param num: A number between 1 and 99.
+ * @returns two-character string containing the number and a leading 0 if necessary.
+ */
+function dateAppendZero(num) {
+    return num < 10 ? '0' + num : '' + num;
+}

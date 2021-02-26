@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./shared-util.js"
+import { updateLabels, updateTableHeight } from "./util.js"
 import { round } from "./my-math.js"
 
 /**
