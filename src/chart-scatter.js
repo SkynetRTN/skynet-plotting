@@ -9,6 +9,23 @@ import { round } from "./my-math.js"
  *  @returns {any[]}
  */
 export function scatter() {
+    document.getElementById('input-div').insertAdjacentHTML('beforeend',
+        '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Center (X): </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="x" title="Center (X)" value=0></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Center (Y): </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="y" title="Center (Y)" value=0></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Radius: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="r" title="Radius" value=5></input></div>\n' +
+        '</div>\n' +
+        '</form>\n'
+    );
+
     let tableData = [];
     for (let i = 0; i < 17; i++) {
         tableData[i] = {
@@ -53,12 +70,32 @@ export function scatter() {
                     pointHoverRadius: 12,
                     pointBorderWidth: 2,
                     immutableLabel: true,
-                },
+                }, {
+                    pointStyle: 'crossRot',
+                    data: [{ x: 0, y: 0 }],
+                    borderWidth: 3,
+                    immutableLabel: true,
+                    pointRadius: 15,
+                }, {
+                    data: [{ x: 0, y: 0 }],
+                    pointRadius: 60,
+                    pointBorderWidth: 2,
+                    immutableLabel: true,
+                    borderColor: colors['gray'],
+                    backgroundColor: colors['white-0']
+                }
             ],
         },
         options: {
             hover: {
                 mode: 'nearest'
+            },
+            legend: {
+                labels: {
+                    filter: function (legendItem, chartData) {
+                        return legendItem.datasetIndex <= 1;
+                    }
+                }
             },
             tooltips: {
                 callbacks: {
