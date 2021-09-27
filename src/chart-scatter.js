@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./util.js"
-import { round } from "./my-math.js"
+import { rad, round } from "./my-math.js"
 
 /**
  *  Function for scatter chart.
@@ -36,6 +36,7 @@ export function scatter() {
     }
 
     let chartData = [];
+    let circleData = [];
 
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
@@ -51,13 +52,15 @@ export function scatter() {
 
     let ctx = document.getElementById("myChart").getContext('2d');
     let myChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'line',
         data: {
             datasets: [
                 {
                     label: 'Data',
                     data: chartData,
                     backgroundColor: colors['orange'],
+                    fill: false,
+                    showLine: false,
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
@@ -66,6 +69,8 @@ export function scatter() {
                     label: 'Sun',
                     data: [{ x: 0, y: 0 }],
                     backgroundColor: colors['bright'],
+                    fill: false,
+                    showLine: false,
                     pointRadius: 10,
                     pointHoverRadius: 12,
                     pointBorderWidth: 2,
@@ -73,12 +78,15 @@ export function scatter() {
                 }, {
                     pointStyle: 'crossRot',
                     data: [{ x: 0, y: 0 }],
-                    borderWidth: 3,
+                    fill: false,
+                    showLine: false,
+                    borderWidth: 5,
                     immutableLabel: true,
-                    pointRadius: 15,
+                    pointRadius: 10,
+                    pointHoverRadius: 12,
                 }, {
-                    data: [{ x: 0, y: 0 }],
-                    pointRadius: 60,
+                    data: circle(0, 0, 5),
+                    pointRadius: 0,
                     pointBorderWidth: 2,
                     immutableLabel: true,
                     borderColor: colors['gray'],
@@ -124,6 +132,17 @@ export function scatter() {
         afterRemoveRow: update,
         afterCreateRow: update,
     });
+
+    // Link the form to chart
+    let scatterForm = document.getElementById("scatter-form");
+    scatterForm.oninput = function () {
+        let x = parseInt(scatterForm.elements['x'].value);
+        let y = parseInt(scatterForm.elements['y'].value);
+        let r = parseInt(scatterForm.elements['r'].value);
+        myChart.data.datasets[2].data = [{ x: x, y: y}];
+        myChart.data.datasets[3].data = circle(x, y, r);
+        myChart.update(0);
+    }
 
     updateScatter(tableData, myChart);
     
@@ -173,13 +192,28 @@ function updateScatter(table, myChart) {
         chart.pop();
     }
 
+    adjustScale(myChart, minX, maxX, minY, maxY, false);
+}
+
+/**
+ * Adjust the min/max scales of the chart by given new min/max values.
+ * @param {Chart.js object} myChart The chart to be updated
+ * @param {number} minX 
+ * @param {number} maxX 
+ * @param {number} minY 
+ * @param {number} maxY 
+ * @param {boolean} suggested       Default is false. If true, min/max values won't be
+ * updated if new values are greater (for min) or less (for max) than the existing values.
+ */
+function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
+    // Adjusting the min/max values to avoid having data points on the very edge
     minX -= 3;
     maxX += 3;
     minY -= 3;
     maxY += 3;
 
     // This is the ratio of the length of X axis over the length of Y axis
-    const screenRatio = 1.8;
+    const screenRatio = 1.9;
     let dataRatio = (maxX - minX) / (maxY - minY);
 
     if (dataRatio < screenRatio) {
@@ -194,6 +228,13 @@ function updateScatter(table, myChart) {
         minY = m - d * dataRatio / screenRatio;
     }
 
+    if (suggested) {
+        minX = Math.min(minX, myChart.options.scales.xAxes[0].ticks.min);
+        maxX = Math.max(maxX, myChart.options.scales.xAxes[0].ticks.max);
+        minY = Math.min(minY, myChart.options.scales.yAxes[0].ticks.min);
+        maxY = Math.max(maxY, myChart.options.scales.yAxes[0].ticks.max);
+    }
+
     myChart.options.scales.xAxes[0].ticks.min = Math.floor(minX);
     myChart.options.scales.xAxes[0].ticks.max = Math.ceil(maxX);
     myChart.options.scales.yAxes[0].ticks.min = Math.floor(minY);
@@ -202,4 +243,31 @@ function updateScatter(table, myChart) {
     myChart.options.scales.yAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
 
     myChart.update(0);
+}
+
+/**
+ * Generator function for the circle with specificed x, y and radius
+ * @param {number} x        x-coordinate of the center of circle
+ * @param {number} y        y-coordinate of the centor of circle
+ * @param {number} radius   radius of the circle
+ * @param {number} steps    Number of points to generate. Default is 500
+ * @returns {Array}         An array of points
+ */
+function circle(x, y, radius, steps = 500) {
+    let data = [];
+
+    let step = 2 * Math.PI / steps;
+    for (let i = 0; i < steps; i++) {
+        data.push({
+            x: x + Math.cos(step * i) * radius,
+            y: y + Math.sin(step * i) * radius
+        });
+    }
+    // Add a redundant point to complete the circle.
+    data.push({
+        x: x + radius,
+        y: y
+    })
+
+    return data;
 }
