@@ -43,7 +43,6 @@ export function moon() {
     let tableData = generateMoonData();
 
     let chartData = [];
-    let formula = [];
 
     // create table
     let container = document.getElementById('table-div');
@@ -74,7 +73,7 @@ export function moon() {
                     immutableLabel: false,
                 }, {
                     label: 'Model',
-                    data: formula,
+                    data: null, // will be generated later
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
