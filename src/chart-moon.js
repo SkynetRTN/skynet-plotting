@@ -124,30 +124,33 @@ export function moon() {
     });
 
     /**
-     *  This part of code limits the maximum fps of the chart to change, so that it
+     *  This part of code (throttle) limits the maximum fps of the chart to change, so that it
      *  is possible to increase the sampling precision without hindering performance.
      */
-    let lastChange = Date.now();
-    let lock = false;
+    let changed = false;        // Indicates whether a change occurred while waiting for lock
+    let lock = false;           // Lock for throttle
 
-    let fps = 60;
+    let fps = 100;
     let frameTime = Math.floor(1000 / fps);
+
+    let callback = () => {
+        if (changed) {
+            changed = false;
+            updateFormula(tableData, moonForm, myChart);
+            setTimeout(callback, frameTime);
+        } else {
+            lock = false;
+        }
+    }
 
     // link chart to input form (slider + text)
     moonForm.oninput = function () {
-        if (Date.now() - lastChange > frameTime) {
-            // Immediate update.
-            updateFormula(tableData, moonForm, myChart);
-            lock = false;
-            lastChange = Date.now();
-        } else if (!lock) {
-            // Delayed update to ensure the newest changes are recorded.
-            setTimeout(function () {
-                updateFormula(tableData, moonForm, myChart);
-                lock = false;
-                lastChange = Date.now();
-            }, frameTime);
+        if (!lock) {
             lock = true;
+            updateFormula(tableData, moonForm, myChart);
+            setTimeout(callback, frameTime);
+        } else {
+            changed = true;
         }
     };
 
