@@ -105,6 +105,9 @@ export function scatter() {
                 }
             },
             tooltips: {
+                filter: function (tooltipItem) {
+                    return tooltipItem.datasetIndex !== 3;
+                },
                 callbacks: {
                     label: function (tooltipItem, data) {
                         return '(' + round(tooltipItem.xLabel, 2) + ', ' +
