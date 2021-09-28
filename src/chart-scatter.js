@@ -36,7 +36,6 @@ export function scatter() {
     }
 
     let chartData = [];
-    let circleData = [];
 
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
