@@ -9,6 +9,7 @@ import { scatter } from "./chart-scatter.js";
 import { venus } from "./chart-venus.js";
 import { variable, variableFileUpload } from "./chart-variable.js";
 import { spectrum, spectrumFileUpload } from "./chart-spectrum.js";
+import { pulsar, pulsarFileUpload } from "./chart-pulsar.js";
 
 /**
  *  Initializing the page when the website loads
@@ -133,11 +134,17 @@ function chartType(chart) {
         document.getElementById("file-upload").onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1]);
         }
-    } else {
+    } else if (chart === "spectrum") {
         objects = spectrum();
         document.getElementById("file-upload-button").style.display = "inline";
         document.getElementById("file-upload").onchange = function (evt) {
             spectrumFileUpload(evt, objects[0], objects[1]);
+        }
+    } else if (chart === "pulsar") { 
+        objects = pulsar();
+        document.getElementById("file-upload-button").style.display = "inline";
+        document.getElementById("file-upload").onchange = function (evt) {
+            pulsarFileUpload(evt, objects[0], objects[1]);
         }
     }
 
