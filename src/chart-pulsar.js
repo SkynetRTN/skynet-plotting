@@ -241,11 +241,10 @@ export function pulsarFileUpload(evt, table, myChart) {
     if (file === undefined) {
         return;
     }
-    if (!file.type.match("(text/csv|application/vnd.ms-excel)") &&
-        !file.name.match(".*\.csv")) {
+    if (!file.name.match(".*\.txt")) {
         console.log("Uploaded file type is: ", file.type);
         console.log("Uploaded file name is: ", file.name);
-        alert("Please upload a CSV file.");
+        alert("Please upload a txt file.");
         return;
     }
 
@@ -263,18 +262,14 @@ export function pulsarFileUpload(evt, table, myChart) {
         data = data.map(row => [row[0], row[5], row[6]]);
 
         let tableData = [];
-        for (row of data) {
+        for (let row of data) {
             tableData.push({
                 'time': row[0],
                 'chn1': row[1],
                 'chn2': row[2]
             });
         }
-
-        tableData.sort((a, b) => a.jd - b.jd);
-
-        myChart.data.datasets[0].label = chn1;
-        myChart.data.datasets[1].label = chn2;
+        tableData.sort((a, b) => a.time - b.time);
         
         switchMode(myChart, 'lc', true);
 
