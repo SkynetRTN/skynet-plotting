@@ -492,47 +492,19 @@ function lightCurve(myChart) {
  */
 function updateChart(myChart, ...dataIndices) {
     // console.log("updateChart called");
-
-    // let minX = Number.POSITIVE_INFINITY;
-    // let maxX = Number.NEGATIVE_INFINITY;
-    // let minY = Number.POSITIVE_INFINITY;
-    // let maxY = Number.NEGATIVE_INFINITY;
-
     for (let i = 0; i < 5; i++) {
         myChart.data.datasets[i].hidden = true;
     }
-
+    // Reversing y-axis for lc and pf, since a lower value for star magnitude means it's brighter.
     myChart.options.scales.yAxes[0].ticks.reverse = true;
 
     for (const dataIndex of dataIndices) {
         myChart.data.datasets[dataIndex].hidden = false;
         if (dataIndex === 3) {
+            // Normal y-axis for fourier transform.
             myChart.options.scales.yAxes[0].ticks.reverse = false;
         }
-
-        // let data = myChart.data.datasets[dataIndex].data;
-
-        // for (let i = 0; i < data.length; i++) {
-        //     minX = Math.min(data[i].x, minX);
-        //     maxX = Math.max(data[i].x, maxX);
-        //     minY = Math.min(data[i].y, minY);
-        //     maxY = Math.max(data[i].y, maxY);
-        // }
     }
-
-    // const marginRatio = 0.2;
-    // minX -= (maxX - minX) * marginRatio;
-    // maxX += (maxX - minX) * marginRatio;
-    // minY -= (maxY - minY) * marginRatio;
-    // maxY += (maxY - minY) * marginRatio;
-
-    // myChart.options.scales.xAxes[0].ticks.min = minX;
-    // myChart.options.scales.xAxes[0].ticks.max = maxX;
-    // myChart.options.scales.xAxes[0].ticks.stepSize = (maxX - minX) / 12.6;
-    // myChart.options.scales.yAxes[0].ticks.min = minY;
-    // myChart.options.scales.yAxes[0].ticks.max = maxY;
-    // myChart.options.scales.yAxes[0].ticks.stepSize = (maxY - minY) / 7;
-
     myChart.update(0);
 }
 
