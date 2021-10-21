@@ -1,14 +1,15 @@
 'use strict';
 
-import { updateTableHeight, getDateString, dataURLtoBlob } from "./util.js";
-import { round } from "./my-math.js";
-import { curve } from "./chart-curve.js";
-import { dual } from "./chart-dual.js";
-import { moon } from "./chart-moon.js";
-import { scatter } from "./chart-scatter.js";
-import { venus } from "./chart-venus.js";
-import { variable, variableFileUpload } from "./chart-variable.js";
-import { spectrum, spectrumFileUpload } from "./chart-spectrum.js";
+import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
+import { round } from './my-math.js';
+import { curve } from './chart-curve.js';
+import { dual } from './chart-dual.js';
+import { moon } from './chart-moon.js';
+import { scatter } from './chart-scatter.js';
+import { venus } from './chart-venus.js';
+import { variable, variableFileUpload } from './chart-variable.js';
+import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
+import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
 
 /**
  *  Initializing the page when the website loads
@@ -52,17 +53,17 @@ window.onload = function () {
     document.getElementById('pledge-signed').onclick = () => {
         let signature = document.getElementById('honor-pledge-form').elements['signature'].value;
         if (signature === null || signature === '') {
-            document.getElementById('no-signature-alert').style.display = "block";
+            document.getElementById('no-signature-alert').style.display = 'block';
         } else {
-            document.getElementById('no-signature-alert').style.display = "none";
+            document.getElementById('no-signature-alert').style.display = 'none';
             // jQuery is required for this line of bootstrap functionality to work
             $('#honor-pledge-modal').modal('hide');
-            saveImage("myChart", signature, true, 1.0);
+            saveImage('myChart', signature, true, 1.0);
         }
     };
 
     document.getElementById('save-button').onclick = () => {
-        document.getElementById('no-signature-alert').style.display = "none";
+        document.getElementById('no-signature-alert').style.display = 'none';
     }
 };
 
@@ -70,22 +71,22 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
     let canvas = document.getElementById(canvasID);
 
     // Create a dummy canvas
-    let destCanvas = document.createElement("canvas");
+    let destCanvas = document.createElement('canvas');
     destCanvas.width = canvas.width;
     destCanvas.height = canvas.height;
 
     let destCtx = destCanvas.getContext('2d');
 
     // Create a rectangle with the desired color
-    destCtx.fillStyle = "#FFFFFF";
+    destCtx.fillStyle = '#FFFFFF';
     destCtx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw the original canvas onto the destination canvas
     destCtx.drawImage(canvas, 0, 0);
 
     // Download the dummy canvas
-    let exifImage = addEXIFToImage(destCanvas.toDataURL("image/jpeg", 1.0), signature);
-    saveAs(dataURLtoBlob(exifImage), "chart.jpg");
+    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature);
+    saveAs(dataURLtoBlob(exifImage), 'chart.jpg');
 }
 
 function addEXIFToImage(jpegData, signature) {
@@ -94,7 +95,7 @@ function addEXIFToImage(jpegData, signature) {
     zeroth[piexif.ImageIFD.Artist] = signature;
     exif[piexif.ExifIFD.DateTimeOriginal] = getDateString();
     
-    let exifObj = { "0th":zeroth, "Exif":exif };
+    let exifObj = { '0th':zeroth, 'Exif':exif };
     let exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }
@@ -109,35 +110,41 @@ function chartType(chart) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
-    document.getElementById("chart-div").innerHTML =
-        '<canvas id="myChart" width="300" height="200"></canvas>\n';
-    document.getElementById("file-upload-button").style.display = "none";
+    document.getElementById('chart-div').innerHTML =
+        '<canvas id="myChart" width=300 height=200></canvas>\n';
+    document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('table-div').hidden = false;
-    document.getElementById("add-row-button").hidden = false;
+    document.getElementById('add-row-button').hidden = false;
 
     let objects;
 
-    if (chart === "curve") {
+    if (chart === 'curve') {
         objects = curve();
-    } else if (chart === "moon") {
+    } else if (chart === 'moon') {
         objects = moon();
-    } else if (chart === "scatter") {
+    } else if (chart === 'scatter') {
         objects = scatter();
-    } else if (chart === "venus") {
+    } else if (chart === 'venus') {
         objects = venus();
-    } else if (chart === "dual") {
+    } else if (chart === 'dual') {
         objects = dual();
-    } else if (chart === "variable") {
+    } else if (chart === 'variable') {
         objects = variable();
-        document.getElementById("file-upload-button").style.display = "inline";
-        document.getElementById("file-upload").onchange = function (evt) {
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1]);
         }
-    } else {
+    } else if (chart === 'spectrum') {
         objects = spectrum();
-        document.getElementById("file-upload-button").style.display = "inline";
-        document.getElementById("file-upload").onchange = function (evt) {
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
             spectrumFileUpload(evt, objects[0], objects[1]);
+        }
+    } else if (chart === 'pulsar') {
+        objects = pulsar();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            pulsarFileUpload(evt, objects[0], objects[1]);
         }
     }
 
@@ -172,9 +179,9 @@ function initializeChart(chart, table) {
     // Setting properties about the title.
     chart.options.title.display = true;
     chart.options.title.fontSize = 18;
-    chart.options.title.fontColor = "rgba(0, 0, 0, 1)";
+    chart.options.title.fontColor = 'rgba(0, 0, 0, 1)';
     chart.options.title.fontStyle = '';
-    chart.options.title.fontFamily = "'Lato', 'Arial', sans-serif";
+    chart.options.title.fontFamily = '"Lato", "Arial", sans-serif';
 
     // Setting properties about the tooltips
     chart.options.tooltips.mode = 'nearest';
@@ -209,7 +216,7 @@ function initializeChart(chart, table) {
  */
 function updateChartInfo(myChart, form) {
     myChart.options.title.text = form.elements['title'].value;
-    let labels = form.elements['data'].value.split(",").map(item => item.trim());
+    let labels = form.elements['data'].value.split(',').map(item => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
