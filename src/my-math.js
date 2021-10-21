@@ -36,7 +36,7 @@ export function rad(degree) {
  * @param {number} stop the stopin period
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
- function lombScargle(ts, ys, start, stop, steps = 1000) {
+ export function lombScargle(ts, ys, start, stop, steps = 1000) {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return;
