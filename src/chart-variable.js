@@ -35,7 +35,7 @@ export function variable() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Julian Date', 'Source1 Mag', 'Source2 Mag'],
+        colHeaders: ['Julian Date', 'Source1', 'Source2'],
         maxCols: 3,
         columns: [
             { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -248,7 +248,7 @@ export function variableFileUpload(evt, table, myChart) {
         }
 
         table.updateSettings({
-            colHeaders: ['Julian Date', src1 + " Mag", src2 + " Mag"],
+            colHeaders: ['Julian Date', src1, src2],
         })
 
         let tableData = [];
