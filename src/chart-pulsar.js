@@ -81,7 +81,11 @@ export function pulsar() {
                 x: "x",
                 y: "y",
                 lastMode: "Pulsar",
-                fourierChanged: true
+            },
+            modified: {
+                lightCurveChanged: true,
+                fourierChanged: true,
+                periodFoldingChanged: true
             },
             datasets: [
                 {
@@ -211,8 +215,6 @@ export function pulsar() {
         myChart.data.datasets[1].data = chn2;
 
         myChart.update(0);
-        // TODO: background subtraction
-        myChart.data.customLabels.fourierChanged = true;
     }
 
     let fourierForm = document.getElementById("fourier-form");
@@ -351,7 +353,9 @@ function updatePulsar(table, myChart) {
 
     myChart.data.datasets[0].data = chn1Data;
     myChart.data.datasets[1].data = chn2Data;
-    myChart.data.customLabels.fourierChanged = true;
+    myChart.data.modified.lightCurveChanged = true;
+    myChart.data.modified.fourierChanged = true;
+    myChart.data.modified.periodFoldingChanged = true;
 
     switchMode(myChart, 'lc');
 }
@@ -369,15 +373,29 @@ function switchMode(myChart, mode, reset=false) {
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
     }
+    let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
+        if (modified.lightCurveChanged) {
+            modified.lightCurveChanged = false;
+            document.getElementById('light-curve-form').oninput();
+        }
         showDiv("light-curve-div");
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
     } else if (mode === 'ft') {
+        // Only update fourier transform periodogram when changes occured.
+        if (modified.fourierChanged) {
+            modified.fourierChanged = false;
+            document.getElementById('fourier-form').oninput();
+        }
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
     } else {
+        if (modified.periodFoldingChanged) {
+            modified.periodFoldingChanged = false;
+            document.getElementById('period-folding-form').oninput();
+        }
         showDiv("period-folding-div");
         myChart.data.datasets[4].hidden = false;
         myChart.data.datasets[5].hidden = false;
@@ -395,12 +413,6 @@ function switchMode(myChart, mode, reset=false) {
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     } else if (mode === 'ft') {
-        // Only update fourier transform periodogram when changes occured.
-        if (customLabels.fourierChanged) {
-            customLabels.fourierChanged = false;
-            document.getElementById('fourier-form').oninput();
-        }
-
         customLabels.title = myChart.options.title.text;
         customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
