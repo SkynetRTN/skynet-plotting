@@ -241,6 +241,9 @@ export function pulsar() {
         myChart.data.datasets[0].data = chn1;
         myChart.data.datasets[1].data = chn2;
 
+        myChart.data.modified.fourierChanged = true;
+        myChart.data.modified.periodFoldingChanged = true;
+
         myChart.update(0);
     }
 
