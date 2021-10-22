@@ -91,6 +91,7 @@ export function pulsar() {
                     borderWidth: 2,
                     // immutableLabel: true,
                     hidden: false,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
@@ -98,6 +99,7 @@ export function pulsar() {
                     borderWidth: 2,
                     // immutableLabel: true,
                     hidden: false,
+                    fill: false
                 }, {
                     label: 'Channel 1',
                     data: [],
@@ -105,6 +107,7 @@ export function pulsar() {
                     borderWidth: 2,
                     // immutableLabel: true,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
@@ -112,6 +115,7 @@ export function pulsar() {
                     borderWidth: 2,
                     // immutableLabel: true,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 1',
                     data: [],
@@ -120,6 +124,7 @@ export function pulsar() {
                     showLine: false,
                     // immutableLabel: true,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
@@ -128,6 +133,7 @@ export function pulsar() {
                     showLine: false,
                     // immutableLabel: true,
                     hidden: true,
+                    fill: false
                 }
             ]
         },
