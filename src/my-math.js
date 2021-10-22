@@ -79,15 +79,15 @@ export function backgroundSubtraction(time, flux, dt) {
     let n = Math.min(time.length, flux.length);
     const subtracted = [];
 
-    for (i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
         let j = i;
-        while (time[j] > time[i] - (dt / 2)) {
+        while (j >= 0 && time[j] >= time[i] - (dt / 2)) {
             j = j - 1;
         }
         let jmin = j + 1;
         j = i;
 
-        while (time[j] < time[i] + (dt / 2)) {
+        while (j < n && time[j] <= time[i] + (dt / 2)) {
             j = j + 1;
         }
         let jmax = j;
@@ -95,34 +95,6 @@ export function backgroundSubtraction(time, flux, dt) {
         subtracted.push(flux[i] - fluxmed);
     }
     return subtracted;
-}
-
-export function median(arr) {
-    const mid = Math.floor(arr.length / 2);
-    const nums = arr.sort((a, b) => a - b);
-    return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-};
-
-export function backgroundSubtraction(time, flux, dt) {
-    let n = Math.min(time.length, flux.length);
-    const medians = [];
-
-    for (i = 0; i < n; i++) {
-        let j = i;
-        while (time[j] > time[i] - (dt / 2)) {
-            j = j - 1;
-        }
-        let jmin = j + 1;
-        j = i;
-
-        while (time[j] < time[i] + (dt / 2)) {
-            j = j + 1;
-        }
-        let jmax = j;
-        let fluxmed = median(flux.slice(jmin, jmax));
-        medians.push(fluxmed);
-    }
-    return medians;
 }
 
 export function median(arr) {

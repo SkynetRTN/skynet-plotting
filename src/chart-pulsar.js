@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle } from "./my-math.js"
+import { round, lombScargle, backgroundSubtraction } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -26,7 +26,7 @@ export function pulsar() {
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Background Subtraction Scale: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="s" title="Magnitude" value=0></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
     
@@ -73,7 +73,7 @@ export function pulsar() {
 
     let ctx = document.getElementById("myChart").getContext('2d');
     let myChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'line',
         data: {
             minT: Number.POSITIVE_INFINITY,
             customLabels: {
@@ -87,54 +87,44 @@ export function pulsar() {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
+                    borderWidth: 2,
                     // immutableLabel: true,
                     hidden: false,
                 }, {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
+                    borderWidth: 2,
                     // immutableLabel: true,
                     hidden: false,
                 }, {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBorderWidth: 0,
+                    borderWidth: 2,
                     // immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBorderWidth: 0,
+                    borderWidth: 2,
                     // immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
+                    borderWidth: 2,
+                    showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                 }, {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
+                    borderWidth: 2,
+                    showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                 }
@@ -185,6 +175,36 @@ export function pulsar() {
 
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = function () {
+        let dt = parseFloat(this.dt.value);
+        let tableData = hot.getData();
+
+        let time = [];
+        let chn1 = [];
+        let chn2 = [];
+        for (let i = 0; i < tableData.length; i++) {
+            time.push(parseFloat(tableData[i][0]));
+            chn1.push(parseFloat(tableData[i][1]));
+            chn2.push(parseFloat(tableData[i][2]));
+        }
+        let chn1Sub = backgroundSubtraction(time, chn1, dt);
+        let chn2Sub = backgroundSubtraction(time, chn2, dt);
+        
+        chn1 = [];
+        chn2 = [];
+        for (let i = 0; i < time.length; i++) {
+            chn1.push({
+                'x': time[i],
+                'y': chn1Sub[i]
+            });
+            chn2.push({
+                'x': time[i],
+                'y': chn2Sub[i]
+            })
+        }
+        myChart.data.datasets[0].data = chn1;
+        myChart.data.datasets[1].data = chn2;
+
+        myChart.update(0);
         // TODO: background subtraction
     }
 
