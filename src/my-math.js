@@ -79,15 +79,15 @@ export function backgroundSubtraction(time, flux, dt) {
     let n = Math.min(time.length, flux.length);
     const subtracted = [];
 
-    for (i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
         let j = i;
-        while (time[j] > time[i] - (dt / 2)) {
+        while (j >= 0 && time[j] >= time[i] - (dt / 2)) {
             j = j - 1;
         }
         let jmin = j + 1;
         j = i;
 
-        while (time[j] < time[i] + (dt / 2)) {
+        while (j < n && time[j] <= time[i] + (dt / 2)) {
             j = j + 1;
         }
         let jmax = j;
@@ -102,6 +102,7 @@ export function median(arr) {
     const nums = arr.sort((a, b) => a - b);
     return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
 };
+
 
 export let ArrMath = {
     max: function (arr) {

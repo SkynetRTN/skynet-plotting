@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
+import { updateLine, updateLabels, updateTableHeight, sanitizeData } from "./util.js"
 import { round } from "./my-math.js"
 
 export function spectrum() {
@@ -144,8 +144,8 @@ function updateSpectrum(table, myChart) {
         })
     }
 
-    myChart.data.datasets[0].data = src1Data;
-    myChart.data.datasets[1].data = src2Data;
+    myChart.data.datasets[0].data = sanitizeData(src1Data);
+    myChart.data.datasets[1].data = sanitizeData(src2Data);
 
     let spectrumForm = document.getElementById("spectrum-form");
     spectrumForm.elements["channel"].selectedIndex = 0;
