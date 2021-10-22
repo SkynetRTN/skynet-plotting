@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle } from "./my-math.js"
+import { round, lombScargle, backgroundSubtraction } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -25,8 +25,8 @@ export function pulsar() {
     document.getElementById('light-curve-div').innerHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Background Subtraction Scale: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="s" title="Magnitude" value=0></input></div>\n' +
+        '<div class="col-sm-7">Background Scale (sec): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
     
@@ -87,7 +87,7 @@ export function pulsar() {
 
     let ctx = document.getElementById("myChart").getContext('2d');
     let myChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'line',
         data: {
             minT: Number.POSITIVE_INFINITY,
             customLabels: {
@@ -96,25 +96,44 @@ export function pulsar() {
                 y: "y",
                 lastMode: "Pulsar",
             },
+            modified: {
+                lightCurveChanged: true,
+                fourierChanged: true,
+                periodFoldingChanged: true
+            },
             datasets: [
                 {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    // immutableLabel: true,
+                    borderWidth: 2,
+                    immutableLabel: true,
                     hidden: false,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    // immutableLabel: true,
+                    borderWidth: 2,
+                    immutableLabel: true,
                     hidden: false,
+                    fill: false
+                }, {
+                    label: 'Channel 1',
+                    data: [],
+                    backgroundColor: colors['blue'],
+                    borderWidth: 2,
+                    // immutableLabel: true,
+                    hidden: true,
+                    fill: false
+                }, {
+                    label: 'Channel 2',
+                    data: [],
+                    backgroundColor: colors['red'],
+                    borderWidth: 2,
+                    // immutableLabel: true,
+                    hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 1',
                     data: [],
@@ -122,8 +141,11 @@ export function pulsar() {
                     pointRadius: 3,
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
+                    borderWidth: 2,
+                    showLine: false,
                     // immutableLabel: true,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
@@ -131,26 +153,11 @@ export function pulsar() {
                     pointRadius: 3,
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
+                    borderWidth: 2,
+                    showLine: false,
                     // immutableLabel: true,
                     hidden: true,
-                }, {
-                    label: 'Channel 1',
-                    data: [],
-                    backgroundColor: colors['blue'],
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBorderWidth: 0,
-                    // immutableLabel: true,
-                    hidden: true,
-                }, {
-                    label: 'Channel 2',
-                    data: [],
-                    backgroundColor: colors['red'],
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBorderWidth: 0,
-                    // immutableLabel: true,
-                    hidden: true,
+                    fill: false
                 }
             ]
         },
@@ -194,12 +201,40 @@ export function pulsar() {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
-        updateTableHeight(hot);
     }
 
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = function () {
-        // TODO: background subtraction
+        let dt = parseFloat(this.dt.value);
+        let tableData = hot.getData();
+
+        let time = [];
+        let chn1 = [];
+        let chn2 = [];
+        for (let i = 0; i < tableData.length; i++) {
+            time.push(parseFloat(tableData[i][0]));
+            chn1.push(parseFloat(tableData[i][1]));
+            chn2.push(parseFloat(tableData[i][2]));
+        }
+        let chn1Sub = backgroundSubtraction(time, chn1, dt);
+        let chn2Sub = backgroundSubtraction(time, chn2, dt);
+        
+        chn1 = [];
+        chn2 = [];
+        for (let i = 0; i < time.length; i++) {
+            chn1.push({
+                'x': time[i],
+                'y': chn1Sub[i]
+            });
+            chn2.push({
+                'x': time[i],
+                'y': chn2Sub[i]
+            })
+        }
+        myChart.data.datasets[0].data = chn1;
+        myChart.data.datasets[1].data = chn2;
+
+        myChart.update(0);
     }
 
     let fourierForm = document.getElementById("fourier-form");
@@ -224,8 +259,8 @@ export function pulsar() {
             let t2 = chn2.map(entry => entry.x);
             let y2 = chn2.map(entry => entry.y);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 2000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 2000);
+            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
+            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
         }
         //frequency mode
         else{
@@ -247,8 +282,8 @@ export function pulsar() {
             let t2 = chn2.map(entry => 1/entry.x);
             let y2 = chn2.map(entry => entry.y);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 2000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 2000);
+            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
+            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
         };
         console.log(document.getElementById("fourier-form").fouriermode.value)
         myChart.update(0)
@@ -259,6 +294,8 @@ export function pulsar() {
         let period = parseFloat(this.pf.value);
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period);
+
+        myChart.update(0);
     }
     
     myChart.options.title.text = "Title"
@@ -366,6 +403,9 @@ function updatePulsar(table, myChart) {
 
     myChart.data.datasets[0].data = chn1Data;
     myChart.data.datasets[1].data = chn2Data;
+    myChart.data.modified.lightCurveChanged = true;
+    myChart.data.modified.fourierChanged = true;
+    myChart.data.modified.periodFoldingChanged = true;
 
     switchMode(myChart, 'lc');
 }
@@ -383,24 +423,33 @@ function switchMode(myChart, mode, reset=false) {
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
     }
+    let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
+        if (modified.lightCurveChanged) {
+            modified.lightCurveChanged = false;
+            document.getElementById('light-curve-form').oninput();
+        }
         showDiv("light-curve-div");
-        document.getElementById('light-curve-form').oninput();
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = true;
     } else if (mode === 'ft') {
+        document.getElementById('fourier-form').fouriermode.value = 'p';
+        // Only update fourier transform periodogram when changes occured.
+        if (modified.fourierChanged) {
+            modified.fourierChanged = false;
+            document.getElementById('fourier-form').oninput();
+        }
         showDiv("fourier-div");
-        document.getElementById('fourier-form').oninput();
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = false;
     } else {
+        if (modified.periodFoldingChanged) {
+            modified.periodFoldingChanged = false;
+            document.getElementById('period-folding-form').oninput();
+        }
         showDiv("period-folding-div");
-        document.getElementById('period-folding-form').oninput();
         myChart.data.datasets[4].hidden = false;
         myChart.data.datasets[5].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = true;
     }
     myChart.update(0);
 

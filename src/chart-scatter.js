@@ -12,16 +12,16 @@ export function scatter() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Center (X): </div>\n' +
+        '<div class="col-sm-6">Distance (kpc): </div>\n' +
         '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="x" title="Center (X)" value=0></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Center (Y): </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="y" title="Center (Y)" value=0></input></div>\n' +
+       // '<div class="col-sm-6">Center (Y): </div>\n' +
+        //'<div class="col-sm-6"><input class="field" type="number" step="0.001" name="y" title="Center (Y)" value=0></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Radius: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="r" title="Radius" value=5></input></div>\n' +
+        '<div class="col-sm-6">Diameter (kpc): </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="d" title="Diameter" value=5></input></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
@@ -84,6 +84,7 @@ export function scatter() {
                     pointRadius: 10,
                     pointHoverRadius: 12,
                 }, {
+                    label: 'Model',
                     data: circle(0, 0, 5),
                     pointRadius: 0,
                     pointBorderWidth: 2,
@@ -100,7 +101,7 @@ export function scatter() {
             legend: {
                 labels: {
                     filter: function (legendItem, chartData) {
-                        return legendItem.datasetIndex <= 1;
+                        return legendItem.datasetIndex !== 2;
                     }
                 }
             },
@@ -139,10 +140,10 @@ export function scatter() {
     let scatterForm = document.getElementById("scatter-form");
     scatterForm.oninput = function () {
         let x = parseInt(scatterForm.elements['x'].value);
-        let y = parseInt(scatterForm.elements['y'].value);
-        let r = parseInt(scatterForm.elements['r'].value);
+        let y = 0;
+        let d = parseInt(scatterForm.elements['d'].value);
         myChart.data.datasets[2].data = [{ x: x, y: y}];
-        myChart.data.datasets[3].data = circle(x, y, r);
+        myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update(0);
     }
 
@@ -248,26 +249,26 @@ function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
 }
 
 /**
- * Generator function for the circle with specificed x, y and radius
+ * Generator function for the circle with specificed x, y and diameter
  * @param {number} x        x-coordinate of the center of circle
  * @param {number} y        y-coordinate of the centor of circle
- * @param {number} radius   radius of the circle
+ * @param {number} diameter   diameter of the circle
  * @param {number} steps    Number of points to generate. Default is 500
  * @returns {Array}         An array of points
  */
-function circle(x, y, radius, steps = 500) {
+function circle(x, y, diameter, steps = 500) {
     let data = [];
 
     let step = 2 * Math.PI / steps;
     for (let i = 0; i < steps; i++) {
         data.push({
-            x: x + Math.cos(step * i) * radius,
-            y: y + Math.sin(step * i) * radius
+            x: x + Math.cos(step * i) * (diameter/2),
+            y: y + Math.sin(step * i) * (diameter/2)
         });
     }
     // Add a redundant point to complete the circle.
     data.push({
-        x: x + radius,
+        x: x + (diameter/2),
         y: y
     })
 
