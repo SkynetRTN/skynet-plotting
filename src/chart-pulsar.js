@@ -25,7 +25,7 @@ export function pulsar() {
     document.getElementById('light-curve-div').innerHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Background Subtraction Scale: </div>\n' +
+        '<div class="col-sm-7">Background Scale (sec): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
@@ -93,7 +93,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
-                    // immutableLabel: true,
+                    immutableLabel: true,
                     hidden: false,
                     fill: false
                 }, {
@@ -101,7 +101,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    // immutableLabel: true,
+                    immutableLabel: true,
                     hidden: false,
                     fill: false
                 }, {
