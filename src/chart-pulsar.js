@@ -241,13 +241,16 @@ export function pulsar() {
         myChart.data.datasets[0].data = chn1;
         myChart.data.datasets[1].data = chn2;
 
+        myChart.data.modified.fourierChanged = true;
+        myChart.data.modified.periodFoldingChanged = true;
+
         myChart.update(0);
     }
 
     let fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
         //period mode
-        if (this.fouriermode.value==='p'){
+        if (this.fouriermode.value === 'p') {
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
             this.fstart.disabled = true;
             this.fstop.disabled  = true;
@@ -270,7 +273,7 @@ export function pulsar() {
             myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
         }
         //frequency mode
-        else{
+        else {
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
             this.pstart.disabled = true;
             this.pstop.disabled  = true;
@@ -425,13 +428,16 @@ function updatePulsar(table, myChart) {
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset = false) {
+function switchMode(myChart, mode, reset=false) {
     // Displaying the correct datasets
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
     }
     let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
+        if (document.getElementById('pulsar-form').mode.value !== 'lc') {
+            document.getElementById('pulsar-form').mode[0].checked = true;
+        }
         if (modified.lightCurveChanged) {
             modified.lightCurveChanged = false;
             document.getElementById('light-curve-form').oninput();
@@ -440,7 +446,6 @@ function switchMode(myChart, mode, reset = false) {
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
     } else if (mode === 'ft') {
-        document.getElementById('fourier-form').fouriermode.value = 'p';
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
@@ -476,7 +481,12 @@ function switchMode(myChart, mode, reset = false) {
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
 
         myChart.options.title.text = "Periodogram";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+        let freq = document.getElementById('fourier-form').fouriermode.value;
+        if (freq === 'p') {
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+        } else {
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+        }
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
