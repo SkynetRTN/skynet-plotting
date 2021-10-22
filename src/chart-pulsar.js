@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction } from "./my-math.js"
+import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -70,13 +70,12 @@ export function pulsar() {
         '</form>\n'
     );
 
-
     let tableData = [];
     for (let i = 0; i < 1000; i++) {
         tableData[i] = {
-            'time': (i*0.2) + 3560,
-            'chn1': (Math.random()/20) + 20.63,
-            'chn2': (Math.random()/20) + 28.98,
+            'time': (i * 0.2) + 3560,
+            'chn1': (Math.random() / 20) + 20.63,
+            'chn2': (Math.random() / 20) + 28.98,
         };
     }
 
@@ -114,7 +113,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
-                    immutableLabel: true,
+                    immutableLabel: false,
                     hidden: false,
                     fill: false
                 }, {
@@ -122,7 +121,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    immutableLabel: true,
+                    immutableLabel: false,
                     hidden: false,
                     fill: false
                 }, {
@@ -208,6 +207,7 @@ export function pulsar() {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
+        updateTableHeight(hot);
     }
 
     let lightCurveForm = document.getElementById('light-curve-form');
@@ -219,13 +219,16 @@ export function pulsar() {
         let chn1 = [];
         let chn2 = [];
         for (let i = 0; i < tableData.length; i++) {
+            if (isNaN(parseFloat(tableData[i][0]))) {
+                continue;
+            }
             time.push(parseFloat(tableData[i][0]));
             chn1.push(parseFloat(tableData[i][1]));
             chn2.push(parseFloat(tableData[i][2]));
         }
         let chn1Sub = backgroundSubtraction(time, chn1, dt);
         let chn2Sub = backgroundSubtraction(time, chn2, dt);
-        
+
         chn1 = [];
         chn2 = [];
         for (let i = 0; i < time.length; i++) {
@@ -249,53 +252,43 @@ export function pulsar() {
 
     let fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
-        //period mode
+        let start, stop;
         if (this.fouriermode.value === 'p') {
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+            //period mode
             this.fstart.disabled = true;
             this.fstop.disabled  = true;
             this.pstart.disabled = false;
             this.pstop.disabled  = false;
-            let start = parseFloat(this.pstart.value);
-            let stop = parseFloat(this.pstop.value);
-            if (start > stop) {
-                // alert("Please make sure the stop value is greater than the start value.");
-                return;
-            };
-            let chn1 = myChart.data.datasets[0].data;
-            let t1 = chn1.map(entry => entry.x);
-            let y1 = chn1.map(entry => entry.y);
-            let chn2 = myChart.data.datasets[1].data;
-            let t2 = chn2.map(entry => entry.x);
-            let y2 = chn2.map(entry => entry.y);
+            start = parseFloat(this.pstart.value);
+            stop = parseFloat(this.pstop.value);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
-        }
-        //frequency mode
-        else {
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+        } else {
+            //frequency mode
             this.pstart.disabled = true;
             this.pstop.disabled  = true;
             this.fstart.disabled = false;
             this.fstop.disabled  = false;
-            let start = parseFloat(this.fstart.value);
-            let stop = parseFloat(this.fstop.value); 
-            if (start > stop) {
-                // alert("Please make sure the stop value is greater than the start value.");
-                return;
-            };
-            let chn1 = myChart.data.datasets[0].data;
-            let t1 = chn1.map(entry => 1/entry.x);
-            let y1 = chn1.map(entry => entry.y);
-            let chn2 = myChart.data.datasets[1].data;
-            let t2 = chn2.map(entry => 1/entry.x);
-            let y2 = chn2.map(entry => entry.y);
+            start = parseFloat(this.fstart.value);
+            stop = parseFloat(this.fstop.value);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+        }
+        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
+
+        if (start > stop) {
+            // alert("Please make sure the stop value is greater than the start value.");
+            return;
         };
-        console.log(document.getElementById("fourier-form").fouriermode.value)
+        let chn1 = myChart.data.datasets[0].data;
+        let chn2 = myChart.data.datasets[1].data;
+        let t = chn1.map(entry => entry.x);
+        let y1 = chn1.map(entry => entry.y);
+        let y2 = chn2.map(entry => entry.y);
+
+        myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, 1000, this.fouriermode.value === 'f');
+        myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, 1000, this.fouriermode.value === 'f');
+
         myChart.update(0)
     }
 
@@ -306,11 +299,13 @@ export function pulsar() {
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
+        updateTableHeight(hot);
     }
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
     myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updatePulsar(hot, myChart);
     updateTableHeight(hot);
@@ -400,7 +395,7 @@ function updatePulsar(table, myChart) {
         let chn2 = tableData[i][2];
 
         myChart.data.minT = Math.min(myChart.data.minT, time);
-    
+
         chn1Data.push({
             "x": time,
             "y": chn1,
@@ -417,6 +412,17 @@ function updatePulsar(table, myChart) {
     myChart.data.modified.fourierChanged = true;
     myChart.data.modified.periodFoldingChanged = true;
 
+    let ts = myChart.data.datasets[0].data.map(entry => entry.x);
+    let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+    let fourierForm = document.getElementById('fourier-form');
+    fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
+    fourierForm.pstop.value = 3;
+    fourierForm.fstart.value = 0.1;
+    fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+    let periodFoldingForm = document.getElementById('period-folding-form');
+    periodFoldingForm.pf.value = 0;
+    periodFoldingForm.bins.value = 100;
+
     switchMode(myChart, 'lc');
 }
 
@@ -428,7 +434,7 @@ function updatePulsar(table, myChart) {
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset=false) {
+function switchMode(myChart, mode, reset = false) {
     // Displaying the correct datasets
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
@@ -537,7 +543,7 @@ function periodFolding(myChart, src, period, bins) {
 
     foldedData.sort((a, b) => a.x - b.x);
 
-    if (bins === 0) {
+    if (bins <= 0) {
         let repeated = foldedData.map(val => ({
             "x": val.x + period,
             "y": val.y
