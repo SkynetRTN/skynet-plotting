@@ -28,6 +28,80 @@ export function rad(degree) {
     return degree / 180 * Math.PI;
 }
 
+/**
+ * This function computes the Lomb Scargle periodogram for a given set of time/observation data.
+ * @param {array(number)} ts The array of time values
+ * @param {array{number}} ys They array of observation values. The length of ys and ts must match
+ * @param {number}  start the starting period
+ * @param {number} stop the stopin period
+ * @param {number} steps number of steps between start and stop. Default is 1000.
+ */
+ export function lombScargle(ts, ys, start, stop, steps = 1000) {
+    if (ts.length != ys.length) {
+        alert("Dimension mismatch between time array and value array.");
+        return;
+    }
+
+    let step = (stop - start) / steps;
+
+    let spectralPowerDensity = [];
+
+    let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+    let hResidue = ArrMath.sub(ys, ArrMath.mean(ys));
+    let twoVarOfY = 2 * ArrMath.var(ys);
+    
+    let period = start;
+
+    while (period < stop) {
+        // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
+        let frequency = 1 / period;
+
+        let omega = 2.0 * Math.PI * frequency;
+        let twoOmegaT = ArrMath.mul(2 * omega, ts);
+        let tau = Math.atan2(ArrMath.sum(ArrMath.sin(twoOmegaT)), ArrMath.sum(ArrMath.cos(twoOmegaT))) / (2.0 * omega);
+        let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
+
+        spectralPowerDensity.push({
+            x: period,
+            y: (( Math.pow( ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0) ) /
+                ( ArrMath.dot(ArrMath.cos(omegaTMinusTau)) ) +
+                ( Math.pow( ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0) ) /
+                ( ArrMath.dot(ArrMath.sin(omegaTMinusTau)) )) / twoVarOfY,
+        });
+
+        period += step;
+    }
+
+    return spectralPowerDensity;
+}
+
+export function backgroundSubtraction(time, flux, dt) {
+    let n = Math.min(time.length, flux.length);
+    const subtracted = [];
+
+    for (i = 0; i < n; i++) {
+        let j = i;
+        while (time[j] > time[i] - (dt / 2)) {
+            j = j - 1;
+        }
+        let jmin = j + 1;
+        j = i;
+
+        while (time[j] < time[i] + (dt / 2)) {
+            j = j + 1;
+        }
+        let jmax = j;
+        let fluxmed = median(flux.slice(jmin, jmax));
+        subtracted.push(flux[i] - fluxmed);
+    }
+    return subtracted;
+}
+
+export function median(arr) {
+    const mid = Math.floor(arr.length / 2);
+    const nums = arr.sort((a, b) => a - b);
+    return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+};
 
 export let ArrMath = {
     max: function (arr) {
