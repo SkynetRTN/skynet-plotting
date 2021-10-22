@@ -33,12 +33,26 @@ export function pulsar() {
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Start Period: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=0.1></input></div>\n' +
+        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="p" checked><span>Period</span></label></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Stop Period: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=1></input></div>\n' +
+        '<div class="col-sm-7">Start Period (sec): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstart" title="Start Period" value=0.1></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Stop Period (sec): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstop" title="Stop Period" value=3></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="f"><span>Frequency</span></label></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Start Frequency (Hz): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstart" title="Start Frequency" value=0.1></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Stop Frequency (Hz): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstop" title="Stop Frequency" value=30></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 
@@ -131,6 +145,9 @@ export function pulsar() {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    pointBorderWidth: 0,
                     borderWidth: 2,
                     // showLine: false,
                     // immutableLabel: true,
@@ -140,6 +157,9 @@ export function pulsar() {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    pointBorderWidth: 0,
                     borderWidth: 2,
                     // showLine: false,
                     // immutableLabel: true,
@@ -226,24 +246,54 @@ export function pulsar() {
 
     let fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
-        let start = parseFloat(this.start.value);
-        let stop = parseFloat(this.stop.value);
-        if (start > stop) {
-            // alert("Please make sure the stop value is greater than the start value.");
-            return;
+        //period mode
+        if (this.fouriermode.value==='p'){
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+            this.fstart.disabled = true;
+            this.fstop.disabled  = true;
+            this.pstart.disabled = false;
+            this.pstop.disabled  = false;
+            let start = parseFloat(this.pstart.value);
+            let stop = parseFloat(this.pstop.value);
+            if (start > stop) {
+                // alert("Please make sure the stop value is greater than the start value.");
+                return;
+            };
+            let chn1 = myChart.data.datasets[0].data;
+            let t1 = chn1.map(entry => entry.x);
+            let y1 = chn1.map(entry => entry.y);
+            let chn2 = myChart.data.datasets[1].data;
+            let t2 = chn2.map(entry => entry.x);
+            let y2 = chn2.map(entry => entry.y);
+
+            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
+            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
         }
+        //frequency mode
+        else{
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+            this.pstart.disabled = true;
+            this.pstop.disabled  = true;
+            this.fstart.disabled = false;
+            this.fstop.disabled  = false;
+            let start = parseFloat(this.fstart.value);
+            let stop = parseFloat(this.fstop.value); 
+            if (start > stop) {
+                // alert("Please make sure the stop value is greater than the start value.");
+                return;
+            };
+            let chn1 = myChart.data.datasets[0].data;
+            let t1 = chn1.map(entry => 1/entry.x);
+            let y1 = chn1.map(entry => entry.y);
+            let chn2 = myChart.data.datasets[1].data;
+            let t2 = chn2.map(entry => 1/entry.x);
+            let y2 = chn2.map(entry => entry.y);
 
-        let chn1 = myChart.data.datasets[0].data;
-        let t1 = chn1.map(entry => entry.x);
-        let y1 = chn1.map(entry => entry.y);
-        let chn2 = myChart.data.datasets[1].data;
-        let t2 = chn2.map(entry => entry.x);
-        let y2 = chn2.map(entry => entry.y);
-
-        myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
-        myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
-
-        myChart.update(0);
+            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
+            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
+        };
+        console.log(document.getElementById("fourier-form").fouriermode.value)
+        myChart.update(0)
     }
 
     let periodFoldingForm = document.getElementById("period-folding-form");
@@ -390,6 +440,7 @@ function switchMode(myChart, mode, reset = false) {
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
     } else if (mode === 'ft') {
+        document.getElementById('fourier-form').fouriermode.value = 'p';
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
@@ -425,7 +476,7 @@ function switchMode(myChart, mode, reset = false) {
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
 
         myChart.options.title.text = "Periodogram";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period";
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);

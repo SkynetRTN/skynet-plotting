@@ -417,11 +417,11 @@ function lightCurve(myChart) {
     let fHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Start Period: </div>\n' +
+        '<div class="col-sm-7">Start Period (days): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=0.1></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Stop Period: </div>\n' +
+        '<div class="col-sm-7">Stop Period (days): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=1></input></div>\n' +
         '</div>\n' +
         '</form>\n';
@@ -451,7 +451,7 @@ function lightCurve(myChart) {
     let pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period: </div>\n' +
+        '<div class="col-sm-7">Folding Period (days): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
