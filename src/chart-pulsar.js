@@ -70,13 +70,12 @@ export function pulsar() {
         '</form>\n'
     );
 
-
     let tableData = [];
     for (let i = 0; i < 1000; i++) {
         tableData[i] = {
-            'time': (i*0.2) + 3560,
-            'chn1': (Math.random()/20) + 20.63,
-            'chn2': (Math.random()/20) + 28.98,
+            'time': (i * 0.2) + 3560,
+            'chn1': (Math.random() / 20) + 20.63,
+            'chn2': (Math.random() / 20) + 28.98,
         };
     }
 
@@ -122,7 +121,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    immutableLabel: true,
+                    immutableLabel: false,
                     hidden: false,
                     fill: false
                 }, {
@@ -220,13 +219,16 @@ export function pulsar() {
         let chn1 = [];
         let chn2 = [];
         for (let i = 0; i < tableData.length; i++) {
+            if (isNaN(parseFloat(tableData[i][0]))) {
+                continue;
+            }
             time.push(parseFloat(tableData[i][0]));
             chn1.push(parseFloat(tableData[i][1]));
             chn2.push(parseFloat(tableData[i][2]));
         }
         let chn1Sub = backgroundSubtraction(time, chn1, dt);
         let chn2Sub = backgroundSubtraction(time, chn2, dt);
-        
+
         chn1 = [];
         chn2 = [];
         for (let i = 0; i < time.length; i++) {
@@ -313,6 +315,7 @@ export function pulsar() {
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
     myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updatePulsar(hot, myChart);
     updateTableHeight(hot);
@@ -402,7 +405,7 @@ function updatePulsar(table, myChart) {
         let chn2 = tableData[i][2];
 
         myChart.data.minT = Math.min(myChart.data.minT, time);
-    
+
         chn1Data.push({
             "x": time,
             "y": chn1,
@@ -430,7 +433,7 @@ function updatePulsar(table, myChart) {
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset=false) {
+function switchMode(myChart, mode, reset = false) {
     // Displaying the correct datasets
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
