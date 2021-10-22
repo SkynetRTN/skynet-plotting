@@ -347,7 +347,7 @@ function updatePulsar(table, myChart) {
         let chn2 = tableData[i][2];
 
         myChart.data.minT = Math.min(myChart.data.minT, time);
-
+    
         chn1Data.push({
             "x": time,
             "y": chn1,
