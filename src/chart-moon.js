@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
+import { updateLine, updateLabels, updateTableHeight, linkInputs } from "./util.js"
 import { round, sqr, rad } from "./my-math.js"
 
 /**
@@ -12,22 +12,22 @@ export function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Moon" id="moon-form">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">a (")</div>\n' +
+        '<div class="col-sm-3 des">a ("):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="a" name="a"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="a" name="a-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">P (d)</div>\n' +
+        '<div class="col-sm-3 des">P (d):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="P" name="p"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="P" name="p-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Phase (°)</div>\n' +
+        '<div class="col-sm-3 des">Phase (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Phase" name="phase"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Tilt (°)</div>\n' +
+        '<div class="col-sm-3 des">Tilt (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Tilt" name="tilt"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt-num" class="field"></div>\n' +
         '</div>\n' +
@@ -200,55 +200,6 @@ function updateFormula(table, form, chart) {
         2000
     );
     chart.update(0);
-}
-
-/**
-*  This function links a <input type="range"> and a <input type="number"> together so changing the value
-*  of one updates the other. This function also sets the min, max and step properties for both the inputs.
-*  @param slider:  A <input type="range"> to be linked.
-*  @param number:  A <input type"number"> to be linked.
-*  @param min:     The min value for both inputs.
-*  @param max:     The max value for both inputs.
-*  @param step:    The step of changes for both inputs.
-*  @param value:   The initial value of both inputs.
-*  @param log:     A true or false value that determines whether the slider uses logarithmic scale.
-*/
-function linkInputs(slider, number, min, max, step, value, log = false) {
-    number.min = min;
-    number.max = max;
-    number.step = step;
-    number.value = value;
-    if (!log) {
-        slider.min = min;
-        slider.max = max;
-        slider.step = step;
-        slider.value = value;
-
-        slider.oninput = function () {
-            number.value = slider.value;
-        };
-        number.oninput = function () {
-            slider.value = number.value;
-        };
-    } else {
-        slider.min = Math.log(min * 0.999);
-        slider.max = Math.log(max * 1.001);
-        slider.step = (Math.log(max) - Math.log(min)) / ((max - min) / step);
-        slider.value = Math.log(value);
-        slider.oninput = function () {
-            let x = Math.exp(slider.value);
-            if (x > max) {
-                number.value = max;
-            } else if (x < min) {
-                number.value = min;
-            } else {
-                number.value = round(x, 2);
-            }
-        };
-        number.oninput = function () {
-            slider.value = Math.log(number.value);
-        }
-    }
 }
 
 /**

@@ -60,6 +60,55 @@ export function updateLabels(myChart, form, immData = false, immTitle = false, i
 }
 
 /**
+*  This function links a <input type="range"> and a <input type="number"> together so changing the value
+*  of one updates the other. This function also sets the min, max and step properties for both the inputs.
+*  @param slider:  A <input type="range"> to be linked.
+*  @param number:  A <input type"number"> to be linked.
+*  @param min:     The min value for both inputs.
+*  @param max:     The max value for both inputs.
+*  @param step:    The step of changes for both inputs.
+*  @param value:   The initial value of both inputs.
+*  @param log:     A true or false value that determines whether the slider uses logarithmic scale.
+*/
+export function linkInputs(slider, number, min, max, step, value, log = false) {
+    number.min = min;
+    number.max = max;
+    number.step = step;
+    number.value = value;
+    if (!log) {
+        slider.min = min;
+        slider.max = max;
+        slider.step = step;
+        slider.value = value;
+
+        slider.oninput = function () {
+            number.value = slider.value;
+        };
+        number.oninput = function () {
+            slider.value = number.value;
+        };
+    } else {
+        slider.min = Math.log(min * 0.999);
+        slider.max = Math.log(max * 1.001);
+        slider.step = (Math.log(max) - Math.log(min)) / ((max - min) / step);
+        slider.value = Math.log(value);
+        slider.oninput = function () {
+            let x = Math.exp(slider.value);
+            if (x > max) {
+                number.value = max;
+            } else if (x < min) {
+                number.value = min;
+            } else {
+                number.value = round(x, 2);
+            }
+        };
+        number.oninput = function () {
+            slider.value = Math.log(number.value);
+        }
+    }
+}
+
+/**
  *  This function updates the height for the Handsontable object based on the number of rows it has.
  *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
  *  @param table:   The Handsontable object whose height is to be updated.
