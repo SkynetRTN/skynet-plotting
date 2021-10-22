@@ -208,6 +208,7 @@ export function pulsar() {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
+        updateTableHeight(hot);
     }
 
     let lightCurveForm = document.getElementById('light-curve-form');
