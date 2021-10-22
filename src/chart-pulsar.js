@@ -42,13 +42,20 @@ export function pulsar() {
         '</div>\n' +
         '</form>\n';
         
-    document.getElementById("period-folding-div").innerHTML =
-        '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+
+        document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
+        '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
+        '<div class="col-sm-6">Folding Period: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="period folding" title="Folding Period" value=0></input></div>\n' +
         '</div>\n' +
-        '</form>\n';
+        '<div class="row">\n' +
+        '<div class="col-sm-6">Bins: </div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="number of bins" title="Bins" value=0></input></div>\n' +
+        '</div>\n' +
+        '</form>\n'
+    );
+
 
     let tableData = [];
     for (let i = 0; i < 14; i++) {
@@ -427,7 +434,27 @@ function periodFolding(myChart, src, period) {
         })
     }
     return pfData;
+
+    arr.sort((a, b) => a[0] - b[0]);
 }
+
+
+
+arr.sort((a, b) => a[0] - b[0]);
+//this function iterates over bins to average the flux
+
+//function binning(time and flux) {
+       // while 0 <= j < bins - 1
+//
+
+
+
+
+
+
+
+
+
 
 /**
  * This function computes the floating point modulo.
