@@ -10,6 +10,7 @@ import { venus } from './chart-venus.js';
 import { variable, variableFileUpload } from './chart-variable.js';
 import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
 import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
+import { cluster } from './chart-cluster.js';
 
 /**
  *  Initializing the page when the website loads
@@ -146,6 +147,8 @@ function chartType(chart) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1]);
         }
+    } else if (chart === 'cluster') {
+        objects = cluster();
     }
 
     updateTableHeight(objects[0]);

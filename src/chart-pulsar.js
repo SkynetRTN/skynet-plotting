@@ -276,10 +276,10 @@ export function pulsar() {
                 return;
             };
             let chn1 = myChart.data.datasets[0].data;
-            let t1 = chn1.map(entry => 1/entry.x);
+            let t1 = chn1.map(entry => entry.x);
             let y1 = chn1.map(entry => entry.y);
             let chn2 = myChart.data.datasets[1].data;
-            let t2 = chn2.map(entry => 1/entry.x);
+            let t2 = chn2.map(entry => entry.x);
             let y2 = chn2.map(entry => entry.y);
 
             myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
