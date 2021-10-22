@@ -81,6 +81,7 @@ export function pulsar() {
                 x: "x",
                 y: "y",
                 lastMode: "Pulsar",
+                fourierChanged: true
             },
             datasets: [
                 {
@@ -170,7 +171,6 @@ export function pulsar() {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
-        updateTableHeight(hot);
     }
 
     let lightCurveForm = document.getElementById('light-curve-form');
@@ -206,6 +206,7 @@ export function pulsar() {
 
         myChart.update(0);
         // TODO: background subtraction
+        myChart.data.customLabels.fourierChanged = true;
     }
 
     let fourierForm = document.getElementById("fourier-form");
@@ -224,8 +225,10 @@ export function pulsar() {
         let t2 = chn2.map(entry => entry.x);
         let y2 = chn2.map(entry => entry.y);
 
-        myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 2000);
-        myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 2000);
+        myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
+        myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
+
+        myChart.update(0);
     }
     
     let periodFoldingForm = document.getElementById("period-folding-form");
@@ -233,6 +236,8 @@ export function pulsar() {
         let period = parseFloat(this.pf.value);
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period);
+
+        myChart.update(0);
     }
     
     myChart.options.title.text = "Title"
@@ -340,6 +345,7 @@ function updatePulsar(table, myChart) {
 
     myChart.data.datasets[0].data = chn1Data;
     myChart.data.datasets[1].data = chn2Data;
+    myChart.data.customLabels.fourierChanged = true;
 
     switchMode(myChart, 'lc');
 }
@@ -359,22 +365,16 @@ function switchMode(myChart, mode, reset=false) {
     }
     if (mode === 'lc' || reset) {
         showDiv("light-curve-div");
-        document.getElementById('light-curve-form').oninput();
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = true;
     } else if (mode === 'ft') {
         showDiv("fourier-div");
-        document.getElementById('fourier-form').oninput();
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = false;
     } else {
         showDiv("period-folding-div");
-        document.getElementById('period-folding-form').oninput();
         myChart.data.datasets[4].hidden = false;
         myChart.data.datasets[5].hidden = false;
-        myChart.options.scales.yAxes[0].ticks.reverse = true;
     }
     myChart.update(0);
 
@@ -389,6 +389,12 @@ function switchMode(myChart, mode, reset=false) {
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     } else if (mode === 'ft') {
+        // Only update fourier transform periodogram when changes occured.
+        if (customLabels.fourierChanged) {
+            customLabels.fourierChanged = false;
+            document.getElementById('fourier-form').oninput();
+        }
+
         customLabels.title = myChart.options.title.text;
         customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
