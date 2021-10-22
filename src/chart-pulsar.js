@@ -306,6 +306,7 @@ export function pulsar() {
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
+        updateTableHeight(hot);
     }
 
     myChart.options.title.text = "Title"
