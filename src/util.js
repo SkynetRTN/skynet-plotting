@@ -122,3 +122,23 @@ export function getDateString() {
 function dateAppendZero(num) {
     return num < 10 ? '0' + num : '' + num;
 }
+export function sanitizeData(dataset){
+//Function for cleaning blanks from coordinate arrays.
+    var newdataset = dataset;
+    for (let i=0; i< dataset.length; i++){
+        try{
+            newdataset[i].x = ((dataset[i].x==='')? undefined : dataset[i].x);
+        }
+        catch{}
+        try{
+            newdataset[i].y = ((dataset[i].y==='')? undefined : dataset[i].y);
+        }
+        catch{}
+        try{
+            newdataset[i].wl = ((dataset[i].wl==='')? undefined : dataset[i].wl);
+        }
+        catch{}
+    };
+    console.log(newdataset);
+    return newdataset;
+}
