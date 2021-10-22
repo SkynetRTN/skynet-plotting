@@ -26,7 +26,7 @@ export function pulsar() {
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Background Scale (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=0></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
     
