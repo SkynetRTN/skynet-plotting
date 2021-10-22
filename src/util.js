@@ -139,6 +139,5 @@ export function sanitizeData(dataset){
         }
         catch{}
     };
-    console.log(newdataset);
     return newdataset;
 }
