@@ -85,8 +85,8 @@ export function backgroundSubtraction(time, flux, dt) {
             j = j - 1;
         }
         let jmin = j + 1;
-        j = i;
 
+        j = i;
         while (j < n && time[j] <= time[i] + (dt / 2)) {
             j = j + 1;
         }
@@ -98,6 +98,7 @@ export function backgroundSubtraction(time, flux, dt) {
 }
 
 export function median(arr) {
+    arr = arr.filter(num => !isNaN(num));
     const mid = Math.floor(arr.length / 2);
     const nums = arr.sort((a, b) => a - b);
     return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
@@ -119,7 +120,7 @@ export let ArrMath = {
     },
     mul: function (arr1, arr2) {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
-            console.assert(arr1.length === arr2.length, 
+            console.assert(arr1.length === arr2.length,
                 "Error: Dimension mismatch when multiplying two arrays.");
             return arr1.map((x, i) => x * arr2[i]);
         } else if (Array.isArray(arr1)) {
@@ -132,7 +133,7 @@ export let ArrMath = {
     },
     div: function (arr1, arr2) {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
-            console.assert(arr1.length === arr2.length, 
+            console.assert(arr1.length === arr2.length,
                 "Error: Dimension mismatch when dividing two arrays.");
             return arr1.map((x, i) => x / arr2[i]);
         } else if (Array.isArray(arr1)) {
@@ -145,7 +146,7 @@ export let ArrMath = {
     },
     add: function (arr1, arr2) {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
-            console.assert(arr1.length === arr2.length, 
+            console.assert(arr1.length === arr2.length,
                 "Error: Dimension mismatch when adding two arrays.");
             return arr1.map((x, i) => x + arr2[i]);
         } else if (Array.isArray(arr1)) {
@@ -158,7 +159,7 @@ export let ArrMath = {
     },
     sub: function (arr1, arr2) {
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
-            console.assert(arr1.length === arr2.length, 
+            console.assert(arr1.length === arr2.length,
                 "Error: Dimension mismatch when subtracting two arrays.");
             return arr1.map((x, i) => x - arr2[i]);
         } else if (Array.isArray(arr1)) {
@@ -174,7 +175,7 @@ export let ArrMath = {
             return this.dot(arr1, arr1);
         }
         if (Array.isArray(arr1) && Array.isArray(arr2)) {
-            console.assert(arr1.length === arr2.length, 
+            console.assert(arr1.length === arr2.length,
                 "Error: Dimension mismatch when dot multiplying two arrasy.");
             return arr1.reduce((acc, cur, i) => (acc + cur * arr2[i]), 0);
         } else if (!Array.isArray(arr1) && !Array.isArray(arr2)) {
