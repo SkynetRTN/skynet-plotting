@@ -72,7 +72,7 @@ export function pulsar() {
 
 
     let tableData = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 1000; i++) {
         tableData[i] = {
             'time': (i*0.2) + 3560,
             'chn1': (Math.random()/20) + 20.63,
