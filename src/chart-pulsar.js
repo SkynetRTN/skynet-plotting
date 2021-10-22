@@ -432,6 +432,9 @@ function switchMode(myChart, mode, reset = false) {
     }
     let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
+        if (document.getElementById('pulsar-form').mode.value !== 'lc') {
+            document.getElementById('pulsar-form').mode[0].checked = true;
+        }
         if (modified.lightCurveChanged) {
             modified.lightCurveChanged = false;
             document.getElementById('light-curve-form').oninput();
