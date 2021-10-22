@@ -36,7 +36,7 @@ export function rad(degree) {
  * @param {number} stop the stopin period
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
- export function lombScargle(ts, ys, start, stop, steps = 1000) {
+export function lombScargle(ts, ys, start, stop, steps = 1000, freqMode = false) {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return;
@@ -44,17 +44,18 @@ export function rad(degree) {
 
     let step = (stop - start) / steps;
 
-    let spectralPowerDensity = [];
-
-    let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+    // Nyquist is not used here. But it became useful for default frequency ranges in
+    // Fourier transform!! (In pulsar mode).
+    // let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
     let hResidue = ArrMath.sub(ys, ArrMath.mean(ys));
     let twoVarOfY = 2 * ArrMath.var(ys);
-    
-    let period = start;
 
-    while (period < stop) {
+    // xVal is what we iterate through & push to result. It will either be frequency or
+    // period, depending on the mode.
+    let spectralPowerDensity = [];
+    for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        let frequency = 1 / period;
+        let frequency = freqMode ? xVal : 1 / xVal;
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -62,14 +63,12 @@ export function rad(degree) {
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: period,
-            y: (( Math.pow( ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0) ) /
-                ( ArrMath.dot(ArrMath.cos(omegaTMinusTau)) ) +
-                ( Math.pow( ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0) ) /
-                ( ArrMath.dot(ArrMath.sin(omegaTMinusTau)) )) / twoVarOfY,
+            x: xVal,
+            y: ((Math.pow(ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0)) /
+                (ArrMath.dot(ArrMath.cos(omegaTMinusTau))) +
+                (Math.pow(ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0)) /
+                (ArrMath.dot(ArrMath.sin(omegaTMinusTau)))) / twoVarOfY,
         });
-
-        period += step;
     }
 
     return spectralPowerDensity;
