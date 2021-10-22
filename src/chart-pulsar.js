@@ -60,12 +60,12 @@ export function pulsar() {
     document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
         '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Folding Period: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
+        '<div class="col-sm-7">Folding Period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Bins: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
+        '<div class="col-sm-7">Bins: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
