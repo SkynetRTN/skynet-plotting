@@ -211,6 +211,7 @@ function initializeChart(chart, table) {
 /**
  *  This function takes a Chartjs object and a form containing information (Title, data labels, X axis label,
  *  Y axis label) about the chart, and updates corresponding properties of the chart.
+ *  DATA FLOW: chart-info-form -> Chart
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
  */

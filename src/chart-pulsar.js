@@ -29,7 +29,7 @@ export function pulsar() {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
-    
+
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
@@ -55,14 +55,21 @@ export function pulsar() {
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstop" title="Stop Frequency" value=30></input></div>\n' +
         '</div>\n' +
         '</form>\n';
-        
-    document.getElementById("period-folding-div").innerHTML =
-        '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+
+
+    document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
+        '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
+        '<div class="col-sm-7">Folding Period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
         '</div>\n' +
-        '</form>\n';
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Bins: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
+        '</div>\n' +
+        '</form>\n'
+    );
+
 
     let tableData = [];
     for (let i = 0; i < 50; i++) {
@@ -142,7 +149,7 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -154,7 +161,7 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -173,7 +180,7 @@ export function pulsar() {
                 callbacks: {
                     label: function (tooltipItem, data) {
                         return '(' + round(tooltipItem.xLabel, 4) + ', ' +
-                               round(tooltipItem.yLabel, 4) + ')';
+                            round(tooltipItem.yLabel, 4) + ')';
                     },
                 },
             },
@@ -196,7 +203,7 @@ export function pulsar() {
         afterRemoveRow: update,
         afterCreateRow: update,
     });
-    
+
     let pulsarForm = document.getElementById("pulsar-form");
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
@@ -288,20 +295,20 @@ export function pulsar() {
         console.log(document.getElementById("fourier-form").fouriermode.value)
         myChart.update(0)
     }
-    
+
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = function () {
         let period = parseFloat(this.pf.value);
-        myChart.data.datasets[4].data = periodFolding(myChart, 0, period);
-        myChart.data.datasets[5].data = periodFolding(myChart, 1, period);
-
+        let bins = parseInt(this.bins.value);
+        myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
+        myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
     }
-    
+
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
     myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
-    
+
     updatePulsar(hot, myChart);
     updateTableHeight(hot);
 
@@ -339,7 +346,7 @@ export function pulsarFileUpload(evt, table, myChart) {
 
         //turn each string into an array of numbers
         data = data.map(val => val.trim().split(/\ +/));
-        
+
         data = data.map(row => row.map(str => parseFloat(str)));
         data = data.filter(row => (row[9] !== 0));
         data = data.map(row => [row[0], row[5], row[6]]);
@@ -353,7 +360,7 @@ export function pulsarFileUpload(evt, table, myChart) {
             });
         }
         tableData.sort((a, b) => a.time - b.time);
-        
+
         switchMode(myChart, 'lc', true);
 
         // Need to put this line down in the end, because it will trigger update on the Chart, which will 
@@ -375,7 +382,7 @@ function updatePulsar(table, myChart) {
     // console.log("updatePulsar called");
 
     myChart.data.minT = Number.POSITIVE_INFINITY;
-    
+
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].data = [];
     }
@@ -390,7 +397,7 @@ function updatePulsar(table, myChart) {
         let chn2 = tableData[i][2];
 
         myChart.data.minT = Math.min(myChart.data.minT, time);
-
+    
         chn1Data.push({
             "x": time,
             "y": chn1,
@@ -418,7 +425,7 @@ function updatePulsar(table, myChart) {
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset=false) {
+function switchMode(myChart, mode, reset = false) {
     // Displaying the correct datasets
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
@@ -467,7 +474,7 @@ function switchMode(myChart, mode, reset=false) {
         customLabels.title = myChart.options.title.text;
         customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
-        
+
         myChart.options.title.text = "Periodogram";
         myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
@@ -502,23 +509,68 @@ function showDiv(id) {
     }
 }
 
-function periodFolding(myChart, src, period) {
+function periodFolding(myChart, src, period, bins) {
     if (period === 0) {
         return myChart.data.datasets[src].data;
     }
 
     let data = myChart.data.datasets[src].data;
     let minT = myChart.data.minT;
+
+    let foldedData = data.map(val => ({
+        "x": floatMod(val.x - minT, period),
+        "y": val.y
+    }));
+
+    // this sorts the time components of the array and then
+    // sorts the flux components accordingly
+
+    foldedData.sort((a, b) => a.x - b.x);
+
+    if (bins === 0) {
+        let repeated = foldedData.map(val => ({
+            "x": val.x + period,
+            "y": val.y
+        }));
+
+        return foldedData.concat(repeated);
+    }
+
+    let time_b = []
+    let flux_b = []
+
+    //initialize j and new binned arrays
+    let j = 0;
+
+    //iterate over the input number of bins!
+    for (let i = 0; i < bins; i++) {
+        let num = 0; //initialize count
+        time_b.push(period * (i + .5) / bins);  //initialize binned time
+        flux_b.push(0);  //initialize binned flux
+
+        while (j < foldedData.length && foldedData[j].x < (period * (i + 1)) / bins) {
+            num = num + 1;
+            flux_b[i] = flux_b[i] + foldedData[j].y;
+            j = j + 1;//update count, total, and binned flux
+        }
+
+        if (num !== 0) {
+            flux_b[i] = flux_b[i] / num; //average binned flux
+        }
+    }
+
     let pfData = [];
 
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < bins; i++) {
         pfData.push({
-            "x": floatMod(data[i].x - minT, period),
-            "y": data[i].y,
-        });
+            "x": time_b[i],
+            "y": flux_b[i]
+        })
+    }
+    for (let i = 0; i < bins; i++) {
         pfData.push({
-            "x": pfData[pfData.length - 1].x + period,
-            "y": pfData[pfData.length - 1].y,
+            "x": time_b[i] + period,
+            "y": flux_b[i]
         })
     }
     return pfData;
