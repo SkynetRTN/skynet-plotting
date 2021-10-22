@@ -77,7 +77,7 @@ export function rad(degree) {
 
 export function backgroundSubtraction(time, flux, dt) {
     let n = Math.min(time.length, flux.length);
-    const medians = [];
+    const subtracted = [];
 
     for (i = 0; i < n; i++) {
         let j = i;
@@ -92,9 +92,9 @@ export function backgroundSubtraction(time, flux, dt) {
         }
         let jmax = j;
         let fluxmed = median(flux.slice(jmin, jmax));
-        medians.push(fluxmed);
+        subtracted.push(flux[i] - fluxmed);
     }
-    return medians;
+    return subtracted;
 }
 
 export function median(arr) {
