@@ -245,7 +245,6 @@ export function pulsar() {
         myChart.data.modified.periodFoldingChanged = true;
 
         myChart.update(0);
-        updateTableHeight(hot);
     }
 
     let fourierForm = document.getElementById("fourier-form");
