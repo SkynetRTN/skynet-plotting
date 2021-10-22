@@ -51,7 +51,7 @@ export function pulsar() {
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6">Bins: </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=0></input></div>\n' +
+        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
@@ -132,7 +132,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -141,7 +141,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -476,6 +476,15 @@ function periodFolding(myChart, src, period, bins) {
 
     foldedData.sort((a, b) => a.x - b.x);
 
+    if (bins === 0) {
+        let repeated = foldedData.map(val => ({
+            "x": val.x + period,
+            "y": val.y
+        }));
+
+        return foldedData.concat(repeated);
+    }
+
     let time_b = []
     let flux_b = []
 
@@ -485,7 +494,7 @@ function periodFolding(myChart, src, period, bins) {
     //iterate over the input number of bins!
     for (let i = 0; i < bins; i++) {
         let num = 0; //initialize count
-        time_b.push(period * (i + .5)) / bins;  //initialize binned time
+        time_b.push(period * (i + .5) / bins);  //initialize binned time
         flux_b.push(0);  //initialize binned flux
 
         while (j < foldedData.length && foldedData[j].x < (period * (i + 1)) / bins) {
