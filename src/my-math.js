@@ -75,6 +75,34 @@ export function rad(degree) {
     return spectralPowerDensity;
 }
 
+export function backgroundSubtraction(time, flux, dt) {
+    let n = Math.min(time.length, flux.length);
+    const medians = [];
+
+    for (i = 0; i < n; i++) {
+        let j = i;
+        while (time[j] > time[i] - (dt / 2)) {
+            j = j - 1;
+        }
+        let jmin = j + 1;
+        j = i;
+
+        while (time[j] < time[i] + (dt / 2)) {
+            j = j + 1;
+        }
+        let jmax = j;
+        let fluxmed = median(flux.slice(jmin, jmax));
+        medians.push(fluxmed);
+    }
+    return medians;
+}
+
+export function median(arr) {
+    const mid = Math.floor(arr.length / 2);
+    const nums = arr.sort((a, b) => a - b);
+    return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+};
+
 export let ArrMath = {
     max: function (arr) {
         return Math.max.apply(null, arr);
