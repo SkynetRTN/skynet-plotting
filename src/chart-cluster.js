@@ -47,7 +47,6 @@ export function cluster() {
         '<div class="col-sm-4">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-<<<<<<< HEAD
         '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n' +
         '<option value="B" title="B filter" selected>B</option></div>\n' +
         '<option value="V" title="V filter">V</option></select></div>\n' +
@@ -57,17 +56,6 @@ export function cluster() {
         '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n' +
         '<option value="V" title="V filter" selected>V</option></div>\n' +
         '<option value="B" title="B filter">B</option></select></div>\n' +
-=======
-        '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n'+
-        '<option value="B" title="B filter" selected>B</option></div>\n'+
-        '<option value="V" title="V filter">V</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
->>>>>>> fee3cd80d4d2525cfc964eb33c372d38089a9f73
         '</div>\n' +
         '</form>\n');
 
@@ -481,7 +469,6 @@ function generateclusterData() {
      *  Generates random age, distance, metallicity, reddening
      */
     let returnData = [];
-<<<<<<< HEAD
     let clusterData = HRGenerator(Math.random() * 99.9 + 0.1,
         100,
         Math.random() * 4 + 6,
@@ -491,17 +478,6 @@ function generateclusterData() {
     for (let i = 0; i < clusterData.length; i++) {
         let y = clusterData[i].y * (1 + (Math.random() - 0.5) * 0.40);
         let x = clusterData[i].x * (1 + (Math.random() - 0.5) * 0.40) + y;
-=======
-    let clusterData = HRGenerator(Math.random()*99.9+0.1,
-                              100,
-                              Math.random()*4+6,
-                              Math.random()*100,
-                              Math.random()*100,
-                              -8,8,100);
-    for (let i=0; i<clusterData.length; i++){
-        let V= clusterData[i].y+((Math.random()-0.5)*0.5);
-        let B= clusterData[i].x+((Math.random()-0.5)*0.7)+V;
->>>>>>> fee3cd80d4d2525cfc964eb33c372d38089a9f73
         returnData.push({
             y: V,
             x: B
@@ -519,14 +495,8 @@ function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') 
             tableData[i][xKey] === null || tableData[i][yKey] === null) {
             continue;
         }
-<<<<<<< HEAD
         //B-V,V
         chart[start++] = { x: tableData[i][xKey] - tableData[i][yKey], y: tableData[i][yKey] };
-=======
-        //red-blue,red
-        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], 
-                           y: tableData[i][yKey] };
->>>>>>> fee3cd80d4d2525cfc964eb33c372d38089a9f73
     }
     while (chart.length !== start) {
         chart.pop();
