@@ -259,33 +259,26 @@ export function variableFileUpload(evt, table, myChart) {
 
         console.log(data1, data2);
 
-        while ((left < data1.length) && (right < data2.length)) {
-            while (left < data1.length && data1[left][0] < data2[right][0]) {
-                pushTableData(tableData, data1[left][0], data1[left][1], NaN);
-                left++;
-            }
-
-            while (left < data1.length && right < data2.length && data1[left][0] > data2[right][0]) {
-                pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
-                right++;
-            }
-
-            if (left < data1.length && right < data2.length) {
-                console.log('left:  ' + left);
-                console.log('right: ' + right);
+        while (left < data1.length && right < data2.length) {
+            if (data1[left][0] === data2[right][0]) {
                 pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1]);
                 left++;
                 right++;
+            } else if (data1[left][0] < data2[right][0]) {
+                pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+                left++;
             } else {
-                while (left < data1.length) {
-                    pushTableData(tableData, data1[left][0], data1[left][1], NaN);
-                    left++;
-                }
-                while (right < data2.length) {
-                    pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
-                    right++;
-                }
+                pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+                right++;
             }
+        }
+        while (left < data1.length) {
+            pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+            left++;
+        }
+        while (right < data2.length) {
+            pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+            right++;
         }
 
         table.updateSettings({
