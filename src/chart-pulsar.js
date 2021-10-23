@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./util.js"
+import { sanitizeTableData, updateLabels, updateTableHeight } from "./util.js"
 import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
 
 /**
@@ -225,7 +225,7 @@ export function pulsar() {
         if (isNaN(dt)) {
             return;
         }
-        let tableData = hot.getData();
+        let tableData = sanitizeTableData(hot.getData(), [0]);
 
         let time = [];
         let chn1 = [];
@@ -244,6 +244,7 @@ export function pulsar() {
         chn1 = [];
         chn2 = [];
         for (let i = 0; i < time.length; i++) {
+            myChart.data.minT = Math.min(myChart.data.minT, time[i]);
             chn1.push({
                 'x': time[i],
                 'y': chn1Sub[i]
@@ -370,13 +371,16 @@ export function pulsarFileUpload(evt, table, myChart) {
             });
         }
         tableData.sort((a, b) => a.time - b.time);
+        table.updateSettings({ data: tableData });
+
+        let ts = data.map(row => row[0]).filter(num => !isNaN(num));
+        let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+
+        let fourierForm = document.getElementById('fourier-form');
+        fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
+        fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 
         switchMode(myChart, 'lc', true);
-
-        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
-        // in turn trigger update to the pulsar form and the light curve form, which needs to be cleared
-        // prior to being triggered by this upload.
-        table.updateSettings({ data: tableData });
     }
     reader.readAsText(file);
 }
@@ -390,50 +394,12 @@ export function pulsarFileUpload(evt, table, myChart) {
  */
 function updatePulsar(table, myChart) {
     // console.log("updatePulsar called");
-
     myChart.data.minT = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < 6; i++) {
-        myChart.data.datasets[i].data = [];
-    }
-
-    let tableData = table.getData();
-    let chn1Data = [];
-    let chn2Data = [];
-
-    for (let i = 0; i < tableData.length; i++) {
-        let time = tableData[i][0];
-        let chn1 = tableData[i][1];
-        let chn2 = tableData[i][2];
-
-        myChart.data.minT = Math.min(myChart.data.minT, time);
-
-        chn1Data.push({
-            "x": time,
-            "y": chn1,
-        })
-        chn2Data.push({
-            "x": time,
-            "y": chn2,
-        })
-    }
-
-    myChart.data.datasets[0].data = chn1Data;
-    myChart.data.datasets[1].data = chn2Data;
+    // Flag that every mode needs to be updated.
     myChart.data.modified.lightCurveChanged = true;
     myChart.data.modified.fourierChanged = true;
     myChart.data.modified.periodFoldingChanged = true;
-
-    let ts = myChart.data.datasets[0].data.map(entry => entry.x);
-    let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
-    let fourierForm = document.getElementById('fourier-form');
-    fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
-    fourierForm.pstop.value = 3;
-    fourierForm.fstart.value = 0.1;
-    fourierForm.fstop.value = Number(nyquist.toPrecision(4));
-    let periodFoldingForm = document.getElementById('period-folding-form');
-    periodFoldingForm.pf.value = 0;
-    periodFoldingForm.bins.value = 100;
 
     switchMode(myChart, 'lc');
 }
@@ -488,10 +454,8 @@ function switchMode(myChart, mode, reset = false) {
 
         document.getElementById('fourier-form').rc.value = 1000;
         document.getElementById('fourier-form').fouriermode.value = 'p';
-        document.getElementById('fourier-form').pstart.value = 0.1;
         document.getElementById('fourier-form').pstop.value = 3;
         document.getElementById('fourier-form').fstart.value = 0.1;
-        document.getElementById('fourier-form').fstop.value = 30;
 
         document.getElementById("period-folding-form").pf.value = 0;
         document.getElementById("period-folding-form").bins.value = 100;
