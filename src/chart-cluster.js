@@ -12,27 +12,27 @@ export function cluster() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Dist. (kpc)</div>\n' +
+        '<div class="col-sm-4 des">Dist. (kpc):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="d" name="d"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="d" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">+/- Range (%)</div>\n' +
+        '<div class="col-sm-4 des">+/- Range (%):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">log(Age (yr))</div>\n' +
+        '<div class="col-sm-4 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Age" name="age"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Reddening (mag)</div>\n' +
+        '<div class="col-sm-4 des">Reddening (mag):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Reddening" name="red"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Metallicity (solar)</div>\n' +
+        '<div class="col-sm-4 des">Metallicity (solar):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
@@ -42,9 +42,9 @@ export function cluster() {
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4">Blue</div>\n' +
-        '<div class="col-sm-4">Red</div>\n' +
-        '<div class="col-sm-4">Luminosity</div>\n' +
+        '<div class="col-sm-4">Blue:</div>\n' +
+        '<div class="col-sm-4">Red:</div>\n' +
+        '<div class="col-sm-4">Luminosity:</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n' +
@@ -68,7 +68,267 @@ export function cluster() {
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
 
-    let tableData = generateclusterData();
+    let tableData = [
+        {"r":15.43097938,"b":16.27826813},
+        {"r":16.77254031,"b":25.11862975},
+        {"r":15.8596803,"b":16.02283206},
+        {"r":15.33731775,"b":16.33344688},
+        {"r":16.38859704,"b":17.18360391},
+        {"r":16.31949681,"b":16.53544594},
+        {"r":14.0629343,"b":15.38553603},
+        {"r":16.29534441,"b":16.50974513},
+        {"r":16.1657268,"b":16.83575269},
+        {"r":17.51460697,"b":18.5984111},
+        {"r":16.04886286,"b":17.05094936},
+        {"r":16.5769982,"b":17.85338039},
+        {"r":16.25836173,"b":17.32776556},
+        {"r":16.98460632,"b":17.32776556},
+        {"r":16.55678419,"b":19.03864387},
+        {"r":16.33446192,"b":16.95786137},
+        {"r":16.57383717,"b":18.22282621},
+        {"r":15.45454838,"b":16.38287161},
+        {"r":0,"b":0},
+        {"r":0,"b":18.64958716},
+        {"r":17.03338599,"b":17.18225861},
+        {"r":15.67943013,"b":17.06307599},
+        {"r":15.58749498,"b":16.25978671},
+        {"r":0,"b":0},
+        {"r":17.22801358,"b":19.11819362},
+        {"r":15.58749498,"b":16.25978671},
+        {"r":13.73313678,"b":15.09469488},
+        {"r":17.88121272,"b":0},
+        {"r":16.85434535,"b":18.18845161},
+        {"r":14.82866923,"b":16.10561823},
+        {"r":13.73313678,"b":15.09469488},
+        {"r":16.20261041,"b":17.10551692},
+        {"r":14.05584728,"b":14.95406699},
+        {"r":13.41512997,"b":14.77205357},
+        {"r":13.4150376,"b":14.77142355},
+        {"r":16.3081282,"b":16.23340589},
+        {"r":0,"b":0},
+        {"r":13.50782524,"b":17.19386585},
+        {"r":14.05584728,"b":14.95406699},
+        {"r":14.48228538,"b":15.53284141},
+        {"r":14.48228538,"b":15.53284141},
+        {"r":13.41512997,"b":14.77205357},
+        {"r":14.98742022,"b":16.16161323},
+        {"r":0,"b":17.3542598},
+        {"r":14.48228538,"b":15.53284141},
+        {"r":14.82000979,"b":15.50808964},
+        {"r":13.50782524,"b":14.93330301},
+        {"r":14.23864951,"b":15.36526562},
+        {"r":0,"b":17.3542598},
+        {"r":0,"b":21.88558586},
+        {"r":15.88362032,"b":16.99347154},
+        {"r":16.59246742,"b":18.63973181},
+        {"r":18.74756052,"b":18.43987184},
+        {"r":0,"b":0},
+        {"r":18.79360112,"b":0},
+        {"r":0,"b":17.3542598},
+        {"r":0,"b":0},
+        {"r":13.85972628,"b":15.04605293},
+        {"r":0,"b":0},
+        {"r":12.99477704,"b":14.33654336},
+        {"r":0,"b":0},
+        {"r":13.44868484,"b":15.13626032},
+        {"r":13.85972628,"b":15.04605293},
+        {"r":16.64663172,"b":16.52047654},
+        {"r":13.44868484,"b":15.13626032},
+        {"r":15.2232312,"b":16.59897296},
+        {"r":13.80402188,"b":15.24006842},
+        {"r":16.95685979,"b":18.65277628},
+        {"r":13.85972628,"b":15.04605293},
+        {"r":15.93885734,"b":16.68293062},
+        {"r":12.99477704,"b":14.33654336},
+        {"r":14.81124663,"b":16.13093644},
+        {"r":0,"b":0},
+        {"r":14.88940903,"b":15.75268685},
+        {"r":18.34280539,"b":21.27274425},
+        {"r":13.80402188,"b":15.24006842},
+        {"r":17.19977299,"b":15.41325092},
+        {"r":0,"b":16.92714199},
+        {"r":16.24101221,"b":16.93271118},
+        {"r":16.08172697,"b":16.68293062},
+        {"r":14.69924929,"b":15.63058973},
+        {"r":13.80402188,"b":15.24006842},
+        {"r":13.24179334,"b":13.83144443},
+        {"r":16.18894154,"b":15.41325092},
+        {"r":0,"b":0},
+        {"r":14.88940903,"b":15.75268685},
+        {"r":14.8531258,"b":15.95426672},
+        {"r":16.72466552,"b":16.32461737},
+        {"r":0,"b":0},
+        {"r":14.69924929,"b":0},
+        {"r":14.52230024,"b":15.84437243},
+        {"r":15.92405784,"b":16.98715997},
+        {"r":15.05031888,"b":16.18179559},
+        {"r":18.09267371,"b":18.58192812},
+        {"r":0,"b":0},
+        {"r":15.51171659,"b":15.72326776},
+        {"r":16.60222305,"b":16.03893106},
+        {"r":14.56617257,"b":15.41325092},
+        {"r":16.06682967,"b":17.07770783},
+        {"r":16.45704176,"b":16.90445332},
+        {"r":15.67454005,"b":16.05655379},
+        {"r":14.8531258,"b":15.95426672},
+        {"r":16.45704176,"b":16.90445332},
+        {"r":21.08594604,"b":17.49628014},
+        {"r":14.69924929,"b":15.63058973},
+        {"r":0,"b":17.84698171},
+        {"r":14.61864369,"b":15.67788232},
+        {"r":13.24179334,"b":13.83144443},
+        {"r":13.24179334,"b":13.83144443},
+        {"r":0,"b":0},
+        {"r":15.72682416,"b":16.51716071},
+        {"r":15.58326758,"b":16.03031502},
+        {"r":17.22909189,"b":17.8896688},
+        {"r":14.61864369,"b":15.67788232},
+        {"r":17.39615147,"b":16.80733512},
+        {"r":16.01539528,"b":16.2342371},
+        {"r":15.58326758,"b":16.03031502},
+        {"r":18.79203925,"b":18.26028926},
+        {"r":15.58326758,"b":16.03031502},
+        {"r":13.49905899,"b":14.62940184},
+        {"r":14.98669874,"b":15.35993901},
+        {"r":14.97756429,"b":0},
+        {"r":13.82155931,"b":14.47200105},
+        {"r":0,"b":17.86970859},
+        {"r":16.40612773,"b":16.61646937},
+        {"r":14.97756429,"b":15.76702651},
+        {"r":13.49905899,"b":15.18299228},
+        {"r":13.49905899,"b":14.62940184},
+        {"r":13.70930632,"b":14.87941149},
+        {"r":15.54511222,"b":16.71033503},
+        {"r":13.77453263,"b":18.07248158},
+        {"r":13.77453263,"b":15.17212027},
+        {"r":14.27431121,"b":15.25671618},
+        {"r":14.02803462,"b":15.11422176},
+        {"r":13.70930632,"b":14.87941149},
+        {"r":13.33085835,"b":13.98467529},
+        {"r":14.90694167,"b":16.02144661},
+        {"r":0,"b":0},
+        {"r":13.70930632,"b":14.87941149},
+        {"r":13.8372448,"b":15.31225338},
+        {"r":0,"b":16.57549536},
+        {"r":14.02803462,"b":15.11422176},
+        {"r":16.96342168,"b":19.18057963},
+        {"r":14.37840351,"b":15.04955875},
+        {"r":15.25060087,"b":21.08582186},
+        {"r":16.41724172,"b":17.10243209},
+        {"r":16.47411586,"b":17.91034943},
+        {"r":15.25060087,"b":16.57596516},
+        {"r":14.37840351,"b":15.0486841},
+        {"r":13.8372448,"b":15.31225338},
+        {"r":16.53261597,"b":18.81756806},
+        {"r":0,"b":0},
+        {"r":14.84242564,"b":15.93099465},
+        {"r":18.28437793,"b":17.15460615},
+        {"r":16.53261597,"b":18.81756806},
+        {"r":0,"b":18.79026006},
+        {"r":0,"b":17.92461728},
+        {"r":13.13773957,"b":15.0750296},
+        {"r":0,"b":18.79026006},
+        {"r":0,"b":0},
+        {"r":14.95902581,"b":15.93054716},
+        {"r":15.06917621,"b":16.15735039},
+        {"r":14.2347885,"b":15.37820781},
+        {"r":17.98635869,"b":19.07238478},
+        {"r":13.13773957,"b":15.0750296},
+        {"r":15.06917621,"b":18.68626436},
+        {"r":14.69189468,"b":15.84163791},
+        {"r":14.69189468,"b":17.74147243},
+        {"r":13.13773957,"b":15.0750296},
+        {"r":14.05725573,"b":15.35865411},
+        {"r":15.3533662,"b":16.24543087},
+        {"r":15.2558489,"b":16.04229177},
+        {"r":14.23841017,"b":14.83887406},
+        {"r":14.43720534,"b":15.72291857},
+        {"r":0,"b":23.42619755},
+        {"r":16.32331101,"b":16.67035321},
+        {"r":0,"b":24.55117794},
+        {"r":18.40699651,"b":18.12856044},
+        {"r":16.58143317,"b":17.47876839},
+        {"r":15.13527717,"b":16.21270202},
+        {"r":0,"b":25.39429629},
+        {"r":15.80986892,"b":16.89650921},
+        {"r":13.90799577,"b":15.11518485},
+        {"r":0,"b":25.39429629},
+        {"r":16.58143317,"b":17.47876839},
+        {"r":0,"b":24.55117794},
+        {"r":18.33497755,"b":18.12856044},
+        {"r":14.13664216,"b":15.56268401},
+        {"r":0,"b":18.44553419},
+        {"r":17.12470139,"b":17.47506295},
+        {"r":14.13664216,"b":15.56268401},
+        {"r":15.3112048,"b":15.55115479},
+        {"r":15.58917524,"b":16.11254138},
+        {"r":13.49960974,"b":15.05117977},
+        {"r":16.1203243,"b":17.0695496},
+        {"r":18.13568273,"b":16.67549226},
+        {"r":0,"b":0},
+        {"r":16.1203243,"b":17.0695496},
+        {"r":15.58917524,"b":16.11254138},
+        {"r":15.3112048,"b":15.55115479},
+        {"r":0,"b":18.23561866},
+        {"r":16.17464756,"b":17.69068621},
+        {"r":0,"b":0},
+        {"r":13.33603931,"b":15.07683153},
+        {"r":16.83715169,"b":17.33751497},
+        {"r":13.04569612,"b":14.47211794},
+        {"r":16.04315762,"b":16.88091123},
+        {"r":0,"b":18.61413441},
+        {"r":13.04569612,"b":14.47211794},
+        {"r":0,"b":0},
+        {"r":15.70786378,"b":16.4406514},
+        {"r":13.04569612,"b":14.47211794},
+        {"r":14.07870114,"b":15.03124572},
+        {"r":13.55230332,"b":14.91182518},
+        {"r":15.70786378,"b":16.4406514},
+        {"r":20.29622649,"b":21.33380038},
+        {"r":15.19615187,"b":16.02070873},
+        {"r":14.07870114,"b":15.03124572},
+        {"r":16.9743219,"b":15.62688866},
+        {"r":13.55230332,"b":14.91182518},
+        {"r":13.18718203,"b":14.69238295},
+        {"r":15.52584271,"b":16.20351223},
+        {"r":0,"b":20.37034632},
+        {"r":15.97991765,"b":17.5350865},
+        {"r":15.90354203,"b":16.59412282},
+        {"r":14.07870114,"b":15.03124572},
+        {"r":14.02410856,"b":15.12885013},
+        {"r":0,"b":22.79532344},
+        {"r":16.30601359,"b":17.13647676},
+        {"r":0,"b":0},
+        {"r":16.20178532,"b":17.25270183},
+        {"r":16.31932821,"b":17.28118029},
+        {"r":19.69219179,"b":0},
+        {"r":17.91919503,"b":20.68047585},
+        {"r":0,"b":22.70010615},
+        {"r":16.34308014,"b":16.57115875},
+        {"r":17.90855255,"b":0},
+        {"r":17.84905512,"b":19.31873402},
+        {"r":16.74182906,"b":19.49336918},
+        {"r":15.98969122,"b":17.19788018},
+        {"r":14.48389827,"b":15.37697935},
+        {"r":17.59717916,"b":18.3012353},
+        {"r":18.74666131,"b":0},
+        {"r":15.46912347,"b":16.16041647},
+        {"r":15.99515795,"b":16.65227211},
+        {"r":15.92543248,"b":16.7860739},
+        {"r":14.75814408,"b":15.74677631},
+        {"r":15.30698282,"b":16.55804587},
+        {"r":16.09043148,"b":16.90277312},
+        {"r":0,"b":0},
+        {"r":15.45418544,"b":16.22666318},
+        {"r":16.48585897,"b":17.81263727},
+        {"r":15.34314466,"b":16.12683861},
+        {"r":16.27769139,"b":17.27925046},
+        {"r":16.46677073,"b":18.52425997},
+        {"r":16.17653508,"b":16.47572187},
+        {"r":16.46675614,"b":17.15839414}
+    ];
+    
+
 
     let chartData = [];
 
@@ -76,7 +336,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ["Blue", "Red"], // need to change to filter1, filter2
+        colHeaders: ["B Mag", "V Mag"], // need to change to filter1, filter2
         maxCols: 2,
         columns: [
             { data: 'b', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -202,8 +462,8 @@ export function cluster() {
     updateHRModel(tableData, clusterForm, myChart);
 
     myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue"].value+"-"+filterForm.elements["red"].value;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = filterForm.elements["red"].value;
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue-color-filter"].value+"-"+filterForm.elements["red-color-filter"].value;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = filterForm.elements["red-color-filter"].value;
     updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
 
     return [hot, myChart];
@@ -241,9 +501,7 @@ export function clusterFileUpload(evt, table, myChart) {
         let last = data.length;
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
 
-        let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the
-                                                            // first filter is in row 1 and the last filter 
-                                                            // is in the last row.
+        let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the first filter is in row 1 and the last filter is in the last row.
         
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
@@ -279,47 +537,42 @@ export function clusterFileUpload(evt, table, myChart) {
         let right = 0;
         let tableData = [];
 
-        while ((left < data1.length) && (right < data2.length)) {
-            while (left < data1.length && data1[left][0] < data2[right][0]) {
+        
+        while (left < data1.length && right < data2.length) {
+            if (data1[left][0] === data2[right][0]) {
+                tableData.push({
+                    'b': data1[left][1],
+                    'r': data2[right][1]
+                });
+                left++;
+                right++;
+            } else if (data1[left][0] < data2[right][0]) {
                 tableData.push({
                     'b': data1[left][1],
                     'r': null
                 });
                 left++;
-            }
-
-            while (left < data1.length && right < data2.length && data1[left][0] > data2[right][0]) {
+            } else {
                 tableData.push({
                     'b': null,
                     'r': data2[right][1]
                 });
                 right++;
             }
-
-            if (left < data1.length && right < data2.length) {
-                tableData.push({
-                    'b': data1[left][1],
-                    'r': data2[right][1]
-                });
-                left++;
-                right++;
-            } else {
-                while (left < data1.length) {
-                    tableData.push({
-                        'b': data1[left][1],
-                        'r': null
-                    });
-                    left++;
-                }
-                while (right < data2.length) {
-                    tableData.push({
-                        'b': null,
-                        'r': data2[right][1]
-                    });
-                    right++;
-                }
-                break;
-            }
+        }
+        while (left < data1.length) {
+            tableData.push({
+                'b': data1[left][1],
+                'r': null
+            });
+            left++;
+        }
+        while (right < data2.length) {
+            tableData.push({
+                'b': null,
+                'r': data2[right][1]
+            });
+            right++;
         }
 
         tableData = tableData.filter(entry => !isNaN(entry.b) || !isNaN(entry.r));
@@ -479,8 +732,8 @@ function generateclusterData() {
         let y = clusterData[i].y * (1 + (Math.random() - 0.5) * 0.40);
         let x = clusterData[i].x * (1 + (Math.random() - 0.5) * 0.40) + y;
         returnData.push({
-            y: V,
-            x: B
+            y: y,
+            x: x
         })
     }
 
