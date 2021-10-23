@@ -61,7 +61,7 @@ export function cluster() {
 
     // Link each slider with corresponding text box
     let clusterForm = document.getElementById("cluster-form");
-    let filterForm  = document.getElementById("filter-form");
+    let filterForm = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 10, 0.01, 6);
@@ -76,11 +76,11 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: [ filterForm.elements["blue"].value + ' mag', filterForm.elements["red"].value + ' mag'],
+        colHeaders: ["Blue", "Red"],
         maxCols: 2,
         columns: [
-            { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'b', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'r', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     }));
 
@@ -239,59 +239,83 @@ export function clusterFileUpload(evt, table, myChart) {
     reader.onload = () => {
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
 
-        // Need to trim because of weired end-of-line issues (potentially a Windows problem).
-        let columns = data[0].trim().split(",");
-
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
 
         let data1 = []; // initialize arrays for the values associated with 
-        let data2 = []; // he first and second filter
+        let data2 = []; // the first and second filter
 
         data.splice(0, 1);
 
-        for (let row of data) {
+        for (const row of data) {
+            let items = row.trim().split(",");
 
             // adds id and magnitude to data1 if filter is filter 1
-            if (row[10] === filter1) {
-                data1.push([row[1], parseFloat(row[12])])
-
+            if (items[10] === filter1) {
+                data1.push([items[1], parseFloat(items[12])])
             }
             // otherwise adds id and magnitude to data2
             else {
-                data2.push([row[1], parseFloat(row[12])])
+                data2.push([items[1], parseFloat(items[12])])
             }
-
-
         }
+
+        data1.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+        data2.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
 
         let left = 0;
         let right = 0;
         let tableData = [];
 
         while ((left < data1.length) && (right < data2.length)) {
-
-            while (left < data1.length && data1[left].row[1] < data2[right].row[1]) {
+            while (left < data1.length && data1[left][0] < data2[right][0]) {
+                tableData.push({
+                    'b': data1[left][1],
+                    'r': null
+                });
                 left++;
             }
 
-            while (left < data1.length && right < data2.length && data1[left].row[1] > data2[right].row[1]) {
+            while (left < data1.length && right < data2.length && data1[left][0] > data2[right][0]) {
+                tableData.push({
+                    'b': null,
+                    'r': data2[right][1]
+                });
                 right++;
             }
 
             if (left < data1.length && right < data2.length) {
-                tableData.push([data1.row[12], data2.row[12]]);
+                tableData.push({
+                    'b': data1[left][1],
+                    'r': data2[right][1]
+                });
                 left++;
                 right++;
             } else {
+                while (left < data1.length) {
+                    tableData.push({
+                        'b': data1[left][1],
+                        'r': null
+                    });
+                    left++;
+                }
+                while (right < data2.length) {
+                    tableData.push({
+                        'b': null,
+                        'r': data2[right][1]
+                    });
+                    right++;
+                }
                 break;
             }
         }
 
-        // Here we have complete tableData
+        tableData = tableData.filter(entry => !isNaN(entry.b) || !isNaN(entry.r));
+        tableData = tableData.map(entry => ({
+            'b': isNaN(entry.b) ? null : entry.b,
+            'r': isNaN(entry.r) ? null : entry.r
+        }));
 
-        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
-        // in turn trigger update to the variable form and the light curve form, which needs to be cleared
-        // prior to being triggered by this upload.
+        // Here we have complete tableData
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
         updateScatter(tableData,myChart)
