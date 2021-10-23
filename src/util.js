@@ -175,8 +175,8 @@ export function getDateString() {
  */
 export function sanitizeTableData(data, cols) {
     return data.filter(row => {
-        for (let col of cols)
-            if (isNaN(row[col]))
+        for (const col of cols)
+            if (isNaN(parseFloat(row[col])))
                 return false;
         return true;
     });
