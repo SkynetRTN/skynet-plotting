@@ -36,19 +36,23 @@ export function cluster() {
         '<div class="col-sm-5 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
+        '</form>\n' +
+        '<form title="Filters" id="filter-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n'+
         '</div>\n'+
         '<div class="row">\n' +
-        '<div class="col-sm-4">Blue Color</div>\n'+
-        '<div class="col-sm-4">Red Color</div>\n'+
-        '<div class="col-sm-4">Luminosity</div>\n'+
+        '<div class="col-sm-4 des">Blue Color</div>\n'+
+        '<div class="col-sm-4 des">Red Color</div>\n'+
+        '<div class="col-sm-4 des">Luminosity</div>\n'+
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n'+
-        '<option value="B" title="B filter" selected>B</option></select></div>\n'+
+        '<option value="B" title="B filter" selected>B</option></div>\n'+
+        '<option value="V" title="V filter">V</option></select></div>\n'+
         '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n'+
-        '<option value="V" title="V filter" selected>V</option></select></div>\n'+
+        '<option value="V" title="V filter" selected>V</option></div>\n'+
+        '<option value="B" title="B filter">B</option></select></div>\n'+
         '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n'+
         '<option value="V" title="V filter" selected>Lum</option></select></div>\n'+
         '</div>\n' +
@@ -56,6 +60,7 @@ export function cluster() {
 
     // Link each slider with corresponding text box
     let clusterForm = document.getElementById("cluster-form");
+    let filterForm  = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 0, 100, 1, 0);
@@ -70,7 +75,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Blue mag', 'Red mag'],
+        colHeaders: [ filterForm.elements["blue-color-filter"].value + ' mag', filterForm.elements["red-color-filter"].value + ' mag'],
         maxCols: 2,
         columns: [
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
