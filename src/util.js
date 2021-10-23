@@ -164,6 +164,25 @@ export function getDateString() {
 }
 
 /**
+ * This function takes in an array from Handsontable.getData() and returns a new array
+ * with rows with not meeting requirement removed. A row meets the requirement if it has
+ * valid number values in all columns specified by @param cols.
+ * @param {Array} data An array representing the table data. Each element of the array
+ * is also an array, which represents one row of the table data.
+ * @param {Array} cols An array containing, in increasing order, the index of the columns
+ * that needs to be filled in.
+ * @returns Sanitized table data. 
+ */
+export function sanitizeTableData(data, cols) {
+    return data.filter(row => {
+        for (let col of cols)
+            if (isNaN(row[col]))
+                return false;
+        return true;
+    });
+}
+
+/**
  * Pre-fix a number with '0' if it is less then 10. Otherwise just convert it to string.
  * @param num: A number between 1 and 99.
  * @returns two-character string containing the number and a leading 0 if necessary.
