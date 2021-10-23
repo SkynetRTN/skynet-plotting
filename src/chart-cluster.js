@@ -42,17 +42,18 @@ export function cluster() {
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Blue</div>\n' +
-        '<div class="col-sm-6">Luminosity</div>\n' +
+        '<div class="col-sm-4">Blue</div>\n' +
+        '<div class="col-sm-4">Red</div>\n' +
+        '<div class="col-sm-4">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n'+
+        '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n'+
         '<option value="B" title="B filter" selected>B</option></div>\n'+
         '<option value="V" title="V filter">V</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n'+
+        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n'+
         '<option value="V" title="V filter" selected>V</option></div>\n'+
         '<option value="B" title="B filter">B</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n'+
+        '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n'+
         '<option value="V" title="V filter" selected>V</option></div>\n'+
         '<option value="B" title="B filter">B</option></select></div>\n'+
         '</div>\n' +
@@ -75,7 +76,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: [ filterForm.elements["blue-color-filter"].value + ' mag', filterForm.elements["red-color-filter"].value + ' mag'],
+        colHeaders: [ filterForm.elements["blue"].value + ' mag', filterForm.elements["red"].value + ' mag'],
         maxCols: 2,
         columns: [
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -125,10 +126,12 @@ export function cluster() {
             },
             scales: {
                 xAxes: [{
+                    label: 'B-V',
                     type: 'linear',
                     position: 'bottom',
                 }],
                 yAxes: [{
+                    label: 'V',
                     ticks: {
                         reverse: true,
                         suggestedMin: 0,
@@ -137,7 +140,6 @@ export function cluster() {
             }
         }
     });
-    myChart.options.scales.yAxes[0].ticks.reverse = true;
 
     let update = function () {
         updateTableHeight(hot);
@@ -184,21 +186,25 @@ export function cluster() {
     };
 
     filterForm.oninput = function (){
-        let red  = filterForm.elements["red-color-filter"];
-        let blue = filterForm.elements["blue-color-filter"];
-        let lum  = filterForm.elements["luminosity-filter"];
+        let red  = filterForm.elements["red"];
+        let blue = filterForm.elements["blue"];
+        let lum  = filterForm.elements["lum"];
         if (red.value === blue.value){
             red.value = red.options[(red.selectedIndex+1)%2].value;
         }
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+        updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
+        myChart.update(0);
     }
 
     updateScatter(tableData, myChart);
     updateHRModel(tableData, clusterForm, myChart);
 
     myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue"].value+"-"+filterForm.elements["red"].value;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = filterForm.elements["red"].value;
+    updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
 
     return [hot, myChart];
 }
@@ -288,6 +294,7 @@ export function clusterFileUpload(evt, table, myChart) {
         // prior to being triggered by this upload.
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
+        updateScatter(tableData,myChart)
     }
     reader.readAsText(file);
 }
@@ -422,8 +429,7 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
 */
 function generateclusterData() {
     /**
-     *  ln(750) = 6.62
-     *  ln(1) = 0
+     *  Generates random age, distance, metallicity, reddening
      */
     let returnData = [];
     let clusterData = HRGenerator(Math.random()*99.9+0.1,
@@ -433,11 +439,11 @@ function generateclusterData() {
                               Math.random()*100,
                               -8,8,100);
     for (let i=0; i<clusterData.length; i++){
-        let y= clusterData[i].y*(1 + (Math.random()-0.5) * 0.40);
-        let x= clusterData[i].x*(1 + (Math.random()-0.5) * 0.40)+y;
+        let V= clusterData[i].y+((Math.random()-0.5)*0.5);
+        let B= clusterData[i].x+((Math.random()-0.5)*0.7)+V;
         returnData.push({
-            y: y,
-            x: x
+            y: V,
+            x: B
         })
     }
 
@@ -452,8 +458,9 @@ function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') 
             tableData[i][xKey] === null || tableData[i][yKey] === null) {
             continue;
         }
-        //B-V,V
-        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], y: tableData[i][yKey] };
+        //red-blue,red
+        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], 
+                           y: tableData[i][yKey] };
     }
     while (chart.length !== start) {
         chart.pop();
