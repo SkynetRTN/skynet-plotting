@@ -47,13 +47,13 @@ export function cluster() {
         '<div class="col-sm-4">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n' +
+        '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
         '<option value="B" title="B filter" selected>B</option></div>\n' +
         '<option value="V" title="V filter">V</option></select></div>\n' +
-        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n' +
-        '<option value="V" title="V filter" selected>V</option></div>\n' +
-        '<option value="B" title="B filter">B</option></select></div>\n' +
-        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n' +
+        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n' +
+        '<option value="B" title="B filter">B</option></div>\n' +
+        '<option value="V" title="V filter" selected>V</option></select></div>\n' +
+        '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
         '<option value="V" title="V filter" selected>V</option></div>\n' +
         '<option value="B" title="B filter">B</option></select></div>\n' +
         '</div>\n' +
@@ -68,8 +68,7 @@ export function cluster() {
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
 
-    let tableData = generateclusterData();
-    console.log(tableData);
+    let tableData = generateClusterData();
 
     let chartData = [];
 
@@ -145,7 +144,9 @@ export function cluster() {
     let update = function () {
         //console.log(tableData);
         updateTableHeight(hot);
-        updateScatter(hot, myChart, clusterForm.elements['d-num'].value);
+        updateScatter(hot, myChart, 
+            clusterForm.elements['d-num'].value,0,
+            filterForm);
         updateHRModel(clusterForm, myChart);
     };
 
@@ -172,7 +173,7 @@ export function cluster() {
             red.value = red.options[(red.selectedIndex+1)%2].value;
         }
         myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = lum.value;
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
@@ -224,6 +225,13 @@ export function clusterFileUpload(evt, table, myChart) {
                                                             // first filter is in row 1 and the last filter 
                                                             // is in the last row.
         
+        let blue = document.getElementById("filter-form").elements["blue"];
+        let red = document.getElementById("filter-form").elements["red"];
+        let lum = document.getElementById("filter-form").elements["lum"];
+        blue.options[0] = filter1; blue.options[1] = filter2;
+        red.options[1] = filter1; red.options[0] = filter2;
+        lum.options[0] = filter1; lum.options[1] = filter2;
+
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
 
@@ -310,7 +318,10 @@ export function clusterFileUpload(evt, table, myChart) {
         // Here we have complete tableData
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
-        updateScatter(table,myChart,document.getElementById('cluster-form').elements["d-num"].value)
+        updateScatter(table,myChart,
+            document.getElementById('cluster-form').elements["d-num"].value,0,
+            filterForm
+            )
     }
     reader.readAsText(file);
 }
@@ -425,14 +436,14 @@ function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps 
 *  generated parameters. This function also introduces noise to all data points.
 *  @returns    {Array}
 */
-function generateclusterData() {
+function generateClusterData() {
     /**
      *  Generates random age, distance, metallicity, reddening
      */
     let returnData = [];
-    let clusterData = HRGenerator(Math.random()*99.9+0.1,
+    let clusterData = HRGenerator(
                               100,
-                              Math.random()*4+6,
+                              Math.random()*5+6,
                               Math.random()*100,
                               Math.random()*100);
     for (let i=0; i<clusterData.length; i++){
@@ -443,23 +454,25 @@ function generateclusterData() {
             x: B
         })
     }
-    console.log(returnData);
     return returnData;
 }
 
-function updateScatter(table, myChart, dist=0.01, dataSet = 0, xKey = 0, yKey = 1) {
+function updateScatter(table, myChart, dist=0.01, dataSet = 0, form) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
-    console.log(tableData);
+    let blue = form.elements["blue"].selectedIndex;
+    let red  = form.elements["red"].selectedIndex;
+    let lum  = form.elements["lum"].selectedIndex;
+
     for (let i = 0; i < tableData.length; i++) {
-        if (tableData[i][xKey] === '' || tableData[i][yKey] === '' ||
-            tableData[i][xKey] === null || tableData[i][yKey] === null) {
+        if (tableData[i][blue] === '' || tableData[i][red] === '' ||
+            tableData[i][blue] === null || tableData[i][red] === null) {
             continue;
         }
         //red-blue,red
-        chart[start++] = { x: tableData[i][yKey]-tableData[i][xKey], 
-                           y: tableData[i][yKey]-5*Math.log10(dist/0.01)};
+        chart[start++] = { x: tableData[i][blue]-tableData[i][red], 
+                           y: tableData[i][lum]-5*Math.log10(dist/0.01)};
     }
     while (chart.length !== start) {
         chart.pop();
