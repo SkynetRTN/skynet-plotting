@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
+import { updateLabels, updateTableHeight } from "./util.js"
 import { round, sqr, rad } from "./my-math.js"
 
 /**
@@ -54,7 +54,8 @@ export function cluster() {
         '<option value="V" title="V filter" selected>V</option></div>\n'+
         '<option value="B" title="B filter">B</option></select></div>\n'+
         '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n'+
-        '<option value="Lum" title="Lum filter" selected>Lum</option></select></div>\n'+
+        '<option value="V" title="V filter" selected>V</option></div>\n'+
+        '<option value="B" title="B filter">B</option></select></div>\n'+
         '</div>\n' +
         '</form>\n');
 
@@ -64,8 +65,8 @@ export function cluster() {
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 10, 0.01, 6);
-    linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 100, 1, 0);
-    linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], 0, 1000, 1, 0);
+    linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
+    linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
 
     let tableData = generateclusterData();
 
@@ -141,7 +142,7 @@ export function cluster() {
 
     let update = function () {
         updateTableHeight(hot);
-        updateLine(tableData, myChart);
+        updateScatter(tableData, myChart);
         updateFormula(tableData, clusterForm, myChart);
     };
 
@@ -172,7 +173,7 @@ export function cluster() {
         }
     }
 
-    // link chart to input form (slider + text)
+    // link chart to model form (slider + text)
     clusterForm.oninput = function () {
         if (!lock) {
             lock = true;
@@ -183,7 +184,16 @@ export function cluster() {
         }
     };
 
-    updateLine(tableData, myChart);
+    filterForm.oninput = function (){
+        let red  = filterForm.elements["red-color-filter"];
+        let blue = filterForm.elements["blue-color-filter"];
+        let lum  = filterForm.elements["luminosity-filter"];
+        if (red.value === blue.value){
+            red.value = red.options[(red.selectedIndex+1)%2].value;
+        }
+    }
+
+    updateScatter(tableData, myChart);
     updateFormula(tableData, clusterForm, myChart);
     
     myChart.options.title.text = "Title"
@@ -290,7 +300,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 }
 
 /**
-*  This function generates the data used for function "updateFormula" with the four parameters provided.
+*  This function generates the data used for functions "updateFormula" and "clusterGenerator."
 *
 *  @param d:            Distance to the Cluster
 *  @param r:            % of the range
@@ -311,14 +321,16 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
     for (let i = 0; i < steps; i++) {
         let x3 = 0.2*Math.pow(( (y-8)/(-22.706+2.7236*age-8) ),3);
         let x2 = -0.0959+0.1088*y+0.0073*Math.pow(y,2)
-        let x1 = (x3+x2>2)?null:x3+x2;
-        data.push({
-            // actual magnitude is less the further away the object is (and less is more for mag)
-            y: y-5*Math.log10(dist/0.01),
-            // x =-0.0959+0.1088*y+0.0073*y^2
-            x: x1,
+        let x1 = x3+x2;
+        if (x1<=2){
+            data.push({
+                // actual magnitude is less the further away the object is (and less is more for mag)
+                y: y-5*Math.log10(dist/0.01),
+                // x =-0.0959+0.1088*y+0.0073*y^2
+                x: x1,
 
-        });
+            });
+        }
         y += step;
     }
     return data;
@@ -326,7 +338,7 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
 
 /**
 *  This function returns an array of data points that represent a cluster of stars with randomly
-*  generated parameters. This function also introduces a 10% noise to all data points.
+*  generated parameters. This function also introduces noise to all data points.
 *  @returns    {Array}
 */
 function generateclusterData() {
@@ -342,11 +354,30 @@ function generateclusterData() {
                               Math.random()*100,
                               -8,8,100);
     for (let i=0; i<clusterData.length; i++){
+        let y= clusterData[i].y*(1 + (Math.random()-0.5) * 0.40);
+        let x= clusterData[i].x*(1 + (Math.random()-0.5) * 0.40)+y;
         returnData.push({
-            x: clusterData[i].x*(1 + (Math.random()-0.5) * 0.40),
-            y: clusterData[i].y*(1 + (Math.random()-0.5) * 0.40)
+            y: y,
+            x: x
         })
     }
 
     return returnData;
+}
+
+function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
+    let start = 0;
+    let chart = myChart.data.datasets[dataSet].data;
+    for (let i = 0; i < tableData.length; i++) {
+        if (tableData[i][xKey] === '' || tableData[i][yKey] === '' ||
+            tableData[i][xKey] === null || tableData[i][yKey] === null) {
+            continue;
+        }
+        //B-V,V
+        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], y: tableData[i][yKey] };
+    }
+    while (chart.length !== start) {
+        chart.pop();
+    }
+    myChart.update(0);
 }
