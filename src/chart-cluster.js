@@ -442,8 +442,8 @@ export function cluster() {
     update();
 
     myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue-color-filter"].value+"-"+filterForm.elements["red-color-filter"].value;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = filterForm.elements["red-color-filter"].value;
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue"].value+"-"+filterForm.elements["red"].value;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = filterForm.elements["red"].value;
     updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
 
     return [hot, myChart];
@@ -665,18 +665,17 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps = 500) {
     //To Change
     let data = [];
-
     let y = start;
+    console.log(reddening);
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
         let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
         let x2 = -0.0959 + 0.1088 * y + 0.0073 * Math.pow(y, 2)
         let x1 = x3 + x2;
-        if (x1 <= 2) {
+        if (x1 <= 2) {//cut off at x=2
             data.push({
                 y: y,
-                // x =-0.0959+0.1088*y+0.0073*y^2
-                x: x1
+                x: x1+parseFloat(reddening)
             });    
         }
         y += step;
