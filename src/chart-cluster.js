@@ -12,30 +12,32 @@ export function cluster() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Distance (kpc)</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="d" name="d"></div>\n' +
+        '<div class="col-sm-4 des">Dist. (kpc)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="d" name="d"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="d" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">+/- Range (%)</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="R" name="r"></div>\n' +
+        '<div class="col-sm-4 des">+/- Range (%)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Age (yr)</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="Age" name="age"></div>\n' +
+        '<div class="col-sm-4 des">log(Age (yr))</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="Age" name="age"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Reddening (mag)</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-4 des">Reddening (mag)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="Reddening" name="red"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Metallicity (solar)</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+        '<div class="col-sm-4 des">Metallicity (solar)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
+        '</form>\n' +
+        '<form title="Filters" id="filter-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
@@ -51,9 +53,10 @@ export function cluster() {
 
     // Link each slider with corresponding text box
     let clusterForm = document.getElementById("cluster-form");
+    let filterForm  = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
-    linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 0, 100, 1, 0);
+    linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 10, 0.01, 6);
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 100, 1, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], 0, 1000, 1, 0);
 
@@ -65,7 +68,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Blue mag', 'Red mag'],
+        colHeaders: [ filterForm.elements["blue-color-filter"].value + ' mag', filterForm.elements["red-color-filter"].value + ' mag'],
         maxCols: 2,
         columns: [
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -120,12 +123,14 @@ export function cluster() {
                 }],
                 yAxes: [{
                     ticks: {
+                        reverse: true,
                         suggestedMin: 0,
                     },
                 }],
             }
         }
     });
+    myChart.options.scales.yAxes[0].ticks.reverse = true;
 
     let update = function () {
         updateTableHeight(hot);
@@ -344,35 +349,41 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 /**
 *  This function generates the data used for function "updateFormula" with the four parameters provided.
 *
-*  @param a:       Amplitude of the moon's orbit
-*  @param p:       The period of the moon's orbit
-*  @param phase:   The phase of the orbit
-*  @param tilt:    The tilt of the orbit
-*  @param start:   The starting point of the data points
-*  @param end:     The end point of the data points
-*  @param steps:   Steps generated to be returned in the array. Default is 500
+*  @param d:            Distance to the Cluster
+*  @param r:            % of the range
+*  @param age:          Age of the Cluster
+*  @param reddening:    The reddening of the observation
+*  @param metallicity:  Metallicity of the cluster
+*  @param start:        The starting point of the data points
+*  @param end:          The end point of the data points
+*  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function trigGenerator(a, p, phase, tilt, start, end, steps = 500) {
+function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps = 500) {
+    //To Change
     let data = [];
-    let x = start;
+
+    let y = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let theta = (x - start - 2) / p * Math.PI * 2 - rad(phase);
-        let alpha = rad(tilt);
+        let x3 = 0.2*Math.pow(( (y-8)/(-22.706+2.7236*age-8) ),3);
+        let x2 = -0.0959+0.1088*y+0.0073*Math.pow(y,2)
+        let x1 = (x3+x2>2)?null:x3+x2;
         data.push({
-            x: x,
-            // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
-            y: a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))),
+            // actual magnitude is less the further away the object is (and less is more for mag)
+            y: y-5*Math.log10(dist/0.01),
+            // x =-0.0959+0.1088*y+0.0073*y^2
+            x: x1,
+
         });
-        x += step;
+        y += step;
     }
     return data;
 }
 
 /**
-*  This function returns an array of data points that represent a moon's orbit with randomly
-*  generated parameters. This function also introduce a 5% noise to all data points.
+*  This function returns an array of data points that represent a cluster of stars with randomly
+*  generated parameters. This function also introduces a 10% noise to all data points.
 *  @returns    {Array}
 */
 function generateclusterData() {
@@ -380,22 +391,18 @@ function generateclusterData() {
      *  ln(750) = 6.62
      *  ln(1) = 0
      */
-    let a = Math.exp(Math.random() * 4 + 1.62);
-    let p = Math.random() * 10 + 5;
-    let phase = Math.random() * 360;
-    let tilt = Math.random() * 45;
-
     let returnData = [];
-
-    for (let i = 0; i < 10; i++) {
-        let x = i * 2 + Math.random() * 2;
-        let theta = x / p * Math.PI * 2 - rad(phase);
-        let alpha = rad(tilt);
-        returnData[i] = {
-            x: x,
-            y: (a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
-                * (1 + Math.random() * 0.05),
-        }
+    let clusterData = HRGenerator(Math.random()*99.9+0.1,
+                              100,
+                              Math.random()*4+6,
+                              Math.random()*100,
+                              Math.random()*100,
+                              -8,8,100);
+    for (let i=0; i<clusterData.length; i++){
+        returnData.push({
+            x: clusterData[i].x*(1 + (Math.random()-0.5) * 0.40),
+            y: clusterData[i].y*(1 + (Math.random()-0.5) * 0.40)
+        })
     }
 
     return returnData;
