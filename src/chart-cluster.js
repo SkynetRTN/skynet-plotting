@@ -64,7 +64,7 @@ export function cluster() {
     let filterForm = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
-    linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 10, 0.01, 6);
+    linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 11, 0.01, 6);
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
 
@@ -402,9 +402,10 @@ export function cluster() {
     });
 
     let update = function () {
+        //console.log(tableData);
         updateTableHeight(hot);
-        updateScatter(tableData, myChart);
-        updateHRModel(tableData, clusterForm, myChart);
+        updateScatter(hot, myChart, clusterForm.elements['d-num'].value);
+        updateHRModel(clusterForm, myChart);
     };
 
     // link chart to table
@@ -414,52 +415,29 @@ export function cluster() {
         afterCreateRow: update,
     });
 
-    /**
-     *  This part of code (throttle) limits the maximum fps of the chart to change, so that it
-     *  is possible to increase the sampling precision without hindering performance.
-     */
-    let changed = false;        // Indicates whether a change occurred while waiting for lock
-    let lock = false;           // Lock for throttle
-
-    let fps = 100;
-    let frameTime = Math.floor(1000 / fps);
-
-    let callback = () => {
-        if (changed) {
-            changed = false;
-            updateHRModel(tableData, clusterForm, myChart);
-            setTimeout(callback, frameTime);
-        } else {
-            lock = false;
-        }
-    }
-
     // link chart to model form (slider + text)
     clusterForm.oninput = function () {
-        if (!lock) {
-            lock = true;
-            updateHRModel(tableData, clusterForm, myChart);
-            setTimeout(callback, frameTime);
-        } else {
-            changed = true;
-        }
+        //console.log(tableData);
+        update();
+        
     };
 
-    filterForm.oninput = function () {
-        let red = filterForm.elements["red-color-filter"];
-        let blue = filterForm.elements["blue-color-filter"];
-        let lum = filterForm.elements["luminosity-filter"];
-        if (red.value === blue.value) {
-            red.value = red.options[(red.selectedIndex + 1) % 2].value;
+    filterForm.oninput = function (){
+        //console.log(tableData);
+        let red  = filterForm.elements["red"];
+        let blue = filterForm.elements["blue"];
+        let lum  = filterForm.elements["lum"];
+        if (red.value === blue.value){
+            red.value = red.options[(red.selectedIndex+1)%2].value;
         }
         myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
         myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+
+        update();
         updateLabels(myChart, document.getElementById('chart-info-form'),false,false,true,true);
         myChart.update(0);
     }
-
-    updateScatter(tableData, myChart);
-    updateHRModel(tableData, clusterForm, myChart);
+    update();
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = filterForm.elements["blue-color-filter"].value+"-"+filterForm.elements["red-color-filter"].value;
@@ -584,7 +562,7 @@ export function clusterFileUpload(evt, table, myChart) {
         // Here we have complete tableData
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
-        updateScatter(tableData,myChart)
+        updateScatter(table,myChart,document.getElementById('cluster-form').elements["d-num"].value)
     }
     reader.readAsText(file);
 }
@@ -597,24 +575,8 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(table, form, chart) {
-    let min = null;
-    let max = null;
-    for (let i = 0; i < table.length; i++) {
-        let x = table[i]['x'];
-        let y = table[i]['y'];
-        if (x === '' || y === '' || x === null || y === null) {
-            continue;
-        }
-        if (max === null || x > max) {
-            max = x;
-        }
-        if (min === null || x < min) {
-            min = x;
-        }
-    }
+function updateHRModel(form, chart) {
     chart.data.datasets[1].data = HRGenerator(
-        form.elements['d-num'].value,
         form.elements['r-num'].value,
         form.elements['age-num'].value,
         form.elements['red-num'].value,
@@ -688,7 +650,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 *  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps = 500) {
+function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps = 500) {
     //To Change
     let data = [];
 
@@ -700,12 +662,10 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
         let x1 = x3 + x2;
         if (x1 <= 2) {
             data.push({
-                // actual magnitude is less the further away the object is (and less is more for mag)
-                y: y - 5 * Math.log10(dist / 0.01),
+                y: y,
                 // x =-0.0959+0.1088*y+0.0073*y^2
-                x: x1,
-
-            });
+                x: x1
+            });    
         }
         y += step;
     }
@@ -722,34 +682,36 @@ function generateclusterData() {
      *  Generates random age, distance, metallicity, reddening
      */
     let returnData = [];
-    let clusterData = HRGenerator(Math.random() * 99.9 + 0.1,
-        100,
-        Math.random() * 4 + 6,
-        Math.random() * 100,
-        Math.random() * 100,
-        -8, 8, 100);
-    for (let i = 0; i < clusterData.length; i++) {
-        let y = clusterData[i].y * (1 + (Math.random() - 0.5) * 0.40);
-        let x = clusterData[i].x * (1 + (Math.random() - 0.5) * 0.40) + y;
+    let clusterData = HRGenerator(Math.random()*99.9+0.1,
+                              100,
+                              Math.random()*4+6,
+                              Math.random()*100,
+                              Math.random()*100);
+    for (let i=0; i<clusterData.length; i++){
+        let V= clusterData[i].y+((Math.random()-0.5)*0.5);
+        let B= clusterData[i].x+((Math.random()-0.5)*0.7)+V;
         returnData.push({
             y: y,
             x: x
         })
     }
-
+    console.log(returnData);
     return returnData;
 }
 
-function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
+function updateScatter(table, myChart, dist=0.01, dataSet = 0, xKey = 0, yKey = 1) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
+    let tableData = table.getData();
+    console.log(tableData);
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][xKey] === '' || tableData[i][yKey] === '' ||
             tableData[i][xKey] === null || tableData[i][yKey] === null) {
             continue;
         }
-        //B-V,V
-        chart[start++] = { x: tableData[i][xKey] - tableData[i][yKey], y: tableData[i][yKey] };
+        //red-blue,red
+        chart[start++] = { x: tableData[i][yKey]-tableData[i][xKey], 
+                           y: tableData[i][yKey]-5*Math.log10(dist/0.01)};
     }
     while (chart.length !== start) {
         chart.pop();
