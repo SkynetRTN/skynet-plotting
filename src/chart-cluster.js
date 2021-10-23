@@ -37,15 +37,15 @@ export function cluster() {
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6"><b>Select Filters:</b></div>\n'+
-        '</div>\n'+
-        '<div class="row">\n' +
-        '<div class="col-sm-6">Blue</div>\n'+
-        '<div class="col-sm-6">Luminosity</div>\n'+
+        '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6"><select name="Blue Color Filter" style="width: 100%;" title="Select Blue Color Filter"></select></div>\n'+
-        '<div class="col-sm-6"><select name="Luminosity Filter" style="width: 100%;" title="Select Luminosity Filter"></select></div>\n'+
+        '<div class="col-sm-6">Blue</div>\n' +
+        '<div class="col-sm-6">Luminosity</div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6"><select name="Blue Color Filter" style="width: 100%;" title="Select Blue Color Filter"></select></div>\n' +
+        '<div class="col-sm-6"><select name="Luminosity Filter" style="width: 100%;" title="Select Luminosity Filter"></select></div>\n' +
         '</div>\n' +
         '</form>\n');
 
@@ -109,7 +109,7 @@ export function cluster() {
                 callbacks: {
                     label: function (tooltipItem, data) {
                         return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
+                            round(tooltipItem.yLabel, 2) + ')';
                     },
                 },
             },
@@ -171,15 +171,109 @@ export function cluster() {
         }
     };
 
+
+
+
+
+
     updateLine(tableData, myChart);
     updateFormula(tableData, clusterForm, myChart);
-    
+
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
     myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
+}
+
+
+/**
+ * This function handles the uploaded file to the variable chart. Specifically, it parse the file
+ * and load related information into the table.
+ * DATA FLOW: file -> table
+ * @param {Event} evt The uploadig event
+ * @param {Handsontable} table The table to be updated
+ * @param {Chartjs} myChart
+ */
+export function clusterFileUpload(evt, table, myChart) {
+    // console.log("clusterFileUpload called");
+    let file = evt.target.files[0];
+
+    if (file === undefined) {
+        return;
+    }
+
+    // File type validation
+    if (!file.type.match("(text/csv|application/vnd.ms-excel)") &&
+        !file.name.match(".*\.csv")) {
+        console.log("Uploaded file type is: ", file.type);
+        console.log("Uploaded file name is: ", file.name);
+        alert("Please upload a CSV file.");
+        return;
+    }
+
+    let reader = new FileReader();
+    reader.onload = () => {
+        let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+
+        // Need to trim because of weired end-of-line issues (potentially a Windows problem).
+        let columns = data[0].trim().split(",");
+
+        let filter1 = data[1].trim().split(",")[10]; // identify first filter
+
+        let data1 = []; // initialize arrays for the values associated with 
+        let data2 = []; // he first and second filter
+
+        data.splice(0, 1);
+
+        for (let row of data) {
+
+            // adds id and magnitude to data1 if filter is filter 1
+            if (row[10] === filter1) {
+                data1.push([row[1], parseFloat(row[12])])
+
+            }
+            // otherwise adds id and magnitude to data2
+            else {
+                data2.push([row[1], parseFloat(row[12])])
+            }
+
+
+        }
+
+        let left = 0;
+        let right = 0;
+        let tableData = [];
+
+        while ((left < data1.length) && (right < data2.length)) {
+
+            while (left < data1.length && data1[left].row[1] < data2[right].row[1]) {
+                left++;
+            }
+
+            while (left < data1.length && right < data2.length && data1[left].row[1] > data2[right].row[1]) {
+                right++;
+            }
+
+            if (left < data1.length && right < data2.length) {
+                tableData.push([data1.row[12], data2.row[12]]);
+                left++;
+                right++;
+            } else {
+                break;
+            }
+        }
+
+        // Here we have complete tableData
+
+        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
+        // in turn trigger update to the variable form and the light curve form, which needs to be cleared
+        // prior to being triggered by this upload.
+        table.updateSettings({ data: tableData });
+        updateTableHeight(table);
+    }
+    reader.readAsText(file);
 }
 
 /**
@@ -191,10 +285,10 @@ export function cluster() {
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateFormula(table, form, chart) {
-/** 
- * HELLLLLOOOOOOOO
- * this is where the formula for moving the data set around should go
-*/
+    /** 
+     * HELLLLLOOOOOOOO
+     * this is where the formula for moving the data set around should go
+    */
 
 }
 
