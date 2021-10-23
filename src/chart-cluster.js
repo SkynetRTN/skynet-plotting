@@ -130,12 +130,14 @@ export function cluster() {
                 }],
                 yAxes: [{
                     ticks: {
+                        reverse: true,
                         suggestedMin: 0,
                     },
                 }],
             }
         }
     });
+    myChart.options.scales.yAxes[0].ticks.reverse = true;
 
     let update = function () {
         updateTableHeight(hot);
@@ -231,8 +233,8 @@ export function cluster() {
         form.elements['age-num'].value,
         form.elements['red-num'].value,
         form.elements['metal-num'].value,
-        -41.58,
-        26.73,
+        -8,
+        8,
         2000
     );
     chart.update(0);
