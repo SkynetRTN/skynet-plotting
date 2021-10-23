@@ -142,7 +142,7 @@ export function cluster() {
     let update = function () {
         updateTableHeight(hot);
         updateScatter(tableData, myChart);
-        updateFormula(tableData, clusterForm, myChart);
+        updateHRModel(tableData, clusterForm, myChart);
     };
 
     // link chart to table
@@ -165,7 +165,7 @@ export function cluster() {
     let callback = () => {
         if (changed) {
             changed = false;
-            updateFormula(tableData, clusterForm, myChart);
+            updateHRModel(tableData, clusterForm, myChart);
             setTimeout(callback, frameTime);
         } else {
             lock = false;
@@ -176,7 +176,7 @@ export function cluster() {
     clusterForm.oninput = function () {
         if (!lock) {
             lock = true;
-            updateFormula(tableData, clusterForm, myChart);
+            updateHRModel(tableData, clusterForm, myChart);
             setTimeout(callback, frameTime);
         } else {
             changed = true;
@@ -193,7 +193,7 @@ export function cluster() {
     }
 
     updateScatter(tableData, myChart);
-    updateFormula(tableData, clusterForm, myChart);
+    updateHRModel(tableData, clusterForm, myChart);
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
@@ -300,12 +300,33 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateFormula(table, form, chart) {
-    /** 
-     * HELLLLLOOOOOOOO
-     * this is where the formula for moving the data set around should go
-    */
-
+function updateHRModel(table, form, chart) {
+    let min = null;
+    let max = null;
+    for (let i = 0; i < table.length; i++) {
+        let x = table[i]['x'];
+        let y = table[i]['y'];
+        if (x === '' || y === '' || x === null || y === null) {
+            continue;
+        }
+        if (max === null || x > max) {
+            max = x;
+        }
+        if (min === null || x < min) {
+            min = x;
+        }
+    }
+    chart.data.datasets[1].data = HRGenerator(
+        form.elements['d-num'].value,
+        form.elements['r-num'].value,
+        form.elements['age-num'].value,
+        form.elements['red-num'].value,
+        form.elements['metal-num'].value,
+        -8,
+        8,
+        2000
+    );
+    chart.update(0);
 }
 
 /**
@@ -358,7 +379,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 }
 
 /**
-*  This function generates the data used for functions "updateFormula" and "clusterGenerator."
+*  This function generates the data used for functions "updateHRModel" and "clusterGenerator."
 *
 *  @param d:            Distance to the Cluster
 *  @param r:            % of the range
