@@ -42,19 +42,20 @@ export function cluster() {
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Blue</div>\n' +
-        '<div class="col-sm-6">Luminosity</div>\n' +
+        '<div class="col-sm-4">Blue</div>\n' +
+        '<div class="col-sm-4">Red</div>\n' +
+        '<div class="col-sm-4">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n'+
-        '<option value="B" title="B filter" selected>B</option></div>\n'+
-        '<option value="V" title="V filter">V</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
+        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n' +
+        '<option value="B" title="B filter" selected>B</option></div>\n' +
+        '<option value="V" title="V filter">V</option></select></div>\n' +
+        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n' +
+        '<option value="V" title="V filter" selected>V</option></div>\n' +
+        '<option value="B" title="B filter">B</option></select></div>\n' +
+        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n' +
+        '<option value="V" title="V filter" selected>V</option></div>\n' +
+        '<option value="B" title="B filter">B</option></select></div>\n' +
         '</div>\n' +
         '</form>\n');
 
@@ -75,7 +76,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ["Blue", "Red"],
+        colHeaders: ["Blue", "Red"], // need to change to filter1, filter2
         maxCols: 2,
         columns: [
             { data: 'b', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -183,12 +184,12 @@ export function cluster() {
         }
     };
 
-    filterForm.oninput = function (){
-        let red  = filterForm.elements["red-color-filter"];
+    filterForm.oninput = function () {
+        let red = filterForm.elements["red-color-filter"];
         let blue = filterForm.elements["blue-color-filter"];
-        let lum  = filterForm.elements["luminosity-filter"];
-        if (red.value === blue.value){
-            red.value = red.options[(red.selectedIndex+1)%2].value;
+        let lum = filterForm.elements["luminosity-filter"];
+        if (red.value === blue.value) {
+            red.value = red.options[(red.selectedIndex + 1) % 2].value;
         }
     }
 
@@ -232,16 +233,23 @@ export function clusterFileUpload(evt, table, myChart) {
     let reader = new FileReader();
     reader.onload = () => {
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
-
+        let last = data.length;
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
 
+        let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the
+                                                            // first filter is in row 1 and the last filter 
+                                                            // is in the last row.
+        
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
 
         data.splice(0, 1);
 
+       
+
         for (const row of data) {
             let items = row.trim().split(",");
+            
 
             // adds id and magnitude to data1 if filter is filter 1
             if (items[10] === filter1) {
@@ -252,6 +260,12 @@ export function clusterFileUpload(evt, table, myChart) {
                 data2.push([items[1], parseFloat(items[12])])
             }
         }
+
+
+
+        table.updateSettings({
+            colHeaders: [filter1 + " Mag", filter2 + " Mag"],
+        })
 
         data1.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         data2.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
@@ -421,13 +435,13 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
     let y = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let x3 = 0.2*Math.pow(( (y-8)/(-22.706+2.7236*age-8) ),3);
-        let x2 = -0.0959+0.1088*y+0.0073*Math.pow(y,2)
-        let x1 = x3+x2;
-        if (x1<=2){
+        let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
+        let x2 = -0.0959 + 0.1088 * y + 0.0073 * Math.pow(y, 2)
+        let x1 = x3 + x2;
+        if (x1 <= 2) {
             data.push({
                 // actual magnitude is less the further away the object is (and less is more for mag)
-                y: y-5*Math.log10(dist/0.01),
+                y: y - 5 * Math.log10(dist / 0.01),
                 // x =-0.0959+0.1088*y+0.0073*y^2
                 x: x1,
 
@@ -449,15 +463,15 @@ function generateclusterData() {
      *  ln(1) = 0
      */
     let returnData = [];
-    let clusterData = HRGenerator(Math.random()*99.9+0.1,
-                              100,
-                              Math.random()*4+6,
-                              Math.random()*100,
-                              Math.random()*100,
-                              -8,8,100);
-    for (let i=0; i<clusterData.length; i++){
-        let y= clusterData[i].y*(1 + (Math.random()-0.5) * 0.40);
-        let x= clusterData[i].x*(1 + (Math.random()-0.5) * 0.40)+y;
+    let clusterData = HRGenerator(Math.random() * 99.9 + 0.1,
+        100,
+        Math.random() * 4 + 6,
+        Math.random() * 100,
+        Math.random() * 100,
+        -8, 8, 100);
+    for (let i = 0; i < clusterData.length; i++) {
+        let y = clusterData[i].y * (1 + (Math.random() - 0.5) * 0.40);
+        let x = clusterData[i].x * (1 + (Math.random() - 0.5) * 0.40) + y;
         returnData.push({
             y: y,
             x: x
@@ -476,7 +490,7 @@ function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') 
             continue;
         }
         //B-V,V
-        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], y: tableData[i][yKey] };
+        chart[start++] = { x: tableData[i][xKey] - tableData[i][yKey], y: tableData[i][yKey] };
     }
     while (chart.length !== start) {
         chart.pop();
