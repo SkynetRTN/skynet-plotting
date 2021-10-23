@@ -32,6 +32,15 @@ export function pulsar() {
 
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Rendering Count: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="1" name="rc" title="Rendering Count" value="1000" max="10000"></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-12" style="color: grey;">Note: increasing rendering count beyond 5000 may cause system slowdowns.</div>' +
+        '</div>\n' +
+        
         '<div class="row">\n' +
         '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="p" checked><span>Period</span></label></input></div>\n' +
         '</div>\n' +
@@ -289,8 +298,8 @@ export function pulsar() {
         let y1 = chn1.map(entry => entry.y);
         let y2 = chn2.map(entry => entry.y);
 
-        myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, 1000, this.fouriermode.value === 'f');
-        myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, 1000, this.fouriermode.value === 'f');
+        myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
+        myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
 
         myChart.update(0)
     }
