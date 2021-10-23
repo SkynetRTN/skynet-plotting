@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight, linkInputs } from "./util.js"
+import { updateLine, updateLabels, updateTableHeight, linkInputs, debounce, throttle } from "./util.js"
 import { round, sqr, rad } from "./my-math.js"
 
 /**
@@ -123,35 +123,13 @@ export function moon() {
         afterCreateRow: update,
     });
 
-    /**
-     *  This part of code (throttle) limits the maximum fps of the chart to change, so that it
-     *  is possible to increase the sampling precision without hindering performance.
-     */
-    let changed = false;        // Indicates whether a change occurred while waiting for lock
-    let lock = false;           // Lock for throttle
-
     let fps = 100;
     let frameTime = Math.floor(1000 / fps);
 
-    let callback = () => {
-        if (changed) {
-            changed = false;
-            updateFormula(tableData, moonForm, myChart);
-            setTimeout(callback, frameTime);
-        } else {
-            lock = false;
-        }
-    }
-
     // link chart to input form (slider + text)
+    let throttledUpdateFormula = throttle(updateFormula, 1000);
     moonForm.oninput = function () {
-        if (!lock) {
-            lock = true;
-            updateFormula(tableData, moonForm, myChart);
-            setTimeout(callback, frameTime);
-        } else {
-            changed = true;
-        }
+        throttledUpdateFormula(tableData, moonForm, myChart);
     };
 
     updateLine(tableData, myChart);
