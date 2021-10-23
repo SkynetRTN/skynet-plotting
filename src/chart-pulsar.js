@@ -483,6 +483,20 @@ function switchMode(myChart, mode, reset = false) {
     }
     myChart.update(0);
 
+    if (reset) {
+        document.getElementById("light-curve-form").dt.value = 3;
+
+        document.getElementById('fourier-form').rc.value = 1000;
+        document.getElementById('fourier-form').fouriermode.value = 'p';
+        document.getElementById('fourier-form').pstart.value = 0.1;
+        document.getElementById('fourier-form').pstop.value = 3;
+        document.getElementById('fourier-form').fstart.value = 0.1;
+        document.getElementById('fourier-form').fstop.value = 30;
+
+        document.getElementById("period-folding-form").pf.value = 0;
+        document.getElementById("period-folding-form").bins.value = 100;
+    }
+
     // Displaying the correct label information. Fourier mode has its own separate
     // title and x and y labels, which requires saving and loading the custom 
     // title/labels for other modes.
