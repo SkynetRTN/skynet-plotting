@@ -47,15 +47,15 @@ export function cluster() {
         '<div class="col-sm-4">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n'+
-        '<option value="B" title="B filter" selected>B</option></div>\n'+
-        '<option value="V" title="V filter">V</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
-        '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n'+
-        '<option value="V" title="V filter" selected>V</option></div>\n'+
-        '<option value="B" title="B filter">B</option></select></div>\n'+
+        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n' +
+        '<option value="B" title="B filter" selected>B</option></div>\n' +
+        '<option value="V" title="V filter">V</option></select></div>\n' +
+        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n' +
+        '<option value="V" title="V filter" selected>V</option></div>\n' +
+        '<option value="B" title="B filter">B</option></select></div>\n' +
+        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n' +
+        '<option value="V" title="V filter" selected>V</option></div>\n' +
+        '<option value="B" title="B filter">B</option></select></div>\n' +
         '</div>\n' +
         '</form>\n');
 
@@ -77,7 +77,7 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ["Blue", "Red"],
+        colHeaders: ["Blue", "Red"], // need to change to filter1, filter2
         maxCols: 2,
         columns: [
             { data: 'b', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
@@ -217,16 +217,23 @@ export function clusterFileUpload(evt, table, myChart) {
     let reader = new FileReader();
     reader.onload = () => {
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
-
+        let last = data.length;
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
 
+        let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the
+                                                            // first filter is in row 1 and the last filter 
+                                                            // is in the last row.
+        
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
 
         data.splice(0, 1);
 
+       
+
         for (const row of data) {
             let items = row.trim().split(",");
+            
 
             // adds id and magnitude to data1 if filter is filter 1
             if (items[10] === filter1) {
@@ -237,6 +244,12 @@ export function clusterFileUpload(evt, table, myChart) {
                 data2.push([items[1], parseFloat(items[12])])
             }
         }
+
+
+
+        table.updateSettings({
+            colHeaders: [filter1 + " Mag", filter2 + " Mag"],
+        })
 
         data1.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         data2.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
@@ -392,10 +405,10 @@ function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps 
     let y = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let x3 = 0.2*Math.pow(( (y-8)/(-22.706+2.7236*age-8) ),3);
-        let x2 = -0.0959+0.1088*y+0.0073*Math.pow(y,2)
-        let x1 = x3+x2;
-        if (x1<=2){
+        let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
+        let x2 = -0.0959 + 0.1088 * y + 0.0073 * Math.pow(y, 2)
+        let x1 = x3 + x2;
+        if (x1 <= 2) {
             data.push({
                 y: y,
                 // x =-0.0959+0.1088*y+0.0073*y^2
