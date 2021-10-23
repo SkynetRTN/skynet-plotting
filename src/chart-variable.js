@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight, sanitizeData} from "./util.js"
+import { updateLabels, updateTableHeight, sanitizeData, sanitizeTableData} from "./util.js"
 import { round, lombScargle } from "./my-math.js"
 
 /**
@@ -224,51 +224,73 @@ export function variableFileUpload(evt, table, myChart) {
 
         // Need to trim because of weired end-of-line issues (potentially a Windows problem).
         let columns = data[0].trim().split(",");
+        data.splice(0, 1);
 
         let id_col = columns.indexOf("id");
         let mjd_col = columns.indexOf("mjd");
         let mag_col = columns.indexOf("mag");
 
         let srcs = new Map();
-        for (let i = 1; i < data.length; i++) {
-            let entry = data[i].trim().split(',');
-            if (!srcs.has(entry[id_col])) {
-                srcs.set(entry[id_col], new Map());
+        for (const row of data) {
+            let items = row.trim().split(',');
+            if (!srcs.has(items[id_col])) {
+                srcs.set(items[id_col], []);
             }
-            srcs.get(entry[id_col]).set(entry[mjd_col], entry[mag_col]);
+            srcs.get(items[id_col]).push([
+                parseFloat(items[mjd_col]),
+                parseFloat(items[mag_col])
+            ]);
         }
 
         const itr = srcs.keys();
         let src1 = itr.next().value;
         let src2 = itr.next().value;
-        
         if (!src1 || !src2) {
             alert("Less than two sources are detected in the uploaded file.");
             return;
         }
 
+        let data1 = srcs.get(src1).filter(val => !isNaN(val[0])).sort((a, b) => a[0] - b[0]);
+        let data2 = srcs.get(src2).filter(val => !isNaN(val[0])).sort((a, b) => a[0] - b[0]);
+
+        let left = 0;
+        let right = 0;
+        let tableData = [];
+
+        console.log(data1, data2);
+
+        while ((left < data1.length) && (right < data2.length)) {
+            while (left < data1.length && data1[left][0] < data2[right][0]) {
+                pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+                left++;
+            }
+
+            while (left < data1.length && right < data2.length && data1[left][0] > data2[right][0]) {
+                pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+                right++;
+            }
+
+            if (left < data1.length && right < data2.length) {
+                console.log('left:  ' + left);
+                console.log('right: ' + right);
+                pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1]);
+                left++;
+                right++;
+            } else {
+                while (left < data1.length) {
+                    pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+                    left++;
+                }
+                while (right < data2.length) {
+                    pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+                    right++;
+                }
+            }
+        }
+
         table.updateSettings({
             colHeaders: ['Julian Date', src1, src2],
         })
-
-        let tableData = [];
-
-        for (const date of srcs.get(src1).keys()) {
-            let mjd = parseFloat(date);
-            let mag1 = parseFloat(srcs.get(src1).get(date));
-            let mag2 = parseFloat(srcs.get(src2).get(date));
-            if (isNaN(mjd) || isNaN(mag1) || isNaN(mag2)) {
-                continue;
-            }
-            tableData.push({
-                "jd": mjd,
-                "src1": mag1,
-                "src2": mag2
-            });
-        }
-
-        tableData.sort((a, b) => a.jd - b.jd);
-
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
         
@@ -296,6 +318,26 @@ export function variableFileUpload(evt, table, myChart) {
 }
 
 /**
+ * This function checks the potential entry to the tableData. If jd is not NaN,
+ * the entry will be pushed to tableData with `NaN` turned to `null`.
+ * @param {List} tableData tableData list to be updated
+ * @param {number} jd Julian date of the row.
+ * @param {number} src1 Magnitude of source 1
+ * @param {number} src2 Magnitude of source 2
+ */
+function pushTableData(tableData, jd, src1, src2) {
+    if (isNaN(jd)) {
+        // Ignore entries with invalid timestamp.
+        return;
+    }
+    tableData.push({
+        'jd': jd,
+        'src1': isNaN(src1) ? null : src1,
+        'src2': isNaN(src2) ? null : src2
+    });
+}
+
+/**
  * This function is called when the values in table is changed (either by manual input or by file upload).
  * It then updates the chart according to the data in the table.
  * DATA FLOW: table -> chart
@@ -312,7 +354,7 @@ function updateVariable(table, myChart) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = table.getData();
+    let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
     let src1Data = [];
     let src2Data = [];
 
