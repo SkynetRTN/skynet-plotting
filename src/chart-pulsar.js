@@ -364,6 +364,9 @@ export function pulsarFileUpload(evt, table, myChart) {
 
         let tableData = [];
         for (let row of data) {
+            if (isNaN(row[0])) {
+                continue;
+            }
             tableData.push({
                 'time': row[0],
                 'chn1': row[1],
