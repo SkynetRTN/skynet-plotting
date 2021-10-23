@@ -127,7 +127,7 @@ export function moon() {
     let frameTime = Math.floor(1000 / fps);
 
     // link chart to input form (slider + text)
-    let throttledUpdateFormula = throttle(updateFormula, 1000);
+    let throttledUpdateFormula = throttle(updateFormula, frameTime);
     moonForm.oninput = function () {
         throttledUpdateFormula(tableData, moonForm, myChart);
     };

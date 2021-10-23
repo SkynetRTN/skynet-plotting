@@ -223,9 +223,8 @@ export function throttle(func, wait) {
     let callback = (...args) => {
         if (changed) {
             changed = false;
-            console.log("func called");
             func(...args);
-            
+
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
             setTimeout(() => { callback(...args); }, wait);
@@ -238,14 +237,12 @@ export function throttle(func, wait) {
     return (...args) => {
         if (!lock) {
             lock = true;
-            console.log("func called");
             func(...args);
             
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
             setTimeout(() => { callback(...args); }, wait);
         } else {
-            console.log('lock is true');
             changed = true;
         }
     };
