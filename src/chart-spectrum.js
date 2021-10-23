@@ -6,13 +6,15 @@ import { round } from "./my-math.js"
 
 export function spectrum() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-    '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
+        '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Channel: </div>\n' +
         '<div class="col-sm-5"><select name="channel" style="width: 100%;" title="Select Channel">\n' +
         '<option value="x" title="Channel 1" selected>Channel 1</option>\n' +
-        '<option value="y" title="Channel 2">Channel 2</option>' +
-        '</div>'
+        '<option value="y" title="Channel 2">Channel 2</option>\n' +
+        '</select>\n' +
+        '</div>\n' +
+        '</form>'
     );
     
     let tableData = [];

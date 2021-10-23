@@ -33,15 +33,13 @@ export function pulsar() {
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Rendering Count: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="1" name="rc" title="Rendering Count" value="1000" max="10000"></input></div>\n' +
+        '<div class="col-sm-7">Select Mode: </div>\n' +
+        '<div class="col-sm-5"><select name="fouriermode" style="width: 100%;" title="Select Mode">\n' +
+        '<option value="p" title="Period" selected>Period</option>\n' +
+        '<option value="f" title="Frequency">Frequency</option>\n' +
+        '</select></div>\n' +
         '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-12" style="color: grey;">Note: increasing rendering count beyond 5000 may cause system slowdowns.</div>' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="p" checked><span>Period</span></label></input></div>\n' +
-        '</div>\n' +
+        '<div id="period-div">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Period (sec): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstart" title="Start Period" value=0.1></input></div>\n' +
@@ -50,9 +48,8 @@ export function pulsar() {
         '<div class="col-sm-7">Stop Period (sec): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstop" title="Stop Period" value=3></input></div>\n' +
         '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="f"><span>Frequency</span></label></input></div>\n' +
         '</div>\n' +
+        '<div id="frequency-div" hidden="true">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Frequency (Hz): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstart" title="Start Frequency" value=0.1></input></div>\n' +
@@ -60,6 +57,14 @@ export function pulsar() {
         '<div class="row">\n' +
         '<div class="col-sm-7">Stop Frequency (Hz): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstop" title="Stop Frequency" value=30></input></div>\n' +
+        '</div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Points: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="1" name="rc" title="Rendering Count" value="1000" max="10000"></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-12" style="color: grey;">For better resolution, decrease range and/or increase points.  Note, it is desirable to have multiple points across peaks before measuring them.  10,000 points takes a few minutes to compute.</div>\n' +
         '</div>\n' +
         '</form>\n';
 
@@ -268,20 +273,16 @@ export function pulsar() {
         let start, stop;
         if (this.fouriermode.value === 'p') {
             //period mode
-            this.fstart.disabled = true;
-            this.fstop.disabled  = true;
-            this.pstart.disabled = false;
-            this.pstop.disabled  = false;
+            document.getElementById('period-div').hidden = false;
+            document.getElementById("frequency-div").hidden = true;
             start = parseFloat(this.pstart.value);
             stop = parseFloat(this.pstop.value);
 
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
         } else {
             //frequency mode
-            this.pstart.disabled = true;
-            this.pstop.disabled  = true;
-            this.fstart.disabled = false;
-            this.fstop.disabled  = false;
+            document.getElementById('period-div').hidden = true;
+            document.getElementById("frequency-div").hidden = false;
             start = parseFloat(this.fstart.value);
             stop = parseFloat(this.fstop.value);
 
@@ -436,7 +437,9 @@ function switchMode(myChart, mode, reset = false) {
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
-            document.getElementById('fourier-form').oninput();
+            // document.getElementById('fourier-form').oninput();
+            myChart.data.datasets[2].data = [];
+            myChart.data.datasets[3].data = [];
         }
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
@@ -459,6 +462,8 @@ function switchMode(myChart, mode, reset = false) {
         document.getElementById('fourier-form').fouriermode.value = 'p';
         document.getElementById('fourier-form').pstop.value = 3;
         document.getElementById('fourier-form').fstart.value = 0.1;
+        document.getElementById('period-div').hidden = false;
+        document.getElementById('frequency-div').hidden = true;
 
         document.getElementById("period-folding-form").pf.value = 0;
         document.getElementById("period-folding-form").bins.value = 100;
