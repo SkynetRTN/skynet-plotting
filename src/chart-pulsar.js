@@ -32,7 +32,6 @@ export function pulsar() {
 
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
-        
         '<div class="row">\n' +
         '<div class="col-sm-7">Rendering Count: </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="1" name="rc" title="Rendering Count" value="1000" max="10000"></input></div>\n' +
@@ -40,7 +39,6 @@ export function pulsar() {
         '<div class="row">\n' +
         '<div class="col-sm-12" style="color: grey;">Note: increasing rendering count beyond 5000 may cause system slowdowns.</div>' +
         '</div>\n' +
-        
         '<div class="row">\n' +
         '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="p" checked><span>Period</span></label></input></div>\n' +
         '</div>\n' +
@@ -186,8 +184,10 @@ export function pulsar() {
             },
             tooltips: {
                 callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 4) + ', ' +
+                    label: function (tooltipItem) {
+                        let precision = tooltipItem.datasetIndex === 2 || 
+                                        tooltipItem.datasetIndex === 3 ? 6 : 4
+                        return '(' + round(tooltipItem.xLabel, precision) + ', ' +
                             round(tooltipItem.yLabel, 4) + ')';
                     },
                 },
