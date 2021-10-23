@@ -26,7 +26,7 @@ export function pulsar() {
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Background Scale (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=3></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" max="30" title="Background Subtraction Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 
@@ -212,7 +212,10 @@ export function pulsar() {
 
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = function () {
-        let dt = parseFloat(this.dt.value);
+        let dt = Math.min(30, parseFloat(this.dt.value));
+        if (isNaN(dt)) {
+            return;
+        }
         let tableData = hot.getData();
 
         let time = [];
