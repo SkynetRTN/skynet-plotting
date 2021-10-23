@@ -10,7 +10,7 @@ import { venus } from './chart-venus.js';
 import { variable, variableFileUpload } from './chart-variable.js';
 import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
 import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
-import { cluster } from './chart-cluster.js';
+import { cluster, clusterFileUpload } from './chart-cluster.js';
 
 /**
  *  Initializing the page when the website loads
@@ -149,6 +149,10 @@ function chartType(chart) {
         }
     } else if (chart === 'cluster') {
         objects = cluster();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, objects[0], objects[1]);
+        }
     }
 
     updateTableHeight(objects[0]);
