@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
+import { updateLabels, updateTableHeight } from "./util.js"
 import { round, sqr, rad } from "./my-math.js"
 
 /**
@@ -46,8 +46,15 @@ export function cluster() {
         '<div class="col-sm-6">Luminosity</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6"><select name="blue" style="width: 100%;" title="Select Blue Color Filter"></select></div>\n' +
-        '<div class="col-sm-6"><select name="lum" style="width: 100%;" title="Select Luminosity Filter"></select></div>\n' +
+        '<div class="col-sm-4"><select name="blue-color-filter" style="width: 100%;" title="Select Blue Color Filter">\n'+
+        '<option value="B" title="B filter" selected>B</option></div>\n'+
+        '<option value="V" title="V filter">V</option></select></div>\n'+
+        '<div class="col-sm-4"><select name="red-color-filter" style="width: 100%;" title="Red Color Filter" disabled>\n'+
+        '<option value="V" title="V filter" selected>V</option></div>\n'+
+        '<option value="B" title="B filter">B</option></select></div>\n'+
+        '<div class="col-sm-4"><select name="luminosity-filter" style="width: 100%;" title="Select Luminosity Filter">\n'+
+        '<option value="V" title="V filter" selected>V</option></div>\n'+
+        '<option value="B" title="B filter">B</option></select></div>\n'+
         '</div>\n' +
         '</form>\n');
 
@@ -57,8 +64,8 @@ export function cluster() {
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
     linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 10, 0.01, 6);
-    linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 100, 1, 0);
-    linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], 0, 1000, 1, 0);
+    linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
+    linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
 
     let tableData = generateclusterData();
 
@@ -134,8 +141,8 @@ export function cluster() {
 
     let update = function () {
         updateTableHeight(hot);
-        updateLine(tableData, myChart);
-        updateFormula(tableData, clusterForm, myChart);
+        updateScatter(tableData, myChart);
+        updateHRModel(tableData, clusterForm, myChart);
     };
 
     // link chart to table
@@ -158,31 +165,35 @@ export function cluster() {
     let callback = () => {
         if (changed) {
             changed = false;
-            updateFormula(tableData, clusterForm, myChart);
+            updateHRModel(tableData, clusterForm, myChart);
             setTimeout(callback, frameTime);
         } else {
             lock = false;
         }
     }
 
-    // link chart to input form (slider + text)
+    // link chart to model form (slider + text)
     clusterForm.oninput = function () {
         if (!lock) {
             lock = true;
-            updateFormula(tableData, clusterForm, myChart);
+            updateHRModel(tableData, clusterForm, myChart);
             setTimeout(callback, frameTime);
         } else {
             changed = true;
         }
     };
 
+    filterForm.oninput = function (){
+        let red  = filterForm.elements["red-color-filter"];
+        let blue = filterForm.elements["blue-color-filter"];
+        let lum  = filterForm.elements["luminosity-filter"];
+        if (red.value === blue.value){
+            red.value = red.options[(red.selectedIndex+1)%2].value;
+        }
+    }
 
-
-
-
-
-    updateLine(tableData, myChart);
-    updateFormula(tableData, clusterForm, myChart);
+    updateScatter(tableData, myChart);
+    updateHRModel(tableData, clusterForm, myChart);
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
@@ -312,12 +323,33 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateFormula(table, form, chart) {
-    /** 
-     * HELLLLLOOOOOOOO
-     * this is where the formula for moving the data set around should go
-    */
-
+function updateHRModel(table, form, chart) {
+    let min = null;
+    let max = null;
+    for (let i = 0; i < table.length; i++) {
+        let x = table[i]['x'];
+        let y = table[i]['y'];
+        if (x === '' || y === '' || x === null || y === null) {
+            continue;
+        }
+        if (max === null || x > max) {
+            max = x;
+        }
+        if (min === null || x < min) {
+            min = x;
+        }
+    }
+    chart.data.datasets[1].data = HRGenerator(
+        form.elements['d-num'].value,
+        form.elements['r-num'].value,
+        form.elements['age-num'].value,
+        form.elements['red-num'].value,
+        form.elements['metal-num'].value,
+        -8,
+        8,
+        2000
+    );
+    chart.update(0);
 }
 
 /**
@@ -370,7 +402,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 }
 
 /**
-*  This function generates the data used for function "updateFormula" with the four parameters provided.
+*  This function generates the data used for functions "updateHRModel" and "clusterGenerator."
 *
 *  @param d:            Distance to the Cluster
 *  @param r:            % of the range
@@ -389,16 +421,18 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
     let y = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
-        let x2 = -0.0959 + 0.1088 * y + 0.0073 * Math.pow(y, 2)
-        let x1 = (x3 + x2 > 2) ? null : x3 + x2;
-        data.push({
-            // actual magnitude is less the further away the object is (and less is more for mag)
-            y: y - 5 * Math.log10(dist / 0.01),
-            // x =-0.0959+0.1088*y+0.0073*y^2
-            x: x1,
+        let x3 = 0.2*Math.pow(( (y-8)/(-22.706+2.7236*age-8) ),3);
+        let x2 = -0.0959+0.1088*y+0.0073*Math.pow(y,2)
+        let x1 = x3+x2;
+        if (x1<=2){
+            data.push({
+                // actual magnitude is less the further away the object is (and less is more for mag)
+                y: y-5*Math.log10(dist/0.01),
+                // x =-0.0959+0.1088*y+0.0073*y^2
+                x: x1,
 
-        });
+            });
+        }
         y += step;
     }
     return data;
@@ -406,7 +440,7 @@ function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps
 
 /**
 *  This function returns an array of data points that represent a cluster of stars with randomly
-*  generated parameters. This function also introduces a 10% noise to all data points.
+*  generated parameters. This function also introduces noise to all data points.
 *  @returns    {Array}
 */
 function generateclusterData() {
@@ -415,18 +449,37 @@ function generateclusterData() {
      *  ln(1) = 0
      */
     let returnData = [];
-    let clusterData = HRGenerator(Math.random() * 99.9 + 0.1,
-                                  100,
-                                  Math.random() * 4 + 6,
-                                  Math.random() * 100,
-                                  Math.random() * 100,
-                                  -8, 8, 100);
-    for (let i = 0; i < clusterData.length; i++) {
+    let clusterData = HRGenerator(Math.random()*99.9+0.1,
+                              100,
+                              Math.random()*4+6,
+                              Math.random()*100,
+                              Math.random()*100,
+                              -8,8,100);
+    for (let i=0; i<clusterData.length; i++){
+        let y= clusterData[i].y*(1 + (Math.random()-0.5) * 0.40);
+        let x= clusterData[i].x*(1 + (Math.random()-0.5) * 0.40)+y;
         returnData.push({
-            x: clusterData[i].x * (1 + (Math.random() - 0.5) * 0.40),
-            y: clusterData[i].y * (1 + (Math.random() - 0.5) * 0.40)
+            y: y,
+            x: x
         })
     }
 
     return returnData;
+}
+
+function updateScatter(tableData, myChart, dataSet = 0, xKey = 'x', yKey = 'y') {
+    let start = 0;
+    let chart = myChart.data.datasets[dataSet].data;
+    for (let i = 0; i < tableData.length; i++) {
+        if (tableData[i][xKey] === '' || tableData[i][yKey] === '' ||
+            tableData[i][xKey] === null || tableData[i][yKey] === null) {
+            continue;
+        }
+        //B-V,V
+        chart[start++] = { x: tableData[i][xKey]-tableData[i][yKey], y: tableData[i][yKey] };
+    }
+    while (chart.length !== start) {
+        chart.pop();
+    }
+    myChart.update(0);
 }
