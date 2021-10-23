@@ -257,8 +257,6 @@ export function variableFileUpload(evt, table, myChart) {
         let right = 0;
         let tableData = [];
 
-        console.log(data1, data2);
-
         while (left < data1.length && right < data2.length) {
             if (data1[left][0] === data2[right][0]) {
                 pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1]);

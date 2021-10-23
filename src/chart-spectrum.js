@@ -193,8 +193,7 @@ export function spectrumFileUpload(evt, table, myChart) {
         data = data.map(row => row.map(str => parseFloat(str)));
         data = data.filter(row => (row[9] !== 0));
         data = data.map(row => [row[0], row[5], row[6]]);
-        console.log(data)
-
+        // console.log(data)
     }
     reader.readAsText(file);
 }
