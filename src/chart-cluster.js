@@ -67,7 +67,7 @@ export function cluster() {
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 100, 1, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], 0, 1000, 1, 0);
 
-    let tableData = generateclusterData();
+    let tableData = [];
 
     let chartData = [];
 
@@ -200,12 +200,42 @@ export function cluster() {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateFormula(table, form, chart) {
-/** 
- * HELLLLLOOOOOOOO
- * this is where the formula for moving the data set around should go
-*/
-
+/**
+ *  This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
+ *  relationship between a moon's angular distance and Julian date, and generates a dataset that
+ *  spans over the range determined by the max and min value present in the table.
+ *  @param table:   A table used to determine the max and min value for the range
+ *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
+ *  @param chart:   The Chartjs object to be updated.
+ */
+ function updateFormula(table, form, chart) {
+    // Can't just set min and max to the first values in the table because it might be invalid
+    let min = null;
+    let max = null;
+    for (let i = 0; i < table.length; i++) {
+        let x = table[i]['x'];
+        let y = table[i]['y'];
+        if (x === '' || y === '' || x === null || y === null) {
+            continue;
+        }
+        if (max === null || x > max) {
+            max = x;
+        }
+        if (min === null || x < min) {
+            min = x;
+        }
+    }
+    chart.data.datasets[1].data = HRGenerator(
+        form.elements['d-num'].value,
+        form.elements['r-num'].value,
+        form.elements['age-num'].value,
+        form.elements['red-num'].value,
+        form.elements['metal-num'].value,
+        -41.58,
+        26.73,
+        2000
+    );
+    chart.update(0);
 }
 
 /**
@@ -260,28 +290,30 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 /**
 *  This function generates the data used for function "updateFormula" with the four parameters provided.
 *
-*  @param a:       Amplitude of the moon's orbit
-*  @param p:       The period of the moon's orbit
-*  @param phase:   The phase of the orbit
-*  @param tilt:    The tilt of the orbit
-*  @param start:   The starting point of the data points
-*  @param end:     The end point of the data points
-*  @param steps:   Steps generated to be returned in the array. Default is 500
+*  @param d:            Distance to the Cluster
+*  @param r:            % of the range
+*  @param age:          Age of the Cluster
+*  @param reddening:    The reddening of the observation
+*  @param metallicity:  Metallicity of the cluster
+*  @param start:        The starting point of the data points
+*  @param end:          The end point of the data points
+*  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function trigGenerator(a, p, phase, tilt, start, end, steps = 500) {
+function HRGenerator(dist, range, age, reddening, metallicity, start, end, steps = 500) {
+    //To Change
     let data = [];
-    let x = start;
+
+    let y = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let theta = (x - start - 2) / p * Math.PI * 2 - rad(phase);
-        let alpha = rad(tilt);
         data.push({
-            x: x,
-            // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
-            y: a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))),
+            y: y,
+            // x =-0.0959+0.1088*y+0.0073*y^2
+            x: -0.0959+0.1088*y+0.0073*Math.pow(y,2),
+
         });
-        x += step;
+        y += step;
     }
     return data;
 }
