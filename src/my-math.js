@@ -78,18 +78,15 @@ export function backgroundSubtraction(time, flux, dt) {
     let n = Math.min(time.length, flux.length);
     const subtracted = [];
 
+    let jmin = 0;
+    let jmax = 0;
     for (let i = 0; i < n; i++) {
-        let j = i;
-        while (j >= 0 && time[j] >= time[i] - (dt / 2)) {
-            j = j - 1;
+        while (jmin < n && time[jmin] < time[i] - (dt / 2)) {
+            jmin++;
         }
-        let jmin = j + 1;
-
-        j = i;
-        while (j < n && time[j] <= time[i] + (dt / 2)) {
-            j = j + 1;
+        while (jmax < n && time[jmax] <= time[i] + (dt / 2)) {
+            jmax++;
         }
-        let jmax = j;
         let fluxmed = median(flux.slice(jmin, jmax));
         subtracted.push(flux[i] - fluxmed);
     }
