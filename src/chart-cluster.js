@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./util.js"
+import { throttle, updateLabels, updateTableHeight } from "./util.js"
 import { round, sqr, rad } from "./my-math.js"
 
 /**
@@ -397,12 +397,14 @@ export function cluster() {
         afterCreateRow: update,
     });
 
+    let fps = 60;
+    let frameTime = Math.floor(1000 / fps);
+
     // link chart to model form (slider + text)
-    clusterForm.oninput = function () {
+    clusterForm.oninput = throttle(function () {
         //console.log(tableData);
         update();
-
-    };
+    }, frameTime);
 
     filterForm.oninput = function () {
         //console.log(tableData);
@@ -469,72 +471,72 @@ export function clusterFileUpload(evt, table, myChart) {
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
         //Change filter oprions to match file
-let filter1num, filter2num;
-if (filter1.toUpperCase() === "U") {
-     filter1num = 1
-} else if (filter1.toUpperCase() === "UPRIME") {
-     filter1num = 2
-} else if (filter1.toUpperCase() === "B") {
-     filter1num = 3
-} else if (filter1.toUpperCase() === "GPRIME") {
-     filter1num = 4
-} else if (filter1.toUpperCase() === "V") {
-     filter1num = 5
-} else if (filter1.toUpperCase() === "RPRIME") {
-     filter1num = 6
-} else if (filter1.toUpperCase() === "R") {
-     filter1num = 7
-} else if (filter1.toUpperCase() === "IPRIME") {
-     filter1num = 8
-} else if (filter1.toUpperCase() === "I") {
-     filter1num = 9
-} else if (filter1.toUpperCase() === "ZPRIME") {
-     filter1num = 10
-} else if (filter1.toUpperCase() === "J") {
-     filter1num = 11
-} else if (filter1.toUpperCase() === "H") {
-     filter1num = 12
-} else if (filter1.toUpperCase() === "K") {
-     filter1num = 13
-} else  {
-     filter1num = 14
-}
+        let filter1num, filter2num;
+        if (filter1.toUpperCase() === "U") {
+            filter1num = 1
+        } else if (filter1.toUpperCase() === "UPRIME") {
+            filter1num = 2
+        } else if (filter1.toUpperCase() === "B") {
+            filter1num = 3
+        } else if (filter1.toUpperCase() === "GPRIME") {
+            filter1num = 4
+        } else if (filter1.toUpperCase() === "V") {
+            filter1num = 5
+        } else if (filter1.toUpperCase() === "RPRIME") {
+            filter1num = 6
+        } else if (filter1.toUpperCase() === "R") {
+            filter1num = 7
+        } else if (filter1.toUpperCase() === "IPRIME") {
+            filter1num = 8
+        } else if (filter1.toUpperCase() === "I") {
+            filter1num = 9
+        } else if (filter1.toUpperCase() === "ZPRIME") {
+            filter1num = 10
+        } else if (filter1.toUpperCase() === "J") {
+            filter1num = 11
+        } else if (filter1.toUpperCase() === "H") {
+            filter1num = 12
+        } else if (filter1.toUpperCase() === "K") {
+            filter1num = 13
+        } else {
+            filter1num = 14
+        }
 
-if (filter2.toUpperCase() === "U") {
-     filter2num = 1
-} else if (filter2.toUpperCase() === "UPRIME") {
-     filter2num = 2
-} else if (filter2=== "B") {
-     filter2num = 3
-} else if (filter2.toUpperCase() === "GPRIME") {
-     filter2num = 4
-} else if (filter2.toUpperCase() === "V") {
-     filter2num = 5
-} else if (filter2.toUpperCase() === "RPRIME") {
-     filter2num = 6
-}else if (filter2.toUpperCase() === "R") {
-     filter2num = 7
-} else if (filter2.toUpperCase()=== "IPRIME") {
-     filter2num = 8
-} else if (filter2.toUpperCase() === "I") {
-     filter2num = 9
-} else if (filter2.toUpperCase() === "ZPRIME") {
-     filter2num = 10
-} else if (filter2.toUpperCase()=== "J") {
-     filter2num = 11
-} else if (filter2.toUpperCase() === "H") {
-     filter2num = 12
-} else if (filter2.toUpperCase()=== "K") {
-     filter2num = 13
-} else  {
-     filter2num = 14
-}
-let filter1temp = filter1
-let filter2temp = filter2
-if (filter1num > filter2num){
-     filter1 = filter2temp
-     filter2 = filter1temp 
-}
+        if (filter2.toUpperCase() === "U") {
+            filter2num = 1
+        } else if (filter2.toUpperCase() === "UPRIME") {
+            filter2num = 2
+        } else if (filter2 === "B") {
+            filter2num = 3
+        } else if (filter2.toUpperCase() === "GPRIME") {
+            filter2num = 4
+        } else if (filter2.toUpperCase() === "V") {
+            filter2num = 5
+        } else if (filter2.toUpperCase() === "RPRIME") {
+            filter2num = 6
+        } else if (filter2.toUpperCase() === "R") {
+            filter2num = 7
+        } else if (filter2.toUpperCase() === "IPRIME") {
+            filter2num = 8
+        } else if (filter2.toUpperCase() === "I") {
+            filter2num = 9
+        } else if (filter2.toUpperCase() === "ZPRIME") {
+            filter2num = 10
+        } else if (filter2.toUpperCase() === "J") {
+            filter2num = 11
+        } else if (filter2.toUpperCase() === "H") {
+            filter2num = 12
+        } else if (filter2.toUpperCase() === "K") {
+            filter2num = 13
+        } else {
+            filter2num = 14
+        }
+        let filter1temp = filter1
+        let filter2temp = filter2
+        if (filter1num > filter2num) {
+            filter1 = filter2temp
+            filter2 = filter1temp
+        }
 
         blue.options[0].textContent = filter1;
         blue.options[1].textContent = filter2;
@@ -715,7 +717,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 *  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function HRGenerator( age, reddening, metallicity, start = -8, end = 8, steps = 500) {
+function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 500) {
     //To Change
     let data = [];
     let y = start;
@@ -740,9 +742,9 @@ function updateScatter(table, myChart, dist = 0.01, dataSet = 0, form) {
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
     //Determine what filters each is set to
-    let blue = form.elements["blue"].value==='b'?0:1;
-    let red = form.elements["red"].value==='b'?0:1;
-    let lum = form.elements["lum"].value==='b'?0:1;
+    let blue = form.elements["blue"].value === 'b' ? 0 : 1;
+    let red = form.elements["red"].value === 'b' ? 0 : 1;
+    let lum = form.elements["lum"].value === 'b' ? 0 : 1;
 
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][blue] === '' || tableData[i][red] === '' ||
