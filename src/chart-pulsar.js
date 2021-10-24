@@ -1,8 +1,8 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction } from "./my-math.js"
+import { sanitizeTableData, updateLabels, updateTableHeight } from "./util.js"
+import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -26,15 +26,20 @@ export function pulsar() {
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Background Scale (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" title="Background Subtraction Scale" value=3></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" max="30" title="Background Subtraction Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
-    
+
     document.getElementById("fourier-div").innerHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="p" checked><span>Period</span></label></input></div>\n' +
+        '<div class="col-sm-7">Select Mode: </div>\n' +
+        '<div class="col-sm-5"><select name="fouriermode" style="width: 100%;" title="Select Mode">\n' +
+        '<option value="p" title="Period" selected>Period</option>\n' +
+        '<option value="f" title="Frequency">Frequency</option>\n' +
+        '</select></div>\n' +
         '</div>\n' +
+        '<div id="period-div">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Period (sec): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstart" title="Start Period" value=0.1></input></div>\n' +
@@ -43,9 +48,8 @@ export function pulsar() {
         '<div class="col-sm-7">Stop Period (sec): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pstop" title="Stop Period" value=3></input></div>\n' +
         '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-5"><label><input type="radio" name="fouriermode" value="f"><span>Frequency</span></label></input></div>\n' +
         '</div>\n' +
+        '<div id="frequency-div" hidden="true">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Frequency (Hz): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstart" title="Start Frequency" value=0.1></input></div>\n' +
@@ -54,22 +58,36 @@ export function pulsar() {
         '<div class="col-sm-7">Stop Frequency (Hz): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="fstop" title="Stop Frequency" value=30></input></div>\n' +
         '</div>\n' +
-        '</form>\n';
-        
-    document.getElementById("period-folding-div").innerHTML =
-        '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
+        '<div class="col-sm-7">Points: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="1" name="rc" title="Rendering Count" value="1000" max="10000"></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-12" style="color: grey;">For better resolution, decrease range and/or increase points.  Note, it is desirable to have multiple points across peaks before measuring them.  10,000 points takes a few minutes to compute.</div>\n' +
         '</div>\n' +
         '</form>\n';
 
+
+    document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
+        '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Folding Period: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Bins: </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
+        '</div>\n' +
+        '</form>\n'
+    );
+
     let tableData = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 1000; i++) {
         tableData[i] = {
-            'time': i * 10 + Math.random() * 10 - 5,
-            'chn1': Math.random() * 20,
-            'chn2': Math.random() * 20,
+            'time': (i * 0.2) + 3560,
+            'chn1': (Math.random() / 20) + 20.63,
+            'chn2': (Math.random() / 20) + 28.98,
         };
     }
 
@@ -107,7 +125,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
-                    immutableLabel: true,
+                    immutableLabel: false,
                     hidden: false,
                     fill: false
                 }, {
@@ -115,7 +133,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    immutableLabel: true,
+                    immutableLabel: false,
                     hidden: false,
                     fill: false
                 }, {
@@ -142,7 +160,7 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -154,7 +172,7 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    showLine: false,
+                    // showLine: false,
                     // immutableLabel: true,
                     hidden: true,
                     fill: false
@@ -171,9 +189,11 @@ export function pulsar() {
             },
             tooltips: {
                 callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 4) + ', ' +
-                               round(tooltipItem.yLabel, 4) + ')';
+                    label: function (tooltipItem) {
+                        let precision = tooltipItem.datasetIndex === 2 || 
+                                        tooltipItem.datasetIndex === 3 ? 6 : 4
+                        return '(' + round(tooltipItem.xLabel, precision) + ', ' +
+                            round(tooltipItem.yLabel, 4) + ')';
                     },
                 },
             },
@@ -196,32 +216,40 @@ export function pulsar() {
         afterRemoveRow: update,
         afterCreateRow: update,
     });
-    
+
     let pulsarForm = document.getElementById("pulsar-form");
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
+        updateTableHeight(hot);
     }
 
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = function () {
-        let dt = parseFloat(this.dt.value);
-        let tableData = hot.getData();
+        let dt = Math.min(30, parseFloat(this.dt.value));
+        if (isNaN(dt)) {
+            return;
+        }
+        let tableData = sanitizeTableData(hot.getData(), [0]);
 
         let time = [];
         let chn1 = [];
         let chn2 = [];
         for (let i = 0; i < tableData.length; i++) {
+            if (isNaN(parseFloat(tableData[i][0]))) {
+                continue;
+            }
             time.push(parseFloat(tableData[i][0]));
             chn1.push(parseFloat(tableData[i][1]));
             chn2.push(parseFloat(tableData[i][2]));
         }
         let chn1Sub = backgroundSubtraction(time, chn1, dt);
         let chn2Sub = backgroundSubtraction(time, chn2, dt);
-        
+
         chn1 = [];
         chn2 = [];
         for (let i = 0; i < time.length; i++) {
+            myChart.data.minT = Math.min(myChart.data.minT, time[i]);
             chn1.push({
                 'x': time[i],
                 'y': chn1Sub[i]
@@ -234,74 +262,65 @@ export function pulsar() {
         myChart.data.datasets[0].data = chn1;
         myChart.data.datasets[1].data = chn2;
 
+        myChart.data.modified.fourierChanged = true;
+        myChart.data.modified.periodFoldingChanged = true;
+
         myChart.update(0);
     }
 
     let fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
-        //period mode
-        if (this.fouriermode.value==='p'){
+        let start, stop;
+        if (this.fouriermode.value === 'p') {
+            //period mode
+            document.getElementById('period-div').hidden = false;
+            document.getElementById("frequency-div").hidden = true;
+            start = parseFloat(this.pstart.value);
+            stop = parseFloat(this.pstop.value);
+
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
-            this.fstart.disabled = true;
-            this.fstop.disabled  = true;
-            this.pstart.disabled = false;
-            this.pstop.disabled  = false;
-            let start = parseFloat(this.pstart.value);
-            let stop = parseFloat(this.pstop.value);
-            if (start > stop) {
-                // alert("Please make sure the stop value is greater than the start value.");
-                return;
-            };
-            let chn1 = myChart.data.datasets[0].data;
-            let t1 = chn1.map(entry => entry.x);
-            let y1 = chn1.map(entry => entry.y);
-            let chn2 = myChart.data.datasets[1].data;
-            let t2 = chn2.map(entry => entry.x);
-            let y2 = chn2.map(entry => entry.y);
+        } else {
+            //frequency mode
+            document.getElementById('period-div').hidden = true;
+            document.getElementById("frequency-div").hidden = false;
+            start = parseFloat(this.fstart.value);
+            stop = parseFloat(this.fstop.value);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
-        }
-        //frequency mode
-        else{
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
-            this.pstart.disabled = true;
-            this.pstop.disabled  = true;
-            this.fstart.disabled = false;
-            this.fstop.disabled  = false;
-            let start = parseFloat(this.fstart.value);
-            let stop = parseFloat(this.fstop.value); 
-            if (start > stop) {
-                // alert("Please make sure the stop value is greater than the start value.");
-                return;
-            };
-            let chn1 = myChart.data.datasets[0].data;
-            let t1 = chn1.map(entry => entry.x);
-            let y1 = chn1.map(entry => entry.y);
-            let chn2 = myChart.data.datasets[1].data;
-            let t2 = chn2.map(entry => entry.x);
-            let y2 = chn2.map(entry => entry.y);
+        }
+        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
 
-            myChart.data.datasets[2].data = lombScargle(t1, y1, start, stop, 1000);
-            myChart.data.datasets[3].data = lombScargle(t2, y2, start, stop, 1000);
+        if (start > stop) {
+            // alert("Please make sure the stop value is greater than the start value.");
+            return;
         };
-        console.log(document.getElementById("fourier-form").fouriermode.value)
+        let chn1 = myChart.data.datasets[0].data;
+        let chn2 = myChart.data.datasets[1].data;
+        let t = chn1.map(entry => entry.x);
+        let y1 = chn1.map(entry => entry.y);
+        let y2 = chn2.map(entry => entry.y);
+
+        myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
+        myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
+
         myChart.update(0)
     }
-    
+
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = function () {
         let period = parseFloat(this.pf.value);
-        myChart.data.datasets[4].data = periodFolding(myChart, 0, period);
-        myChart.data.datasets[5].data = periodFolding(myChart, 1, period);
-
+        let bins = parseInt(this.bins.value);
+        myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
+        myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
+        updateTableHeight(hot);
     }
-    
+
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
     myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
-    
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+
     updatePulsar(hot, myChart);
     updateTableHeight(hot);
 
@@ -339,13 +358,16 @@ export function pulsarFileUpload(evt, table, myChart) {
 
         //turn each string into an array of numbers
         data = data.map(val => val.trim().split(/\ +/));
-        
+
         data = data.map(row => row.map(str => parseFloat(str)));
         data = data.filter(row => (row[9] !== 0));
         data = data.map(row => [row[0], row[5], row[6]]);
 
         let tableData = [];
         for (let row of data) {
+            if (isNaN(row[0])) {
+                continue;
+            }
             tableData.push({
                 'time': row[0],
                 'chn1': row[1],
@@ -353,13 +375,16 @@ export function pulsarFileUpload(evt, table, myChart) {
             });
         }
         tableData.sort((a, b) => a.time - b.time);
-        
-        switchMode(myChart, 'lc', true);
-
-        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
-        // in turn trigger update to the pulsar form and the light curve form, which needs to be cleared
-        // prior to being triggered by this upload.
         table.updateSettings({ data: tableData });
+
+        let ts = data.map(row => row[0]).filter(num => !isNaN(num));
+        let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+
+        let fourierForm = document.getElementById('fourier-form');
+        fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
+        fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+
+        switchMode(myChart, 'lc', true);
     }
     reader.readAsText(file);
 }
@@ -373,36 +398,9 @@ export function pulsarFileUpload(evt, table, myChart) {
  */
 function updatePulsar(table, myChart) {
     // console.log("updatePulsar called");
-
     myChart.data.minT = Number.POSITIVE_INFINITY;
-    
-    for (let i = 0; i < 6; i++) {
-        myChart.data.datasets[i].data = [];
-    }
 
-    let tableData = table.getData();
-    let chn1Data = [];
-    let chn2Data = [];
-
-    for (let i = 0; i < tableData.length; i++) {
-        let time = tableData[i][0];
-        let chn1 = tableData[i][1];
-        let chn2 = tableData[i][2];
-
-        myChart.data.minT = Math.min(myChart.data.minT, time);
-
-        chn1Data.push({
-            "x": time,
-            "y": chn1,
-        })
-        chn2Data.push({
-            "x": time,
-            "y": chn2,
-        })
-    }
-
-    myChart.data.datasets[0].data = chn1Data;
-    myChart.data.datasets[1].data = chn2Data;
+    // Flag that every mode needs to be updated.
     myChart.data.modified.lightCurveChanged = true;
     myChart.data.modified.fourierChanged = true;
     myChart.data.modified.periodFoldingChanged = true;
@@ -418,13 +416,16 @@ function updatePulsar(table, myChart) {
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset=false) {
+function switchMode(myChart, mode, reset = false) {
     // Displaying the correct datasets
     for (let i = 0; i < 6; i++) {
         myChart.data.datasets[i].hidden = true;
     }
     let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
+        if (document.getElementById('pulsar-form').mode.value !== 'lc') {
+            document.getElementById('pulsar-form').mode[0].checked = true;
+        }
         if (modified.lightCurveChanged) {
             modified.lightCurveChanged = false;
             document.getElementById('light-curve-form').oninput();
@@ -433,11 +434,12 @@ function switchMode(myChart, mode, reset=false) {
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
     } else if (mode === 'ft') {
-        document.getElementById('fourier-form').fouriermode.value = 'p';
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
-            document.getElementById('fourier-form').oninput();
+            // document.getElementById('fourier-form').oninput();
+            myChart.data.datasets[2].data = [];
+            myChart.data.datasets[3].data = [];
         }
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
@@ -453,6 +455,20 @@ function switchMode(myChart, mode, reset=false) {
     }
     myChart.update(0);
 
+    if (reset) {
+        document.getElementById("light-curve-form").dt.value = 3;
+
+        document.getElementById('fourier-form').rc.value = 1000;
+        document.getElementById('fourier-form').fouriermode.value = 'p';
+        document.getElementById('fourier-form').pstop.value = 3;
+        document.getElementById('fourier-form').fstart.value = 0.1;
+        document.getElementById('period-div').hidden = false;
+        document.getElementById('frequency-div').hidden = true;
+
+        document.getElementById("period-folding-form").pf.value = 0;
+        document.getElementById("period-folding-form").bins.value = 100;
+    }
+
     // Displaying the correct label information. Fourier mode has its own separate
     // title and x and y labels, which requires saving and loading the custom 
     // title/labels for other modes.
@@ -467,9 +483,14 @@ function switchMode(myChart, mode, reset=false) {
         customLabels.title = myChart.options.title.text;
         customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
         customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
-        
+
         myChart.options.title.text = "Periodogram";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+        let freq = document.getElementById('fourier-form').fouriermode.value;
+        if (freq === 'p') {
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+        } else {
+            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+        }
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
@@ -502,23 +523,68 @@ function showDiv(id) {
     }
 }
 
-function periodFolding(myChart, src, period) {
+function periodFolding(myChart, src, period, bins) {
     if (period === 0) {
         return myChart.data.datasets[src].data;
     }
 
     let data = myChart.data.datasets[src].data;
     let minT = myChart.data.minT;
+
+    let foldedData = data.map(val => ({
+        "x": floatMod(val.x - minT, period),
+        "y": val.y
+    }));
+
+    // this sorts the time components of the array and then
+    // sorts the flux components accordingly
+
+    foldedData.sort((a, b) => a.x - b.x);
+
+    if (bins <= 0) {
+        let repeated = foldedData.map(val => ({
+            "x": val.x + period,
+            "y": val.y
+        }));
+
+        return foldedData.concat(repeated);
+    }
+
+    let time_b = []
+    let flux_b = []
+
+    //initialize j and new binned arrays
+    let j = 0;
+
+    //iterate over the input number of bins!
+    for (let i = 0; i < bins; i++) {
+        let num = 0; //initialize count
+        time_b.push(period * (i + .5) / bins);  //initialize binned time
+        flux_b.push(0);  //initialize binned flux
+
+        while (j < foldedData.length && foldedData[j].x < (period * (i + 1)) / bins) {
+            num = num + 1;
+            flux_b[i] = flux_b[i] + foldedData[j].y;
+            j = j + 1;//update count, total, and binned flux
+        }
+
+        if (num !== 0) {
+            flux_b[i] = flux_b[i] / num; //average binned flux
+        }
+    }
+
     let pfData = [];
 
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < bins; i++) {
         pfData.push({
-            "x": floatMod(data[i].x - minT, period),
-            "y": data[i].y,
-        });
+            "x": time_b[i],
+            "y": flux_b[i]
+        })
+    }
+    for (let i = 0; i < bins; i++) {
         pfData.push({
-            "x": pfData[pfData.length - 1].x + period,
-            "y": pfData[pfData.length - 1].y,
+            "x": time_b[i] + period,
+            "y": flux_b[i]
         })
     }
     return pfData;

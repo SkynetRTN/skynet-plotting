@@ -16,12 +16,12 @@ export function cluster() {
         '<div class="col-sm-5 range"><input type="range" title="d" name="d"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="d" name="d-num" class="field"></div>\n' +
         '</div>\n' +
-        '<div class="row">\n' +
+        /*'<div class="row">\n' +
         '<div class="col-sm-4 des">+/- Range (%):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
         '</div>\n' +
-        '<div class="row">\n' +
+        */'<div class="row">\n' +
         '<div class="col-sm-4 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Age" name="age"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
@@ -63,7 +63,7 @@ export function cluster() {
     let clusterForm = document.getElementById("cluster-form");
     let filterForm = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
-    linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
+    //linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 11, 0.01, 6);
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
@@ -469,65 +469,64 @@ export function clusterFileUpload(evt, table, myChart) {
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
         //Change filter oprions to match file
-console.log(filter1)
 let filter1num, filter2num;
-if (filter1 === "U") {
+if (filter1.toUpperCase() === "U") {
      filter1num = 1
-} else if (filter1 === "Uprime") {
+} else if (filter1.toUpperCase() === "UPRIME") {
      filter1num = 2
-} else if (filter1=== "B") {
+} else if (filter1.toUpperCase() === "B") {
      filter1num = 3
-} else if (filter1 === "Gprime") {
+} else if (filter1.toUpperCase() === "GPRIME") {
      filter1num = 4
-} else if (filter1 === "V") {
+} else if (filter1.toUpperCase() === "V") {
      filter1num = 5
-} else if (filter1=== "Rprime") {
+} else if (filter1.toUpperCase() === "RPRIME") {
      filter1num = 6
-}else if (filter1 === "R") {
+} else if (filter1.toUpperCase() === "R") {
      filter1num = 7
-} else if (filter1=== "Iprime") {
+} else if (filter1.toUpperCase() === "IPRIME") {
      filter1num = 8
-} else if (filter1 === "I") {
+} else if (filter1.toUpperCase() === "I") {
      filter1num = 9
-} else if (filter1 === "Zprime") {
+} else if (filter1.toUpperCase() === "ZPRIME") {
      filter1num = 10
-} else if (filter1=== "J") {
+} else if (filter1.toUpperCase() === "J") {
      filter1num = 11
-} else if (filter1 === "H") {
+} else if (filter1.toUpperCase() === "H") {
      filter1num = 12
-} else if (filter1=== "K") {
+} else if (filter1.toUpperCase() === "K") {
      filter1num = 13
-} else if (filter1 === []) {
+} else if (filter1.toUpperCase() === []) {
      filter1num = 14
 }
 
-if (filter2 === "U") {
+if (filter2.toUpperCase() === "U") {
      filter2num = 1
-} else if (filter2 === "Uprime") {
+} else if (filter2.toUpperCase() === "UPRIME") {
      filter2num = 2
 } else if (filter2=== "B") {
      filter2num = 3
-} else if (filter2 === "Gprime") {
+} else if (filter2.toUpperCase() === "GPRIME") {
      filter2num = 4
-} else if (filter2 === "V") {
+} else if (filter2.toUpperCase() === "V") {
      filter2num = 5
-} else if (filter2=== "Rprime") {
+} else if (filter2.toUpperCase() === "RPRIME") {
      filter2num = 6
-}else if (filter2 === "R") {
+}else if (filter2.toUpperCase() === "R") {
      filter2num = 7
-} else if (filter2=== "Iprime") {
+} else if (filter2.toUpperCase()=== "IPRIME") {
      filter2num = 8
-} else if (filter2 === "I") {
+} else if (filter2.toUpperCase() === "I") {
      filter2num = 9
-} else if (filter2 === "Zprime") {
+} else if (filter2.toUpperCase() === "ZPRIME") {
      filter2num = 10
-} else if (filter2=== "J") {
+} else if (filter2.toUpperCase()=== "J") {
      filter2num = 11
-} else if (filter2 === "H") {
+} else if (filter2.toUpperCase() === "H") {
      filter2num = 12
-} else if (filter2=== "K") {
+} else if (filter2.toUpperCase()=== "K") {
      filter2num = 13
-} else if (filter2 === []) {
+} else if (filter2.toUpperCase() === []) {
      filter2num = 14
 }
 let filter1temp = filter1
@@ -643,7 +642,7 @@ if (filter1num > filter2num){
  */
 function updateHRModel(form, chart) {
     chart.data.datasets[1].data = HRGenerator(
-        form.elements['r-num'].value,
+        //form.elements['r-num'].value,
         form.elements['age-num'].value,
         form.elements['red-num'].value,
         form.elements['metal-num'].value,
@@ -716,7 +715,7 @@ function linkInputs(slider, number, min, max, step, value, log = false) {
 *  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function HRGenerator(range, age, reddening, metallicity, start = -8, end = 8, steps = 500) {
+function HRGenerator( age, reddening, metallicity, start = -8, end = 8, steps = 500) {
     //To Change
     let data = [];
     let y = start;

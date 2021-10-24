@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./util.js"
+import { updateLabels, updateTableHeight, linkInputs } from "./util.js"
 import { rad, round } from "./my-math.js"
 
 /**
@@ -12,20 +12,25 @@ export function scatter() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Distance (kpc): </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="x" title="Center (X)" value=0></input></div>\n' +
+        '<div class="col-sm-5">Distance (kpc): </div>\n' +
+        '<div class="col-sm-4 range"><input class="field" type="range" name="x" title="Center (X)" value=0></input></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
        // '<div class="col-sm-6">Center (Y): </div>\n' +
         //'<div class="col-sm-6"><input class="field" type="number" step="0.001" name="y" title="Center (Y)" value=0></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6">Diameter (kpc): </div>\n' +
-        '<div class="col-sm-6"><input class="field" type="number" step="0.001" name="d" title="Diameter" value=5></input></div>\n' +
+        '<div class="col-sm-5">Diameter (kpc): </div>\n' +
+        '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value=10></input></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
-
+    let scatterForm = document.getElementById("scatter-form");
+    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 30, 0.01, 10);
+    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 50, 0.01, 0);
+    
     let tableData = [];
     for (let i = 0; i < 17; i++) {
         tableData[i] = {
@@ -137,7 +142,7 @@ export function scatter() {
     });
 
     // Link the form to chart
-    let scatterForm = document.getElementById("scatter-form");
+    //let scatterForm = document.getElementById("scatter-form");
     scatterForm.oninput = function () {
         let x = parseInt(scatterForm.elements['x'].value);
         let y = 0;
@@ -145,6 +150,21 @@ export function scatter() {
         myChart.data.datasets[2].data = [{ x: x, y: y}];
         myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update(0);
+    }
+    let changed = false;        // Indicates whether a change occurred while waiting for lock
+    let lock = false;           // Lock for throttle
+
+    let fps = 100;
+    let frameTime = Math.floor(1000 / fps);
+
+    let callback = () => {
+        if (changed) {
+            changed = false;
+            updateFormula(tableData, moonForm, myChart);
+            setTimeout(callback, frameTime);
+        } else {
+            lock = false;
+        }
     }
 
     updateScatter(tableData, myChart);
