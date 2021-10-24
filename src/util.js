@@ -237,7 +237,7 @@ export function throttle(func, wait, extraTrailExecution = true) {
     let callback = function (...args) {
         if (changed) {
             changed = false;
-
+            
             // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
             //   We want to bind `this` only so that we have access to the values that
             //   came with the triggering event (usually a changed input field).
@@ -261,6 +261,7 @@ export function throttle(func, wait, extraTrailExecution = true) {
             //   We want to bind `this` only so that we have access to the values that
             //   came with the triggering event (usually a changed input field).
             // this.func(...args);
+
             func.apply(this, args);
 
             // BADDDDDDD! callback(...args) will run here and now ;_;
@@ -277,5 +278,9 @@ export function throttle(func, wait, extraTrailExecution = true) {
 }
 
 export function debounce(func, wait) {
-
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => { func.apply(this, args); }, wait);
+    }
 }
