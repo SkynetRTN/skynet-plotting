@@ -342,7 +342,7 @@ export function cluster() {
                 }, {
                     label: 'Model',
                     data: null, // will be generated later
-                    borderColor: colors['purple'],
+                    borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,

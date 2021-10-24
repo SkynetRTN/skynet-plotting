@@ -87,11 +87,13 @@ export function scatter() {
                 }, {
                     label: 'Model',
                     data: circle(0, 0, 5),
-                    pointRadius: 0,
-                    pointBorderWidth: 2,
-                    immutableLabel: true,
                     borderColor: colors['gray'],
-                    backgroundColor: colors['white-0']
+                    backgroundColor: colors['white-0'],
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    pointRadius: 0,
+                    fill: false,
+                    immutableLabel: true
                 }
             ],
         },
