@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { debounce, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -231,9 +231,10 @@ export function pulsar() {
         }
     }
 
-    let lightCurveForm = document.getElementById('light-curve-form');
-    lightCurveForm.oninput = function () {
-        let dt = Math.min(30, parseFloat(this.dt.value));
+    let lightCurveOninput = function () {
+        this.dt.value = clamp(this.dt.value, 0, 30);
+
+        let dt = this.dt.value;
         if (isNaN(dt)) {
             return;
         }
@@ -288,8 +289,9 @@ export function pulsar() {
         }
     }
 
-    let fourierForm = document.getElementById("fourier-form");
-    fourierForm.oninput = function () {
+    let fourierOninput = function () {
+        this.rc.value = clamp(this.rc.value, 0, 10000);
+
         let start, stop;
         if (this.fouriermode.value === 'p') {
             //period mode
@@ -331,14 +333,15 @@ export function pulsar() {
         fourierOninput.apply(fourierForm, args);
     }
 
-    let periodFoldingForm = document.getElementById("period-folding-form");
-    periodFoldingForm.oninput = function () {
+    let periodFoldingOninput = function () {
+        this.pf.value   = clamp(this.pf.value, 0, NaN);
+        this.bins.value = clamp(this.bins.value, 0, 10000);
+
         let period = parseFloat(this.pf.value);
         let bins = parseInt(this.bins.value);
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
-        updateTableHeight(hot);
     }
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
