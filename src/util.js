@@ -234,29 +234,39 @@ export function throttle(func, wait, extraTrailExecution = true) {
     let changed = false;        // Indicates whether a change occurred while waiting for lock
     let lock = false;           // Lock for throttle
 
-    let callback = (...args) => {
+    let callback = function (...args) {
         if (changed) {
             changed = false;
-            func(...args);
+
+            // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
+            //   We want to bind `this` only so that we have access to the values that
+            //   came with the triggering event (usually a changed input field).
+            // this.func(...args);
+            func.apply(this, args);
 
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
-            setTimeout(() => { callback(...args); }, wait);
+            setTimeout(() => { callback.apply(this, args); }, wait);
         } else {
             lock = false;
         }
     }
 
     // link chart to input form (slider + text)
-    return (...args) => {
+    return function (...args) {
         if (!lock) {
             lock = true;
-            func(...args);
-            
+
+            // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
+            //   We want to bind `this` only so that we have access to the values that
+            //   came with the triggering event (usually a changed input field).
+            // this.func(...args);
+            func.apply(this, args);
+
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
             if (extraTrailExecution) {
-                setTimeout(() => { callback(...args); }, wait);
+                setTimeout(() => { callback.apply(this, args); }, wait);
             } else {
                 setTimeout(() => { lock = false; }, wait);
             }
