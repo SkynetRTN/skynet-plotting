@@ -1,8 +1,8 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { sanitizeTableData, updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
+import { debounce, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -26,7 +26,7 @@ export function pulsar() {
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Background Scale (sec): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" max="30" title="Background Subtraction Scale" value=3></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="dt" max="30" title="Background Scale" value=3></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 
@@ -66,8 +66,10 @@ export function pulsar() {
         '<div class="row">\n' +
         '<div class="col-sm-12" style="color: grey;">For better resolution, decrease range and/or increase points.  Note, it is desirable to have multiple points across peaks before measuring them.  10,000 points takes a few minutes to compute.</div>\n' +
         '</div>\n' +
-        '</form>\n';
-
+        '</form>\n' +
+        '<div class="row justify-content-end">\n' +
+        '<div class="col-4"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
+        '</div>\n';
 
     document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
         '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -221,12 +223,18 @@ export function pulsar() {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value;
         switchMode(myChart, mode);
-        updateTableHeight(hot);
+        
+        // This needs to happen after switchMode() since different parts of height
+        // updates during switching.
+        if (mode === 'lc') {
+            updateTableHeight(hot);
+        }
     }
 
-    let lightCurveForm = document.getElementById('light-curve-form');
-    lightCurveForm.oninput = function () {
-        let dt = Math.min(30, parseFloat(this.dt.value));
+    let lightCurveOninput = function () {
+        this.dt.value = clamp(this.dt.value, 0, 30);
+
+        let dt = this.dt.value;
         if (isNaN(dt)) {
             return;
         }
@@ -267,9 +275,23 @@ export function pulsar() {
 
         myChart.update(0);
     }
+    let lightCurveForm = document.getElementById('light-curve-form');
+    lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
-    let fourierForm = document.getElementById("fourier-form");
-    fourierForm.oninput = function () {
+    let fourierModeSelect = document.getElementById('fourier-form').fouriermode;
+    fourierModeSelect.oninput = function () {
+        if (this.value === 'p') {
+            document.getElementById('period-div').hidden = false;
+            document.getElementById("frequency-div").hidden = true;
+        } else {
+            document.getElementById('period-div').hidden = true;
+            document.getElementById("frequency-div").hidden = false;
+        }
+    }
+
+    let fourierOninput = function () {
+        this.rc.value = clamp(this.rc.value, 0, 10000);
+
         let start, stop;
         if (this.fouriermode.value === 'p') {
             //period mode
@@ -305,16 +327,24 @@ export function pulsar() {
 
         myChart.update(0)
     }
+    let fourierForm = document.getElementById('fourier-form');
+    let computeButton = document.getElementById('compute');
+    computeButton.onclick = (...args) => {
+        fourierOninput.apply(fourierForm, args);
+    }
 
-    let periodFoldingForm = document.getElementById("period-folding-form");
-    periodFoldingForm.oninput = function () {
+    let periodFoldingOninput = function () {
+        this.pf.value   = clamp(this.pf.value, 0, NaN);
+        this.bins.value = clamp(this.bins.value, 0, 10000);
+
         let period = parseFloat(this.pf.value);
         let bins = parseInt(this.bins.value);
         myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
         myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
         myChart.update(0);
-        updateTableHeight(hot);
     }
+    let periodFoldingForm = document.getElementById("period-folding-form");
+    periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";

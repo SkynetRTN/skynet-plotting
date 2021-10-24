@@ -12,16 +12,12 @@ export function scatter() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-5">Distance (kpc): </div>\n' +
-        '<div class="col-sm-4 range"><input class="field" type="range" name="x" title="Center (X)" value=0></input></div>\n' +
+        '<div class="col-sm-5 des">Distance (kpc): </div>\n' +
+        '<div class="col-sm-4 range"><input type="range" name="x" title="Center (X)" value=0></input></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-       // '<div class="col-sm-6">Center (Y): </div>\n' +
-        //'<div class="col-sm-6"><input class="field" type="number" step="0.001" name="y" title="Center (Y)" value=0></input></div>\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-5">Diameter (kpc): </div>\n' +
+        '<div class="col-sm-5 des">Diameter (kpc): </div>\n' +
         '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value=10></input></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d-num" class="field"></div>\n' +
         '</div>\n' +

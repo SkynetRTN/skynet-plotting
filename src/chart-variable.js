@@ -485,7 +485,7 @@ function lightCurve(myChart) {
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Folding Period (days): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Period Folding" value=0></input></div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Folding Period" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
 

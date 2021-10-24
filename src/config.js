@@ -1,6 +1,7 @@
 'use strict';
 
 export const tableCommonOptions = {
+    renderAllRows: false,
     rowHeights: 23,
     columnHeaderHeight: 26,
     rowHeaders: true,

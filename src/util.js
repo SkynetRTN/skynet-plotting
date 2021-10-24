@@ -212,7 +212,21 @@ export function sanitizeData(dataset) {
     return newdataset;
 }
 
-export function throttle(func, wait) {
+/**
+ * This function takes a function @param func and a wait time @param wait, and returns a 
+ * version of the function that will execute at max once per @param wait interval.
+ * 
+ * @param {function} func               The function to be throttled
+ * @param {number} wait                 Wait time in (ms).
+ * @param {boolean} extraTrailExecution If set to true, the function will be executed one
+ *                                      extra time after the @param wait interval if an
+ *                                      execution attemp was made during the blocking period.
+ *                                      This will be useful if @param func is some sort of
+ *                                      update function that will update a view based on
+ *                                      the underlying model.
+ * @returns Throttled version of @param func.
+ */
+export function throttle(func, wait, extraTrailExecution = true) {
     /**
      *  This part of code (throttle) limits the maximum fps of the chart to change, so that it
      *  is possible to increase the sampling precision without hindering performance.
@@ -220,34 +234,53 @@ export function throttle(func, wait) {
     let changed = false;        // Indicates whether a change occurred while waiting for lock
     let lock = false;           // Lock for throttle
 
-    let callback = (...args) => {
+    let callback = function (...args) {
         if (changed) {
             changed = false;
-            func(...args);
+            
+            // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
+            //   We want to bind `this` only so that we have access to the values that
+            //   came with the triggering event (usually a changed input field).
+            // this.func(...args);
+            func.apply(this, args);
 
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
-            setTimeout(() => { callback(...args); }, wait);
+            setTimeout(() => { callback.apply(this, args); }, wait);
         } else {
             lock = false;
         }
     }
 
     // link chart to input form (slider + text)
-    return (...args) => {
+    return function (...args) {
         if (!lock) {
             lock = true;
-            func(...args);
-            
+
+            // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
+            //   We want to bind `this` only so that we have access to the values that
+            //   came with the triggering event (usually a changed input field).
+            // this.func(...args);
+
+            func.apply(this, args);
+
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
-            setTimeout(() => { callback(...args); }, wait);
+            if (extraTrailExecution) {
+                setTimeout(() => { callback.apply(this, args); }, wait);
+            } else {
+                setTimeout(() => { lock = false; }, wait);
+            }
         } else {
             changed = true;
         }
     };
 }
 
-export function debounce(func, delay) {
-
+export function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => { func.apply(this, args); }, wait);
+    }
 }
