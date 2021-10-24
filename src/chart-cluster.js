@@ -13,8 +13,8 @@ export function cluster() {
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Distance" name="d-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Distance (kpc)" name="d"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Distance (kpc)" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">+/- Range (%):</div>\n' +
@@ -23,18 +23,18 @@ export function cluster() {
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Log of Age (in Years)" name="age"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Log of Age (in Years)" name="age-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening (magnitude)" name="red"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Reddening (magnitude)" name="red-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metallicity (solar)" name="metal"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Metallicity (solar)" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<form title="Filters" id="filter-form">\n' +
@@ -648,6 +648,7 @@ function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps 
     //To Change
     let data = [];
     let y = start;
+    console.log(reddening);
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
         let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
