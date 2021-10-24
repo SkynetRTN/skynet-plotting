@@ -6,13 +6,15 @@ import { round } from "./my-math.js"
 
 export function spectrum() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-    '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
+        '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Channel: </div>\n' +
         '<div class="col-sm-5"><select name="channel" style="width: 100%;" title="Select Channel">\n' +
         '<option value="x" title="Channel 1" selected>Channel 1</option>\n' +
-        '<option value="y" title="Channel 2">Channel 2</option>' +
-        '</div>'
+        '<option value="y" title="Channel 2">Channel 2</option>\n' +
+        '</select>\n' +
+        '</div>\n' +
+        '</form>'
     );
     
     let tableData = [];
@@ -181,35 +183,17 @@ export function spectrumFileUpload(evt, table, myChart) {
 
     let reader = new FileReader();
     reader.onload = () => {
-        let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+        let data = reader.result.split("\n");
+        data = data.filter(str => (str !== null && str !== undefined && str !== ""));
         data = data.filter(str => (str[0] !== '#'));
 
-        let tableData = [];
-        for (let i = 0; i < data.length; i++) {
-            "Use regular expression `/\s+/` to handle more than one space"
-            let entry = data[i].trim().split(/\s+/);
-
-            let wl = freqToWL(parseFloat(entry[0]));
-            let x = parseFloat(entry[1]);
-            let y = parseFloat(entry[2]);
-            if (isNaN(wl) || isNaN(x) || isNaN(y) || wl < 21.085 || wl > 21.125) {
-                continue;
-            }
-            tableData.push({
-                "wl": wl,
-                "x": x,
-                "y": y,
-            });
-        }
-        tableData.sort((a, b) => a.wl - b.wl);
+        //turn each string into an array of numbers
+        data = data.map(val => val.trim().split(/\ +/));
         
-        let spectrumForm = document.getElementById("spectrum-form");
-        spectrumForm.elements['channel'].selectedIndex = 0;
-
-        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
-        // in turn trigger update to the variable form and the light curve form, which needs to be cleared
-        // prior to being triggered by this upload.
-        table.updateSettings({ data: tableData });
+        data = data.map(row => row.map(str => parseFloat(str)));
+        data = data.filter(row => (row[9] !== 0));
+        data = data.map(row => [row[0], row[5], row[6]]);
+        // console.log(data)
     }
     reader.readAsText(file);
 }
