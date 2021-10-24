@@ -12,11 +12,11 @@ export function curve() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Lines" id="line-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="1" checked><span>1</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="2"><span>2</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="3"><span>3</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="lineCount" value="4"><span>4</span></label></div>\n' +
-        '<div class="flex-item-grow0"><label><input type="checkbox" name="magnitude"><span>Magnitudes</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" title="y1" name="lineCount" value="1" checked><span>1</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" title="y2" name="lineCount" value="2"><span>2</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" title="y3" name="lineCount" value="3"><span>3</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" title="y4" name="lineCount" value="4"><span>4</span></label></div>\n' +
+        '<div class="flex-item-grow0"><label><input type="checkbox" title="Magnitude" name="magnitude"><span>Magnitudes</span></label></div>\n' +
         '</div>' +
         '</form>\n');
 

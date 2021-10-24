@@ -12,29 +12,29 @@ export function cluster() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Dist. (kpc):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="d" name="d"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="d" name="d-num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Distance (kpc)" name="d"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Distance (kpc)" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">+/- Range (%):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">+/- Range (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Range" name="r"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Range" name="r-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">log(Age (yr)):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Log of Age (in Years)" name="age"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Log of Age (in Years)" name="age-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Reddening (mag):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red-num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening (magnitude)" name="red"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Reddening (magnitude)" name="red-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Metallicity (solar):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metallicity (solar)" name="metal"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Metallicity (solar)" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<form title="Filters" id="filter-form">\n' +
