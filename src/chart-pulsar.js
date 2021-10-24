@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { sanitizeTableData, updateLabels, updateTableHeight } from "./util.js"
+import { debounce, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
 import { round, lombScargle, backgroundSubtraction, ArrMath } from "./my-math.js"
 
 /**
@@ -66,8 +66,10 @@ export function pulsar() {
         '<div class="row">\n' +
         '<div class="col-sm-12" style="color: grey;">For better resolution, decrease range and/or increase points.  Note, it is desirable to have multiple points across peaks before measuring them.  10,000 points takes a few minutes to compute.</div>\n' +
         '</div>\n' +
-        '</form>\n';
-
+        '</form>\n' +
+        '<div class="row justify-content-end">\n' +
+        '<div class="col-4"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
+        '</div>\n';
 
     document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
         '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -272,6 +274,19 @@ export function pulsar() {
 
         myChart.update(0);
     }
+    let lightCurveForm = document.getElementById('light-curve-form');
+    lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
+
+    let fourierModeSelect = document.getElementById('fourier-form').fouriermode;
+    fourierModeSelect.oninput = function () {
+        if (this.value === 'p') {
+            document.getElementById('period-div').hidden = false;
+            document.getElementById("frequency-div").hidden = true;
+        } else {
+            document.getElementById('period-div').hidden = true;
+            document.getElementById("frequency-div").hidden = false;
+        }
+    }
 
     let fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
@@ -310,6 +325,11 @@ export function pulsar() {
 
         myChart.update(0)
     }
+    let fourierForm = document.getElementById('fourier-form');
+    let computeButton = document.getElementById('compute');
+    computeButton.onclick = (...args) => {
+        fourierOninput.apply(fourierForm, args);
+    }
 
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = function () {
@@ -320,6 +340,8 @@ export function pulsar() {
         myChart.update(0);
         updateTableHeight(hot);
     }
+    let periodFoldingForm = document.getElementById("period-folding-form");
+    periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
