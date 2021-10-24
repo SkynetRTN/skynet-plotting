@@ -458,6 +458,24 @@ export function clusterFileUpload(evt, table, myChart) {
 
     let reader = new FileReader();
     reader.onload = () => {
+
+        let clusterForm = document.getElementById("cluster-form");
+        console.log(clusterForm.elements['d'].value);
+        clusterForm.elements['d'].value = Math.log(3);
+        console.log(clusterForm.elements['d'].value);
+        clusterForm.elements['age'].value = 6;
+        clusterForm.elements['red'].value = 0;
+        clusterForm.elements['metal'].value = -3;
+        clusterForm.elements['d-num'].value = 3;
+        clusterForm.elements['age-num'].value = 6;
+        clusterForm.elements['red-num'].value = 0;
+        clusterForm.elements['metal-num'].value = -3;
+        myChart.options.title.text = "Title";
+        myChart.data.datasets[0].label = "Data";
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = 'x';
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = 'y';
+        updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
+
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
         let last = data.length;
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
@@ -467,6 +485,7 @@ export function clusterFileUpload(evt, table, myChart) {
         let blue = document.getElementById("filter-form").elements["blue"];
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
+
         //Change filter oprions to match file
         let filter1num, filter2num;
         if (filter1.toUpperCase() === "U") {
