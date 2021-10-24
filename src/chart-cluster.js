@@ -496,7 +496,7 @@ if (filter1.toUpperCase() === "U") {
      filter1num = 12
 } else if (filter1.toUpperCase() === "K") {
      filter1num = 13
-} else if (filter1.toUpperCase() === []) {
+} else  {
      filter1num = 14
 }
 
@@ -526,7 +526,7 @@ if (filter2.toUpperCase() === "U") {
      filter2num = 12
 } else if (filter2.toUpperCase()=== "K") {
      filter2num = 13
-} else if (filter2.toUpperCase() === []) {
+} else  {
      filter2num = 14
 }
 let filter1temp = filter1
