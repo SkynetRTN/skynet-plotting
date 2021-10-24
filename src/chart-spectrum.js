@@ -115,6 +115,10 @@ export function spectrum() {
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     
+    myChart.options.title.text = "Title"
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
