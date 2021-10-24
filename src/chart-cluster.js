@@ -401,10 +401,7 @@ export function cluster() {
     let frameTime = Math.floor(1000 / fps);
 
     // link chart to model form (slider + text)
-    clusterForm.oninput = throttle(function () {
-        //console.log(tableData);
-        update();
-    }, frameTime);
+    clusterForm.oninput = throttle(update, frameTime);
 
     filterForm.oninput = function () {
         //console.log(tableData);
