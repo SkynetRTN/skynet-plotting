@@ -468,7 +468,75 @@ export function clusterFileUpload(evt, table, myChart) {
         let blue = document.getElementById("filter-form").elements["blue"];
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
-        //Change filter options to match file
+        //Change filter oprions to match file
+console.log(filter1)
+let filter1num, filter2num;
+if (filter1 === "U") {
+     filter1num = 1
+} else if (filter1 === "Uprime") {
+     filter1num = 2
+} else if (filter1=== "B") {
+     filter1num = 3
+} else if (filter1 === "Gprime") {
+     filter1num = 4
+} else if (filter1 === "V") {
+     filter1num = 5
+} else if (filter1=== "Rprime") {
+     filter1num = 6
+}else if (filter1 === "R") {
+     filter1num = 7
+} else if (filter1=== "Iprime") {
+     filter1num = 8
+} else if (filter1 === "I") {
+     filter1num = 9
+} else if (filter1 === "Zprime") {
+     filter1num = 10
+} else if (filter1=== "J") {
+     filter1num = 11
+} else if (filter1 === "H") {
+     filter1num = 12
+} else if (filter1=== "K") {
+     filter1num = 13
+} else if (filter1 = []) {
+     filter1num = 14
+}
+
+if (filter2 === "U") {
+     filter2num = 1
+} else if (filter2 === "Uprime") {
+     filter2num = 2
+} else if (filter2=== "B") {
+     filter2num = 3
+} else if (filter2 === "Gprime") {
+     filter2num = 4
+} else if (filter2 === "V") {
+     filter2num = 5
+} else if (filter2=== "Rprime") {
+     filter2num = 6
+}else if (filter2 === "R") {
+     filter2num = 7
+} else if (filter2=== "Iprime") {
+     filter2num = 8
+} else if (filter2 === "I") {
+     filter2num = 9
+} else if (filter2 === "Zprime") {
+     filter2num = 10
+} else if (filter2=== "J") {
+     filter2num = 11
+} else if (filter2 === "H") {
+     filter2num = 12
+} else if (filter2=== "K") {
+     filter2num = 13
+} else if (filter2 = []) {
+     filter2num = 14
+}
+let filter1temp = filter1
+let filter2temp = filter2
+if (filter1num > filter2num){
+     filter1 = filter2temp
+     filter2 = filter1temp 
+}
+
         blue.options[0].textContent = filter1;
         blue.options[1].textContent = filter2;
         red.options[0].textContent = filter1;
