@@ -1,7 +1,7 @@
 # astro-plotting
 
 ## Description
-A graphing tool used by the OPIS! (Our Place In Space) and MWU! (The Multi-Wavelength Universe) [curriculums]((https://www.danreichart.com/curricula)) at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).
+A graphing tool used by the OPIS! (Our Place In Space) and MWU! (The Multi-Wavelength Universe) [curriculums](https://www.danreichart.com/curricula) at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).
 
 ![Light Curve](./pics/light-curve.png)
 ![Periodogram](./pics/periodogram.png)
