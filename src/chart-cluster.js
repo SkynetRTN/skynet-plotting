@@ -468,7 +468,7 @@ export function clusterFileUpload(evt, table, myChart) {
         let blue = document.getElementById("filter-form").elements["blue"];
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
-        //Change filter oprions to match file
+        //Change filter options to match file
         blue.options[0].textContent = filter1;
         blue.options[1].textContent = filter2;
         red.options[0].textContent = filter1;
