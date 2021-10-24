@@ -11,6 +11,24 @@ export function round(value, digits) {
 }
 
 /**
+ * Returns a number whose value is limited to the given range.
+ *
+ * @param {Number} min The lower boundary of the output range. NaN indicates none.
+ * @param {Number} max The upper boundary of the output range. NaN indicates none.
+ * @returns A number in the range [min, max]
+ */
+export function clamp(num, min, max) {
+    num = parseFloat(num);
+    if (!isNaN(min)) {
+        num = Math.max(num, min);
+    }
+    if (!isNaN(max)) {
+        num = Math.min(num, max);
+    }
+    return num;
+};
+
+/**
  *  This function returns the square of the input n.
  *  @param n:       The input number to be squared.
  *  @returns {number}
