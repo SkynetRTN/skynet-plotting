@@ -85,17 +85,17 @@ label:hover span {
     margin-bottom: 0.5em;
 }
 
-#moon-form .des {
+.des {
     line-height: 1.7em;
     padding-right: 0;
 }
 
-#moon-form .range {
+.range {
     padding-top: 10px;
     margin-bottom: 1em;
 }
 
-#moon-form .text {
+.text {
     padding-left: 0;
 }
 
