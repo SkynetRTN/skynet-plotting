@@ -497,7 +497,7 @@ if (filter1 === "U") {
      filter1num = 12
 } else if (filter1=== "K") {
      filter1num = 13
-} else if (filter1 = []) {
+} else if (filter1 === []) {
      filter1num = 14
 }
 
@@ -527,7 +527,7 @@ if (filter2 === "U") {
      filter2num = 12
 } else if (filter2=== "K") {
      filter2num = 13
-} else if (filter2 = []) {
+} else if (filter2 === []) {
      filter2num = 14
 }
 let filter1temp = filter1
