@@ -486,9 +486,13 @@ export function clusterFileUpload(evt, table, myChart) {
         let blue = document.getElementById("filter-form").elements["blue"];
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
-        blue.options[0] = filter1; blue.options[1] = filter2;
-        red.options[1] = filter1; red.options[0] = filter2;
-        lum.options[0] = filter1; lum.options[1] = filter2;
+
+        blue.options[0].textContent = filter1; 
+        blue.options[1].textContent = filter2;
+        red.options[1].textContent = filter1; 
+        red.options[0].textContent = filter2;
+        lum.options[0].textContent = filter1; 
+        lum.options[1].textContent = filter2;
 
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
@@ -573,7 +577,7 @@ export function clusterFileUpload(evt, table, myChart) {
         updateTableHeight(table);
         updateScatter(table,myChart,
             document.getElementById('cluster-form').elements["d-num"].value,0,
-            filterForm
+            document.getElementById('filter-form')
             )
     }
     reader.readAsText(file);
@@ -666,7 +670,6 @@ function HRGenerator(range, age, reddening, metallicity, start=-8, end=8, steps 
     //To Change
     let data = [];
     let y = start;
-    console.log(reddening);
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
         let x3 = 0.2 * Math.pow(((y - 8) / (-22.706 + 2.7236 * age - 8)), 3);
