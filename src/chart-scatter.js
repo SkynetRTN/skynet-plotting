@@ -13,13 +13,13 @@ export function scatter() {
         '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (kpc): </div>\n' +
-        '<div class="col-sm-4 range"><input type="range" name="x" title="Center (X)" value=0></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" name="x" title="Center (X)" value="0"></input></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x-num" class="field" value="0"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Diameter (kpc): </div>\n' +
-        '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value=10></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d-num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value="10"></input></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d-num" class="field" value="10"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
@@ -56,16 +56,6 @@ export function scatter() {
         data: {
             datasets: [
                 {
-                    label: 'Data',
-                    data: chartData,
-                    backgroundColor: colors['orange'],
-                    fill: false,
-                    showLine: false,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    immutableLabel: false,
-                }, {
                     label: 'Sun',
                     data: [{ x: 0, y: 0 }],
                     backgroundColor: colors['bright'],
@@ -75,6 +65,16 @@ export function scatter() {
                     pointHoverRadius: 12,
                     pointBorderWidth: 2,
                     immutableLabel: true,
+                }, {
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: colors['orange'],
+                    fill: false,
+                    showLine: false,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBorderWidth: 2,
+                    immutableLabel: false,
                 }, {
                     pointStyle: 'crossRot',
                     data: [{ x: 0, y: 0 }],
@@ -86,7 +86,7 @@ export function scatter() {
                     pointHoverRadius: 12,
                 }, {
                     label: 'Model',
-                    data: circle(0, 0, 5),
+                    data: circle(0, 0, 10),
                     borderColor: colors['gray'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -113,7 +113,7 @@ export function scatter() {
                     return tooltipItem.datasetIndex !== 3;
                 },
                 callbacks: {
-                    label: function (tooltipItem, data) {
+                    label: function (tooltipItem) {
                         return '(' + round(tooltipItem.xLabel, 2) + ', ' +
                             round(tooltipItem.yLabel, 2) + ')';
                     },
@@ -190,7 +190,7 @@ function updateScatter(table, myChart) {
     let minY = 0;
     let maxY = 0;
 
-    let chart = myChart.data.datasets[0].data;
+    let chart = myChart.data.datasets[1].data;
     for (let i = 0; i < table.length; i++) {
         let lo = table[i]['lo'];
         let la = table[i]['la'];
