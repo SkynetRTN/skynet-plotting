@@ -28,7 +28,7 @@ export function scatter() {
     linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 50, 0.01, 0);
     
     let tableData = [];
-    for (let i = 0; i < 17; i++) {
+    for (let i = 0; i < 16; i++) {
         tableData[i] = {
             'lo': Math.random() * 40.0 - 20.0,
             'la': Math.random() * 40.0 - 20.0,
