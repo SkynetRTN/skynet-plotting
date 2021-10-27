@@ -12,7 +12,6 @@ export function venus() {
     /**
      *  The following lines are used for exploring the effect of changing x have in geocentric model.
      *  The final value selected for rendering the chart is x = 0.445 (upper) and x = 0.8 (lower).
-     *  To use it enable the 'venusForm.oninput = function ()' part as well in the end of venus() function.
      */
     // document.getElementById('input-div').innerHTML =
     //     '<form title="Venus" id="venus-form">\n' +
@@ -25,6 +24,12 @@ export function venus() {
 
     // let venusForm = document.getElementById("venus-form");
     // linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
+    
+    // venusForm.oninput = function () {
+    //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
+    //     // console.log(geocentricData);
+    //     myChart.update(0);
+    // };
 
     let tableData = [
         { x: 15, y: 0.7 },
@@ -156,12 +161,6 @@ export function venus() {
         afterRemoveRow: update,
         afterCreateRow: update,
     });
-
-    // venusForm.oninput = function () {
-    //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
-    //     // console.log(geocentricData);
-    //     myChart.update(0);
-    // };
 
     updateLine(tableData, myChart);
     
