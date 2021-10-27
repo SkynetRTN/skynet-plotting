@@ -1,6 +1,6 @@
 'use strict';
 
-import { round } from "./my-math.js";
+import { clamp, round } from "./my-math.js";
 
 /**
  *  This function takes the data in a dictionary object and updates a Chartjs object with the data. The
@@ -64,17 +64,26 @@ export function updateLabels(myChart, form, immData = false, immTitle = false, i
 /**
 *  This function links a <input type="range"> and a <input type="number"> together so changing the value
 *  of one updates the other. This function also sets the min, max and step properties for both the inputs.
-*  @param slider:  A <input type="range"> to be linked.
-*  @param number:  A <input type"number"> to be linked.
-*  @param min:     The min value for both inputs.
-*  @param max:     The max value for both inputs.
-*  @param step:    The step of changes for both inputs.
-*  @param value:   The initial value of both inputs.
-*  @param log:     A true or false value that determines whether the slider uses logarithmic scale.
+*  @param slider:       A <input type="range"> to be linked.
+*  @param number:       A <input type"number"> to be linked.
+*  @param min:          The min value for both inputs.
+*  @param max:          The max value for both inputs.
+*  @param step:         The step of changes for both inputs.
+*  @param value:        The initial value of both inputs.
+*  @param log:          A boolean that determines whether the slider uses logarithmic scale.
+*  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
+*  @param numMin:       Min value for number field when @param numOverride is true.
+*  @param numMax:       Max value for number field when @param numOverride is true.
 */
-export function linkInputs(slider, number, min, max, step, value, log = false) {
-    number.min = min;
-    number.max = max;
+export function linkInputs(slider, number, min, max, step, value, 
+    log = false, numOverride = false, numMin = 0, numMax = 0
+) {
+    if (!numOverride) {
+        numMin = min;
+        numMax = max;
+    }
+    number.min = numMin;
+    number.max = numMax;
     number.step = step;
     number.value = value;
     if (!log) {
@@ -87,7 +96,8 @@ export function linkInputs(slider, number, min, max, step, value, log = false) {
             number.value = slider.value;
         };
         number.oninput = function () {
-            slider.value = number.value;
+            number.value = clamp(number.value, numMin, numMax);
+            slider.value = clamp(number.value, min, max);
         };
     } else {
         slider.min = Math.log(min * 0.999);
@@ -95,17 +105,19 @@ export function linkInputs(slider, number, min, max, step, value, log = false) {
         slider.step = (Math.log(max) - Math.log(min)) / ((max - min) / step);
         slider.value = Math.log(value);
         slider.oninput = function () {
-            let x = Math.exp(slider.value);
-            if (x > max) {
-                number.value = max;
-            } else if (x < min) {
-                number.value = min;
-            } else {
-                number.value = round(x, 2);
-            }
+            /**  
+             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
+             * The reason is that the slider has min and max values defined for log. Also this is
+             * clamped to min and max instead of numMin and numMax, because the slider logically
+             * still correspond to min and max, even though the implementation changed to accomodate
+             * the log behavior.
+            */
+            number.value = clamp(round(Math.exp(slider.value), 2), min, max);
         };
         number.oninput = function () {
-            slider.value = Math.log(number.value);
+            number.value = clamp(number.value, numMin, numMax);
+            // Note that we clamp() to min and max instead of numMin and numMax.
+            slider.value = Math.log(clamp(number.value, min, max));
         }
     }
 }
@@ -219,11 +231,9 @@ export function sanitizeData(dataset) {
  * @param {function} func               The function to be throttled
  * @param {number} wait                 Wait time in (ms).
  * @param {boolean} extraTrailExecution If set to true, the function will be executed one
- *                                      extra time after the @param wait interval if an
- *                                      execution attemp was made during the blocking period.
- *                                      This will be useful if @param func is some sort of
- *                                      update function that will update a view based on
- *                                      the underlying model.
+ * extra time after the @param wait interval if an execution attemp was made during the 
+ * blocking period. This will be useful if @param func is some sort of update function that
+ *  will update a view based on the underlying model.
  * @returns Throttled version of @param func.
  */
 export function throttle(func, wait, extraTrailExecution = true) {
