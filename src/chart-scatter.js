@@ -24,8 +24,8 @@ export function scatter() {
         '</form>\n'
     );
     let scatterForm = document.getElementById("scatter-form");
-    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 30, 0.01, 10);
-    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 50, 0.01, 0);
+    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 50, 0.01, 10);
+    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 20, 0.01, 0);
     
     let tableData = [];
     for (let i = 0; i < 16; i++) {
