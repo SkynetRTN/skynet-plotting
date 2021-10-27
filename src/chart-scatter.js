@@ -2,7 +2,7 @@
 
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight, linkInputs } from "./util.js"
-import { rad, round } from "./my-math.js"
+import { clamp, rad, round } from "./my-math.js"
 
 /**
  *  Function for scatter chart.
@@ -24,11 +24,11 @@ export function scatter() {
         '</form>\n'
     );
     let scatterForm = document.getElementById("scatter-form");
-    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 50, 0.01, 10);
-    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 20, 0.01, 0);
+    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 50, 0.01, 10, false, true, 0, Number.POSITIVE_INFINITY);
+    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 20, 0.01, 0,  false, true, 0, Number.POSITIVE_INFINITY);
     
     let tableData = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < 15; i++) {
         tableData[i] = {
             'lo': Math.random() * 40.0 - 20.0,
             'la': Math.random() * 40.0 - 20.0,
@@ -142,9 +142,9 @@ export function scatter() {
     // Link the form to chart
     //let scatterForm = document.getElementById("scatter-form");
     scatterForm.oninput = function () {
-        let x = parseInt(scatterForm.elements['x'].value);
+        let x = parseFloat(this.elements['x-num'].value);
         let y = 0;
-        let d = parseInt(scatterForm.elements['d'].value);
+        let d = parseFloat(this.elements['d-num'].value);
         myChart.data.datasets[2].data = [{ x: x, y: y}];
         myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update(0);
