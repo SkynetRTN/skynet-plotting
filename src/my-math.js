@@ -12,7 +12,7 @@ export function round(value, digits) {
 
 /**
  * Returns a number whose value is limited to the given range.
- *
+ * @param {Number} num The number to be clamped. It will be parsed as float first.
  * @param {Number} min The lower boundary of the output range. NaN indicates none.
  * @param {Number} max The upper boundary of the output range. NaN indicates none.
  * @returns A number in the range [min, max]
