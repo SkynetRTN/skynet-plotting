@@ -25,6 +25,10 @@ select:hover {
     background-color: #E7E7E7;
 }
 
+select:focus {
+    background-color: #E7E7E7;
+}
+
 #chart-type-form select {
     width: 100%;
     margin-top: 0.7em;
@@ -193,6 +197,24 @@ button:focus {
 button:hover {
     opacity: 1;
     background-color: #E7E7E7;
+}
+
+/* Compute button for Periodogram in Pulsar */
+#compute {
+    color: #41A3D1;
+    background-color: white;
+    opacity: 1;
+}
+
+#compute:focus {
+    outline: none;
+    opacity: 1;
+}
+
+#compute:hover {
+    color: white;
+    background-color: #41A3D1;
+    /* background-color: #E7E7E7; */
 }
 
 input[type=range] {
