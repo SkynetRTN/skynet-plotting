@@ -37,7 +37,7 @@ export function cluster() {
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n' +
-        '<form title="Filters" id="filter-form">\n' +
+        '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
         '</div>\n' +
