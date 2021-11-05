@@ -39,7 +39,7 @@ export function cluster() {
         '</form>\n' +
         '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6"><b>Select Filters:</b></div>\n' +
+        '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-4">Blue:</div>\n' +
