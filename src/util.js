@@ -228,6 +228,31 @@ export function sanitizeData(dataset) {
 }
 
 /**
+ * This function takes in two datasets and returns diff for the points from the two
+ * datasets that have the same x-coordinates. Assumes both datasets are sorted.
+ * @param {Array} data1 Array of points in dataset 1
+ * @param {Array} data2 Array of points in dataset 2
+ * @returns Diff between two datasets
+ */
+export function chartDataDiff(data1, data2) {
+    let p1 = 0;
+    let p2 = 0;
+    let result = [];
+    while (p1 < data1.length && p2 < data2.length) {
+        if (data1[p1].x == data2[p2].x) {
+            result.push({ x: data1[p1].x, y: data1[p1].y - data2[p2].y });
+            p1++;
+            p2++;
+        } else if (data1[p1].x < data2[p2].x) {
+            p1++;
+        } else {
+            p2++;
+        }
+    }
+    return result;
+}
+
+/**
  * This function takes a function @param func and a wait time @param wait, and returns a 
  * version of the function that will execute at max once per @param wait interval.
  * 
