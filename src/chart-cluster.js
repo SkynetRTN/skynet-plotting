@@ -460,9 +460,9 @@ export function clusterFileUpload(evt, table, myChart) {
     reader.onload = () => {
 
         let clusterForm = document.getElementById("cluster-form");
-        console.log(clusterForm.elements['d'].value);
+        // console.log(clusterForm.elements['d'].value);
         clusterForm.elements['d'].value = Math.log(3);
-        console.log(clusterForm.elements['d'].value);
+        // console.log(clusterForm.elements['d'].value);
         clusterForm.elements['age'].value = 6;
         clusterForm.elements['red'].value = 0;
         clusterForm.elements['metal'].value = -3;

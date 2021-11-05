@@ -533,7 +533,6 @@ function switchMode(myChart, mode, reset = false) {
     }
     myChart.update(0);
 
-    console.log(myChart.data.modeLabels);
     if (reset) {
         document.getElementById("light-curve-form").dt.value = 3;
 
