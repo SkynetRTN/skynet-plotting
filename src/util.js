@@ -188,12 +188,15 @@ export function getDateString() {
  * @returns Sanitized table data. 
  */
 export function sanitizeTableData(data, cols) {
-    return data.filter(row => {
-        for (const col of cols)
-            if (isNaN(parseFloat(row[col])))
-                return false;
-        return true;
-    });
+    return data.filter(row => cols.reduce(
+        (pre, col) => pre && (!isNaN(parseFloat(row[col]))), true
+    ));
+    // return data.filter(row => {
+    //     for (const col of cols)
+    //         if (isNaN(parseFloat(row[col])))
+    //             return false;
+    //     return true;
+    // });
 }
 
 /**
@@ -271,7 +274,6 @@ export function throttle(func, wait, extraTrailExecution = true) {
             //   We want to bind `this` only so that we have access to the values that
             //   came with the triggering event (usually a changed input field).
             // this.func(...args);
-
             func.apply(this, args);
 
             // BADDDDDDD! callback(...args) will run here and now ;_;
