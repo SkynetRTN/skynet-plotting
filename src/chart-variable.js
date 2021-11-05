@@ -50,11 +50,11 @@ export function variable() {
         data: {
             maxMJD: Number.NEGATIVE_INFINITY,
             minMJD: Number.POSITIVE_INFINITY,
-            customLabels: {
-                title: "Title",
-                x: "x",
-                y: "y",
-                lastMode: "Variable",
+            modeLabels: {
+                lc: { t: 'Title', x: 'x', y: 'y' },
+                ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+                pf: { t: 'Title', x: 'x', y: 'y' },
+                lastMode: 'lc'
             },
             datasets: [
                 {
@@ -160,24 +160,19 @@ export function variable() {
             let periodFoldingForm = document.getElementById("period-folding-form");
             periodFoldingForm.oninput();
         }
-        if (mode === "ft") {
-            customLabels.title = myChart.options.title.text;
-            customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
-            customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
-            
-            myChart.options.title.text = "Periodogram";
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (days)";
-            myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
-            myChart.update(0);
-            updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
-        } else if (customLabels.lastMode === "ft") {
-            myChart.options.title.text = customLabels.title;
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = customLabels.x;
-            myChart.options.scales.yAxes[0].scaleLabel.labelString = customLabels.y;
-            myChart.update(0);
-            updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        
+        myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
+            t: myChart.options.title.text,
+            x: myChart.options.scales.xAxes[0].scaleLabel.labelString,
+            y: myChart.options.scales.yAxes[0].scaleLabel.labelString
         }
-        customLabels.lastMode = mode;
+        myChart.data.modeLabels.lastMode = mode;
+
+        myChart.options.title.text = myChart.data.modeLabels[mode].t;
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].x;
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].y;
+        myChart.update(0);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
         updateTableHeight(hot);
     }
@@ -289,9 +284,12 @@ export function variableFileUpload(evt, table, myChart) {
         variableForm.elements['mode'][1].disabled = true;
         variableForm.elements['mode'][2].disabled = true;
 
-        myChart.data.customLabels.title = "Title"
-        myChart.data.customLabels.x = "x";
-        myChart.data.customLabels.y = "y";
+        myChart.data.modeLabels = {
+            lc: { t: 'Title', x: 'x', y: 'y' },
+            ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+            pf: { t: 'Title', x: 'x', y: 'y' },
+            lastMode: 'lc'
+        };
 
         myChart.options.title.text = "Title"
         myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";

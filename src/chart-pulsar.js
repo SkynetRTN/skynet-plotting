@@ -122,16 +122,16 @@ export function pulsar() {
         type: 'line',
         data: {
             minT: Number.POSITIVE_INFINITY,
-            customLabels: {
-                title: "Title",
-                x: "x",
-                y: "y",
-                lastMode: "Pulsar",
-            },
             modified: {
                 lightCurveChanged: true,
                 fourierChanged: true,
                 periodFoldingChanged: true
+            },
+            modeLabels: {
+                lc: { t: 'Title', x: 'x', y: 'y' },
+                ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+                pf: { t: 'Title', x: 'x', y: 'y' },
+                lastMode: 'lc'
             },
             datasets: [
                 {
@@ -155,7 +155,6 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
-                    // immutableLabel: true,
                     hidden: true,
                     fill: false
                 }, {
@@ -163,7 +162,6 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
-                    // immutableLabel: true,
                     hidden: true,
                     fill: false
                 }, {
@@ -175,8 +173,6 @@ export function pulsar() {
                     borderColor: colors['slate'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    // showLine: false,
-                    // immutableLabel: true,
                     hidden: true,
                     fill: false,
                 }, {
@@ -187,8 +183,6 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    // showLine: false,
-                    // immutableLabel: true,
                     hidden: true,
                     fill: false
                 }, {
@@ -200,8 +194,6 @@ export function pulsar() {
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
                     borderWidth: 2,
-                    // showLine: false,
-                    // immutableLabel: true,
                     hidden: true,
                     fill: false
                 }
@@ -336,7 +328,7 @@ export function pulsar() {
 
             myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
         }
-        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
         if (start > stop) {
             // alert("Please make sure the stop value is greater than the start value.");
@@ -398,7 +390,7 @@ export function pulsar() {
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
-    polarizationForm.oninput = throttle(polarizationOninput, 16);
+    polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
@@ -496,7 +488,7 @@ function updatePulsar(table, myChart) {
  * This function set up the chart by displaying only the appropriate datasets for a mode,
  * and then adjust the chart-info-form to match up with the mode.
  * @param {Chartjs object} myChart 
- * @param {['lc', 'ft', 'pf']} mode
+ * @param { 'lc' | 'ft' | 'pf' } mode
  * @param {boolean} reset               Default is false. If true, will override `mode` and
  *                                      set mode to 'lc', and reset Chart and chart-info-form.
  */
@@ -541,6 +533,7 @@ function switchMode(myChart, mode, reset = false) {
     }
     myChart.update(0);
 
+    console.log(myChart.data.modeLabels);
     if (reset) {
         document.getElementById("light-curve-form").dt.value = 3;
 
@@ -557,40 +550,28 @@ function switchMode(myChart, mode, reset = false) {
         document.getElementById('polarization-form').eq.value = 0;
         document.getElementById('polarization-form').eq_num.value = 1;
         document.getElementById('polarization-form').diff.checked = false;
-    }
-
-    // Displaying the correct label information. Fourier mode has its own separate
-    // title and x and y labels, which requires saving and loading the custom 
-    // title/labels for other modes.
-    let customLabels = myChart.data.customLabels;
-    if (reset) {
-        myChart.options.title.text = "Title"
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
-    } else if (mode === 'ft') {
-        customLabels.title = myChart.options.title.text;
-        customLabels.x = myChart.options.scales.xAxes[0].scaleLabel.labelString;
-        customLabels.y = myChart.options.scales.yAxes[0].scaleLabel.labelString;
-
-        myChart.options.title.text = "Periodogram";
-        let freq = document.getElementById('fourier-form').fouriermode.value;
-        if (freq === 'p') {
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
-        } else {
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+        
+        myChart.data.modeLabels = {
+            lc: { t: 'Title', x: 'x', y: 'y' },
+            ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+            pf: { t: 'Title', x: 'x', y: 'y' },
+            lastMode: 'lc'
+        };
+    } else {
+        myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
+            t: myChart.options.title.text,
+            x: myChart.options.scales.xAxes[0].scaleLabel.labelString,
+            y: myChart.options.scales.yAxes[0].scaleLabel.labelString
         }
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = "Power Spectrum";
-        myChart.update(0);
-        updateLabels(myChart, document.getElementById('chart-info-form'), true, true, true, true);
-    } else if (customLabels.lastMode === "ft") {
-        myChart.options.title.text = customLabels.title;
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = customLabels.x;
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = customLabels.y;
-        myChart.update(0);
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        myChart.data.modeLabels.lastMode = mode;
     }
-    customLabels.lastMode = reset ? 'lc' : mode;
+    
+    myChart.options.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].x;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].y;
+    
+    myChart.update(0);
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 }
 
 /**
