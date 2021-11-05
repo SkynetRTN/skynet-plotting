@@ -564,7 +564,6 @@ function switchMode(myChart, mode, reset = false) {
     // title/labels for other modes.
     let customLabels = myChart.data.customLabels;
     if (reset) {
-        customLabels = { title: 'Title', x: 'x', y: 'y', lastMode: null };
         myChart.options.title.text = "Title"
         myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
         myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
