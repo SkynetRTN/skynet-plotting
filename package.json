@@ -1,0 +1,25 @@
+{
+  "name": "astro-plotting",
+  "version": "1.0.0",
+  "description": "## Description A graphing tool used by the OPIS! (Our Place In Space) and MWU! (The Multi-Wavelength Universe) [curriculums](https://www.danreichart.com/curricula) at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "browser-sync src -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shengjiex98/astro-plotting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shengjiex98/astro-plotting/issues"
+  },
+  "homepage": "https://github.com/shengjiex98/astro-plotting#readme",
+  "devDependencies": {
+    "browser-sync": "^2.27.7"
+  }
+}
