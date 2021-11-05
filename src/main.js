@@ -172,7 +172,7 @@ function chartType(chart) {
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
     };
-    updateChartInfo(objects[1], chartInfoForm);
+    objects[1].update(0);
 
 }
 
