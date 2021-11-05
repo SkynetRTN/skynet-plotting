@@ -1,7 +1,7 @@
 'use strict';
 
 import { tableCommonOptions, colors } from "./config.js"
-import { debounce, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
+import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math.js"
 
 /**
@@ -81,6 +81,18 @@ export function pulsar() {
         '<div class="col-sm-7">Bins: </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
         '</div>\n' +
+        '</form>\n' +
+        
+        '<form title="Polarization Detection" id="polarization-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        '<div class="flex-container" style="padding-bottom: 1em">\n' +
+        '<div class="flex-item-grow1" style="color: grey;">Polarization Detection: </div>\n' +
+        '<div class="flex-item-grow0"><label><input type="checkbox" name="diff" title="Show Difference"><span>Show Difference</span></label></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-3 des">Equalize:</div>\n' +
+        '<div class="col-sm-6 range"><input type="range" title="Equalize" name="eq"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Equalize" name="eq_num" class="field"></div>\n' +
+        '</div>\n' +
         '</form>\n'
     );
 
@@ -155,6 +167,19 @@ export function pulsar() {
                     hidden: true,
                     fill: false
                 }, {
+                    label: 'Difference',
+                    data: [],
+                    backgroundColor: colors['white-0'],
+                    pointRadius: 0,
+                    pointBorderWidth: 0,
+                    borderColor: colors['black'],
+                    borderWidth: 2,
+                    lineTension: 0.1,
+                    // showLine: false,
+                    // immutableLabel: true,
+                    hidden: true,
+                    fill: false,
+                }, {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
@@ -168,6 +193,7 @@ export function pulsar() {
                     fill: false
                 }, {
                     label: 'Channel 2',
+                    rawData: [],
                     data: [],
                     backgroundColor: colors['red'],
                     pointRadius: 3,
@@ -339,12 +365,39 @@ export function pulsar() {
 
         let period = parseFloat(this.pf.value);
         let bins = parseInt(this.bins.value);
-        myChart.data.datasets[4].data = periodFolding(myChart, 0, period, bins);
-        myChart.data.datasets[5].data = periodFolding(myChart, 1, period, bins);
+        let eqaulizer = parseFloat(document.getElementById('polarization-form').eq_num.value);
+        myChart.data.datasets[5].data = periodFolding(myChart, 0, period, bins);
+        myChart.data.datasets[6].rawData = periodFolding(myChart, 1, period, bins);
+        myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
+            point => ({ x: point.x, y: point.y * eqaulizer })
+        );
+        myChart.data.datasets[4].data = chartDataDiff(
+            myChart.data.datasets[5].data, myChart.data.datasets[6].data
+        )
         myChart.update(0);
     }
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
+
+    let polarizationForm = document.getElementById("polarization-form");
+    linkInputs(
+        polarizationForm.eq,
+        polarizationForm.eq_num,
+        0.5, 2, 0.01, 1, true, true, 0, Number.POSITIVE_INFINITY
+    );
+
+    let polarizationOninput = function () {
+        let eqaulizer = parseFloat(this.eq_num.value);
+        myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
+            point => ({ x: point.x, y: point.y * eqaulizer })
+        );
+        myChart.data.datasets[4].data = chartDataDiff(
+            myChart.data.datasets[5].data, myChart.data.datasets[6].data
+        )
+        myChart.data.datasets[4].hidden = !this.diff.checked;
+        myChart.update(0);
+    }
+    polarizationForm.oninput = throttle(polarizationOninput, 16);
 
     myChart.options.title.text = "Title"
     myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
@@ -448,7 +501,7 @@ function updatePulsar(table, myChart) {
  */
 function switchMode(myChart, mode, reset = false) {
     // Displaying the correct datasets
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
         myChart.data.datasets[i].hidden = true;
     }
     let modified = myChart.data.modified;
@@ -480,8 +533,10 @@ function switchMode(myChart, mode, reset = false) {
             document.getElementById('period-folding-form').oninput();
         }
         showDiv("period-folding-div");
-        myChart.data.datasets[4].hidden = false;
         myChart.data.datasets[5].hidden = false;
+        myChart.data.datasets[6].hidden = false;
+        myChart.data.datasets[4].hidden = 
+            !document.getElementById('polarization-form').diff.checked;
     }
     myChart.update(0);
 
@@ -497,6 +552,10 @@ function switchMode(myChart, mode, reset = false) {
 
         document.getElementById("period-folding-form").pf.value = 0;
         document.getElementById("period-folding-form").bins.value = 100;
+
+        document.getElementById('polarization-form').eq.value = 0;
+        document.getElementById('polarization-form').eq_num.value = 1;
+        document.getElementById('polarization-form').diff.checked = false;
     }
 
     // Displaying the correct label information. Fourier mode has its own separate
