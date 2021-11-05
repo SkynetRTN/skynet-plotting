@@ -34,6 +34,7 @@ export const colors = {
     'black': rgbString('#000000'),
     'white-0': rgbString('#ffffff', 0),
     'blue-0.5': rgbString('#41a3d1', 0.5),
+    'slate': rgbString('#3f3f3f'),
 };
 
 /**

@@ -172,7 +172,7 @@ export function pulsar() {
                     backgroundColor: colors['white-0'],
                     pointRadius: 0,
                     pointBorderWidth: 0,
-                    borderColor: colors['black'],
+                    borderColor: colors['slate'],
                     borderWidth: 2,
                     lineTension: 0.1,
                     // showLine: false,
@@ -396,6 +396,7 @@ export function pulsar() {
         )
         myChart.data.datasets[4].hidden = !this.diff.checked;
         myChart.update(0);
+        updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);
 
