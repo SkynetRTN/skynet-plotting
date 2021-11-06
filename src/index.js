@@ -7,7 +7,7 @@ import './style.css';
 import bootstrap from 'bootstrap';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
-import $ from 'jquery/src/jquery';
+import $ from 'jquery';
 
 import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
 import { curve } from './chart-curve.js';

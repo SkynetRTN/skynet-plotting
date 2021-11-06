@@ -6,6 +6,12 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  /**
+   * NEVER MIND. After going down an endless rabbit hole of Googling I finally figured this
+   * junk out. See the `import` section of `index.js`. 
+   */
+  // // Can't figure out a way to use jQuery without using this plugin... :-(
+  // plugins: [ new webpack.ProvidePlugin({ $: 'jquery', jQuery: 'jquery',}) ],
   module: {
     rules: [
       {
