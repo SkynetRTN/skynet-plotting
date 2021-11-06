@@ -1,7 +1,6 @@
 'use strict';
 
 import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
-import { round } from './my-math.js';
 import { curve } from './chart-curve.js';
 import { dual } from './chart-dual.js';
 import { moon } from './chart-moon.js';
