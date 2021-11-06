@@ -1,5 +1,14 @@
 'use strict';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'handsontable/dist/handsontable.full.css';
+import './style.css';
+
+import bootstrap from 'bootstrap';
+import { saveAs } from 'file-saver';
+import * as piexif from 'piexif-ts';
+import $ from 'jquery/src/jquery';
+
 import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
 import { curve } from './chart-curve.js';
 import { dual } from './chart-dual.js';
@@ -92,8 +101,8 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
 function addEXIFToImage(jpegData, signature) {
     let zeroth = {};
     let exif = {};
-    zeroth[piexif.ImageIFD.Artist] = signature;
-    exif[piexif.ExifIFD.DateTimeOriginal] = getDateString();
+    zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
+    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = getDateString();
     
     let exifObj = { '0th':zeroth, 'Exif':exif };
     let exifBytes = piexif.dump(exifObj);

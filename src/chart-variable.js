@@ -1,5 +1,8 @@
 'use strict';
 
+import Chart from "chart.js";
+import Handsontable from "handsontable";
+
 import { tableCommonOptions, colors } from "./config.js"
 import { updateLabels, updateTableHeight, sanitizeData, sanitizeTableData} from "./util.js"
 import { round, lombScargle } from "./my-math.js"

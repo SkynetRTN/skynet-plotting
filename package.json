@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/shengjiex98/astro-plotting#readme",
   "devDependencies": {
-    "browser-sync": "^2.27.7",
     "css-loader": "^6.5.1",
     "style-loader": "^3.3.1",
     "webpack": "^5.62.1",
