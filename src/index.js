@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'handsontable/dist/handsontable.full.css';
 import './style.css';
 
-import bootstrap from 'bootstrap';
+import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 import $ from 'jquery';
