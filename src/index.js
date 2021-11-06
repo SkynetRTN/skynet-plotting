@@ -4,7 +4,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'handsontable/dist/handsontable.full.css';
 import './style.css';
 
+/**
+ * "importing for side effect": nothing is actually imported here. It is
+ * just used to "load" the plugin for jquery to manipulate the modal.
+ */ 
 import 'bootstrap/js/dist/modal';
+
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 import $ from 'jquery';
