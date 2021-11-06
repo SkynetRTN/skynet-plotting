@@ -5,14 +5,17 @@ import 'handsontable/dist/handsontable.full.css';
 import './style.css';
 
 /**
- * "importing for side effect": nothing is actually imported here. It is
- * just used to "load" the plugin for jquery to manipulate the modal.
+ * "importing for side effect": nothing is actually imported here. This is used
+ * to attach the bootstrap modal plugin to the global jQuery object.
+ * 
+ * Not sure if this is webpack black magic or not, but importing the 
+ * bootstrap plugin before jQuery seems to work fine.
  */ 
 import 'bootstrap/js/dist/modal';
+import $ from 'jquery';
 
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
-import $ from 'jquery';
 
 import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
 import { curve } from './chart-curve.js';
