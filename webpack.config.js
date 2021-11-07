@@ -19,6 +19,11 @@ module.exports = {
       template: 'src/index.html',
     }),
   ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
   /**
    * NEVER MIND. After going down an endless rabbit hole of Googling I finally figured this
    * junk out. See the `import` section of `index.js`. 
