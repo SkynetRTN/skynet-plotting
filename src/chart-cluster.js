@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
 import { linkInputs, throttle, updateLabels, updateTableHeight } from "./util.js"
-import { round, sqr, rad } from "./my-math.js"
+import { round } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.
