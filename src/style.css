@@ -3,6 +3,9 @@
     src: url(./assets/Lato-Regular.ttf);
 }
 
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'handsontable/dist/handsontable.full.css';
+
 body {
     font-family: 'Lato', sans-serif;
 }
