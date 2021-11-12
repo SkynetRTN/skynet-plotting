@@ -1,7 +1,5 @@
 'use strict';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'handsontable/dist/handsontable.full.css';
 import './style.css';
 
 /**
