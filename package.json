@@ -7,7 +7,8 @@
   },
   "scripts": {
     "start": "snowpack dev",
-    "build": "snowpack build"
+    "build": "snowpack build",
+    "fix-piexif": "cp WORKAROUND.piexif-ts.2.0.16.package.json ./node_modules/piexif-ts/package.json"
   },
   "repository": {
     "type": "git",
