@@ -1,7 +1,5 @@
 'use strict';
 
-import './style.css';
-
 /**
  * "importing for side effect": nothing is actually imported here. This is used
  * to attach the bootstrap modal plugin to the global jQuery object.
