@@ -334,15 +334,6 @@ export function cluster() {
         data: {
             datasets: [
                 {
-                    label: 'Data',
-                    data: chartData,
-                    backgroundColor: colors['red'],
-                    fill: false,
-                    showLine: false,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    immutableLabel: false,
-                }, {
                     label: 'Model',
                     data: null, // will be generated later
                     borderColor: colors['blue'],
@@ -352,6 +343,15 @@ export function cluster() {
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
+                },{
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: colors['red'],
+                    fill: false,
+                    showLine: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    immutableLabel: false,
                 }
             ]
         },
@@ -388,7 +388,7 @@ export function cluster() {
         //console.log(tableData);
         updateTableHeight(hot);
         updateScatter(hot, myChart,
-            clusterForm.elements['d-num'].value, 0,
+            clusterForm.elements['d-num'].value, 1,
             filterForm);
         updateHRModel(clusterForm, myChart);
     };
@@ -474,7 +474,7 @@ export function clusterFileUpload(evt, table, myChart) {
         clusterForm.elements['red-num'].value = 0;
         clusterForm.elements['metal-num'].value = -3;
         myChart.options.title.text = "Title";
-        myChart.data.datasets[0].label = "Data";
+        myChart.data.datasets[1].label = "Data";
         myChart.options.scales.xAxes[0].scaleLabel.labelString = 'x';
         myChart.options.scales.yAxes[0].scaleLabel.labelString = 'y';
         updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
@@ -646,7 +646,7 @@ export function clusterFileUpload(evt, table, myChart) {
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
         updateScatter(table, myChart,
-            document.getElementById('cluster-form').elements["d-num"].value, 0,
+            document.getElementById('cluster-form').elements["d-num"].value, 1,
             document.getElementById('filter-form')
         )
     }
@@ -662,7 +662,7 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(form, chart) {
-    chart.data.datasets[1].data = HRGenerator(
+    chart.data.datasets[0].data = HRGenerator(
         //form.elements['r-num'].value,
         form.elements['age-num'].value,
         form.elements['red-num'].value,
@@ -707,7 +707,7 @@ function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 5
     return data;
 }
 
-function updateScatter(table, myChart, dist = 0.01, dataSet = 0, form) {
+function updateScatter(table, myChart, dist = 0.01, dataSet = 1, form) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
