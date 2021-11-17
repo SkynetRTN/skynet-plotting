@@ -707,7 +707,7 @@ function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 5
     return data;
 }
 
-function updateScatter(table, myChart, dist = 0.01, dataSet = 1, form) {
+function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
