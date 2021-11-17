@@ -1,4 +1,4 @@
-# astro-plotting
+# skynet-plotting
 
 ## Getting Started
 Once cloned, run the following command to install required Node.js packages.
