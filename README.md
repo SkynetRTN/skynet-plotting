@@ -1,4 +1,4 @@
-# astro-plotting
+# skynet-plotting
 
 ## Known problems
 
