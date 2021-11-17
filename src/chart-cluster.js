@@ -19,11 +19,11 @@ export function cluster() {
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Distance" name="d-num" class="field"></div>\n' +
         '</div>\n' +
-        /*'<div class="row">\n' +
-        '<div class="col-sm-4 des">+/- Range (%):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
-        '</div>\n' +*/
+        '<div class="row">\n' +
+        '<div class="col-sm-4 des">Max Error (mag)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="Error" name="err"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Error" name="err-num" class="field"></div>\n' +
+        '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
@@ -66,7 +66,7 @@ export function cluster() {
     let clusterForm = document.getElementById("cluster-form");
     let filterForm = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
-    //linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
+    linkInputs(clusterForm.elements['err'], clusterForm.elements['err-num'], 0, 1, 0.01, 1);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 11, 0.01, 6);
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
