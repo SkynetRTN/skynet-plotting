@@ -15,7 +15,7 @@ import $ from 'jquery';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
+import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util.js';
 import { curve } from './chart-curve.js';
 import { dual } from './chart-dual.js';
 import { moon } from './chart-moon.js';
@@ -100,15 +100,16 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
     destCtx.drawImage(canvas, 0, 0);
 
     // Download the dummy canvas
-    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature);
-    saveAs(dataURLtoBlob(exifImage), 'chart.jpg');
+    let time = getDateString();
+    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
+    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
 }
 
-function addEXIFToImage(jpegData, signature) {
+function addEXIFToImage(jpegData, signature,time) {
     let zeroth = {};
     let exif = {};
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
-    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = getDateString();
+    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     
     let exifObj = { '0th':zeroth, 'Exif':exif };
     let exifBytes = piexif.dump(exifObj);

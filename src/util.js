@@ -321,3 +321,12 @@ export function debounce(func, wait) {
         timeout = setTimeout(() => { func.apply(this, args); }, wait);
     }
 }
+
+export function formatTime(time) {
+    //takes in date/times asreturned by getDateString() and formats them as Year-Month-DayTHourMinuteSecond
+    let tarray = ['','']
+    tarray = time.split(' ');
+    tarray[0] = tarray[0].split(':').join('-');
+    tarray[1] = tarray[1].split(':').join('');
+    return tarray.join('T');
+}
