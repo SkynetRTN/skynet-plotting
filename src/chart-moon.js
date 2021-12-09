@@ -69,7 +69,6 @@ export function moon() {
                     label: 'Data',
                     data: chartData,
                     backgroundColor: colors['red'],
-                    fill: false,
                     showLine: false,
                     pointRadius: 5,
                     pointHoverRadius: 7,
@@ -82,7 +81,6 @@ export function moon() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     pointRadius: 0,
-                    fill: false,
                     immutableLabel: true,
                 }
             ]

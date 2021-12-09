@@ -78,7 +78,6 @@ export function venus() {
                     label: 'Data',
                     data: chartData,
                     backgroundColor: colors['orange'],
-                    fill: false,
                     showLine: false,
                     pointRadius: 5,
                     pointHoverRadius: 7,
@@ -90,7 +89,6 @@ export function venus() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     pointRadius: 0,
-                    fill: false,
                     immutableLabel: true,
                 }, {
                     label: 'Geocentric',
@@ -110,7 +108,6 @@ export function venus() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     pointRadius: 0,
-                    fill: false,
                     immutableLabel: true,
                 }
             ]
