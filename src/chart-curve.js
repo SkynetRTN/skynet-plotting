@@ -70,7 +70,6 @@ export function curve() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: false,
                     immutableLabel: false,
                 }, {
@@ -80,7 +79,6 @@ export function curve() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: true,
                     immutableLabel: false,
                 }, {
@@ -90,7 +88,6 @@ export function curve() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: true,
                     immutableLabel: false,
                 }, {
@@ -100,7 +97,6 @@ export function curve() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: true,
                     immutableLabel: false,
                 }

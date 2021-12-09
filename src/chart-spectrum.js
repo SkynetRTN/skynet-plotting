@@ -54,7 +54,6 @@ export function spectrum() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: false,
                 }, {
                     label: 'Channel 2',
@@ -63,7 +62,6 @@ export function spectrum() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
-                    fill: false,
                     hidden: true,
                 }
             ]

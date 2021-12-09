@@ -62,7 +62,6 @@ export function scatter() {
                     label: 'Sun',
                     data: [{ x: 0, y: 0 }],
                     backgroundColor: colors['bright'],
-                    fill: false,
                     showLine: false,
                     pointRadius: 10,
                     pointHoverRadius: 12,
@@ -72,7 +71,6 @@ export function scatter() {
                     label: 'Data',
                     data: chartData,
                     backgroundColor: colors['orange'],
-                    fill: false,
                     showLine: false,
                     pointRadius: 6,
                     pointHoverRadius: 8,
@@ -81,7 +79,6 @@ export function scatter() {
                 }, {
                     pointStyle: 'crossRot',
                     data: [{ x: 0, y: 0 }],
-                    fill: false,
                     showLine: false,
                     borderWidth: 5,
                     immutableLabel: true,
@@ -95,7 +92,6 @@ export function scatter() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     pointRadius: 0,
-                    fill: false,
                     immutableLabel: true
                 }
             ],
