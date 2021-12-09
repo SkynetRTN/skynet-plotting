@@ -205,6 +205,8 @@ function initializeChart(chart, table) {
     chart.options.title.fontStyle = '';
     chart.options.title.fontFamily = '"Lato", "Arial", sans-serif';
 
+    chart.options.legend.labels.usePointStyle = true;
+
     // Setting properties about the tooltips
     chart.options.tooltips.mode = 'nearest';
     chart.options.tooltips.callbacks.title = function (tooltipItems, data) {
