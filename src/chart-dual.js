@@ -60,6 +60,7 @@ export function dual() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
+                    fill: false,
                     hidden: false,
                     immutableLabel: false,
                 }, {
@@ -69,6 +70,7 @@ export function dual() {
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     lineTension: 0.1,
+                    fill: false,
                     hidden: false,
                     immutableLabel: false,
                 }

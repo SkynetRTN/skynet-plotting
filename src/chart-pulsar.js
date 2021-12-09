@@ -144,6 +144,7 @@ export function pulsar() {
                     borderWidth: 2,
                     immutableLabel: false,
                     hidden: false,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
@@ -151,18 +152,21 @@ export function pulsar() {
                     borderWidth: 2,
                     immutableLabel: false,
                     hidden: false,
+                    fill: false
                 }, {
                     label: 'Channel 1',
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Difference',
                     data: [],
@@ -173,6 +177,7 @@ export function pulsar() {
                     borderWidth: 2,
                     lineTension: 0.1,
                     hidden: true,
+                    fill: false,
                 }, {
                     label: 'Channel 1',
                     data: [],
@@ -182,6 +187,7 @@ export function pulsar() {
                     pointBorderWidth: 0,
                     borderWidth: 2,
                     hidden: true,
+                    fill: false
                 }, {
                     label: 'Channel 2',
                     rawData: [],
@@ -192,6 +198,7 @@ export function pulsar() {
                     pointBorderWidth: 0,
                     borderWidth: 2,
                     hidden: true,
+                    fill: false
                 }
             ]
         },
