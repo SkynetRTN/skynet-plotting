@@ -3,14 +3,11 @@
 import './style.css';
 
 /**
- * "importing for side effect": nothing is actually imported here. This is used
- * to attach the bootstrap modal plugin to the global jQuery object.
- * 
- * Not sure if this is webpack black magic or not, but importing the 
- * bootstrap plugin before jQuery seems to work fine.
+ * "importing for side effect": nothing is actually imported by the line below. 
+ * This is used to attach the bootstrap modal plugin to the global jQuery object.
  */ 
-import 'bootstrap/js/dist/modal';
 import $ from 'jquery';
+import 'bootstrap/js/dist/modal';
 
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
