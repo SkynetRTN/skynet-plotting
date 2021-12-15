@@ -53,12 +53,15 @@ export function cluster() {
         '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
         '<option value="b" title="B filter" selected>B</option></div>\n' +
         '<option value="r" title="V filter">V</option></select></div>\n' +
+        '<option value ="l" title="Lum filter">L</option></select></div>\n' +
         '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n' +
         '<option value="b" title="B filter">B</option></div>\n' +
         '<option value="r" title="V filter" selected>V</option></select></div>\n' +
+        '<option value= "l" title="Lum filter">L</option></select></div>\n' +
         '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
         '<option value="b" title="B filter">B</option></div>\n' +
-        '<option value="r" title="V filter" selected>V</option></select></div>\n' +
+        '<option value="r" title="V filter">V</option></select></div>\n' +
+        '<option value= "l" title="Lum filter" selected>L</option></select></div>\n' +
         '</div>\n' +
         '</form>\n');
 
@@ -319,11 +322,12 @@ export function cluster() {
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ["B Mag", "V Mag"], // need to change to filter1, filter2
-        maxCols: 2,
+        colHeaders: ["B Mag", "V Mag", "Lum Mag"], // need to change to filter1, filter2
+        maxCols: 3,
         columns: [
             { data: 'b', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'r', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'l', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     }));
 
@@ -481,16 +485,20 @@ export function clusterFileUpload(evt, table, myChart) {
 
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
         let last = data.length;
+        let middle = Math.floor(last / 2);
+        //let filter1 = data[1].trim().split(",")[10]; // identify first filter
+        //let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the first filter is in row 1 and the last filter is in the last row.
+        //going to try to add more than 2 filters ==> with each filter being defined as the first thing that changes in that column
+
         let filter1 = data[1].trim().split(",")[10]; // identify first filter
-
-        let filter2 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the first filter is in row 1 and the last filter is in the last row.
-
+        let filter2 = data[middle].trim().split(",")[10]; // because afterglow stacks filters in chunks, the first filter is in row 1 and the last filter is in the last row.
+        let filter3 = data[last - 1].trim().split(",")[10]; // because afterglow stacks filters in chunks, the first filter is in row 1 and the last filter is in the last row.
         let blue = document.getElementById("filter-form").elements["blue"];
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
 
         //Change filter oprions to match file
-        let filter1num, filter2num;
+        let filter1num, filter2num, filter3num;
         if (filter1.toUpperCase() === "U") {
             filter1num = 1
         } else if (filter1.toUpperCase() === "UPRIME") {
@@ -550,23 +558,66 @@ export function clusterFileUpload(evt, table, myChart) {
         } else {
             filter2num = 14
         }
+        if (filter3.toUpperCase() === "U") {
+            filter3num = 1
+        } else if (filter3.toUpperCase() === "UPRIME") {
+            filter3num = 2
+        } else if (filter3 === "B") {
+            filter3num = 3
+        } else if (filter3.toUpperCase() === "GPRIME") {
+            filter3num = 4
+        } else if (filter3.toUpperCase() === "V") {
+            filter3num = 5
+        } else if (filter3.toUpperCase() === "RPRIME") {
+            filter3num = 6
+        } else if (filter3.toUpperCase() === "R") {
+            filter3num = 7
+        } else if (filter3.toUpperCase() === "IPRIME") {
+            filter3num = 8
+        } else if (filter3.toUpperCase() === "I") {
+            filter3num = 9
+        } else if (filter3.toUpperCase() === "ZPRIME") {
+            filter3num = 10
+        } else if (filter3.toUpperCase() === "J") {
+            filter3num = 11
+        } else if (filter3.toUpperCase() === "H") {
+            filter3num = 12
+        } else if (filter3.toUpperCase() === "K") {
+            filter3num = 13
+        } else {
+            filter3num = 14
+        }
         let filter1temp = filter1
         let filter2temp = filter2
-        if (filter1num > filter2num) {
+        let filter3temp = filter3
+        if (filter1num > filter2num > filter3num) {
             filter1 = filter2temp
             filter2 = filter1temp
+            filter3 = filter3temp
+        }else if (filter1num > filter3num > filter2num) {
+                filter1 = filter3temp
+                filter2 = filter2temp
+                filter3 = filter1temp
+            }
+        else if (filter2num > filter1num > filter3num) {
+            filter1 = filter2temp
+            filter2 = filter1temp
+            filter3 = filter3temp
         }
 
         blue.options[0].textContent = filter1;
         blue.options[1].textContent = filter2;
+        blue.options[2].textContent = filter3;
         red.options[0].textContent = filter1;
         red.options[1].textContent = filter2;
+        red.options[2].textContent = filter3;
         lum.options[0].textContent = filter1;
         lum.options[1].textContent = filter2;
+        lum.options[2].textContent = filter3;
 
         let data1 = []; // initialize arrays for the values associated with 
         let data2 = []; // the first and second filter
-
+        let data3 = []; // the third filter
         data.splice(0, 1);
 
 
@@ -580,20 +631,23 @@ export function clusterFileUpload(evt, table, myChart) {
                 data1.push([items[1], parseFloat(items[12])])
             }
             // otherwise adds id and magnitude to data2
-            else {
+            else if (items[10] === filter2) {
                 data2.push([items[1], parseFloat(items[12])])
+            }else{
+                data3.push([items[1], parseFloat(items[12])])
+            
             }
         }
 
 
 
         table.updateSettings({
-            colHeaders: [filter1 + " Mag", filter2 + " Mag"],
+            colHeaders: [filter1 + " Mag", filter2 + " Mag", filter3 + "Mag"],
         })
 
         data1.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         data2.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
-
+        data3.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         let left = 0;
         let right = 0;
         let tableData = [];
@@ -616,7 +670,8 @@ export function clusterFileUpload(evt, table, myChart) {
             } else {
                 tableData.push({
                     'b': null,
-                    'r': data2[right][1]
+                    'r': data2[right][1],
+                    
                 });
                 right++;
             }
@@ -636,10 +691,11 @@ export function clusterFileUpload(evt, table, myChart) {
             right++;
         }
 
-        tableData = tableData.filter(entry => !isNaN(entry.b) || !isNaN(entry.r));
+        tableData = tableData.filter(entry => !isNaN(entry.b) || !isNaN(entry.r)) || !isNaN(entry.l);
         tableData = tableData.map(entry => ({
             'b': isNaN(entry.b) ? null : entry.b,
-            'r': isNaN(entry.r) ? null : entry.r
+            'r': isNaN(entry.r) ? null : entry.r,
+            'l': isNaN(entry.l) ? null : entry.l
         }));
 
         // Here we have complete tableData
