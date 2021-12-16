@@ -52,15 +52,15 @@ export function cluster() {
         '<div class="row">\n' +
         '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
         '<option value="b" title="B filter" selected>B</option></div>\n' +
-        '<option value="r" title="V filter">V</option></select></div>\n' +
+        '<option value="r" title="V filter">V</option></div>\n' +
         '<option value ="l" title="Lum filter">L</option></select></div>\n' +
-        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter" disabled>\n' +
+        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter">\n' +
         '<option value="b" title="B filter">B</option></div>\n' +
-        '<option value="r" title="V filter" selected>V</option></select></div>\n' +
+        '<option value="r" title="V filter" selected>V</option></div>\n' +
         '<option value= "l" title="Lum filter">L</option></select></div>\n' +
         '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
         '<option value="b" title="B filter">B</option></div>\n' +
-        '<option value="r" title="V filter">V</option></select></div>\n' +
+        '<option value="r" title="V filter">V</option></div>\n' +
         '<option value= "l" title="Lum filter" selected>L</option></select></div>\n' +
         '</div>\n' +
         '</form>\n');
@@ -411,15 +411,15 @@ export function cluster() {
     clusterForm.oninput = throttle(update, frameTime);
 
     filterForm.oninput = function () {
-        //console.log(tableData);
+        console.log(tableData);
         let red = filterForm.elements["red"];
         let blue = filterForm.elements["blue"];
         let lum = filterForm.elements["lum"];
-        if (red.value === blue.value) {
-            red.value = red.options[(red.selectedIndex + 1) % 2].value;
-        }
-        //myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
-        //myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+        //if (red.value === blue.value) {
+            //red.value = red.options[(red.selectedIndex + 1) % 2].value;
+        
+        myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
+        myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
@@ -591,17 +591,29 @@ export function clusterFileUpload(evt, table, myChart) {
         let filter2temp = filter2
         let filter3temp = filter3
         if (filter1num > filter2num > filter3num) {
-            filter1 = filter2temp
-            filter2 = filter1temp
-            filter3 = filter3temp
+            filter1 = filter3temp
+            filter2 = filter2temp
+            filter3 = filter1temp
         }else if (filter1num > filter3num > filter2num) {
                 filter1 = filter3temp
-                filter2 = filter2temp
-                filter3 = filter1temp
+                filter2 = filter1temp
+                filter3 = filter2temp
             }
         else if (filter2num > filter1num > filter3num) {
             filter1 = filter2temp
+            filter2 = filter3temp
+            filter3 = filter1temp
+        }else if (filter2num > filter3num > filter1num) {
+            filter1 = filter1temp
+            filter2 = filter3temp
+            filter3 = filter2temp
+        }else if (filter3num > filter1num > filter2num) {
+            filter1 = filter2temp
             filter2 = filter1temp
+            filter3 = filter3temp
+        }else if (filter3num > filter2num > filter1num) {
+            filter1 = filter1temp
+            filter2 = filter2temp
             filter3 = filter3temp
         }
 
@@ -633,14 +645,14 @@ export function clusterFileUpload(evt, table, myChart) {
             // otherwise adds id and magnitude to data2
             else if (items[10] === filter2) {
                 data2.push([items[1], parseFloat(items[12])])
-            }else{
+            }else if (items[10] === filter3) {
                 data3.push([items[1], parseFloat(items[12])])
             
             }
         }
 
 
-
+            //add in however filter 3 will fall into place
         table.updateSettings({
             colHeaders: [filter1 + " Mag", filter2 + " Mag", filter3 + "Mag"],
         })
@@ -657,20 +669,23 @@ export function clusterFileUpload(evt, table, myChart) {
             if (data1[left][0] === data2[right][0]) {
                 tableData.push({
                     'b': data1[left][1],
-                    'r': data2[right][1]
+                    'r': data2[right][1],
+                    //'l': null
                 });
                 left++;
                 right++;
             } else if (data1[left][0] < data2[right][0]) {
                 tableData.push({
                     'b': data1[left][1],
-                    'r': null
+                    'r': null,
+                    //'l': data2[right][1]
                 });
                 left++;
             } else {
                 tableData.push({
                     'b': null,
                     'r': data2[right][1],
+                    //'l': data1[left][1]
                     
                 });
                 right++;
@@ -679,14 +694,16 @@ export function clusterFileUpload(evt, table, myChart) {
         while (left < data1.length) {
             tableData.push({
                 'b': data1[left][1],
-                'r': null
+                'r': null,
+                //'l': data2[right][1]
             });
             left++;
         }
         while (right < data2.length) {
             tableData.push({
                 'b': null,
-                'r': data2[right][1]
+                'r': data2[right][1],
+                //'l': data1[left][1]
             });
             right++;
         }
