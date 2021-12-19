@@ -411,15 +411,15 @@ export function cluster() {
     clusterForm.oninput = throttle(update, frameTime);
 
     filterForm.oninput = function () {
-        console.log(tableData);
+        //console.log(tableData);
         let red = filterForm.elements["red"];
         let blue = filterForm.elements["blue"];
         let lum = filterForm.elements["lum"];
         //if (red.value === blue.value) {
-            //red.value = red.options[(red.selectedIndex + 1) % 2].value;
-        
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+        //    red.value = red.options[(red.selectedIndex + 1) % 2].value;
+        //}
+        //myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
+        //myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
@@ -591,101 +591,120 @@ export function clusterFileUpload(evt, table, myChart) {
         let filter2temp = filter2
         let filter3temp = filter3
         if (filter1num > filter2num > filter3num) {
-            filter1 = filter3temp
-            filter2 = filter2temp
-            filter3 = filter1temp
-        }else if (filter1num > filter3num > filter2num) {
-                filter1 = filter3temp
-                filter2 = filter1temp
-                filter3 = filter2temp
-            }
-        else if (filter2num > filter1num > filter3num) {
-            filter1 = filter2temp
-            filter2 = filter3temp
-            filter3 = filter1temp
-        }else if (filter2num > filter3num > filter1num) {
-            filter1 = filter1temp
-            filter2 = filter3temp
-            filter3 = filter2temp
-        }else if (filter3num > filter1num > filter2num) {
             filter1 = filter2temp
             filter2 = filter1temp
             filter3 = filter3temp
-        }else if (filter3num > filter2num > filter1num) {
-            filter1 = filter1temp
-            filter2 = filter2temp
+        }else if (filter1num > filter3num > filter2num) {
+                filter1 = filter3temp
+                filter2 = filter2temp
+                filter3 = filter1temp
+            }
+        else if (filter2num > filter1num > filter3num) {
+            filter1 = filter2temp
+            filter2 = filter1temp
             filter3 = filter3temp
         }
 
         blue.options[0].textContent = filter1;
+        blue.options[0].value = filter1;
         blue.options[1].textContent = filter2;
+        blue.options[1].value = filter2;
         blue.options[2].textContent = filter3;
+        blue.options[2].value = filter3;
         red.options[0].textContent = filter1;
+        red.options[0].value = filter1;
         red.options[1].textContent = filter2;
+        red.options[1].value = filter2;
         red.options[2].textContent = filter3;
+        red.options[2].value = filter3;
         lum.options[0].textContent = filter1;
+        lum.options[0].value = filter1;
         lum.options[1].textContent = filter2;
+        lum.options[1].value = filter2;
         lum.options[2].textContent = filter3;
+        lum.options[2].value = filter3;
 
-        let data1 = []; // initialize arrays for the values associated with 
-        let data2 = []; // the first and second filter
-        let data3 = []; // the third filter
+        for (let i=0; i<3; i++){
+            console.log(lum.options[i].value)
+        }
+
+        let datadict = {}; // initializes a dictionary for the data
         data.splice(0, 1);
 
 
-
+        //Hard to read, but the best solution
+        //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
             let items = row.trim().split(",");
-
-
-            // adds id and magnitude to data1 if filter is filter 1
+            let src    = items[1]
+            let filter = items[10]
+            let mag    = parseFloat(items[12])
+            try{//If an object for this source exists, add an attribute for this filter
+            datadict[src][filter] = isNaN(mag)? null:mag;
+            }
+            catch{//Otherwise? create an object for this source and add the filter
+                datadict[src] = {}
+                datadict[src][filter] = isNaN(mag)? null:mag;
+            }
+        }// adds a dict element with the source number for the key and an element
+        /*
             if (items[10] === filter1) {
-                data1.push([items[1], parseFloat(items[12])])
+                
             }
             // otherwise adds id and magnitude to data2
             else if (items[10] === filter2) {
-                data2.push([items[1], parseFloat(items[12])])
-            }else if (items[10] === filter3) {
-                data3.push([items[1], parseFloat(items[12])])
+                //If there was already such a source added for filter 1, make a new one.
+                //otherwise add another attribute for filter 2
+                data[items[1]] = {...data[items[1]], items[10]: parseFloat(items[12])}
+            }else{
+                data[items[1]] = {...data[items[1]], filter3: parseFloat(items[12])}
             
             }
-        }
+        }*/
 
 
-            //add in however filter 3 will fall into place
+
         table.updateSettings({
-            colHeaders: [filter1 + " Mag", filter2 + " Mag", filter3 + "Mag"],
+            colHeaders: [filter1 + " Mag", filter2 + " Mag", filter3 + " Mag"],
         })
-
-        data1.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+        
+        /*
+        //sort by source number
+        data.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         data2.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
         data3.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+
         let left = 0;
         let right = 0;
+        let up = 0;
+        */
         let tableData = [];
+/*
 
-
-        while (left < data1.length && right < data2.length) {
-            if (data1[left][0] === data2[right][0]) {
+        //Finds sources with incomplete filter data
+        while (left < data1.length && right < data2.length && up < data3.length) {
+            if (data1[left][0] === data2[right][0] === data3[up][0]) {
                 tableData.push({
                     'b': data1[left][1],
                     'r': data2[right][1],
-                    //'l': null
+                    'l': data3[up][1]
                 });
                 left++;
                 right++;
-            } else if (data1[left][0] < data2[right][0]) {
+                up++;
+
+                //if the source only has filter 1 data
+            } else if (data1[left][0] < data2[right][0] && data1[left][0] < data3[up][0]) {
                 tableData.push({
                     'b': data1[left][1],
-                    'r': null,
-                    //'l': data2[right][1]
+                    'r': null
+                    'l': null
                 });
                 left++;
             } else {
                 tableData.push({
                     'b': null,
                     'r': data2[right][1],
-                    //'l': data1[left][1]
                     
                 });
                 right++;
@@ -694,29 +713,35 @@ export function clusterFileUpload(evt, table, myChart) {
         while (left < data1.length) {
             tableData.push({
                 'b': data1[left][1],
-                'r': null,
-                //'l': data2[right][1]
+                'r': null
             });
             left++;
         }
         while (right < data2.length) {
             tableData.push({
                 'b': null,
-                'r': data2[right][1],
-                //'l': data1[left][1]
+                'r': data2[right][1]
             });
             right++;
         }
-
-        tableData = tableData.filter(entry => !isNaN(entry.b) || !isNaN(entry.r)) || !isNaN(entry.l);
+        */
+        
+        tableData = Object.values(datadict);//turns our dictionary into an array
+        console.log(tableData);
+        /*
+        tableData = tableData.filter(entry => !isNaN(entry[0]) || !isNaN(entry[1])) || !isNaN(entry[2]);
         tableData = tableData.map(entry => ({
-            'b': isNaN(entry.b) ? null : entry.b,
-            'r': isNaN(entry.r) ? null : entry.r,
-            'l': isNaN(entry.l) ? null : entry.l
+            [0]: isNaN(entry.b) ? null : entry.b,
+            [1]: isNaN(entry.r) ? null : entry.r,
+            [2]: isNaN(entry.l) ? null : entry.l
         }));
-
+        */
         // Here we have complete tableData
-        table.updateSettings({ data: tableData });
+        table.updateSettings({ data: tableData, 
+                               columns: [{ data: filter1, type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+                               { data: filter2, type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+                               { data: filter3, type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },]});
+                
         updateTableHeight(table);
         updateScatter(table, myChart,
             document.getElementById('cluster-form').elements["d-num"].value, 1,
@@ -781,20 +806,23 @@ function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 5
 }
 
 function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
+
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
-    //Determine what filters each is set to
-    let blue = form.elements["blue"].value === 'b' ? 0 : 1;
-    let red = form.elements["red"].value === 'b' ? 0 : 1;
-    let lum = form.elements["lum"].value === 'b' ? 0 : 1;
+    let columns = table.getColHeader();
+    console.log(columns)
+
+    //Identify the column the selected filter refers to
+    let blue = columns.indexOf(form.elements["blue"].value + " Mag");
+    let red = columns.indexOf(form.elements["red"].value + " Mag");
+    let lum = columns.indexOf(form.elements["lum"].value + " Mag");
 
     for (let i = 0; i < tableData.length; i++) {
-        if (tableData[i][blue] === '' || tableData[i][red] === '' ||
-            tableData[i][blue] === null || tableData[i][red] === null) {
+        if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null) {
             continue;
         }
-        //red-blue,red
+        //red-blue,lum
         chart[start++] = {
             x: tableData[i][blue] - tableData[i][red],
             y: tableData[i][lum] - 5 * Math.log10(dist / 0.01)
