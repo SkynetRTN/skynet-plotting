@@ -497,96 +497,18 @@ export function clusterFileUpload(evt, table, myChart) {
         let red = document.getElementById("filter-form").elements["red"];
         let lum = document.getElementById("filter-form").elements["lum"];
 
-        //Change filter oprions to match file
-        let filter1num, filter2num, filter3num;
-        if (filter1.toUpperCase() === "U") {
-            filter1num = 1
-        } else if (filter1.toUpperCase() === "UPRIME") {
-            filter1num = 2
-        } else if (filter1.toUpperCase() === "B") {
-            filter1num = 3
-        } else if (filter1.toUpperCase() === "GPRIME") {
-            filter1num = 4
-        } else if (filter1.toUpperCase() === "V") {
-            filter1num = 5
-        } else if (filter1.toUpperCase() === "RPRIME") {
-            filter1num = 6
-        } else if (filter1.toUpperCase() === "R") {
-            filter1num = 7
-        } else if (filter1.toUpperCase() === "IPRIME") {
-            filter1num = 8
-        } else if (filter1.toUpperCase() === "I") {
-            filter1num = 9
-        } else if (filter1.toUpperCase() === "ZPRIME") {
-            filter1num = 10
-        } else if (filter1.toUpperCase() === "J") {
-            filter1num = 11
-        } else if (filter1.toUpperCase() === "H") {
-            filter1num = 12
-        } else if (filter1.toUpperCase() === "K") {
-            filter1num = 13
-        } else {
-            filter1num = 14
-        }
+        //Change filter options to match file
 
-        if (filter2.toUpperCase() === "U") {
-            filter2num = 1
-        } else if (filter2.toUpperCase() === "UPRIME") {
-            filter2num = 2
-        } else if (filter2 === "B") {
-            filter2num = 3
-        } else if (filter2.toUpperCase() === "GPRIME") {
-            filter2num = 4
-        } else if (filter2.toUpperCase() === "V") {
-            filter2num = 5
-        } else if (filter2.toUpperCase() === "RPRIME") {
-            filter2num = 6
-        } else if (filter2.toUpperCase() === "R") {
-            filter2num = 7
-        } else if (filter2.toUpperCase() === "IPRIME") {
-            filter2num = 8
-        } else if (filter2.toUpperCase() === "I") {
-            filter2num = 9
-        } else if (filter2.toUpperCase() === "ZPRIME") {
-            filter2num = 10
-        } else if (filter2.toUpperCase() === "J") {
-            filter2num = 11
-        } else if (filter2.toUpperCase() === "H") {
-            filter2num = 12
-        } else if (filter2.toUpperCase() === "K") {
-            filter2num = 13
-        } else {
-            filter2num = 14
-        }
-        if (filter3.toUpperCase() === "U") {
-            filter3num = 1
-        } else if (filter3.toUpperCase() === "UPRIME") {
-            filter3num = 2
-        } else if (filter3 === "B") {
-            filter3num = 3
-        } else if (filter3.toUpperCase() === "GPRIME") {
-            filter3num = 4
-        } else if (filter3.toUpperCase() === "V") {
-            filter3num = 5
-        } else if (filter3.toUpperCase() === "RPRIME") {
-            filter3num = 6
-        } else if (filter3.toUpperCase() === "R") {
-            filter3num = 7
-        } else if (filter3.toUpperCase() === "IPRIME") {
-            filter3num = 8
-        } else if (filter3.toUpperCase() === "I") {
-            filter3num = 9
-        } else if (filter3.toUpperCase() === "ZPRIME") {
-            filter3num = 10
-        } else if (filter3.toUpperCase() === "J") {
-            filter3num = 11
-        } else if (filter3.toUpperCase() === "H") {
-            filter3num = 12
-        } else if (filter3.toUpperCase() === "K") {
-            filter3num = 13
-        } else {
-            filter3num = 14
-        }
+        //order filters by temperature
+        let filters = ["U","UPRIME","B","GPRIME","V","RPRIME","R","IPRIME","I","ZPRIME","J","H","K"];
+        let filter1num = filters.indexOf(filter1.toUpperCase());
+        let filter2num = filters.indexOf(filter2.toUpperCase());
+        let filter3num = filters.indexOf(filter3.toUpperCase());
+
+        filter1num = filter1num===-1? 14:filter1num;
+        filter2num = filter2num===-1? 14:filter2num;
+        filter3num = filter3num===-1? 14:filter3num;
+        
         let filter1temp = filter1
         let filter2temp = filter2
         let filter3temp = filter3
