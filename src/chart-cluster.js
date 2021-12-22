@@ -507,7 +507,9 @@ export function clusterFileUpload(evt, table, myChart) {
                 datadict[src] = {}
                 datadict[src][filter] = isNaN(mag)? null:mag;
             }
-            filters.push(filter)
+            if (!filters.includes(filter)){
+                filters.push(filter);
+            }
         }
 
         let blue = document.getElementById("filter-form").elements["blue"];
@@ -518,7 +520,9 @@ export function clusterFileUpload(evt, table, myChart) {
 
         //order filters by temperature
         let knownFilters = ["U","UPRIME","B","GPRIME","V","RPRIME","R","IPRIME","I","ZPRIME","J","H","K"];
-        filters = knownFilters.filter(f => filters.indexOf(f)>=0);
+        //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
+        knownFilters = knownFilters.filter(f => filters.indexOf(f)>=0);
+        filters = knownFilters.concat(filters.filter(f => knownFilters.indexOf(f)<0));//slap unknowns on the end
         //console.log(filters)
 
        let optionList    = [];
@@ -526,7 +530,7 @@ export function clusterFileUpload(evt, table, myChart) {
        let columns       = [];
        let tableData     = [];
        let hiddenColumns = [];
-       for (let i =0; i<filters.length; i++){
+       for (let i =0; i<filters.length; i++){//makes a list of options for each filter 
            optionList.push({value: filters[i], title: filters[i]+' Mag', text: filters[i]})
            hiddenColumns[i]=i;
            headers.push(filters[i]+" Mag")
@@ -535,8 +539,10 @@ export function clusterFileUpload(evt, table, myChart) {
        //Change the options in the drop downs to the file's filters
        changeOptions(blue,optionList);
        changeOptions(red,optionList);
+       //blue.value=filters[1]
        changeOptions(lum,optionList);
-        
+       //blue.value=filters[2] 
+
         tableData = Object.values(datadict);//turns our dictionary into an array;
         table.updateSettings({ data: tableData,
                                colHeaders: headers, 
