@@ -519,7 +519,7 @@ export function clusterFileUpload(evt, table, myChart) {
         //Change filter options to match file
 
         //order filters by temperature
-        let knownFilters = ["U","UPRIME","B","GPRIME","V","RPRIME","R","IPRIME","I","ZPRIME","J","H","K"];
+        let knownFilters = ["U","UPRIME","USTAR","B","GPRIME","V","VPRIME","RPRIME","R","IPRIME","I","ZPRIME","Y","J","H","KS", "K", "L", "M", "N", "Q"];
         //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
         knownFilters = knownFilters.filter(f => filters.indexOf(f)>=0);
         filters = knownFilters.concat(filters.filter(f => knownFilters.indexOf(f)<0));//slap unknowns on the end
