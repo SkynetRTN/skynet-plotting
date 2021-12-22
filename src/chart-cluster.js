@@ -537,11 +537,11 @@ export function clusterFileUpload(evt, table, myChart) {
            columns.push({data: filters[i], type: 'numeric', numericFormat: { pattern: { mantissa: 2 } }})
        }
        //Change the options in the drop downs to the file's filters
+       //blue and lum are most blue by default, red is set to most red
        changeOptions(blue,optionList);
        changeOptions(red,optionList);
-       //blue.value=filters[1]
+       red.value = red.options[red.options.length-1].value;
        changeOptions(lum,optionList);
-       //blue.value=filters[2] 
 
         tableData = Object.values(datadict);//turns our dictionary into an array;
         table.updateSettings({ data: tableData,
