@@ -92,9 +92,9 @@ export function pulsar() {
         '<div class="flex-item-grow0"><label><input type="checkbox" name="diff" title="Show Difference"><span>Show Difference</span></label></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Equalize:</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="Equalize" name="eq"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Equalize" name="eq_num" class="field"></div>\n' +
+        '<div class="col-sm-3 des">Calibration:</div>\n' +
+        '<div class="col-sm-6 range"><input type="range" title="Calibration" name="eq"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Calibration" name="eq_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
@@ -378,7 +378,7 @@ export function pulsar() {
     linkInputs(
         polarizationForm.eq,
         polarizationForm.eq_num,
-        0.5, 2, 0.01, 1, true, true, 0, Number.POSITIVE_INFINITY
+        0.5, 2, 0.001, 1, true, true, 0, Number.POSITIVE_INFINITY
     );
 
     let polarizationOninput = function () {
