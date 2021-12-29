@@ -501,7 +501,7 @@ export function clusterFileUpload(evt, table, myChart) {
             let filter = items[10]
             let mag    = parseFloat(items[12])
             try{//If an object for this source exists, add an attribute for this filter
-            datadict[src][filter] = isNaN(mag)? null:mag;
+                datadict[src][filter] = isNaN(mag)? null:mag;
             }
             catch{//Otherwise? create an object for this source and add the filter
                 datadict[src] = {}
@@ -509,6 +509,17 @@ export function clusterFileUpload(evt, table, myChart) {
             }
             if (!filters.includes(filter)){
                 filters.push(filter);
+            }
+        }
+        //add null values for sources that didn't show up under each filter
+        for (let src in datadict){
+            for (let f in filters){
+                try{
+                    src[f];
+                }
+                catch{
+                    src[f]=null;
+                }
             }
         }
 
