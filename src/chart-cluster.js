@@ -387,8 +387,8 @@ export function cluster() {
         //console.log(tableData);
         updateTableHeight(hot);
         updateScatter(hot, myChart,
-            clusterForm.elements['d-num'].value, 1,
-            filterForm);
+            clusterForm.elements['d-num'].value,
+            filterForm, clusterForm.elements['err-num'].value);
         updateHRModel(clusterForm, myChart);
     };
 
@@ -501,7 +501,7 @@ export function clusterFileUpload(evt, table, myChart) {
             let filter = items[10]
             let mag    = parseFloat(items[12])
             try{//If an object for this source exists, add an attribute for this filter
-                datadict[src][filter] = isNaN(mag)? null:mag;
+            datadict[src][filter] = isNaN(mag)? null:mag;
             }
             catch{//Otherwise? create an object for this source and add the filter
                 datadict[src] = {}
