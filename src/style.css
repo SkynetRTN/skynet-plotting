@@ -138,6 +138,7 @@ input[type=checkbox] {
 }
 
 input.field {
+    padding-left: 0.5em;
     border-radius: 10px;
     border: 2px solid #E7E7E7;
     -webkit-transition: all 0.1s;
@@ -152,15 +153,6 @@ input.field:focus {
 
 input.field:disabled {
     opacity: 0.7;
-}
-
-input[type=text] {
-    padding: 0 0.5em;
-    margin: 0.1em 0;
-}
-
-input[type=number] {
-    padding-left: 0.5em;
 }
 
 input[type=number]::-webkit-outer-spin-button,
