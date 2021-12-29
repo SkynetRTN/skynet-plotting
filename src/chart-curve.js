@@ -110,31 +110,23 @@ export function curve() {
             hover: {
                 mode: 'nearest'
             },
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return !legendItem.hidden;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return !legendItem.hidden;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                }],
-                yAxes: [{
-                    ticks: {
-                        reverse: false,
-                    }
-                }]
+                },
+                y: {
+                    reverse: false,
+                }
             }
         }
     });
@@ -155,7 +147,7 @@ export function curve() {
     updateLine(tableData, myChart, 0, 'x', 'y1');
 
     lineForm.onchange = function () {
-        myChart.options.scales.yAxes[0].ticks.reverse = lineForm.elements['magnitude'].checked;
+        myChart.options.scales['y'].reverse = lineForm.elements['magnitude'].checked;
         let lineCount = lineForm.elements['lineCount'].value;
         if (lineCount !== lines) {
             let newCols = [{ data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } }];
@@ -183,9 +175,9 @@ export function curve() {
         updateLabels(myChart, document.getElementById('chart-info-form'));
     };
 
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

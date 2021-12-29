@@ -119,36 +119,26 @@ export function venus() {
             hover: {
                 mode: 'nearest'
             },
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return legendItem.datasetIndex !== 1;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return legendItem.datasetIndex !== 1;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                    ticks: {
-                        suggestedMin: 5,
-                        suggestedMax: 65,
-                    }
-                }],
-                yAxes: [{
+                    suggestedMin: 5,
+                    suggestedMax: 65,
+                },
+                y: {
                     // stacked: true,
-                    ticks: {
-                        // suggestedMin: -2,
-                    }
-                }]
+                    // suggestedMin: -2,
+                }
             }
         }
     });
@@ -167,9 +157,9 @@ export function venus() {
 
     updateLine(tableData, myChart);
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

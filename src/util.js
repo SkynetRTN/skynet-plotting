@@ -45,14 +45,14 @@ export function updateLabels(myChart, form, immData = false, immTitle = false, i
     }
     form.data.value = labels;
 
-    if (myChart.options.title.text) {
-        form.title.value = myChart.options.title.text;
+    if (myChart.options.plugins.title.text) {
+        form.title.value = myChart.options.plugins.title.text;
     }
-    if (myChart.options.scales.xAxes[0].scaleLabel.labelString) {
-        form.xAxis.value = myChart.options.scales.xAxes[0].scaleLabel.labelString;
+    if (myChart.options.scales['x'].title.text) {
+        form.xAxis.value = myChart.options.scales['x'].title.text;
     }
-    if (myChart.options.scales.yAxes[0].scaleLabel.labelString) {
-        form.yAxis.value = myChart.options.scales.yAxes[0].scaleLabel.labelString;
+    if (myChart.options.scales['y'].title.text) {
+        form.yAxis.value = myChart.options.scales['y'].title.text;
     }
 
     form.data.disabled = immData;

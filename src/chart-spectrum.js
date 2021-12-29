@@ -69,26 +69,28 @@ export function spectrum() {
             ]
         },
         options: {
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return !legendItem.hidden;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return !legendItem.hidden;
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return '(' + round(context.element.x, 4) + ', ' +
+                                round(context.element.y, 2) + ')';
+                        }
                     }
                 }
             },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 4) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
-                },
-            },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom'
-                }]
+                }
             }
         }
     });
@@ -118,9 +120,9 @@ export function spectrum() {
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
 
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);

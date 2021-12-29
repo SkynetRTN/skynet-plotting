@@ -80,19 +80,11 @@ export function dual() {
             hover: {
                 mode: 'nearest'
             },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
-                },
-            },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                }],
+                },
             }
         }
     });
@@ -112,9 +104,9 @@ export function dual() {
     updateLine(tableData, myChart, 0, 'x1', 'y1');
     updateLine(tableData, myChart, 1, 'x2', 'y2');
 
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

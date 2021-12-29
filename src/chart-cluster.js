@@ -359,27 +359,17 @@ export function cluster() {
             hover: {
                 mode: 'nearest'
             },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                            round(tooltipItem.yLabel, 2) + ')';
-                    },
-                },
-            },
             scales: {
-                xAxes: [{
+                x: {
                     //label: 'B-V',
                     type: 'linear',
                     position: 'bottom',
-                }],
-                yAxes: [{
+                },
+                y: {
                     //label: 'V',
-                    ticks: {
-                        reverse: true,
-                        suggestedMin: 0,
-                    },
-                }],
+                    reverse: true,
+                    suggestedMin: 0,
+                },
             }
         }
     });
@@ -414,8 +404,8 @@ export function cluster() {
         if (red.value === blue.value) {
             red.value = red.options[(red.selectedIndex + 1) % 2].value;
         }
-        //myChart.options.scales.xAxes[0].scaleLabel.labelString = blue.value+"-"+red.value;
-        //myChart.options.scales.yAxes[0].scaleLabel.labelString = red.value;
+        //myChart.options.scales['x'].title.text = blue.value+"-"+red.value;
+        //myChart.options.scales['y'].title.text = red.value;
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
@@ -423,11 +413,9 @@ export function cluster() {
     }
     update();
 
-
-
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = 'x';
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = 'y';
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = 'x';
+    myChart.options.scales['y'].title.text = 'y';
     updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
 
     return [hot, myChart];
@@ -473,10 +461,10 @@ export function clusterFileUpload(evt, table, myChart) {
         clusterForm.elements['age-num'].value = 6;
         clusterForm.elements['red-num'].value = 0;
         clusterForm.elements['metal-num'].value = -3;
-        myChart.options.title.text = "Title";
+        myChart.options.plugins.title.text = "Title";;
         myChart.data.datasets[1].label = "Data";
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = 'x';
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = 'y';
+        myChart.options.scales['x'].title.text = 'x';
+        myChart.options.scales['y'].title.text = 'y';
         updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
 
         let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));

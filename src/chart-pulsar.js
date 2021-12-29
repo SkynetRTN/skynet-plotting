@@ -203,28 +203,30 @@ export function pulsar() {
             ]
         },
         options: {
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return !legendItem.hidden;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return !legendItem.hidden;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem) {
-                        let precision = tooltipItem.datasetIndex === 2 || 
-                                        tooltipItem.datasetIndex === 3 ? 6 : 4
-                        return '(' + round(tooltipItem.xLabel, precision) + ', ' +
-                            round(tooltipItem.yLabel, 4) + ')';
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let precision = context.datasetIndex === 2 || 
+                                            context.datasetIndex === 3 ? 6 : 4
+                            return '(' + round(context.element.x, precision) + ', ' +
+                                round(context.element.y, 4) + ')';
+                        },
                     },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom'
-                }]
+                }
             }
         }
     });
@@ -321,7 +323,7 @@ export function pulsar() {
             start = parseFloat(this.pstart.value);
             stop = parseFloat(this.pstop.value);
 
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+            myChart.options.scales['x'].title.text = "Period (sec)";
         } else {
             //frequency mode
             document.getElementById('period-div').hidden = true;
@@ -329,7 +331,7 @@ export function pulsar() {
             start = parseFloat(this.fstart.value);
             stop = parseFloat(this.fstop.value);
 
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+            myChart.options.scales['x'].title.text = "Frequency (Hz)";
         }
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
@@ -395,9 +397,9 @@ export function pulsar() {
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
 
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updatePulsar(hot, myChart);
@@ -561,16 +563,16 @@ function switchMode(myChart, mode, reset = false) {
         };
     } else {
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.title.text,
-            x: myChart.options.scales.xAxes[0].scaleLabel.labelString,
-            y: myChart.options.scales.yAxes[0].scaleLabel.labelString
+            t: myChart.options.plugins.title.text,
+            x: myChart.options.scales['x'].title.text,
+            y: myChart.options.scales['y'].title.text
         }
         myChart.data.modeLabels.lastMode = mode;
     }
     
-    myChart.options.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].x;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].y;
+    myChart.options.plugins.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
+    myChart.options.scales['x'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].x;
+    myChart.options.scales['y'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].y;
     
     myChart.update(0);
     updateLabels(myChart, document.getElementById('chart-info-form'), true);

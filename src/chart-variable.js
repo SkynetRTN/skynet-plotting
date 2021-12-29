@@ -109,26 +109,28 @@ export function variable() {
             ]
         },
         options: {
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return !legendItem.hidden;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return !legendItem.hidden;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 4) + ', ' +
-                               round(tooltipItem.yLabel, 4) + ')';
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return '(' + round(context.element.x, 4) + ', ' +
+                                   round(context.element.y, 4) + ')';
+                        },
                     },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom'
-                }]
+                }
             }
         }
     });
@@ -165,24 +167,24 @@ export function variable() {
         }
         
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.title.text,
-            x: myChart.options.scales.xAxes[0].scaleLabel.labelString,
-            y: myChart.options.scales.yAxes[0].scaleLabel.labelString
+            t: myChart.options.plugins.title.text,
+            x: myChart.options.scales['x'].title.text,
+            y: myChart.options.scales['y'].title.text
         }
         myChart.data.modeLabels.lastMode = mode;
 
-        myChart.options.title.text = myChart.data.modeLabels[mode].t;
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].x;
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].y;
+        myChart.options.plugins.title.text = myChart.data.modeLabels[mode].t;
+        myChart.options.scales['x'].title.text = myChart.data.modeLabels[mode].x;
+        myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update(0);
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
         updateTableHeight(hot);
     }
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
     
     updateVariable(hot, myChart);
@@ -294,9 +296,9 @@ export function variableFileUpload(evt, table, myChart) {
             lastMode: 'lc'
         };
 
-        myChart.options.title.text = "Title"
-        myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-        myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+        myChart.options.plugins.title.text = "Title";
+        myChart.options.scales['x'].title.text = "x";
+        myChart.options.scales['y'].title.text = "y";
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
         
         lightCurve(myChart);
@@ -530,13 +532,13 @@ function updateChart(myChart, ...dataIndices) {
         myChart.data.datasets[i].hidden = true;
     }
     // Reversing y-axis for lc and pf, since a lower value for star magnitude means it's brighter.
-    myChart.options.scales.yAxes[0].ticks.reverse = true;
+    myChart.options.scales['y'].reverse = true;
 
     for (const dataIndex of dataIndices) {
         myChart.data.datasets[dataIndex].hidden = false;
         if (dataIndex === 3) {
             // Normal y-axis for fourier transform.
-            myChart.options.scales.yAxes[0].ticks.reverse = false;
+            myChart.options.scales['y'].reverse = false;
         }
     }
     myChart.update(0);
