@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
