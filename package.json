@@ -22,6 +22,11 @@
   },
   "homepage": "https://github.com/shengjiex98/astro-plotting#readme",
   "devDependencies": {
+    "@types/bootstrap": "^4.6.1",
+    "@types/chart.js": "2.9.4",
+    "@types/file-saver": "2.0.4",
+    "@types/jquery": "^3.5.11",
+    "@types/mini-css-extract-plugin": "^2.4.0",
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.4.5",
