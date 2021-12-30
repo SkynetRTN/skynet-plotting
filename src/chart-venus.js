@@ -9,7 +9,7 @@ import { round, sqr, rad } from "./my-math.js"
 
 /**
  *  Function for comparing data points with both Heliocentric and geocentric models.
- *  @returns {any[]}
+ *  @returns {[Handsontable, Chart]}
  */
 export function venus() {
     /**
@@ -31,7 +31,7 @@ export function venus() {
     // venusForm.oninput = function () {
     //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
     //     // console.log(geocentricData);
-    //     myChart.update(0);
+    //     myChart.update({duration: 0});
     // };
 
     let tableData = [

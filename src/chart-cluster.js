@@ -9,7 +9,7 @@ import { round } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.
- *  @returns {any[]}:
+ *  @returns {[Handsontable, Chart]}:
  */
 export function cluster() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -419,7 +419,7 @@ export function cluster() {
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
-        myChart.update(0);
+        myChart.update({duration: 0});
     }
     update();
 
@@ -671,7 +671,7 @@ function updateHRModel(form, chart) {
         8,
         2000
     );
-    chart.update(0);
+    chart.update({duration: 0});
 }
 
 /**
@@ -730,5 +730,5 @@ function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update(0);
+    myChart.update({duration: 0});
 }

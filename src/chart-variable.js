@@ -9,7 +9,7 @@ import { round, lombScargle } from "./my-math.js"
 
 /**
  *  Returns generated table and chart for variable.
- *  @returns {[Handsontable, Chartjs]} Returns the table and the chart object.
+ *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
 export function variable() {
     // console.log("root func called");
@@ -174,7 +174,7 @@ export function variable() {
         myChart.options.title.text = myChart.data.modeLabels[mode].t;
         myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].x;
         myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[mode].y;
-        myChart.update(0);
+        myChart.update({duration: 0});
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
         updateTableHeight(hot);
@@ -539,7 +539,7 @@ function updateChart(myChart, ...dataIndices) {
             myChart.options.scales.yAxes[0].ticks.reverse = false;
         }
     }
-    myChart.update(0);
+    myChart.update({duration: 0});
 }
 
 /**
