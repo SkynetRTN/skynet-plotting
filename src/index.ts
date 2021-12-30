@@ -22,7 +22,7 @@ import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
 import { cluster, clusterFileUpload } from './chart-cluster.js';
 import { round } from './my-math';
 
-import * as Chart from 'chart.js';
+import Chart from 'chart.js/auto';
 import Handsontable from 'handsontable';
 
 /**
@@ -81,7 +81,7 @@ window.onload = function () {
     }
 
     setChartDefaults();
-    chartType(form.elements['chart'].value);
+    chartType((form.elements[0] as HTMLInputElement).value);
 };
 
 /**
@@ -174,19 +174,16 @@ function setChartDefaults() {
     // Setting properties about the title.
     Chart.defaults.plugins.title.display = true;
     Chart.defaults.plugins.title.font.size = 18;
-    Chart.defaults.plugins.title.font.color = 'rgba(0, 0, 0, 1)';
     Chart.defaults.plugins.title.font.weight = 'normal';
     Chart.defaults.plugins.title.font.family = '"Lato", "Arial", sans-serif';
 
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    Chart.defaults.plugins.legend.onClick = function (e) {
-        e.stopPropagation();
-    };
+    Chart.defaults.plugins.legend.onClick = function () {};
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
-    Chart.defaults.plugins.tooltip.callbacks.title = function (context) {
+    Chart.defaults.plugins.tooltip.callbacks.title = function (context): null {
         return null;
     };
     Chart.defaults.plugins.tooltip.callbacks.label = function (context) {
@@ -204,7 +201,7 @@ function setChartDefaults() {
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     let elements = form.elements as ChartInfoFormElements;
-    myChart.options.title.text = elements['title'].value;
+    myChart.options.plugins.title.text = elements['title'].value;
     let labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
@@ -217,8 +214,8 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     myChart.update('none');
 }
 
-function saveImage(canvasID, signature, jpg=true, quality=1.0) {
-    let canvas = document.getElementById(canvasID);
+function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
+    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
 
     // Create a dummy canvas
     let destCanvas = document.createElement('canvas');
@@ -240,13 +237,13 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
     saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
 }
 
-function addEXIFToImage(jpegData, signature,time) {
-    let zeroth = {};
-    let exif = {};
+function addEXIFToImage(jpegData: string, signature: string, time: string) {
+    let zeroth: piexif.IExifElement;
+    let exif: piexif.IExifElement;
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     
-    let exifObj = { '0th':zeroth, 'Exif':exif };
+    let exifObj = { '0th': zeroth, 'Exif': exif };
     let exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }

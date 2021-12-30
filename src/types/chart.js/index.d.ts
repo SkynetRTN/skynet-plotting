@@ -1,6 +1,6 @@
-import * as Chart from 'chart.js';
-declare module 'chart.js'{
-    interface ChartDataSets {
-        immutableLabel: boolean;
-    }
-}
+// import Chart from 'chart.js/auto'
+// declare module 'chart.js/auto'{
+//     interface ChartDataset {
+//         immutableLabel: boolean;
+//     }
+// }
