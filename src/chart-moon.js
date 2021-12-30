@@ -9,7 +9,7 @@ import { round, sqr, rad } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.
- *  @returns {any[]}:
+ *  @returns {[Handsontable, Chart]}:
  */
 export function moon() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -180,7 +180,7 @@ function updateFormula(table, form, chart) {
         max + 2,
         2000
     );
-    chart.update(0);
+    chart.update({duration: 0});
 }
 
 /**

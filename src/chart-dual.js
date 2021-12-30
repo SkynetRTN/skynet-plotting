@@ -9,7 +9,7 @@ import { round } from "./my-math.js"
 
 /**
  *  Function for two curves with independent x values.
- *  @returns {any[]}
+ *  @returns {[Handsontable, Chart]}
  */
 export function dual() {
     let tableData = [

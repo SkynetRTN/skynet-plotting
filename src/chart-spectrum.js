@@ -7,6 +7,10 @@ import { tableCommonOptions, colors } from "./config.js"
 import { updateLine, updateLabels, updateTableHeight, sanitizeData } from "./util.js"
 import { round } from "./my-math.js"
 
+/**
+ * 
+ * @returns {[Handsontable, Chart]}
+ */
 export function spectrum() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
@@ -114,7 +118,7 @@ export function spectrum() {
             myChart.data.datasets[0].hidden = true;
             myChart.data.datasets[1].hidden = false;
         }
-        myChart.update(0);
+        myChart.update({duration: 0});
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     
@@ -160,7 +164,7 @@ function updateSpectrum(table, myChart) {
     spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange();
 
-    myChart.update(0);
+    myChart.update({duration: 0});
 }
 
 /**

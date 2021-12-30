@@ -9,7 +9,7 @@ import { round } from "./my-math.js"
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.
- *  @returns {any[]}
+ *  @returns {[Handsontable, Chart]}
  */
 export function curve() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -179,7 +179,7 @@ export function curve() {
                 updateLine(tableData, myChart, i, 'x', 'y' + (i + 1));
             }
         }
-        myChart.update(0);
+        myChart.update({duration: 0});
         updateLabels(myChart, document.getElementById('chart-info-form'));
     };
 
