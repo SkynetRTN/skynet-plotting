@@ -107,8 +107,8 @@ function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
-    let zeroth: piexif.IExifElement;
-    let exif: piexif.IExifElement;
+    let zeroth: piexif.IExifElement = {};
+    let exif: piexif.IExifElement = {};
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     
