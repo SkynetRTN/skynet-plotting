@@ -171,7 +171,7 @@ export function curve() {
                 updateLine(tableData, myChart, i, 'x', 'y' + (i + 1));
             }
         }
-        myChart.update(0);
+        myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form'));
     };
 

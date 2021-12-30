@@ -170,7 +170,7 @@ function updateFormula(table, form, chart) {
         max + 2,
         2000
     );
-    chart.update(0);
+    chart.update('none');
 }
 
 /**

@@ -116,7 +116,7 @@ export function spectrum() {
             myChart.data.datasets[0].hidden = true;
             myChart.data.datasets[1].hidden = false;
         }
-        myChart.update(0);
+        myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     
@@ -162,7 +162,7 @@ function updateSpectrum(table, myChart) {
     spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange();
 
-    myChart.update(0);
+    myChart.update('none');
 }
 
 /**

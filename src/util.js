@@ -26,7 +26,7 @@ export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = '
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update(0);
+    myChart.update('none');
 }
 
 /**

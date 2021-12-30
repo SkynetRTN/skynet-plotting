@@ -147,7 +147,7 @@ export function scatter() {
         let d = parseFloat(this.elements['d-num'].value);
         myChart.data.datasets[2].data = [{ x: x, y: y}];
         myChart.data.datasets[3].data = circle(x, y, d);
-        myChart.update(0);
+        myChart.update('none');
     }
     let changed = false;        // Indicates whether a change occurred while waiting for lock
     let lock = false;           // Lock for throttle
@@ -263,7 +263,7 @@ function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
     myChart.options.scales['x'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
     myChart.options.scales['y'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
 
-    myChart.update(0);
+    myChart.update('none');
 }
 
 /**

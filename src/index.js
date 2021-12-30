@@ -157,7 +157,7 @@ function chartType(chart) {
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
     };
-    objects[1].update(0);
+    objects[1].update('none');
 
 }
 
@@ -212,7 +212,7 @@ function updateChartInfo(myChart, form) {
     }
     myChart.options.scales['x'].title.text = form.elements['xAxis'].value;
     myChart.options.scales['y'].title.text = form.elements['yAxis'].value;
-    myChart.update(0);
+    myChart.update('none');
 }
 
 function saveImage(canvasID, signature, jpg=true, quality=1.0) {

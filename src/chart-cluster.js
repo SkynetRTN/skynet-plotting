@@ -409,7 +409,7 @@ export function cluster() {
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
-        myChart.update(0);
+        myChart.update('none');
     }
     update();
 
@@ -659,7 +659,7 @@ function updateHRModel(form, chart) {
         8,
         2000
     );
-    chart.update(0);
+    chart.update('none');
 }
 
 /**
@@ -718,5 +718,5 @@ function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update(0);
+    myChart.update('none');
 }

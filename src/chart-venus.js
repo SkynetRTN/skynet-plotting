@@ -31,7 +31,7 @@ export function venus() {
     // venusForm.oninput = function () {
     //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
     //     // console.log(geocentricData);
-    //     myChart.update(0);
+    //     myChart.update('none');
     // };
 
     let tableData = [

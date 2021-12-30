@@ -176,7 +176,7 @@ export function variable() {
         myChart.options.plugins.title.text = myChart.data.modeLabels[mode].t;
         myChart.options.scales['x'].title.text = myChart.data.modeLabels[mode].x;
         myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
-        myChart.update(0);
+        myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
         updateTableHeight(hot);
@@ -541,7 +541,7 @@ function updateChart(myChart, ...dataIndices) {
             myChart.options.scales['y'].reverse = false;
         }
     }
-    myChart.update(0);
+    myChart.update('none');
 }
 
 /**

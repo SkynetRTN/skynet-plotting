@@ -294,7 +294,7 @@ export function pulsar() {
         myChart.data.modified.fourierChanged = true;
         myChart.data.modified.periodFoldingChanged = true;
 
-        myChart.update(0);
+        myChart.update('none');
     }
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
@@ -346,7 +346,7 @@ export function pulsar() {
         myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
         myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
 
-        myChart.update(0)
+        myChart.update('none')
     }
     let fourierForm = document.getElementById('fourier-form');
     let computeButton = document.getElementById('compute');
@@ -369,7 +369,7 @@ export function pulsar() {
         myChart.data.datasets[4].data = chartDataDiff(
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
-        myChart.update(0);
+        myChart.update('none');
     }
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
@@ -390,7 +390,7 @@ export function pulsar() {
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
         myChart.data.datasets[4].hidden = !this.diff.checked;
-        myChart.update(0);
+        myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
@@ -534,7 +534,7 @@ function switchMode(myChart, mode, reset = false) {
         myChart.data.datasets[4].hidden = 
             !document.getElementById('polarization-form').diff.checked;
     }
-    myChart.update(0);
+    myChart.update('none');
 
     if (reset) {
         document.getElementById("light-curve-form").dt.value = 3;
@@ -572,7 +572,7 @@ function switchMode(myChart, mode, reset = false) {
     myChart.options.scales['x'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].x;
     myChart.options.scales['y'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].y;
     
-    myChart.update(0);
+    myChart.update('none');
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
 }
 
