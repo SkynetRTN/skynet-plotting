@@ -25,7 +25,7 @@ export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = '
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update(0);
+    myChart.update({duration: 0});
 }
 
 /**
@@ -320,4 +320,13 @@ export function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => { func.apply(this, args); }, wait);
     }
+}
+
+export function formatTime(time) {
+    //takes in date/times asreturned by getDateString() and formats them as Year-Month-DayTHourMinuteSecond
+    let tarray = ['','']
+    tarray = time.split(' ');
+    tarray[0] = tarray[0].split(':').join('-');
+    tarray[1] = tarray[1].split(':').join('');
+    return tarray.join('T');
 }

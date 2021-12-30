@@ -18,12 +18,12 @@ export function round(value, digits) {
  * @returns A number in the range [min, max]
  */
 export function clamp(num, min, max) {
-    num = parseFloat(num);
-    if (!isNaN(min)) {
-        num = Math.max(num, min);
+    let parsed = parseFloat(num);
+    if (!isNaN(min) && parsed < min) {
+        num = min;
     }
-    if (!isNaN(max)) {
-        num = Math.min(num, max);
+    if (!isNaN(max) && parsed > max) {
+        num = max;
     }
     return num;
 };

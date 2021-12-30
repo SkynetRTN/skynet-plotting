@@ -1,19 +1,16 @@
 'use strict';
 
 /**
- * "importing for side effect": nothing is actually imported here. This is used
- * to attach the bootstrap modal plugin to the global jQuery object.
- * 
- * Not sure if this is webpack black magic or not, but importing the 
- * bootstrap plugin before jQuery seems to work fine.
+ * "importing for side effect": nothing is actually imported by the line below. 
+ * This is used to attach the bootstrap modal plugin to the global jQuery object.
  */ 
+import * as $ from 'jquery';
 import 'bootstrap/js/dist/modal';
-import $ from 'jquery';
 
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob } from './util.js';
+import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util.js';
 import { curve } from './chart-curve.js';
 import { dual } from './chart-dual.js';
 import { moon } from './chart-moon.js';
@@ -24,20 +21,23 @@ import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
 import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
 import { cluster, clusterFileUpload } from './chart-cluster.js';
 
+import * as Chart from 'chart.js';
+import Handsontable from 'handsontable';
+
 /**
  *  Initializing the page when the website loads
  */
 window.onload = function () {
-    let form = document.getElementById('chart-type-form');
+    let form = document.getElementById('chart-type-form') as HTMLFormElement;
     form.onchange = function () {
-        chartType(form.elements['chart'].value);
+        chartType((form.elements[0] as HTMLInputElement).value);
     };
-    chartType(form.elements['chart'].value);
+    chartType((form.elements[0] as HTMLInputElement).value);
 
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
         Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
-            value: function (callback, type, quality) {
+            value: function (callback: Function, type: string, quality: number) {
                 let dataURL = this.toDataURL(type, quality).split(',')[1];
                 setTimeout(function () {
                     let binStr = atob(dataURL),
@@ -53,7 +53,7 @@ window.onload = function () {
     }
 
     // Enabling CSV upload function
-    let fileUpload = this.document.getElementById('file-upload');
+    let fileUpload = document.getElementById('file-upload') as HTMLButtonElement;
     document.getElementById('file-upload-button').onclick = function () {
         // Clearing the file upload API first by setting it to null, so that uploading actions are 
         // always triggered even if the same file is uploaded again.
@@ -64,7 +64,8 @@ window.onload = function () {
     // Enabling download function. Will trigger Honor Code Pledge interface before
     //  students are allowed to download images.
     document.getElementById('pledge-signed').onclick = () => {
-        let signature = document.getElementById('honor-pledge-form').elements['signature'].value;
+        let honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
+        let signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
         } else {
@@ -80,8 +81,8 @@ window.onload = function () {
     }
 };
 
-function saveImage(canvasID, signature, jpg=true, quality=1.0) {
-    let canvas = document.getElementById(canvasID);
+function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
+    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
 
     // Create a dummy canvas
     let destCanvas = document.createElement('canvas');
@@ -98,17 +99,18 @@ function saveImage(canvasID, signature, jpg=true, quality=1.0) {
     destCtx.drawImage(canvas, 0, 0);
 
     // Download the dummy canvas
-    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature);
-    saveAs(dataURLtoBlob(exifImage), 'chart.jpg');
+    let time = getDateString();
+    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
+    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
 }
 
-function addEXIFToImage(jpegData, signature) {
-    let zeroth = {};
-    let exif = {};
+function addEXIFToImage(jpegData: string, signature: string, time: string) {
+    let zeroth: piexif.IExifElement;
+    let exif: piexif.IExifElement;
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
-    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = getDateString();
+    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     
-    let exifObj = { '0th':zeroth, 'Exif':exif };
+    let exifObj = { '0th': zeroth, 'Exif': exif };
     let exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }
@@ -119,7 +121,7 @@ function addEXIFToImage(jpegData, signature) {
  *  @param chart:   A string represents the type of chart to be rendered. This string comes from the
  *                  chart-type-form
  */
-function chartType(chart) {
+function chartType(chart: string) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
@@ -129,7 +131,7 @@ function chartType(chart) {
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
-    let objects;
+    let objects: [Handsontable, Chart];
 
     if (chart === 'curve') {
         objects = curve();
@@ -180,11 +182,11 @@ function chartType(chart) {
         objects[0].alter('insert_row');
     };
 
-    let chartInfoForm = document.getElementById('chart-info-form');
+    let chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
     };
-    objects[1].update(0);
+    objects[1].update({duration: 0});
 
 }
 
@@ -194,7 +196,7 @@ function chartType(chart) {
  *  @param chart:   The Chartjs object
  *  @param table:   The Handsontable object
  */
-function initializeChart(chart, table) {
+function initializeChart(chart: Chart, table: Handsontable) {
     // Setting properties about the title.
     chart.options.title.display = true;
     chart.options.title.fontSize = 18;
@@ -236,17 +238,17 @@ function initializeChart(chart, table) {
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
  */
-function updateChartInfo(myChart, form) {
-    myChart.options.title.text = form.elements['title'].value;
-    let labels = form.elements['data'].value.split(',').map(item => item.trim());
+function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
+    let elements = form.elements as ChartInfoFormElements;
+    myChart.options.title.text = elements['title'].value;
+    let labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = form.elements['xAxis'].value;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = form.elements['yAxis'].value;
-    myChart.update(0);
+    myChart.options.scales.xAxes[0].scaleLabel.labelString = elements['xAxis'].value;
+    myChart.options.scales.yAxes[0].scaleLabel.labelString = elements['yAxis'].value;
+    myChart.update({duration: 0});
 }
-

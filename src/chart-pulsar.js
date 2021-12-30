@@ -92,9 +92,9 @@ export function pulsar() {
         '<div class="flex-item-grow0"><label><input type="checkbox" name="diff" title="Show Difference"><span>Show Difference</span></label></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-3 des">Equalize:</div>\n' +
-        '<div class="col-sm-6 range"><input type="range" title="Equalize" name="eq"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Equalize" name="eq_num" class="field"></div>\n' +
+        '<div class="col-sm-3 des">Calibration:</div>\n' +
+        '<div class="col-sm-6 range"><input type="range" title="Calibration" name="eq"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Calibration" name="eq_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
@@ -294,7 +294,7 @@ export function pulsar() {
         myChart.data.modified.fourierChanged = true;
         myChart.data.modified.periodFoldingChanged = true;
 
-        myChart.update(0);
+        myChart.update({duration: 0});
     }
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
@@ -346,7 +346,7 @@ export function pulsar() {
         myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
         myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
 
-        myChart.update(0)
+        myChart.update({duration: 0})
     }
     let fourierForm = document.getElementById('fourier-form');
     let computeButton = document.getElementById('compute');
@@ -369,7 +369,7 @@ export function pulsar() {
         myChart.data.datasets[4].data = chartDataDiff(
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
-        myChart.update(0);
+        myChart.update({duration: 0});
     }
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
@@ -378,7 +378,7 @@ export function pulsar() {
     linkInputs(
         polarizationForm.eq,
         polarizationForm.eq_num,
-        0.5, 2, 0.01, 1, true, true, 0, Number.POSITIVE_INFINITY
+        0.5, 2, 0.001, 1, true, true, 0, Number.POSITIVE_INFINITY
     );
 
     let polarizationOninput = function () {
@@ -390,7 +390,7 @@ export function pulsar() {
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
         myChart.data.datasets[4].hidden = !this.diff.checked;
-        myChart.update(0);
+        myChart.update({duration: 0});
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
@@ -534,7 +534,7 @@ function switchMode(myChart, mode, reset = false) {
         myChart.data.datasets[4].hidden = 
             !document.getElementById('polarization-form').diff.checked;
     }
-    myChart.update(0);
+    myChart.update({duration: 0});
 
     if (reset) {
         document.getElementById("light-curve-form").dt.value = 3;
@@ -572,7 +572,7 @@ function switchMode(myChart, mode, reset = false) {
     myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].x;
     myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].y;
     
-    myChart.update(0);
+    myChart.update({duration: 0});
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
 }
 

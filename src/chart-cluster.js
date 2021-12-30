@@ -9,7 +9,7 @@ import { round } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.
- *  @returns {any[]}:
+ *  @returns {[Handsontable, Chart]}:
  */
 export function cluster() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
@@ -19,11 +19,11 @@ export function cluster() {
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Distance" name="d-num" class="field"></div>\n' +
         '</div>\n' +
-        /*'<div class="row">\n' +
-        '<div class="col-sm-4 des">+/- Range (%):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="R" name="r"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="R" name="r-num" class="field"></div>\n' +
-        '</div>\n' +*/
+        '<div class="row">\n' +
+        '<div class="col-sm-4 des">Max Error (mag)</div>\n' +
+        '<div class="col-sm-5 range"><input type="range" title="Error" name="err"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Error" name="err-num" class="field"></div>\n' +
+        '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
@@ -66,7 +66,7 @@ export function cluster() {
     let clusterForm = document.getElementById("cluster-form");
     let filterForm = document.getElementById("filter-form");
     linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
-    //linkInputs(clusterForm.elements['r'], clusterForm.elements['r-num'], 0, 100, 0.01, 100);
+    linkInputs(clusterForm.elements['err'], clusterForm.elements['err-num'], 0, 1, 0.01, 1);
     linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 11, 0.01, 6);
     linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
@@ -334,15 +334,6 @@ export function cluster() {
         data: {
             datasets: [
                 {
-                    label: 'Data',
-                    data: chartData,
-                    backgroundColor: colors['red'],
-                    fill: false,
-                    showLine: false,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    immutableLabel: false,
-                }, {
                     label: 'Model',
                     data: null, // will be generated later
                     borderColor: colors['blue'],
@@ -352,6 +343,15 @@ export function cluster() {
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
+                },{
+                    label: 'Data',
+                    data: chartData,
+                    backgroundColor: colors['red'],
+                    fill: false,
+                    showLine: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    immutableLabel: false,
                 }
             ]
         },
@@ -388,7 +388,7 @@ export function cluster() {
         //console.log(tableData);
         updateTableHeight(hot);
         updateScatter(hot, myChart,
-            clusterForm.elements['d-num'].value, 0,
+            clusterForm.elements['d-num'].value, 1,
             filterForm);
         updateHRModel(clusterForm, myChart);
     };
@@ -419,7 +419,7 @@ export function cluster() {
 
         update();
         updateLabels(myChart, document.getElementById('chart-info-form'));
-        myChart.update(0);
+        myChart.update({duration: 0});
     }
     update();
 
@@ -474,7 +474,7 @@ export function clusterFileUpload(evt, table, myChart) {
         clusterForm.elements['red-num'].value = 0;
         clusterForm.elements['metal-num'].value = -3;
         myChart.options.title.text = "Title";
-        myChart.data.datasets[0].label = "Data";
+        myChart.data.datasets[1].label = "Data";
         myChart.options.scales.xAxes[0].scaleLabel.labelString = 'x';
         myChart.options.scales.yAxes[0].scaleLabel.labelString = 'y';
         updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
@@ -646,7 +646,7 @@ export function clusterFileUpload(evt, table, myChart) {
         table.updateSettings({ data: tableData });
         updateTableHeight(table);
         updateScatter(table, myChart,
-            document.getElementById('cluster-form').elements["d-num"].value, 0,
+            document.getElementById('cluster-form').elements["d-num"].value, 1,
             document.getElementById('filter-form')
         )
     }
@@ -662,7 +662,7 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(form, chart) {
-    chart.data.datasets[1].data = HRGenerator(
+    chart.data.datasets[0].data = HRGenerator(
         //form.elements['r-num'].value,
         form.elements['age-num'].value,
         form.elements['red-num'].value,
@@ -671,7 +671,7 @@ function updateHRModel(form, chart) {
         8,
         2000
     );
-    chart.update(0);
+    chart.update({duration: 0});
 }
 
 /**
@@ -707,7 +707,7 @@ function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 5
     return data;
 }
 
-function updateScatter(table, myChart, dist = 0.01, dataSet = 0, form) {
+function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
     let start = 0;
     let chart = myChart.data.datasets[dataSet].data;
     let tableData = table.getData();
@@ -730,5 +730,5 @@ function updateScatter(table, myChart, dist = 0.01, dataSet = 0, form) {
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update(0);
+    myChart.update({duration: 0});
 }

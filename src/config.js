@@ -1,6 +1,7 @@
 'use strict';
 
 export const tableCommonOptions = {
+    licenseKey: 'non-commercial-and-evaluation',
     renderAllRows: false,
     rowHeights: 23,
     columnHeaderHeight: 26,
