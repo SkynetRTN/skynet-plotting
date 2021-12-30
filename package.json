@@ -22,7 +22,12 @@
   },
   "homepage": "https://github.com/shengjiex98/astro-plotting#readme",
   "devDependencies": {
-    "snowpack": "^3.8.8"
+    "@types/bootstrap": "^4.6.1",
+    "@types/chart.js": "^2.9.35",
+    "@types/file-saver": "2.0.4",
+    "@types/jquery": "^3.5.11",
+    "snowpack": "^3.8.8",
+    "typescript": "^4.5.4"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
