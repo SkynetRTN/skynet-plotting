@@ -233,13 +233,6 @@ function initializeChart(chart: Chart, table: Handsontable) {
     }
 }
 
-interface ChartInfoFormElements extends HTMLCollection {
-    title: HTMLInputElement,
-    data: HTMLInputElement,
-    xAxis: HTMLInputElement,
-    yAxis: HTMLInputElement
-}
-
 /**
  *  This function takes a Chartjs object and a form containing information (Title, data labels, X axis label,
  *  Y axis label) about the chart, and updates corresponding properties of the chart.
