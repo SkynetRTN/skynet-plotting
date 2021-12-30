@@ -167,12 +167,13 @@ function chartType(chart: string) {
  */
 function setChartDefaults() {
     // Enable axes labeling
-    Chart.defaults.scale.title.display = true;
-    Chart.defaults.animation.duration = 0;
+    (Chart.defaults.scale as any).title.display = true;
+    (Chart.defaults.animation as any).duration = 0;
     Chart.defaults.parsing = false;
     
     // Setting properties about the title.
     Chart.defaults.plugins.title.display = true;
+    Chart.defaults.plugins.title.color = 'rgba(0, 0, 0, 1)';
     Chart.defaults.plugins.title.font.size = 18;
     Chart.defaults.plugins.title.font.weight = 'normal';
     Chart.defaults.plugins.title.font.family = '"Lato", "Arial", sans-serif';
@@ -205,12 +206,12 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     let labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
+        if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    myChart.options.scales['x'].title.text = elements['xAxis'].value;
-    myChart.options.scales['y'].title.text = elements['yAxis'].value;
+    (myChart.options.scales['x'] as any).title.text = elements['xAxis'].value;
+    (myChart.options.scales['y'] as any).title.text = elements['yAxis'].value;
     myChart.update('none');
 }
 
@@ -238,8 +239,8 @@ function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
-    let zeroth: piexif.IExifElement;
-    let exif: piexif.IExifElement;
+    let zeroth: piexif.IExifElement = {};
+    let exif: piexif.IExifElement = {};
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     

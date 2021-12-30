@@ -145,9 +145,16 @@ export function updateTableHeight(table) {
         height = maxHeight;
     }
 
-    table.updateSettings({ stretchH: 'none' });
-    table.updateSettings({ height: height });
-    table.updateSettings({ stretchH: 'all' });
+    /**
+     * Not ideal. But this seems benign and I REALLY CAN'T FIGURE OUT WHAT'S WRONG
+     */
+    try {
+        table.updateSettings({ stretchH: 'none' });
+        table.updateSettings({ height: height });
+        table.updateSettings({ stretchH: 'all' });
+    } catch (error) {
+        // console.error(error);
+    }
 }
 
 // Credits: https://stackoverflow.com/a/30407959/1154380
