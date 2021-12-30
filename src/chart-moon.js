@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
@@ -80,7 +80,7 @@ export function moon() {
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
@@ -91,24 +91,14 @@ export function moon() {
             hover: {
                 mode: 'nearest'
             },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
-                },
-            },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                }],
-                yAxes: [{
-                    ticks: {
-                        suggestedMin: 0,
-                    },
-                }],
+                },
+                y: {
+                    suggestedMin: 0,
+                },
             }
         }
     });
@@ -138,9 +128,9 @@ export function moon() {
     updateLine(tableData, myChart);
     updateFormula(tableData, moonForm, myChart);
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
@@ -180,7 +170,7 @@ function updateFormula(table, form, chart) {
         max + 2,
         2000
     );
-    chart.update({duration: 0});
+    chart.update('none');
 }
 
 /**

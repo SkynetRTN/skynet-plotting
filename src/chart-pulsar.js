@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
@@ -172,10 +172,8 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['white-0'],
                     pointRadius: 0,
-                    pointBorderWidth: 0,
                     borderColor: colors['slate'],
                     borderWidth: 2,
-                    lineTension: 0.1,
                     hidden: true,
                     fill: false,
                 }, {
@@ -203,28 +201,30 @@ export function pulsar() {
             ]
         },
         options: {
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return !legendItem.hidden;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return !legendItem.hidden;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem) {
-                        let precision = tooltipItem.datasetIndex === 2 || 
-                                        tooltipItem.datasetIndex === 3 ? 6 : 4
-                        return '(' + round(tooltipItem.xLabel, precision) + ', ' +
-                            round(tooltipItem.yLabel, 4) + ')';
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let precision = context.datasetIndex === 2 || 
+                                            context.datasetIndex === 3 ? 6 : 4
+                            return '(' + round(context.parsed.x, precision) + ', ' +
+                                round(context.parsed.y, 4) + ')';
+                        },
                     },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom'
-                }]
+                }
             }
         }
     });
@@ -294,7 +294,7 @@ export function pulsar() {
         myChart.data.modified.fourierChanged = true;
         myChart.data.modified.periodFoldingChanged = true;
 
-        myChart.update({duration: 0});
+        myChart.update('none');
     }
     let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
@@ -321,7 +321,7 @@ export function pulsar() {
             start = parseFloat(this.pstart.value);
             stop = parseFloat(this.pstop.value);
 
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Period (sec)";
+            myChart.options.scales['x'].title.text = "Period (sec)";
         } else {
             //frequency mode
             document.getElementById('period-div').hidden = true;
@@ -329,7 +329,7 @@ export function pulsar() {
             start = parseFloat(this.fstart.value);
             stop = parseFloat(this.fstop.value);
 
-            myChart.options.scales.xAxes[0].scaleLabel.labelString = "Frequency (Hz)";
+            myChart.options.scales['x'].title.text = "Frequency (Hz)";
         }
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
@@ -346,7 +346,7 @@ export function pulsar() {
         myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
         myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
 
-        myChart.update({duration: 0})
+        myChart.update('none')
     }
     let fourierForm = document.getElementById('fourier-form');
     let computeButton = document.getElementById('compute');
@@ -369,7 +369,7 @@ export function pulsar() {
         myChart.data.datasets[4].data = chartDataDiff(
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
-        myChart.update({duration: 0});
+        myChart.update('none');
     }
     let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
@@ -390,14 +390,14 @@ export function pulsar() {
             myChart.data.datasets[5].data, myChart.data.datasets[6].data
         )
         myChart.data.datasets[4].hidden = !this.diff.checked;
-        myChart.update({duration: 0});
+        myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form'), true);
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
 
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updatePulsar(hot, myChart);
@@ -534,7 +534,7 @@ function switchMode(myChart, mode, reset = false) {
         myChart.data.datasets[4].hidden = 
             !document.getElementById('polarization-form').diff.checked;
     }
-    myChart.update({duration: 0});
+    myChart.update('none');
 
     if (reset) {
         document.getElementById("light-curve-form").dt.value = 3;
@@ -561,18 +561,18 @@ function switchMode(myChart, mode, reset = false) {
         };
     } else {
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.title.text,
-            x: myChart.options.scales.xAxes[0].scaleLabel.labelString,
-            y: myChart.options.scales.yAxes[0].scaleLabel.labelString
+            t: myChart.options.plugins.title.text,
+            x: myChart.options.scales['x'].title.text,
+            y: myChart.options.scales['y'].title.text
         }
         myChart.data.modeLabels.lastMode = mode;
     }
     
-    myChart.options.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].x;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = myChart.data.modeLabels[reset ? 'lc' : mode].y;
+    myChart.options.plugins.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
+    myChart.options.scales['x'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].x;
+    myChart.options.scales['y'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].y;
     
-    myChart.update({duration: 0});
+    myChart.update('none');
     updateLabels(myChart, document.getElementById('chart-info-form'), true);
 }
 

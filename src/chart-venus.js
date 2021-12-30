@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
@@ -31,7 +31,7 @@ export function venus() {
     // venusForm.oninput = function () {
     //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
     //     // console.log(geocentricData);
-    //     myChart.update({duration: 0});
+    //     myChart.update('none');
     // };
 
     let tableData = [
@@ -88,7 +88,7 @@ export function venus() {
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
@@ -98,7 +98,7 @@ export function venus() {
                     borderColor: colors['blue'],
                     backgroundColor: colors['blue-0.5'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: '-1',
                     immutableLabel: true,
@@ -108,7 +108,7 @@ export function venus() {
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
@@ -119,36 +119,26 @@ export function venus() {
             hover: {
                 mode: 'nearest'
             },
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return legendItem.datasetIndex !== 1;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return legendItem.datasetIndex !== 1;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                               round(tooltipItem.yLabel, 2) + ')';
-                    },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom',
-                    ticks: {
-                        suggestedMin: 5,
-                        suggestedMax: 65,
-                    }
-                }],
-                yAxes: [{
+                    suggestedMin: 5,
+                    suggestedMax: 65,
+                },
+                y: {
                     // stacked: true,
-                    ticks: {
-                        // suggestedMin: -2,
-                    }
-                }]
+                    // suggestedMin: -2,
+                }
             }
         }
     });
@@ -167,9 +157,9 @@ export function venus() {
 
     updateLine(tableData, myChart);
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];

@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js";
+import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
@@ -90,10 +90,11 @@ export function scatter() {
                 }, {
                     label: 'Model',
                     data: circle(0, 0, 10),
+                    parsing: true,
                     borderColor: colors['gray'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true
@@ -104,29 +105,25 @@ export function scatter() {
             hover: {
                 mode: 'nearest'
             },
-            legend: {
-                labels: {
-                    filter: function (legendItem, chartData) {
-                        return legendItem.datasetIndex !== 2;
+            plugins: {
+                legend: {
+                    labels: {
+                        filter: function (legendItem, chartData) {
+                            return legendItem.datasetIndex !== 2;
+                        }
                     }
-                }
-            },
-            tooltips: {
-                filter: function (tooltipItem) {
-                    return tooltipItem.datasetIndex !== 3;
                 },
-                callbacks: {
-                    label: function (tooltipItem) {
-                        return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-                            round(tooltipItem.yLabel, 2) + ')';
+                tooltip: {
+                    filter: function (tooltipItem, index, tooltipItems, data) {
+                        return tooltipItem.datasetIndex !== 3;
                     },
                 },
             },
             scales: {
-                xAxes: [{
+                x: {
                     type: 'linear',
                     position: 'bottom'
-                }]
+                }
             }
         }
     });
@@ -150,7 +147,7 @@ export function scatter() {
         let d = parseFloat(this.elements['d-num'].value);
         myChart.data.datasets[2].data = [{ x: x, y: y}];
         myChart.data.datasets[3].data = circle(x, y, d);
-        myChart.update({duration: 0});
+        myChart.update('none');
     }
     let changed = false;        // Indicates whether a change occurred while waiting for lock
     let lock = false;           // Lock for throttle
@@ -170,9 +167,9 @@ export function scatter() {
 
     updateScatter(tableData, myChart);
     
-    myChart.options.title.text = "Title"
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = "x";
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = "y";
+    myChart.options.plugins.title.text = "Title";
+    myChart.options.scales['x'].title.text = "x";
+    myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form'));
 
     return [hot, myChart];
@@ -253,20 +250,20 @@ function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
     }
 
     if (suggested) {
-        minX = Math.min(minX, myChart.options.scales.xAxes[0].ticks.min);
-        maxX = Math.max(maxX, myChart.options.scales.xAxes[0].ticks.max);
-        minY = Math.min(minY, myChart.options.scales.yAxes[0].ticks.min);
-        maxY = Math.max(maxY, myChart.options.scales.yAxes[0].ticks.max);
+        minX = Math.min(minX, myChart.options.scales['x'].min);
+        maxX = Math.max(maxX, myChart.options.scales['x'].max);
+        minY = Math.min(minY, myChart.options.scales['y'].min);
+        maxY = Math.max(maxY, myChart.options.scales['y'].max);
     }
 
-    myChart.options.scales.xAxes[0].ticks.min = Math.floor(minX);
-    myChart.options.scales.xAxes[0].ticks.max = Math.ceil(maxX);
-    myChart.options.scales.yAxes[0].ticks.min = Math.floor(minY);
-    myChart.options.scales.yAxes[0].ticks.max = Math.ceil(maxY);
-    myChart.options.scales.xAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
-    myChart.options.scales.yAxes[0].ticks.stepSize = Math.ceil((maxY - minY) / 7);
+    myChart.options.scales['x'].min = Math.floor(minX);
+    myChart.options.scales['x'].max = Math.ceil(maxX);
+    myChart.options.scales['y'].min = Math.floor(minY);
+    myChart.options.scales['y'].max = Math.ceil(maxY);
+    myChart.options.scales['x'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
+    myChart.options.scales['y'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
 
-    myChart.update({duration: 0});
+    myChart.update('none');
 }
 
 /**
