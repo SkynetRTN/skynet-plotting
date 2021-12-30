@@ -90,6 +90,7 @@ export function scatter() {
                 }, {
                     label: 'Model',
                     data: circle(0, 0, 10),
+                    parsing: true,
                     borderColor: colors['gray'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
