@@ -142,6 +142,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
+                    pointBorderWidth: 0,
                     immutableLabel: false,
                     hidden: false,
                     fill: false
@@ -150,6 +151,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
+                    pointBorderWidth: 0,
                     immutableLabel: false,
                     hidden: false,
                     fill: false
@@ -158,6 +160,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['blue'],
                     borderWidth: 2,
+                    pointBorderWidth: 0,
                     hidden: true,
                     fill: false
                 }, {
@@ -165,6 +168,7 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['red'],
                     borderWidth: 2,
+                    pointBorderWidth: 0,
                     hidden: true,
                     fill: false
                 }, {
