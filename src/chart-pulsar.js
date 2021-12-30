@@ -172,7 +172,6 @@ export function pulsar() {
                     data: [],
                     backgroundColor: colors['white-0'],
                     pointRadius: 0,
-                    pointBorderWidth: 0,
                     borderColor: colors['slate'],
                     borderWidth: 2,
                     lineTension: 0.1,
