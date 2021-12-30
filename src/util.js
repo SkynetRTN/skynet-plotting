@@ -1,5 +1,6 @@
 'use strict';
 
+import Handsontable from "handsontable";
 import { clamp, round } from "./my-math.js";
 
 /**
@@ -25,7 +26,7 @@ export function updateLine(tableData, myChart, dataSet = 0, xKey = 'x', yKey = '
     while (chart.length !== start) {
         chart.pop();
     }
-    myChart.update({duration: 0});
+    myChart.update('none');
 }
 
 /**
@@ -45,14 +46,14 @@ export function updateLabels(myChart, form, immData = false, immTitle = false, i
     }
     form.data.value = labels;
 
-    if (myChart.options.title.text) {
-        form.title.value = myChart.options.title.text;
+    if (myChart.options.plugins.title.text) {
+        form.title.value = myChart.options.plugins.title.text;
     }
-    if (myChart.options.scales.xAxes[0].scaleLabel.labelString) {
-        form.xAxis.value = myChart.options.scales.xAxes[0].scaleLabel.labelString;
+    if (myChart.options.scales['x'].title.text) {
+        form.xAxis.value = myChart.options.scales['x'].title.text;
     }
-    if (myChart.options.scales.yAxes[0].scaleLabel.labelString) {
-        form.yAxis.value = myChart.options.scales.yAxes[0].scaleLabel.labelString;
+    if (myChart.options.scales['y'].title.text) {
+        form.yAxis.value = myChart.options.scales['y'].title.text;
     }
 
     form.data.disabled = immData;
@@ -125,7 +126,7 @@ export function linkInputs(slider, number, min, max, step, value,
 /**
  *  This function updates the height for the Handsontable object based on the number of rows it has.
  *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
- *  @param table:   The Handsontable object whose height is to be updated.
+ *  @param {Handsontable} table:   The Handsontable object whose height is to be updated.
  */
 export function updateTableHeight(table) {
     const rowHeights = 23;
@@ -144,11 +145,9 @@ export function updateTableHeight(table) {
         height = maxHeight;
     }
 
-    table.updateSettings({ stretchH: 'none', });
-    table.updateSettings({ height: height, });
-    table.updateSettings({
-        stretchH: 'all',
-    });
+    table.updateSettings({ stretchH: 'none' });
+    table.updateSettings({ height: height });
+    table.updateSettings({ stretchH: 'all' });
 }
 
 // Credits: https://stackoverflow.com/a/30407959/1154380

@@ -20,6 +20,7 @@ import { variable, variableFileUpload } from './chart-variable.js';
 import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
 import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
 import { cluster, clusterFileUpload } from './chart-cluster.js';
+import { round } from './my-math';
 
 import * as Chart from 'chart.js';
 import Handsontable from 'handsontable';
@@ -32,7 +33,6 @@ window.onload = function () {
     form.onchange = function () {
         chartType((form.elements[0] as HTMLInputElement).value);
     };
-    chartType((form.elements[0] as HTMLInputElement).value);
 
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
@@ -79,41 +79,10 @@ window.onload = function () {
     document.getElementById('save-button').onclick = () => {
         document.getElementById('no-signature-alert').style.display = 'none';
     }
+
+    setChartDefaults();
+    chartType(form.elements['chart'].value);
 };
-
-function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
-    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
-
-    // Create a dummy canvas
-    let destCanvas = document.createElement('canvas');
-    destCanvas.width = canvas.width;
-    destCanvas.height = canvas.height;
-
-    let destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    destCtx.drawImage(canvas, 0, 0);
-
-    // Download the dummy canvas
-    let time = getDateString();
-    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
-    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
-}
-
-function addEXIFToImage(jpegData: string, signature: string, time: string) {
-    let zeroth: piexif.IExifElement;
-    let exif: piexif.IExifElement;
-    zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
-    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
-    
-    let exifObj = { '0th': zeroth, 'Exif': exif };
-    let exifBytes = piexif.dump(exifObj);
-    return piexif.insert(exifBytes, jpegData);
-}
 
 /**
  *  This function runs once each time the type of the chart changes. It resets various parts of the page
@@ -170,7 +139,10 @@ function chartType(chart: string) {
     }
 
     updateTableHeight(objects[0]);
-    initializeChart(objects[1], objects[0]);
+    // Update the height of the table when the chart resizes.
+    objects[1].options.onResize = function () {
+        updateTableHeight(objects[0]);
+    }
 
     /**
      *  TODO: Find a way to align add-row-button while still putting it directly below
@@ -186,48 +158,40 @@ function chartType(chart: string) {
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
     };
-    objects[1].update({duration: 0});
+    objects[1].update('none');
 
 }
 
 /**
- *  This function initializes some settings for the chart and table objects. It runs once with chartType
- *  each time the type of chart changes
- *  @param chart:   The Chartjs object
- *  @param table:   The Handsontable object
+ *  This function sets the defaults for the Chart.js objects.
  */
-function initializeChart(chart: Chart, table: Handsontable) {
+function setChartDefaults() {
+    // Enable axes labeling
+    Chart.defaults.scale.title.display = true;
+    Chart.defaults.animation.duration = 0;
+    Chart.defaults.parsing = false;
+    
     // Setting properties about the title.
-    chart.options.title.display = true;
-    chart.options.title.fontSize = 18;
-    chart.options.title.fontColor = 'rgba(0, 0, 0, 1)';
-    chart.options.title.fontStyle = '';
-    chart.options.title.fontFamily = '"Lato", "Arial", sans-serif';
+    Chart.defaults.plugins.title.display = true;
+    Chart.defaults.plugins.title.font.size = 18;
+    Chart.defaults.plugins.title.font.color = 'rgba(0, 0, 0, 1)';
+    Chart.defaults.plugins.title.font.weight = 'normal';
+    Chart.defaults.plugins.title.font.family = '"Lato", "Arial", sans-serif';
 
-    chart.options.legend.labels.usePointStyle = true;
-
-    // Setting properties about the tooltips
-    chart.options.tooltips.mode = 'nearest';
-    chart.options.tooltips.callbacks.title = function (tooltipItems, data) {
-        return null;
-    };
-    // chart.options.tooltips.callbacks.label = function (tooltipItem, data) {
-    //     return '(' + round(tooltipItem.xLabel, 2) + ', ' +
-    //         round(tooltipItem.yLabel, 2) + ')';
-    // };
-
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    chart.options.legend.onClick = function (e) {
+    Chart.defaults.plugins.legend.onClick = function (e) {
         e.stopPropagation();
     };
 
-    // Enable axes labeling
-    chart.options.scales.xAxes[0].scaleLabel.display = true;
-    chart.options.scales.yAxes[0].scaleLabel.display = true;
-
-    // Update the height of the table when the chart resizes.
-    chart.options.onResize = function () {
-        updateTableHeight(table);
+    // Setting properties about the tooltip
+    Chart.defaults.plugins.tooltip.mode = 'nearest';
+    Chart.defaults.plugins.tooltip.callbacks.title = function (context) {
+        return null;
+    };
+    Chart.defaults.plugins.tooltip.callbacks.label = function (context) {
+        return '(' + round(context.parsed.x, 2) + ', ' +
+            round(context.parsed.y, 2) + ')';
     }
 }
 
@@ -248,7 +212,41 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    myChart.options.scales.xAxes[0].scaleLabel.labelString = elements['xAxis'].value;
-    myChart.options.scales.yAxes[0].scaleLabel.labelString = elements['yAxis'].value;
-    myChart.update({duration: 0});
+    myChart.options.scales['x'].title.text = elements['xAxis'].value;
+    myChart.options.scales['y'].title.text = elements['yAxis'].value;
+    myChart.update('none');
+}
+
+function saveImage(canvasID, signature, jpg=true, quality=1.0) {
+    let canvas = document.getElementById(canvasID);
+
+    // Create a dummy canvas
+    let destCanvas = document.createElement('canvas');
+    destCanvas.width = canvas.width;
+    destCanvas.height = canvas.height;
+
+    let destCtx = destCanvas.getContext('2d');
+
+    // Create a rectangle with the desired color
+    destCtx.fillStyle = '#FFFFFF';
+    destCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the original canvas onto the destination canvas
+    destCtx.drawImage(canvas, 0, 0);
+
+    // Download the dummy canvas
+    let time = getDateString();
+    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
+    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
+}
+
+function addEXIFToImage(jpegData, signature,time) {
+    let zeroth = {};
+    let exif = {};
+    zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
+    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
+    
+    let exifObj = { '0th':zeroth, 'Exif':exif };
+    let exifBytes = piexif.dump(exifObj);
+    return piexif.insert(exifBytes, jpegData);
 }
