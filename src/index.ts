@@ -83,40 +83,6 @@ window.onload = function () {
     }
 };
 
-function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
-    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
-
-    // Create a dummy canvas
-    let destCanvas = document.createElement('canvas');
-    destCanvas.width = canvas.width;
-    destCanvas.height = canvas.height;
-
-    let destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    destCtx.drawImage(canvas, 0, 0);
-
-    // Download the dummy canvas
-    let time = getDateString();
-    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
-    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
-}
-
-function addEXIFToImage(jpegData: string, signature: string, time: string) {
-    let zeroth: piexif.IExifElement = {};
-    let exif: piexif.IExifElement = {};
-    zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
-    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
-    
-    let exifObj = { '0th': zeroth, 'Exif': exif };
-    let exifBytes = piexif.dump(exifObj);
-    return piexif.insert(exifBytes, jpegData);
-}
-
 /**
  *  This function runs once each time the type of the chart changes. It resets various parts of the page
  *  (input field, table, and the chart) and initialize the components.
@@ -253,4 +219,38 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     myChart.options.scales.xAxes[0].scaleLabel.labelString = elements['xAxis'].value;
     myChart.options.scales.yAxes[0].scaleLabel.labelString = elements['yAxis'].value;
     myChart.update({duration: 0});
+}
+
+function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
+    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
+
+    // Create a dummy canvas
+    let destCanvas = document.createElement('canvas');
+    destCanvas.width = canvas.width;
+    destCanvas.height = canvas.height;
+
+    let destCtx = destCanvas.getContext('2d');
+
+    // Create a rectangle with the desired color
+    destCtx.fillStyle = '#FFFFFF';
+    destCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw the original canvas onto the destination canvas
+    destCtx.drawImage(canvas, 0, 0);
+
+    // Download the dummy canvas
+    let time = getDateString();
+    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
+    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
+}
+
+function addEXIFToImage(jpegData: string, signature: string, time: string) {
+    let zeroth: piexif.IExifElement = {};
+    let exif: piexif.IExifElement = {};
+    zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
+    exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
+    
+    let exifObj = { '0th': zeroth, 'Exif': exif };
+    let exifBytes = piexif.dump(exifObj);
+    return piexif.insert(exifBytes, jpegData);
 }
