@@ -33,7 +33,6 @@ window.onload = function () {
     form.onchange = function () {
         chartType(form.elements['chart'].value);
     };
-    chartType(form.elements['chart'].value);
 
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
@@ -81,6 +80,7 @@ window.onload = function () {
     }
 
     setChartDefaults();
+    chartType(form.elements['chart'].value);
 };
 
 /**
@@ -167,6 +167,8 @@ function chartType(chart) {
 function setChartDefaults() {
     // Enable axes labeling
     Chart.defaults.scale.title.display = true;
+    Chart.defaults.animation.duration = 0;
+    Chart.defaults.parsing = false;
     
     // Setting properties about the title.
     Chart.defaults.plugins.title.display = true;
