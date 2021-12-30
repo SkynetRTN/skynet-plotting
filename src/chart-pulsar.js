@@ -216,8 +216,8 @@ export function pulsar() {
                         label: function (context) {
                             let precision = context.datasetIndex === 2 || 
                                             context.datasetIndex === 3 ? 6 : 4
-                            return '(' + round(context.element.x, precision) + ', ' +
-                                round(context.element.y, 4) + ')';
+                            return '(' + round(context.parsed.x, precision) + ', ' +
+                                round(context.parsed.y, 4) + ')';
                         },
                     },
                 },

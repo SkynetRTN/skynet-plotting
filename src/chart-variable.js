@@ -120,8 +120,8 @@ export function variable() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return '(' + round(context.element.x, 4) + ', ' +
-                                   round(context.element.y, 4) + ')';
+                            return '(' + round(context.parsed.x, 4) + ', ' +
+                                   round(context.parsed.y, 4) + ')';
                         },
                     },
                 },

@@ -80,8 +80,8 @@ export function spectrum() {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            return '(' + round(context.element.x, 4) + ', ' +
-                                round(context.element.y, 2) + ')';
+                            return '(' + round(context.parsed.x, 4) + ', ' +
+                                round(context.parsed.y, 2) + ')';
                         }
                     }
                 }

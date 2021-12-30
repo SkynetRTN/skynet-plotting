@@ -187,8 +187,8 @@ function setChartDefaults() {
         return null;
     };
     Chart.defaults.plugins.tooltip.callbacks.label = function (context) {
-        return '(' + round(context.element.x, 2) + ', ' +
-            round(context.element.y, 2) + ')';
+        return '(' + round(context.parsed.x, 2) + ', ' +
+            round(context.parsed.y, 2) + ')';
     }
 }
 
