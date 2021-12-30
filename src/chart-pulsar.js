@@ -174,7 +174,7 @@ export function pulsar() {
                     pointRadius: 0,
                     borderColor: colors['slate'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    // lineTension: 0.1,
                     hidden: true,
                     fill: false,
                 }, {

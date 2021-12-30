@@ -93,7 +93,7 @@ export function scatter() {
                     borderColor: colors['gray'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true

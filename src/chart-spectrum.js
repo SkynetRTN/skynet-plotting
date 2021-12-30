@@ -53,7 +53,7 @@ export function spectrum() {
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     fill: false,
                     hidden: false,
                 }, {
@@ -62,7 +62,7 @@ export function spectrum() {
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    lineTension: 0.1,
+                    tension: 0.1,
                     fill: false,
                     hidden: true,
                 }
