@@ -9,7 +9,7 @@ import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-
 
 /**
  *  Returns generated table and chart for pulsar.
- *  @returns {[Handsontable, Chartjs]} Returns the table and the chart object.
+ *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
 export function pulsar() {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
