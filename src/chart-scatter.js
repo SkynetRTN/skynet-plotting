@@ -3,9 +3,9 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config"
-import { updateLabels, updateTableHeight, linkInputs } from "./util"
-import { clamp, rad, round } from "./my-math"
+import { tableCommonOptions, colors } from "./config";
+import { updateLabels, updateTableHeight, linkInputs, throttle } from "./util";
+import { clamp, rad, round } from "./my-math";
 
 /**
  *  Function for scatter chart.
@@ -26,11 +26,11 @@ export function scatter() {
         '</div>\n' +
         '</form>\n'
     );
-    let scatterForm = document.getElementById("scatter-form");
+    const scatterForm = document.getElementById("scatter-form");
     linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 50, 0.01, 10, false, true, 0, Number.POSITIVE_INFINITY);
     linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 20, 0.01, 0,  false, true, 0, Number.POSITIVE_INFINITY);
     
-    let tableData = [];
+    const tableData = [];
     for (let i = 0; i < 15; i++) {
         tableData[i] = {
             'lo': Math.random() * 40.0 - 20.0,
@@ -39,10 +39,8 @@ export function scatter() {
         };
     }
 
-    let chartData = [];
-
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Longitude', 'Latitude', 'Distance'],
         maxCols: 3,
@@ -53,8 +51,8 @@ export function scatter() {
         ],
     }));
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
@@ -70,7 +68,7 @@ export function scatter() {
                     immutableLabel: true,
                 }, {
                     label: 'Data',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['orange'],
                     fill: false,
                     showLine: false,
@@ -128,7 +126,7 @@ export function scatter() {
         }
     });
 
-    let update = function () {
+    const update = function () {
         updateScatter(tableData, myChart);
         updateTableHeight(hot);
     };
@@ -140,8 +138,8 @@ export function scatter() {
     });
 
     // Link the form to chart
-    //let scatterForm = document.getElementById("scatter-form");
-    scatterForm.oninput = function () {
+    //const scatterForm = document.getElementById("scatter-form");
+    const scatterOninput = function () {
         let x = parseFloat(this.elements['x-num'].value);
         let y = 0;
         let d = parseFloat(this.elements['d-num'].value);
@@ -149,21 +147,7 @@ export function scatter() {
         myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update('none');
     }
-    let changed = false;        // Indicates whether a change occurred while waiting for lock
-    let lock = false;           // Lock for throttle
-
-    let fps = 100;
-    let frameTime = Math.floor(1000 / fps);
-
-    let callback = () => {
-        if (changed) {
-            changed = false;
-            updateFormula(tableData, moonForm, myChart);
-            setTimeout(callback, frameTime);
-        } else {
-            lock = false;
-        }
-    }
+    scatterForm.oninput = throttle(scatterOninput, 10);
 
     updateScatter(tableData, myChart);
     
@@ -192,9 +176,9 @@ function updateScatter(table, myChart) {
 
     let chart = myChart.data.datasets[1].data;
     for (let i = 0; i < table.length; i++) {
-        let lo = table[i]['lo'];
-        let la = table[i]['la'];
-        let di = table[i]['di'];
+        const lo = table[i]['lo'];
+        const la = table[i]['la'];
+        const di = table[i]['di'];
         if (la === '' || lo === '' || di === '' ||
             la === null || lo === null || di === null) {
             continue;
