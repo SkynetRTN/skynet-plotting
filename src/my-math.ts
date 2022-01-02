@@ -20,12 +20,19 @@ export function round(value: number, digits: number): number {
  */
 export function clamp(num: string | number, min: number, max: number): string {
     let parsed = typeof num === 'string' ? parseFloat(num) : num;
-    if (!isNaN(min) && parsed < min) {
-        parsed = min;
-    } else if (!isNaN(max) && parsed > max) {
-        parsed = min;
+    if (isNaN(parsed)) {
+        if (!isNaN(min) && min > 0) {
+            return min.toString();
+        } else {
+            return '0';
+        }
     }
-    return parsed.toString();
+    if (!isNaN(min) && parsed < min) {
+        return min.toString();
+    } else if (!isNaN(max) && parsed > max) {
+        return max.toString();
+    }
+    return num.toString();
 };
 
 /**
