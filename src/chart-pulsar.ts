@@ -1,17 +1,19 @@
 'use strict';
 
 import Chart from "chart.js/auto";
+import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod } from "./my-math"
+import { PulsarMode } from "./types/chart.js";
 
 /**
  *  Returns generated table and chart for pulsar.
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
-export function pulsar() {
+export function pulsar(): [Handsontable, Chart<'line'>] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Pulsar" id="pulsar-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
@@ -99,7 +101,7 @@ export function pulsar() {
         '</form>\n'
     );
 
-    let tableData = [];
+    const tableData = [];
     for (let i = 0; i < 1000; i++) {
         tableData[i] = {
             'time': (i * 0.2) + 3560,
@@ -108,8 +110,8 @@ export function pulsar() {
         };
     }
 
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const tableOptions = {
         data: tableData,
         colHeaders: ['Time', 'Channel 1', 'Channel 2'],
         maxCols: 3,
@@ -118,10 +120,11 @@ export function pulsar() {
             { data: 'chn1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'chn2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart")  as HTMLCanvasElement).getContext('2d');
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             minT: Number.POSITIVE_INFINITY,
@@ -231,22 +234,28 @@ export function pulsar() {
                 }
             }
         }
-    });
-
-    let update = function () {
-        updatePulsar(hot, myChart);
-        updateTableHeight(hot);
     };
 
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+
+    const update = function () {
+        updatePulsar(myChart);
+        updateTableHeight(hot);
+    };
     hot.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
         afterCreateRow: update,
     });
 
-    let pulsarForm = document.getElementById("pulsar-form");
+    const pulsarForm = document.getElementById("pulsar-form") as PulsarForm;
+    const lightCurveForm = document.getElementById('light-curve-form') as LightCurveForm;
+    const fourierForm = document.getElementById('fourier-form') as FourierForm;
+    const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
+    const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
+
     pulsarForm.onchange = function () {
-        let mode = pulsarForm.elements["mode"].value;
+        let mode = pulsarForm.elements["mode"].value as PulsarMode;
         switchMode(myChart, mode);
         
         // This needs to happen after switchMode() since different parts of height
@@ -256,14 +265,14 @@ export function pulsar() {
         }
     }
 
-    let lightCurveOninput = function () {
+    const lightCurveOninput = function () {
         this.dt.value = clamp(this.dt.value, 0, 30);
 
         let dt = this.dt.value;
         if (isNaN(dt)) {
             return;
         }
-        let tableData = sanitizeTableData(hot.getData(), [0]);
+        const tableData = sanitizeTableData(hot.getData(), [0]);
 
         let time = [];
         let chn1 = [];
@@ -300,12 +309,10 @@ export function pulsar() {
 
         myChart.update('none');
     }
-    let lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
-    let fourierModeSelect = document.getElementById('fourier-form').fouriermode;
-    fourierModeSelect.oninput = function () {
-        if (this.value === 'p') {
+    fourierForm.elements['fouriermode'].oninput = function () {
+        if (fourierForm.elements['fouriermode'].value === 'p') {
             document.getElementById('period-div').hidden = false;
             document.getElementById("frequency-div").hidden = true;
         } else {
@@ -314,7 +321,7 @@ export function pulsar() {
         }
     }
 
-    let fourierOninput = function () {
+    const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
 
         let start, stop;
@@ -335,14 +342,14 @@ export function pulsar() {
 
             myChart.options.scales['x'].title.text = "Frequency (Hz)";
         }
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
         if (start > stop) {
             // alert("Please make sure the stop value is greater than the start value.");
             return;
         };
-        let chn1 = myChart.data.datasets[0].data;
-        let chn2 = myChart.data.datasets[1].data;
+        let chn1 = myChart.data.datasets[0].data as ScatterDataPoint[];
+        let chn2 = myChart.data.datasets[1].data as ScatterDataPoint[];
         let t = chn1.map(entry => entry.x);
         let y1 = chn1.map(entry => entry.y);
         let y2 = chn2.map(entry => entry.y);
@@ -352,33 +359,33 @@ export function pulsar() {
 
         myChart.update('none')
     }
-    let fourierForm = document.getElementById('fourier-form');
-    let computeButton = document.getElementById('compute');
+    
+    const computeButton = document.getElementById('compute');
     computeButton.onclick = (...args) => {
         fourierOninput.apply(fourierForm, args);
     }
 
-    let periodFoldingOninput = function () {
+
+    const periodFoldingOninput = function () {
         this.pf.value   = clamp(this.pf.value, 0, NaN);
         this.bins.value = clamp(this.bins.value, 0, 10000);
 
         let period = parseFloat(this.pf.value);
         let bins = parseInt(this.bins.value);
-        let eqaulizer = parseFloat(document.getElementById('polarization-form').eq_num.value);
+        let eqaulizer = parseFloat(polarizationForm.eq_num.value);
         myChart.data.datasets[5].data = periodFolding(myChart, 0, period, bins);
         myChart.data.datasets[6].rawData = periodFolding(myChart, 1, period, bins);
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({ x: point.x, y: point.y * eqaulizer })
         );
         myChart.data.datasets[4].data = chartDataDiff(
-            myChart.data.datasets[5].data, myChart.data.datasets[6].data
+            myChart.data.datasets[5].data as ScatterDataPoint[], 
+            myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.update('none');
     }
-    let periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
-    let polarizationForm = document.getElementById("polarization-form");
     linkInputs(
         polarizationForm.eq,
         polarizationForm.eq_num,
@@ -391,20 +398,21 @@ export function pulsar() {
             point => ({ x: point.x, y: point.y * eqaulizer })
         );
         myChart.data.datasets[4].data = chartDataDiff(
-            myChart.data.datasets[5].data, myChart.data.datasets[6].data
+            myChart.data.datasets[5].data as ScatterDataPoint[],
+            myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.data.datasets[4].hidden = !this.diff.checked;
         myChart.update('none');
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
     polarizationForm.oninput = throttle(polarizationOninput, 16);   // 60 fps
 
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
-    updatePulsar(hot, myChart);
+    updatePulsar(myChart);
     updateTableHeight(hot);
 
     return [hot, myChart];
@@ -414,13 +422,13 @@ export function pulsar() {
  * This function handles the uploaded file to the pulsar chart. Specifically, it parse the file
  * and load related information into the table.
  * DATA FLOW: file -> table, triggers chart updates as well
- * @param {Event} evt The uploadig event
- * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart
+ * @param evt       The uploadig event
+ * @param table     The table to be updated
+ * @param myChart
  */
-export function pulsarFileUpload(evt, table, myChart) {
+export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("pulsarFileUpload called");
-    let file = evt.target.files[0];
+    let file = (evt.target as HTMLInputElement).files[0];
 
     // File validation
     if (file === undefined) {
@@ -433,21 +441,21 @@ export function pulsarFileUpload(evt, table, myChart) {
         return;
     }
 
-    let reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
-        let data = reader.result.split("\n");
+        let data: string[] = (reader.result as string).split("\n");
         data = data.filter(str => (str !== null && str !== undefined && str !== ""));
         data = data.filter(str => (str[0] !== '#'));
 
         //turn each string into an array of numbers
-        data = data.map(val => val.trim().split(/\ +/));
+        let rows: number[][] | string[][] = data.map(val => val.trim().split(/\ +/));
 
-        data = data.map(row => row.map(str => parseFloat(str)));
-        data = data.filter(row => (row[9] !== 0));
-        data = data.map(row => [row[0], row[5], row[6]]);
+        rows = rows.map(row => row.map(str => parseFloat(str)));
+        rows = rows.filter(row => (row[9] !== 0));
+        rows = rows.map(row => [row[0], row[5], row[6]]) as number[][];
 
-        let tableData = [];
-        for (let row of data) {
+        const tableData = [];
+        for (let row of rows) {
             if (isNaN(row[0])) {
                 continue;
             }
@@ -460,10 +468,10 @@ export function pulsarFileUpload(evt, table, myChart) {
         tableData.sort((a, b) => a.time - b.time);
         table.updateSettings({ data: tableData });
 
-        let ts = data.map(row => row[0]).filter(num => !isNaN(num));
+        let ts = rows.map(row => row[0]).filter(num => !isNaN(num));
         let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
 
-        let fourierForm = document.getElementById('fourier-form');
+        const fourierForm = document.getElementById('fourier-form') as FourierForm;
         fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
         fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 
@@ -476,10 +484,10 @@ export function pulsarFileUpload(evt, table, myChart) {
  * This function is called when the values in table is changed (either by manual input or by file upload).
  * It then updates the chart according to the data in the table.
  * DATA FLOW: table -> chart
- * @param {Handsontable} table The table object
- * @param {Chartjs} myChart The chart object
+ * @param table The table object
+ * @param myChart The chart object
  */
-function updatePulsar(table, myChart) {
+function updatePulsar(myChart: Chart<'line'>) {
     // console.log("updatePulsar called");
     myChart.data.minT = Number.POSITIVE_INFINITY;
 
@@ -494,24 +502,30 @@ function updatePulsar(table, myChart) {
 /**
  * This function set up the chart by displaying only the appropriate datasets for a mode,
  * and then adjust the chart-info-form to match up with the mode.
- * @param {Chartjs object} myChart 
- * @param { 'lc' | 'ft' | 'pf' } mode
- * @param {boolean} reset               Default is false. If true, will override `mode` and
- *                                      set mode to 'lc', and reset Chart and chart-info-form.
+ * @param myChart 
+ * @param mode
+ * @param reset         Default is false. If true, will override `mode` and
+ *                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart, mode, reset = false) {
+function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = false) {
+    const pulsarForm = document.getElementById("pulsar-form") as PulsarForm;
+    const lightCurveForm = document.getElementById('light-curve-form') as LightCurveForm;
+    const fourierForm = document.getElementById('fourier-form') as FourierForm;
+    const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
+    const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
+
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {
         myChart.data.datasets[i].hidden = true;
     }
     let modified = myChart.data.modified;
     if (mode === 'lc' || reset) {
-        if (document.getElementById('pulsar-form').mode.value !== 'lc') {
-            document.getElementById('pulsar-form').mode[0].checked = true;
+        if (pulsarForm.mode.value !== 'lc') {
+            pulsarForm.mode[0].checked = true;
         }
         if (modified.lightCurveChanged) {
             modified.lightCurveChanged = false;
-            document.getElementById('light-curve-form').oninput();
+            lightCurveForm.oninput(null);
         }
         showDiv("light-curve-div");
         myChart.data.datasets[0].hidden = false;
@@ -530,32 +544,31 @@ function switchMode(myChart, mode, reset = false) {
     } else {
         if (modified.periodFoldingChanged) {
             modified.periodFoldingChanged = false;
-            document.getElementById('period-folding-form').oninput();
+            periodFoldingForm.oninput(null);
         }
         showDiv("period-folding-div");
         myChart.data.datasets[5].hidden = false;
         myChart.data.datasets[6].hidden = false;
-        myChart.data.datasets[4].hidden = 
-            !document.getElementById('polarization-form').diff.checked;
+        myChart.data.datasets[4].hidden = !polarizationForm.diff.checked;
     }
     myChart.update('none');
 
     if (reset) {
-        document.getElementById("light-curve-form").dt.value = 3;
+        lightCurveForm.dt.value = 3;
 
-        document.getElementById('fourier-form').rc.value = 1000;
-        document.getElementById('fourier-form').fouriermode.value = 'p';
-        document.getElementById('fourier-form').pstop.value = 3;
-        document.getElementById('fourier-form').fstart.value = 0.1;
+        fourierForm.rc.value = 1000;
+        fourierForm.fouriermode.value = 'p';
+        fourierForm.pstop.value = 3;
+        fourierForm.fstart.value = 0.1;
         document.getElementById('period-div').hidden = false;
         document.getElementById('frequency-div').hidden = true;
 
-        document.getElementById("period-folding-form").pf.value = 0;
-        document.getElementById("period-folding-form").bins.value = 100;
+        periodFoldingForm.pf.value = 0;
+        periodFoldingForm.bins.value = 100;
 
-        document.getElementById('polarization-form').eq.value = 0;
-        document.getElementById('polarization-form').eq_num.value = 1;
-        document.getElementById('polarization-form').diff.checked = false;
+        polarizationForm.eq.value = 0;
+        polarizationForm.eq_num.value = 1;
+        polarizationForm.diff.checked = false;
         
         myChart.data.modeLabels = {
             lc: { t: 'Title', x: 'x', y: 'y' },
@@ -565,9 +578,9 @@ function switchMode(myChart, mode, reset = false) {
         };
     } else {
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.plugins.title.text,
-            x: myChart.options.scales['x'].title.text,
-            y: myChart.options.scales['y'].title.text
+            t: myChart.options.plugins.title.text as string,
+            x: myChart.options.scales['x'].title.text as string,
+            y: myChart.options.scales['y'].title.text as string
         }
         myChart.data.modeLabels.lastMode = mode;
     }
@@ -577,14 +590,14 @@ function switchMode(myChart, mode, reset = false) {
     myChart.options.scales['y'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].y;
     
     myChart.update('none');
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 }
 
 /**
  * This function serves as a switch for the visibility of the control div's for the different modes.
- * @param {str} id The name of the div to be displayed.
+ * @param id The name of the div to be displayed.
  */
-function showDiv(id) {
+function showDiv(id: string) {
     document.getElementById("light-curve-div").hidden = true;
     document.getElementById("fourier-div").hidden = true;
     document.getElementById("period-folding-div").hidden = true;
@@ -599,15 +612,14 @@ function showDiv(id) {
     }
 }
 
-function periodFolding(myChart, src, period, bins) {
+function periodFolding(myChart: Chart, src: number, period: number, bins: number): ScatterDataPoint[] {
+    const data = myChart.data.datasets[src].data as ScatterDataPoint[];
     if (period === 0) {
-        return myChart.data.datasets[src].data;
+        return data;
     }
+    const minT = myChart.data.minT;
 
-    let data = myChart.data.datasets[src].data;
-    let minT = myChart.data.minT;
-
-    let foldedData = data.map(val => ({
+    const foldedData = data.map(val => ({
         "x": floatMod(val.x - minT, period),
         "y": val.y
     }));
@@ -626,8 +638,8 @@ function periodFolding(myChart, src, period, bins) {
         return foldedData.concat(repeated);
     }
 
-    let time_b = []
-    let flux_b = []
+    const time_b: number[] = []
+    const flux_b: number[] = []
 
     //initialize j and new binned arrays
     let j = 0;
@@ -649,7 +661,7 @@ function periodFolding(myChart, src, period, bins) {
         }
     }
 
-    let pfData = [];
+    const pfData: ScatterDataPoint[] = [];
 
     for (let i = 0; i < bins; i++) {
         pfData.push({
@@ -664,16 +676,4 @@ function periodFolding(myChart, src, period, bins) {
         })
     }
     return pfData;
-}
-
-/**
- * This function computes the floating point modulo.
- * @param {number} a The dividend
- * @param {number} b The divisor
- */
-function floatMod(a, b) {
-    while (a > b) {
-        a -= b;
-    }
-    return a;
 }

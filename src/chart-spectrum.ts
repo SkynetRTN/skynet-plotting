@@ -3,15 +3,16 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight } from "./util.js"
-import { round } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { updateLabels, updateTableHeight } from "./util"
+import { round } from "./my-math"
+import { ChartConfiguration } from "chart.js";
 
 /**
  * 
  * @returns {[Handsontable, Chart]}
  */
-export function spectrum() {
+export function spectrum(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Spectrum" id="spectrum-form" style="padding-bottom: 1em">\n' +
         '<div class="row">\n' +
@@ -24,7 +25,7 @@ export function spectrum() {
         '</form>'
     );
     
-    let tableData = [];
+    const tableData = [];
     for (let i = 0; i < 200; i++) {
         let wl = i / 200 * 0.03 + 21.09;
         tableData.push({
@@ -34,8 +35,8 @@ export function spectrum() {
         });
     }
 
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['Wavelength', 'Channel 1', 'Channel 2'],
         maxCols: 3,
@@ -44,10 +45,11 @@ export function spectrum() {
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
@@ -97,9 +99,10 @@ export function spectrum() {
                 }
             }
         }
-    });
+    };
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-    let update = function () {
+    const update = function () {
         updateSpectrum(hot, myChart);
         updateTableHeight(hot);
     };
@@ -110,7 +113,7 @@ export function spectrum() {
         afterCreateRow: update,
     });
 
-    let spectrumForm = document.getElementById("spectrum-form");
+    const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
     spectrumForm.onchange = function () {
         let channel = spectrumForm.elements["channel"].value;
         if (channel === "x") {
@@ -121,13 +124,13 @@ export function spectrum() {
             myChart.data.datasets[1].hidden = false;
         }
         myChart.update('none');
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
     
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);
@@ -139,12 +142,12 @@ export function spectrum() {
  * @param {Handsontable} table Handsontable object
  * @param {Chart} myChart Chartjs object
  */
-function updateSpectrum(table, myChart) {
+function updateSpectrum(table: Handsontable, myChart: Chart) {
     for (let i = 0; i < 2; i++) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = table.getData();
+    const tableData = table.getData();
     let src1Data = [];
     let src2Data = [];
 
@@ -167,9 +170,9 @@ function updateSpectrum(table, myChart) {
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
 
-    let spectrumForm = document.getElementById("spectrum-form");
+    const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
     spectrumForm.elements["channel"].selectedIndex = 0;
-    spectrumForm.onchange();
+    spectrumForm.onchange(null);
 
     myChart.update('none');
 }
@@ -182,10 +185,9 @@ function updateSpectrum(table, myChart) {
  * @param {Handsontable} table The table to be updated
  * @param {Chart} myChart
  */
-export function spectrumFileUpload(evt, table, myChart) {
+export function spectrumFileUpload(evt: Event, table: Handsontable, myChart: Chart) {
     // console.log("spectrumFileUpload called");
-    let file = evt.target.files[0];
-
+    const file = (evt.target as HTMLInputElement).files[0];
     if (file === undefined) {
         return;
     }
@@ -199,13 +201,13 @@ export function spectrumFileUpload(evt, table, myChart) {
         return;
     }
 
-    let reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
-        let data = reader.result.split("\n");
+        let data = (reader.result as string).split("\n");
         data = data.filter(str => (str !== null && str !== undefined && str !== ""));
         data = data.filter(str => (str[0] !== '#'));
 
-        let tableData = [];
+        const tableData = [];
         for (let i = 0; i < data.length; i++) {
             "Use regular expression `/\s+/` to handle more than one space"
             let entry = data[i].trim().split(/\s+/);
@@ -224,7 +226,7 @@ export function spectrumFileUpload(evt, table, myChart) {
         }
         tableData.sort((a, b) => a.wl - b.wl);
         
-        let spectrumForm = document.getElementById("spectrum-form");
+        const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
         spectrumForm.elements['channel'].selectedIndex = 0;
 
         // Need to put this line down in the end, because it will trigger update on the Chart, which will 
@@ -240,7 +242,7 @@ const c = 299792458;
  * This function converts a specific light wave's frequency, in MHz, to its corresponding wavelength, in cm.
  * @param {number} freq The frequency of the light in MHz
  */
-function freqToWL(freq) {
+function freqToWL(freq: number): number {
     return c / (freq * 1e4);
 }
 
@@ -248,6 +250,6 @@ function freqToWL(freq) {
  * This function converts a wavelength in cm to its frequency in MHz
  * @param {number} wl The wavelength of the light in centimeters
  */
-function wlToFreq(wl) {
+function wlToFreq(wl: number): number {
     return c / (wl * 1e4)
 }

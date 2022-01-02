@@ -1,18 +1,19 @@
 'use strict';
 
 import Chart from "chart.js/auto";
+import { ChartConfiguration } from "chart.js";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
-import { round } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { updateLine, updateLabels, updateTableHeight } from "./util"
+import { round } from "./my-math"
 
 /**
  *  Function for two curves with independent x values.
  *  @returns {[Handsontable, Chart]}
  */
-export function dual() {
-    let tableData = [
+export function dual(): [Handsontable, Chart] {
+    const tableData = [
         { x1: 0, y1: 25, x2: 1, y2: Math.sqrt(100) },
         { x1: 1, y1: 16, x2: 2, y2: Math.sqrt(200) },
         { x1: 2, y1: 9, x2: 3, y2: Math.sqrt(300) },
@@ -32,11 +33,8 @@ export function dual() {
         { x1: '', y1: '', x2: 17, y2: Math.sqrt(1700) },
     ];
 
-    let chartData1 = [];
-    let chartData2 = [];
-
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['x1', 'y1', 'x2', 'y2'],
         maxCols: 4,
@@ -46,16 +44,17 @@ export function dual() {
             { data: 'x2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'y2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
                 {
                     label: 'y1',
-                    data: chartData1,
+                    data: [],
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -65,7 +64,7 @@ export function dual() {
                     immutableLabel: false,
                 }, {
                     label: 'y2',
-                    data: chartData2,
+                    data: [],
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -87,9 +86,10 @@ export function dual() {
                 },
             }
         }
-    });
+    }
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-    let update = function () {
+    const update = function () {
         updateLine(tableData, myChart, 0, 'x1', 'y1');
         updateLine(tableData, myChart, 1, 'x2', 'y2');
         updateTableHeight(hot);
@@ -107,7 +107,7 @@ export function dual() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     return [hot, myChart];
 }
