@@ -6,7 +6,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
-import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
 /**
@@ -676,16 +676,4 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
         })
     }
     return pfData;
-}
-
-/**
- * This function computes the floating point modulo.
- * @param {number} a The dividend
- * @param {number} b The divisor
- */
-function floatMod(a: number, b: number) {
-    while (a > b) {
-        a -= b;
-    }
-    return a;
 }

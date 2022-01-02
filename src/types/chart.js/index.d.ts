@@ -3,6 +3,8 @@ import { ChartDatasetProperties, ChartType, ScatterDataPoint } from 'chart.js/au
 declare module 'chart.js/auto'{
     interface ChartData<TType extends ChartType, TData, TLabel = unknown> {
         minT?: number,
+        minMJD?: number,
+        maxMJD?: number,
         modified?: {
             lightCurveChanged: boolean,
             fourierChanged: boolean,

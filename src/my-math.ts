@@ -123,6 +123,17 @@ export function median(arr: number[]) {
     return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
 };
 
+/**
+ * This function computes the floating point modulo.
+ * @param {number} a The dividend
+ * @param {number} b The divisor
+ */
+ export function floatMod(a: number, b: number) {
+    while (a > b) {
+        a -= b;
+    }
+    return a;
+}
 
 export let ArrMath = {
     max: function (arr: number[]): number {

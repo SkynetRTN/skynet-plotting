@@ -41,9 +41,22 @@ interface ScatterFormElements extends HTMLCollection {
     d_num: HTMLInputElement,
     x_num: HTMLInputElement,
 }
-
 interface ScatterForm extends HTMLFormElement {
     elements: ScatterFormElements
+}
+
+interface VariableFormElements extends HTMLCollection {
+    mode: HTMLInputElement
+}
+interface VariableForm extends HTMLFormElement {
+    elements: VariableFormElements
+}
+
+interface SpectrumFormElements extends HTMLCollection {
+    channel: HTMLSelectElement
+}
+interface SpectrumForm extends HTMLFormElement {
+    elements: SpectrumFormElements
 }
 
 interface PulsarFormElements extends HTMLCollection {
