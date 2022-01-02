@@ -12,14 +12,14 @@ import * as piexif from 'piexif-ts';
 
 import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
 import { curve } from './chart-curve';
-import { dual } from './chart-dual.js';
-import { moon } from './chart-moon.js';
-import { scatter } from './chart-scatter.js';
-import { venus } from './chart-venus.js';
-import { variable, variableFileUpload } from './chart-variable.js';
-import { spectrum, spectrumFileUpload } from './chart-spectrum.js';
-import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
-import { cluster, clusterFileUpload } from './chart-cluster.js';
+import { dual } from './chart-dual';
+import { moon } from './chart-moon';
+import { scatter } from './chart-scatter';
+import { venus } from './chart-venus';
+import { variable, variableFileUpload } from './chart-variable';
+import { spectrum, spectrumFileUpload } from './chart-spectrum';
+import { pulsar, pulsarFileUpload } from './chart-pulsar';
+import { cluster, clusterFileUpload } from './chart-cluster';
 import { round } from './my-math';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
@@ -206,7 +206,7 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     let labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel) {
+        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }

@@ -1,6 +1,6 @@
 'use strict';
 
-import Chart from "chart.js/auto";
+import Chart, { ScatterDataPoint } from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
@@ -11,41 +11,39 @@ import { round, sqr, rad } from "./my-math"
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function moon() {
+export function moon(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Moon" id="moon-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">a ("):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="a" name="a"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="a" name="a-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="a" name="a_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">P (d):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="P" name="p"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="P" name="p-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="P" name="p_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">Phase (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Phase" name="phase"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">Tilt (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Tilt" name="tilt"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n');
 
     // Link each slider with corresponding text box
-    let moonForm = document.getElementById("moon-form");
-    linkInputs(moonForm.elements['a'], moonForm.elements['a-num'], 1, 750, 0.01, 30, true);
-    linkInputs(moonForm.elements['p'], moonForm.elements['p-num'], 0.5, 20, 0.01, 10, false, true, 0.5, Number.POSITIVE_INFINITY);
-    linkInputs(moonForm.elements['phase'], moonForm.elements['phase-num'], 0, 360, 1, 0);
-    linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt-num'], 0, 90, 1, 0);
+    let moonForm = document.getElementById("moon-form") as MoonForm;
+    linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.01, 30, true);
+    linkInputs(moonForm.elements['p'], moonForm.elements['p_num'], 0.5, 20, 0.01, 10, false, true, 0.5, Number.POSITIVE_INFINITY);
+    linkInputs(moonForm.elements['phase'], moonForm.elements['phase_num'], 0, 360, 1, 0);
+    linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt_num'], 0, 90, 1, 0);
 
     let tableData = generateMoonData();
-
-    let chartData = [];
 
     // create table
     let container = document.getElementById('table-div');
@@ -60,14 +58,14 @@ export function moon() {
     }));
 
     // create chart
-    let ctx = document.getElementById("myChart").getContext('2d');
+    let ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     let myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
                 {
                     label: 'Data',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['red'],
                     fill: false,
                     showLine: false,
@@ -131,7 +129,7 @@ export function moon() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     return [hot, myChart];
 }
@@ -144,28 +142,28 @@ export function moon() {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateFormula(table, form, chart) {
+function updateFormula(table: InputPoint[], form: MoonForm, chart: Chart) {
     // Can't just set min and max to the first values in the table because it might be invalid
-    let min = null;
-    let max = null;
+    let min = NaN;
+    let max = NaN;
     for (let i = 0; i < table.length; i++) {
-        let x = table[i]['x'];
-        let y = table[i]['y'];
-        if (x === '' || y === '' || x === null || y === null) {
+        let x = parseFloat(table[i]['x']);
+        let y = parseFloat(table[i]['y']);
+        if (isNaN(x) || isNaN(y)) {
             continue;
         }
-        if (max === null || x > max) {
+        if (isNaN(max) || x > max) {
             max = x;
         }
-        if (min === null || x < min) {
+        if (isNaN(min) || x < min) {
             min = x;
         }
     }
     chart.data.datasets[1].data = trigGenerator(
-        form.elements['a-num'].value,
-        form.elements['p-num'].value,
-        form.elements['phase-num'].value,
-        form.elements['tilt-num'].value,
+        parseFloat(form.elements['a_num'].value),
+        parseFloat(form.elements['p_num'].value),
+        parseFloat(form.elements['phase_num'].value),
+        parseFloat(form.elements['tilt_num'].value),
         min - 2,
         max + 2,
         2000
@@ -185,8 +183,8 @@ function updateFormula(table, form, chart) {
 *  @param steps:   Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function trigGenerator(a, p, phase, tilt, start, end, steps = 500) {
-    let data = [];
+function trigGenerator(a:number, p:number, phase:number, tilt:number, start:number, end:number, steps:number = 500): ScatterDataPoint[] {
+    let data: ScatterDataPoint[] = [];
     let x = start;
     let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
@@ -207,7 +205,7 @@ function trigGenerator(a, p, phase, tilt, start, end, steps = 500) {
 *  generated parameters. This function also introduce a 5% noise to all data points.
 *  @returns    {Array}
 */
-function generateMoonData() {
+function generateMoonData(): InputPoint[] {
     /**
      *  ln(750) = 6.62
      *  ln(1) = 0
@@ -217,16 +215,16 @@ function generateMoonData() {
     let phase = Math.random() * 360;
     let tilt = Math.random() * 45;
 
-    let returnData = [];
+    let returnData: InputPoint[] = [];
 
     for (let i = 0; i < 10; i++) {
         let x = i * 2 + Math.random() * 2;
         let theta = x / p * Math.PI * 2 - rad(phase);
         let alpha = rad(tilt);
         returnData[i] = {
-            x: x,
-            y: (a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
-                * (1 + Math.random() * 0.05),
+            x: x.toString(),
+            y: ((a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
+                * (1 + Math.random() * 0.05)).toString(),
         }
     }
 

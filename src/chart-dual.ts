@@ -11,7 +11,7 @@ import { round } from "./my-math"
  *  Function for two curves with independent x values.
  *  @returns {[Handsontable, Chart]}
  */
-export function dual() {
+export function dual(): [Handsontable, Chart] {
     let tableData = [
         { x1: 0, y1: 25, x2: 1, y2: Math.sqrt(100) },
         { x1: 1, y1: 16, x2: 2, y2: Math.sqrt(200) },
@@ -32,9 +32,6 @@ export function dual() {
         { x1: '', y1: '', x2: 17, y2: Math.sqrt(1700) },
     ];
 
-    let chartData1 = [];
-    let chartData2 = [];
-
     let container = document.getElementById('table-div');
     let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
@@ -48,14 +45,14 @@ export function dual() {
         ],
     }));
 
-    let ctx = document.getElementById("myChart").getContext('2d');
+    let ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     let myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
                 {
                     label: 'y1',
-                    data: chartData1,
+                    data: [],
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -65,7 +62,7 @@ export function dual() {
                     immutableLabel: false,
                 }, {
                     label: 'y2',
-                    data: chartData2,
+                    data: [],
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -107,7 +104,7 @@ export function dual() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     return [hot, myChart];
 }
