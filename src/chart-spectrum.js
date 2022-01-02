@@ -127,10 +127,10 @@ export function spectrum() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     return [hot, myChart];
 }
