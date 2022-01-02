@@ -11,7 +11,7 @@ import { updateLabels, updateTableHeight, linkInputs, throttle } from "./util";
  *  Function for scatter chart.
  *  @returns {[Handsontable, Chart]}
  */
-export function scatter() {
+export function scatter(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Scatter" id="scatter-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
