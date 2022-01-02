@@ -25,7 +25,7 @@ export function venus() {
     //         '</div>\n' +
     //     '</form>\n';
 
-    // let venusForm = document.getElementById("venus-form");
+    // const venusForm = document.getElementById("venus-form");
     // linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
     
     // venusForm.oninput = function () {
@@ -34,7 +34,7 @@ export function venus() {
     //     myChart.update('none');
     // };
 
-    let tableData = [
+    const tableData = [
         { x: 15, y: 0.7 },
         { x: 30, y: 0.53 },
         { x: 45, y: 0.27 },
@@ -57,8 +57,8 @@ export function venus() {
     let chartData = [];
 
     // create table
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Angular Diameter', 'Phase of Venus'],
         maxCols: 2,
@@ -69,8 +69,8 @@ export function venus() {
     }));
 
     // create chart
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
@@ -143,7 +143,7 @@ export function venus() {
         }
     });
 
-    let update = function () {
+    const update = function () {
         updateLine(tableData, myChart);
         updateTableHeight(hot);
     };

@@ -133,15 +133,15 @@ export function updateTableHeight(table: Handsontable) {
     const rowHeights = 23;
     const columnHeaderHeight = 26;
 
-    let typeForm = document.getElementById('chart-type-form').clientHeight;
-    let inputDiv = document.getElementById('input-div').clientHeight;
-    let chartDiv = document.getElementById('chart-div').clientHeight;
-    let infoForm = document.getElementById('chart-info-form').clientHeight;
+    const typeForm = document.getElementById('chart-type-form').clientHeight;
+    const inputDiv = document.getElementById('input-div').clientHeight;
+    const chartDiv = document.getElementById('chart-div').clientHeight;
+    const infoForm = document.getElementById('chart-info-form').clientHeight;
 
-    let minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
-    let maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
+    const minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
+    const maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
+    
     let height = table.countRows() * rowHeights + columnHeaderHeight + 5;
-
     if (height > maxHeight) {
         height = maxHeight;
     }
@@ -218,14 +218,14 @@ function dateAppendZero(num: number): string {
 /**
  * This function takes in two datasets and returns diff for the points from the two
  * datasets that have the same x-coordinates. Assumes both datasets are sorted.
- * @param {Array} data1 Array of points in dataset 1
- * @param {Array} data2 Array of points in dataset 2
+ * @param data1 Array of points in dataset 1
+ * @param data2 Array of points in dataset 2
  * @returns Diff between two datasets
  */
 export function chartDataDiff(data1: ScatterDataPoint[], data2: ScatterDataPoint[]) {
     let p1 = 0;
     let p2 = 0;
-    let result = [];
+    const result = [];
     while (p1 < data1.length && p2 < data2.length) {
         if (data1[p1].x == data2[p2].x) {
             result.push({ x: data1[p1].x, y: data1[p1].y - data2[p2].y });
@@ -260,7 +260,7 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
     let changed = false;        // Indicates whether a change occurred while waiting for lock
     let lock = false;           // Lock for throttle
 
-    let trailFunc = function (...args: any[]) {
+    const trailFunc = function (...args: any[]) {
         if (changed) {
             changed = false;
             
@@ -315,7 +315,7 @@ export function debounce(func: Function, wait: number) {
  * @returns Formatted time string as Year-Month-DayTHourMinuteSecond
  */
 export function formatTime(time: string) {
-    let tarray = time.split(' ');
+    const tarray = time.split(' ');
     tarray[0] = tarray[0].split(':').join('-');
     tarray[1] = tarray[1].split(':').join('');
     return tarray.join('T');

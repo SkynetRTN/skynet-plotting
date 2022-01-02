@@ -1,6 +1,7 @@
 'use strict';
 
 import Chart from "chart.js/auto";
+import { ChartConfiguration } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
@@ -12,7 +13,7 @@ import { round } from "./my-math"
  *  @returns {[Handsontable, Chart]}
  */
 export function dual(): [Handsontable, Chart] {
-    let tableData = [
+    const tableData = [
         { x1: 0, y1: 25, x2: 1, y2: Math.sqrt(100) },
         { x1: 1, y1: 16, x2: 2, y2: Math.sqrt(200) },
         { x1: 2, y1: 9, x2: 3, y2: Math.sqrt(300) },
@@ -32,8 +33,8 @@ export function dual(): [Handsontable, Chart] {
         { x1: '', y1: '', x2: 17, y2: Math.sqrt(1700) },
     ];
 
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['x1', 'y1', 'x2', 'y2'],
         maxCols: 4,
@@ -43,10 +44,11 @@ export function dual(): [Handsontable, Chart] {
             { data: 'x2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'y2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
-    let ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
@@ -84,9 +86,10 @@ export function dual(): [Handsontable, Chart] {
                 },
             }
         }
-    });
+    }
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-    let update = function () {
+    const update = function () {
         updateLine(tableData, myChart, 0, 'x1', 'y1');
         updateLine(tableData, myChart, 1, 'x2', 'y2');
         updateTableHeight(hot);

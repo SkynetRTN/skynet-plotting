@@ -26,7 +26,7 @@ export function variable() {
         '<div id="period-folding-div"></div>\n'
     );
 
-    let tableData = [];
+    const tableData = [];
     for (let i = 0; i < 14; i++) {
         tableData[i] = {
             'jd': i * 10 + Math.random() * 10 - 5,
@@ -35,8 +35,8 @@ export function variable() {
         };
     }
 
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Julian Date', 'Source1', 'Source2'],
         maxCols: 3,
@@ -47,8 +47,8 @@ export function variable() {
         ],
     }));
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             maxMJD: Number.NEGATIVE_INFINITY,
@@ -135,7 +135,7 @@ export function variable() {
         }
     });
 
-    let update = function () {
+    const update = function () {
         updateVariable(hot, myChart);
         updateTableHeight(hot);
     };
@@ -148,21 +148,21 @@ export function variable() {
 
     lightCurve(myChart);
     
-    let variableForm = document.getElementById("variable-form");
-    let customLabels = myChart.data.customLabels;
+    const variableForm = document.getElementById("variable-form");
+    const customLabels = myChart.data.customLabels;
     variableForm.onchange = function () {
-        let mode = variableForm.elements["mode"].value;
+        const mode = variableForm.elements["mode"].value;
         if (mode === "lc") {
             showDiv("light-curve-div");
-            let lightCurveForm = document.getElementById("light-curve-form");
+            const lightCurveForm = document.getElementById("light-curve-form");
             lightCurveForm.oninput();
         } else if (mode === "ft") {
             showDiv("fourier-div");
-            let fourierForm = document.getElementById("fourier-form");
+            const fourierForm = document.getElementById("fourier-form");
             fourierForm.oninput();
         } else {
             showDiv("period-folding-div");
-            let periodFoldingForm = document.getElementById("period-folding-form");
+            const periodFoldingForm = document.getElementById("period-folding-form");
             periodFoldingForm.oninput();
         }
         
@@ -255,7 +255,7 @@ export function variableFileUpload(evt, table, myChart) {
 
         let left = 0;
         let right = 0;
-        let tableData = [];
+        const tableData = [];
 
         while (left < data1.length && right < data2.length) {
             if (data1[left][0] === data2[right][0]) {
@@ -285,7 +285,7 @@ export function variableFileUpload(evt, table, myChart) {
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
         
-        let variableForm = document.getElementById("variable-form");
+        const variableForm = document.getElementById("variable-form");
         variableForm.elements['mode'][1].disabled = true;
         variableForm.elements['mode'][2].disabled = true;
 
@@ -348,7 +348,7 @@ function updateVariable(table, myChart) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    const tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
     let src1Data = [];
     let src2Data = [];
 
@@ -375,7 +375,7 @@ function updateVariable(table, myChart) {
 
     updateChart(myChart, 0, 1);
 
-    let variableForm = document.getElementById("variable-form");
+    const variableForm = document.getElementById("variable-form");
     variableForm.mode.value = "lc";
     variableForm.onchange();
 }
@@ -388,7 +388,7 @@ function updateVariable(table, myChart) {
  */
 function lightCurve(myChart) {
     // console.log("lightCurve called");
-    let lcHTML =
+    const lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Variable Star: </div>\n' +
@@ -410,8 +410,8 @@ function lightCurve(myChart) {
         '</div>\n' +
         '</form>\n';
     document.getElementById('light-curve-div').innerHTML = lcHTML;
-    let variableForm = document.getElementById('variable-form');
-    let lightCurveForm = document.getElementById('light-curve-form');
+    const variableForm = document.getElementById('variable-form');
+    const lightCurveForm = document.getElementById('light-curve-form');
     lightCurveForm.oninput = function () {
         if (this.source.value === "none") {
             updateChart(myChart, 0, 1);
@@ -419,7 +419,7 @@ function lightCurve(myChart) {
             variableForm.elements['mode'][1].disabled = true;
             variableForm.elements['mode'][2].disabled = true;
         } else {
-            let datasets = myChart.data.datasets;
+            const datasets = myChart.data.datasets;
             let src, ref;
             if (this.source.value === datasets[0].label) {
                 src = 0;
@@ -428,7 +428,7 @@ function lightCurve(myChart) {
                 src = 1;
                 ref = 0;
             }
-            let lcData = [];
+            const lcData = [];
             let len = Math.min(datasets[0].data.length, datasets[1].data.length);
             for (let i = 0; i < len; i++) {
                 lcData.push({
@@ -450,7 +450,7 @@ function lightCurve(myChart) {
         }
     }
 
-    let fHTML =
+    const fHTML =
         '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Period (days): </div>\n' +
@@ -463,7 +463,7 @@ function lightCurve(myChart) {
         '</form>\n';
 
     document.getElementById("fourier-div").innerHTML = fHTML;
-    let fourierForm = document.getElementById("fourier-form");
+    const fourierForm = document.getElementById("fourier-form");
     fourierForm.oninput = function () {
         let start = parseFloat(this.start.value);
         let stop = parseFloat(this.stop.value);
@@ -484,7 +484,7 @@ function lightCurve(myChart) {
         updateChart(myChart, 3);
     }
 
-    let pfHTML =
+    const pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Folding Period (days): </div>\n' +
@@ -493,7 +493,7 @@ function lightCurve(myChart) {
         '</form>\n';
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
-    let periodFoldingForm = document.getElementById("period-folding-form");
+    const periodFoldingForm = document.getElementById("period-folding-form");
     periodFoldingForm.oninput = function () {
         let period = parseFloat(this.pf.value);
         if (period !== 0) {

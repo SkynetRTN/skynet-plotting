@@ -23,7 +23,7 @@ export function curve(): [Handsontable, Chart] {
         '</div>' +
         '</form>\n');
 
-    let tableData = [
+    const tableData = [
         { "x": 0, "y1": 25, "y2": '', "y3": '', "y4": '' },
         { "x": 1, "y1": 16, "y2": '', "y3": '', "y4": '' },
         { "x": 2, "y1": 9, "y2": '', "y3": '', "y4": '' },
@@ -42,8 +42,7 @@ export function curve(): [Handsontable, Chart] {
     ];
 
     const container = document.getElementById('table-div');
-    const curveTableOptions: Handsontable.GridSettings = {
-    // const curveTableOptions = {
+    const tableOptions: Handsontable.GridSettings = {
     data: tableData,
         colHeaders: ['x', 'y1', 'y2', 'y3', 'y4'],
         maxCols: 5,
@@ -52,10 +51,10 @@ export function curve(): [Handsontable, Chart] {
             { data: 'y1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...curveTableOptions});
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
-    const curveChartOptions: ChartConfiguration = {
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
@@ -127,15 +126,14 @@ export function curve(): [Handsontable, Chart] {
         }
     };
 
-    const myChart = new Chart(ctx, curveChartOptions) as Chart<'line'>;
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-    const lineForm = document.getElementById('line-form') as HTMLFormElement;
-    const elements = lineForm.elements as LineFormElements;
+    const lineForm = document.getElementById('line-form') as LineForm;
 
     let lines = 1;
     lineForm.onchange = function () {
-        myChart.options.scales['y'].reverse = elements['magnitude'].checked;
-        const lineCount = parseInt(elements['lineCount'].value);
+        myChart.options.scales['y'].reverse = lineForm.elements['magnitude'].checked;
+        const lineCount = parseInt(lineForm.elements['lineCount'].value);
         if (lineCount !== lines) {
             let newCols = [{ data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } }];
             for (let i = 0; i < lineCount; i++) {

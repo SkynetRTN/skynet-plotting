@@ -37,17 +37,17 @@ export function moon(): [Handsontable, Chart] {
         '</form>\n');
 
     // Link each slider with corresponding text box
-    let moonForm = document.getElementById("moon-form") as MoonForm;
+    const moonForm = document.getElementById("moon-form") as MoonForm;
     linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.01, 30, true);
     linkInputs(moonForm.elements['p'], moonForm.elements['p_num'], 0.5, 20, 0.01, 10, false, true, 0.5, Number.POSITIVE_INFINITY);
     linkInputs(moonForm.elements['phase'], moonForm.elements['phase_num'], 0, 360, 1, 0);
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt_num'], 0, 90, 1, 0);
 
-    let tableData = generateMoonData();
+    const tableData = generateMoonData();
 
     // create table
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Julian Date', 'Angular Separation'],
         maxCols: 2,
@@ -58,8 +58,8 @@ export function moon(): [Handsontable, Chart] {
     }));
 
     // create chart
-    let ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
@@ -101,7 +101,7 @@ export function moon(): [Handsontable, Chart] {
         }
     });
 
-    let update = function () {
+    const update = function () {
         updateTableHeight(hot);
         updateLine(tableData, myChart);
         updateFormula(tableData, moonForm, myChart);
@@ -114,11 +114,11 @@ export function moon(): [Handsontable, Chart] {
         afterCreateRow: update,
     });
 
-    let fps = 100;
-    let frameTime = Math.floor(1000 / fps);
+    const fps = 100;
+    const frameTime = Math.floor(1000 / fps);
 
     // link chart to input form (slider + text)
-    let throttledUpdateFormula = throttle(updateFormula, frameTime);
+    const throttledUpdateFormula = throttle(updateFormula, frameTime);
     moonForm.oninput = function () {
         throttledUpdateFormula(tableData, moonForm, myChart);
     };
@@ -147,8 +147,8 @@ function updateFormula(table: InputPoint[], form: MoonForm, chart: Chart) {
     let min = NaN;
     let max = NaN;
     for (let i = 0; i < table.length; i++) {
-        let x = parseFloat(table[i]['x']);
-        let y = parseFloat(table[i]['y']);
+        const x = parseFloat(table[i]['x']);
+        const y = parseFloat(table[i]['y']);
         if (isNaN(x) || isNaN(y)) {
             continue;
         }
@@ -184,12 +184,13 @@ function updateFormula(table: InputPoint[], form: MoonForm, chart: Chart) {
 *  @returns {Array}
 */
 function trigGenerator(a:number, p:number, phase:number, tilt:number, start:number, end:number, steps:number = 500): ScatterDataPoint[] {
-    let data: ScatterDataPoint[] = [];
+    const data: ScatterDataPoint[] = [];
+    const step = (end - start) / steps;
+
     let x = start;
-    let step = (end - start) / steps;
     for (let i = 0; i < steps; i++) {
-        let theta = (x - start - 2) / p * Math.PI * 2 - rad(phase);
-        let alpha = rad(tilt);
+        const theta = (x - start - 2) / p * Math.PI * 2 - rad(phase);
+        const alpha = rad(tilt);
         data.push({
             x: x,
             // y = a * sqrt(cos(theta)^2 + sin(theta)^2 * sin(alpha)^2)
@@ -197,6 +198,7 @@ function trigGenerator(a:number, p:number, phase:number, tilt:number, start:numb
         });
         x += step;
     }
+
     return data;
 }
 
@@ -210,17 +212,17 @@ function generateMoonData(): InputPoint[] {
      *  ln(750) = 6.62
      *  ln(1) = 0
      */
-    let a = Math.exp(Math.random() * 4 + 1.62);
-    let p = Math.random() * 10 + 5;
-    let phase = Math.random() * 360;
-    let tilt = Math.random() * 45;
+    const a = Math.exp(Math.random() * 4 + 1.62);
+    const p = Math.random() * 10 + 5;
+    const phase = Math.random() * 360;
+    const tilt = Math.random() * 45;
 
-    let returnData: InputPoint[] = [];
+    const returnData: InputPoint[] = [];
 
     for (let i = 0; i < 10; i++) {
-        let x = i * 2 + Math.random() * 2;
-        let theta = x / p * Math.PI * 2 - rad(phase);
-        let alpha = rad(tilt);
+        const x = i * 2 + Math.random() * 2;
+        const theta = x / p * Math.PI * 2 - rad(phase);
+        const alpha = rad(tilt);
         returnData[i] = {
             x: x.toString(),
             y: ((a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))

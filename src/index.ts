@@ -29,9 +29,9 @@ import Handsontable from 'handsontable';
  *  Initializing the page when the website loads
  */
 window.onload = function () {
-    let form = document.getElementById('chart-type-form') as HTMLFormElement;
-    form.onchange = function () {
-        chartType((form.elements[0] as HTMLInputElement).value);
+    const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+    chartTypeForm.onchange = function () {
+        chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
     };
 
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
@@ -53,7 +53,7 @@ window.onload = function () {
     }
 
     // Enabling CSV upload function
-    let fileUpload = document.getElementById('file-upload') as HTMLButtonElement;
+    const fileUpload = document.getElementById('file-upload') as HTMLButtonElement;
     document.getElementById('file-upload-button').onclick = function () {
         // Clearing the file upload API first by setting it to null, so that uploading actions are 
         // always triggered even if the same file is uploaded again.
@@ -64,8 +64,8 @@ window.onload = function () {
     // Enabling download function. Will trigger Honor Code Pledge interface before
     //  students are allowed to download images.
     document.getElementById('pledge-signed').onclick = () => {
-        let honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
-        let signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
+        const honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
+        const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
         } else {
@@ -81,7 +81,7 @@ window.onload = function () {
     }
 
     setChartDefaults();
-    chartType((form.elements[0] as HTMLInputElement).value);
+    chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
 };
 
 /**
@@ -128,7 +128,7 @@ function chartType(chart: string) {
         objects = pulsar();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            pulsarFileUpload(evt, objects[0], objects[1]);
+            pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'cluster') {
         objects = cluster();
@@ -149,12 +149,12 @@ function chartType(chart: string) {
      *  the table element, so that in smaller screen it will be next to the table instead
      *  of being under the chart with the save-button.
      */
-    let addRow = document.getElementById('add-row-button');
+    const addRow = document.getElementById('add-row-button');
     addRow.onclick = function () {
         objects[0].alter('insert_row');
     };
 
-    let chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
+    const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
     };
@@ -201,9 +201,9 @@ function setChartDefaults() {
  *  @param form:    The form containing information about the chart.
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
-    let elements = form.elements as ChartInfoFormElements;
+    const elements = form.elements as ChartInfoFormElements;
     myChart.options.plugins.title.text = elements['title'].value;
-    let labels = elements['data'].value.split(',').map((item: string) => item.trim());
+    const labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
@@ -216,14 +216,14 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
 }
 
 function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
-    let canvas = document.getElementById(canvasID) as HTMLCanvasElement;
+    const canvas = document.getElementById(canvasID) as HTMLCanvasElement;
 
     // Create a dummy canvas
-    let destCanvas = document.createElement('canvas');
+    const destCanvas = document.createElement('canvas');
     destCanvas.width = canvas.width;
     destCanvas.height = canvas.height;
 
-    let destCtx = destCanvas.getContext('2d');
+    const destCtx = destCanvas.getContext('2d');
 
     // Create a rectangle with the desired color
     destCtx.fillStyle = '#FFFFFF';
@@ -233,18 +233,18 @@ function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
     destCtx.drawImage(canvas, 0, 0);
 
     // Download the dummy canvas
-    let time = getDateString();
-    let exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
+    const time = getDateString();
+    const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
     saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
-    let zeroth: piexif.IExifElement = {};
-    let exif: piexif.IExifElement = {};
+    const zeroth: piexif.IExifElement = {};
+    const exif: piexif.IExifElement = {};
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
     
-    let exifObj = { '0th': zeroth, 'Exif': exif };
-    let exifBytes = piexif.dump(exifObj);
+    const exifObj = { '0th': zeroth, 'Exif': exif };
+    const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }

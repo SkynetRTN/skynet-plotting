@@ -24,7 +24,7 @@ export function spectrum() {
         '</form>'
     );
     
-    let tableData = [];
+    const tableData = [];
     for (let i = 0; i < 200; i++) {
         let wl = i / 200 * 0.03 + 21.09;
         tableData.push({
@@ -34,8 +34,8 @@ export function spectrum() {
         });
     }
 
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const container = document.getElementById('table-div');
+    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Wavelength', 'Channel 1', 'Channel 2'],
         maxCols: 3,
@@ -46,8 +46,8 @@ export function spectrum() {
         ],
     }));
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = document.getElementById("myChart").getContext('2d');
+    const myChart = new Chart(ctx, {
         type: 'line',
         data: {
             datasets: [
@@ -99,7 +99,7 @@ export function spectrum() {
         }
     });
 
-    let update = function () {
+    const update = function () {
         updateSpectrum(hot, myChart);
         updateTableHeight(hot);
     };
@@ -110,7 +110,7 @@ export function spectrum() {
         afterCreateRow: update,
     });
 
-    let spectrumForm = document.getElementById("spectrum-form");
+    const spectrumForm = document.getElementById("spectrum-form");
     spectrumForm.onchange = function () {
         let channel = spectrumForm.elements["channel"].value;
         if (channel === "x") {
@@ -144,7 +144,7 @@ function updateSpectrum(table, myChart) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = table.getData();
+    const tableData = table.getData();
     let src1Data = [];
     let src2Data = [];
 
@@ -167,7 +167,7 @@ function updateSpectrum(table, myChart) {
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
 
-    let spectrumForm = document.getElementById("spectrum-form");
+    const spectrumForm = document.getElementById("spectrum-form");
     spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange();
 
@@ -205,7 +205,7 @@ export function spectrumFileUpload(evt, table, myChart) {
         data = data.filter(str => (str !== null && str !== undefined && str !== ""));
         data = data.filter(str => (str[0] !== '#'));
 
-        let tableData = [];
+        const tableData = [];
         for (let i = 0; i < data.length; i++) {
             "Use regular expression `/\s+/` to handle more than one space"
             let entry = data[i].trim().split(/\s+/);
@@ -224,7 +224,7 @@ export function spectrumFileUpload(evt, table, myChart) {
         }
         tableData.sort((a, b) => a.wl - b.wl);
         
-        let spectrumForm = document.getElementById("spectrum-form");
+        const spectrumForm = document.getElementById("spectrum-form");
         spectrumForm.elements['channel'].selectedIndex = 0;
 
         // Need to put this line down in the end, because it will trigger update on the Chart, which will 
