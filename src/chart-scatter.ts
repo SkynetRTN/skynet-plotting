@@ -1,11 +1,11 @@
 'use strict';
 
 import Chart from "chart.js/auto";
+import { ChartConfiguration, LinearScaleOptions, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config";
 import { updateLabels, updateTableHeight, linkInputs, throttle } from "./util";
-import { clamp, rad, round } from "./my-math";
 
 /**
  *  Function for scatter chart.
@@ -17,30 +17,30 @@ export function scatter() {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (kpc): </div>\n' +
         '<div class="col-sm-4 range"><input type="range" name="x" title="Center (X)" value="0"></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x-num" class="field" value="0"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x_num" class="field" value="0"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Diameter (kpc): </div>\n' +
         '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value="10"></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d-num" class="field" value="10"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d_num" class="field" value="10"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
-    const scatterForm = document.getElementById("scatter-form");
-    linkInputs(scatterForm.elements['d'], scatterForm.elements['d-num'], 0, 50, 0.01, 10, false, true, 0, Number.POSITIVE_INFINITY);
-    linkInputs(scatterForm.elements['x'], scatterForm.elements['x-num'], 0, 20, 0.01, 0,  false, true, 0, Number.POSITIVE_INFINITY);
-    
-    const tableData = [];
+    const scatterForm = document.getElementById("scatter-form") as ScatterForm;
+    linkInputs(scatterForm.elements['d'], scatterForm.elements['d_num'], 0, 50, 0.01, 10, false, true, 0, Number.POSITIVE_INFINITY);
+    linkInputs(scatterForm.elements['x'], scatterForm.elements['x_num'], 0, 20, 0.01, 0, false, true, 0, Number.POSITIVE_INFINITY);
+
+    const tableData: any[] = [];
     for (let i = 0; i < 15; i++) {
-        tableData[i] = {
+        tableData.push({
             'lo': Math.random() * 40.0 - 20.0,
             'la': Math.random() * 40.0 - 20.0,
             'di': Math.random() * 20.0,
-        };
+        });
     }
 
     const container = document.getElementById('table-div');
-    const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
+    const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['Longitude', 'Latitude', 'Distance'],
         maxCols: 3,
@@ -49,10 +49,11 @@ export function scatter() {
             { data: 'la', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'di', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
 
-    const ctx = document.getElementById("myChart").getContext('2d');
-    const myChart = new Chart(ctx, {
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
+
+    const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
@@ -88,7 +89,10 @@ export function scatter() {
                 }, {
                     label: 'Model',
                     data: circle(0, 0, 10),
-                    parsing: true,
+                    parsing: {
+                        xAxisKey: 'x',
+                        yAxisKey: 'y'
+                    },
                     borderColor: colors['gray'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -124,7 +128,10 @@ export function scatter() {
                 }
             }
         }
-    });
+    };
+
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
     const update = function () {
         updateScatter(tableData, myChart);
@@ -140,21 +147,21 @@ export function scatter() {
     // Link the form to chart
     //const scatterForm = document.getElementById("scatter-form");
     const scatterOninput = function () {
-        let x = parseFloat(this.elements['x-num'].value);
+        let x = parseFloat(this.elements['x_num'].value);
         let y = 0;
-        let d = parseFloat(this.elements['d-num'].value);
-        myChart.data.datasets[2].data = [{ x: x, y: y}];
+        let d = parseFloat(this.elements['d_num'].value);
+        myChart.data.datasets[2].data = [{ x: x, y: y }];
         myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update('none');
     }
     scatterForm.oninput = throttle(scatterOninput, 10);
 
     updateScatter(tableData, myChart);
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     return [hot, myChart];
 }
@@ -162,10 +169,10 @@ export function scatter() {
 /**
  *  This function is similar to updateLine but transforms longitude, latitude and distance to x and y
  *  coordinates to be rendered in the chart.
- *  @param table:   The dictionary object holding longitude, latitude and distance
+ *  @param tableData:   The dictionary object holding longitude, latitude and distance
  *  @param myChart: The Chartjs object to be updated.
  */
-function updateScatter(table, myChart) {
+function updateScatter(tableData: any[], myChart: Chart) {
     let start = 0;
 
     // The initial value of mins and maxs are 0 becaues the Sun is located at (0, 0)
@@ -174,11 +181,11 @@ function updateScatter(table, myChart) {
     let minY = 0;
     let maxY = 0;
 
-    let chart = myChart.data.datasets[1].data;
-    for (let i = 0; i < table.length; i++) {
-        const lo = table[i]['lo'];
-        const la = table[i]['la'];
-        const di = table[i]['di'];
+    let chart = myChart.data.datasets[1].data as ScatterDataPoint[];
+    for (let i = 0; i < tableData.length; i++) {
+        const lo = tableData[i]['lo'];
+        const la = tableData[i]['la'];
+        const di = tableData[i]['di'];
         if (la === '' || lo === '' || di === '' ||
             la === null || lo === null || di === null) {
             continue;
@@ -202,7 +209,7 @@ function updateScatter(table, myChart) {
 
 /**
  * Adjust the min/max scales of the chart by given new min/max values.
- * @param {Chart.js object} myChart The chart to be updated
+ * @param {Chart} myChart The chart to be updated
  * @param {number} minX 
  * @param {number} maxX 
  * @param {number} minY 
@@ -210,7 +217,7 @@ function updateScatter(table, myChart) {
  * @param {boolean} suggested       Default is false. If true, min/max values won't be
  * updated if new values are greater (for min) or less (for max) than the existing values.
  */
-function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
+function adjustScale(myChart: Chart, minX: number, maxX: number, minY: number, maxY: number, suggested: boolean = false) {
     // Adjusting the min/max values to avoid having data points on the very edge
     minX -= 3;
     maxX += 3;
@@ -244,8 +251,8 @@ function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
     myChart.options.scales['x'].max = Math.ceil(maxX);
     myChart.options.scales['y'].min = Math.floor(minY);
     myChart.options.scales['y'].max = Math.ceil(maxY);
-    myChart.options.scales['x'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
-    myChart.options.scales['y'].ticks.stepSize = Math.ceil((maxY - minY) / 7);
+    (myChart.options.scales['x'] as LinearScaleOptions).ticks.stepSize = Math.ceil((maxY - minY) / 7);
+    (myChart.options.scales['y'] as LinearScaleOptions).ticks.stepSize = Math.ceil((maxY - minY) / 7);
 
     myChart.update('none');
 }
@@ -258,19 +265,19 @@ function adjustScale(myChart, minX, maxX, minY, maxY, suggested=false) {
  * @param {number} steps    Number of points to generate. Default is 500
  * @returns {Array}         An array of points
  */
-function circle(x, y, diameter, steps = 500) {
-    let data = [];
+function circle(x: number, y: number, diameter: number, steps: number = 500): ScatterDataPoint[] {
+    let data: ScatterDataPoint[] = [];
 
     let step = 2 * Math.PI / steps;
     for (let i = 0; i < steps; i++) {
         data.push({
-            x: x + Math.cos(step * i) * (diameter/2),
-            y: y + Math.sin(step * i) * (diameter/2)
+            x: x + Math.cos(step * i) * (diameter / 2),
+            y: y + Math.sin(step * i) * (diameter / 2)
         });
     }
     // Add a redundant point to complete the circle.
     data.push({
-        x: x + (diameter/2),
+        x: x + (diameter / 2),
         y: y
     })
 

@@ -35,6 +35,17 @@ interface MoonForm extends HTMLFormElement {
     elements: MoonFormElements
 }
 
+interface ScatterFormElements extends HTMLCollection {
+    d: HTMLInputElement,
+    x: HTMLInputElement,
+    d_num: HTMLInputElement,
+    x_num: HTMLInputElement,
+}
+
+interface ScatterForm extends HTMLFormElement {
+    elements: ScatterFormElements
+}
+
 interface PulsarFormElements extends HTMLCollection {
     mode: HTMLInputElement
 }
