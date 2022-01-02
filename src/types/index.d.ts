@@ -1,8 +1,3 @@
-interface InputPoint {
-    x: string,
-    y: string
-}
-
 interface ChartInfoFormElements extends HTMLCollection {
     title: HTMLInputElement,
     data: HTMLInputElement,
