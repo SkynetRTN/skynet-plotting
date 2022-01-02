@@ -4,7 +4,7 @@ import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight, sanitizeData, sanitizeTableData} from "./util.js"
+import { updateLabels, updateTableHeight, sanitizeTableData} from "./util.js"
 import { round, lombScargle } from "./my-math.js"
 
 /**
@@ -370,8 +370,8 @@ function updateVariable(table, myChart) {
         })
     }
 
-    myChart.data.datasets[0].data = sanitizeData(src1Data);
-    myChart.data.datasets[1].data = sanitizeData(src2Data);
+    myChart.data.datasets[0].data = src1Data;
+    myChart.data.datasets[1].data = src2Data;
 
     updateChart(myChart, 0, 1);
 

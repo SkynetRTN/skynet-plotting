@@ -4,7 +4,7 @@ import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight, sanitizeData } from "./util.js"
+import { updateLabels, updateTableHeight } from "./util.js"
 import { round } from "./my-math.js"
 
 /**
@@ -127,17 +127,17 @@ export function spectrum() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
+    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     updateSpectrum(hot, myChart);
     updateTableHeight(hot);
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
 
     return [hot, myChart];
 }
 /**
  * This function takes the updated value from the table and uses it to update the chart.
- * @param {*} table Handsontable object
- * @param {*} myChart Chartjs object
+ * @param {Handsontable} table Handsontable object
+ * @param {Chart} myChart Chartjs object
  */
 function updateSpectrum(table, myChart) {
     for (let i = 0; i < 2; i++) {
@@ -149,18 +149,23 @@ function updateSpectrum(table, myChart) {
     let src2Data = [];
 
     for (let i = 0; i < tableData.length; i++) {
-        src1Data.push({
-            "x": tableData[i][0],
-            "y": tableData[i][1],
-        })
-        src2Data.push({
-            "x": tableData[i][0],
-            "y": tableData[i][2],
-        })
+        if (isNaN(parseFloat(tableData[i][0]))) continue;
+        if (!isNaN(parseFloat(tableData[i][1]))) {
+            src1Data.push({
+                "x": tableData[i][0],
+                "y": tableData[i][1],
+            })
+        }
+        if (!isNaN(parseFloat(tableData[i][2]))) {
+            src2Data.push({
+                "x": tableData[i][0],
+                "y": tableData[i][2],
+            })
+        }
     }
 
-    myChart.data.datasets[0].data = sanitizeData(src1Data);
-    myChart.data.datasets[1].data = sanitizeData(src2Data);
+    myChart.data.datasets[0].data = src1Data;
+    myChart.data.datasets[1].data = src2Data;
 
     let spectrumForm = document.getElementById("spectrum-form");
     spectrumForm.elements["channel"].selectedIndex = 0;
@@ -175,7 +180,7 @@ function updateSpectrum(table, myChart) {
  * DATA FLOW: file -> table
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart
+ * @param {Chart} myChart
  */
 export function spectrumFileUpload(evt, table, myChart) {
     // console.log("spectrumFileUpload called");
