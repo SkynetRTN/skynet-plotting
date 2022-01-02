@@ -74,7 +74,7 @@ export function moon(): [Handsontable, Chart] {
                     immutableLabel: false,
                 }, {
                     label: 'Model',
-                    data: null, // will be generated later
+                    data: [], // will be generated later
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
@@ -142,13 +142,13 @@ export function moon(): [Handsontable, Chart] {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateFormula(table: InputPoint[], form: MoonForm, chart: Chart) {
+function updateFormula(table: ScatterDataPoint[], form: MoonForm, chart: Chart) {
     // Can't just set min and max to the first values in the table because it might be invalid
     let min = NaN;
     let max = NaN;
     for (let i = 0; i < table.length; i++) {
-        const x = parseFloat(table[i]['x']);
-        const y = parseFloat(table[i]['y']);
+        const x = table[i]['x'];
+        const y = table[i]['y'];
         if (isNaN(x) || isNaN(y)) {
             continue;
         }
@@ -207,7 +207,7 @@ function trigGenerator(a:number, p:number, phase:number, tilt:number, start:numb
 *  generated parameters. This function also introduce a 5% noise to all data points.
 *  @returns    {Array}
 */
-function generateMoonData(): InputPoint[] {
+function generateMoonData(): ScatterDataPoint[] {
     /**
      *  ln(750) = 6.62
      *  ln(1) = 0
@@ -217,16 +217,16 @@ function generateMoonData(): InputPoint[] {
     const phase = Math.random() * 360;
     const tilt = Math.random() * 45;
 
-    const returnData: InputPoint[] = [];
+    const returnData: ScatterDataPoint[] = [];
 
     for (let i = 0; i < 10; i++) {
         const x = i * 2 + Math.random() * 2;
         const theta = x / p * Math.PI * 2 - rad(phase);
         const alpha = rad(tilt);
         returnData[i] = {
-            x: x.toString(),
-            y: ((a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
-                * (1 + Math.random() * 0.05)).toString(),
+            x: x,
+            y: (a * Math.sqrt(sqr(Math.cos(theta)) + sqr(Math.sin(theta)) * sqr(Math.sin(alpha))))
+                * (1 + Math.random() * 0.05),
         }
     }
 
