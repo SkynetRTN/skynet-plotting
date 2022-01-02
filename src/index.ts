@@ -118,7 +118,7 @@ function chartType(chart: string) {
         objects = variable();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            variableFileUpload(evt, objects[0], objects[1]);
+            variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'spectrum') {
         objects = spectrum();

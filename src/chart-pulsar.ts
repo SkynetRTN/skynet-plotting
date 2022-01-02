@@ -13,7 +13,7 @@ import { PulsarMode } from "./types/chart.js";
  *  Returns generated table and chart for pulsar.
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
-export function pulsar(): [Handsontable, Chart<'line'>] {
+export function pulsar(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Pulsar" id="pulsar-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +

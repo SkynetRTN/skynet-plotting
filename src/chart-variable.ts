@@ -13,7 +13,7 @@ import { PulsarMode } from "./types/chart.js";
  *  Returns generated table and chart for variable.
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
-export function variable() {
+export function variable(): [Handsontable, Chart] {
     // console.log("root func called");
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
