@@ -388,7 +388,7 @@ function updateVariable(table, myChart) {
  */
 function lightCurve(myChart) {
     // console.log("lightCurve called");
-    const lcHTML =
+    let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Variable Star: </div>\n' +
