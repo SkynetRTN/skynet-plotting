@@ -1,15 +1,5 @@
 # skynet-plotting
 
-## Known problems
-
-**Important!** There is a problem with the npm package `piexif-ts` that declares nonexistent files in its `package.json` file. As a result, Snowpack will try to locate files that do not exist and cause build to fail.
-
-I was not able to find a solution for this in Snowpack's config file yet. For now, a workaround would be running
-```bash
-npm run fix-piexif
-```
-**after** running `npm install`, which replaces the `package.json` file for `piexif-ts` with a custom, corrected version of the file.
-
 ## Getting Started
 Once cloned, run the following command to install required Node.js packages.
 ```bash

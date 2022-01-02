@@ -19,5 +19,6 @@ module.exports = {
     out: 'dist',
   },
   alias: {
-  }
+    "piexif-ts": "piexif-ts/dist/piexif.js",
+  },
 };
