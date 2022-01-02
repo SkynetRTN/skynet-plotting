@@ -3,9 +3,9 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util.js"
-import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp } from "./my-math"
 
 /**
  *  Returns generated table and chart for pulsar.

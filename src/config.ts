@@ -1,6 +1,8 @@
 'use strict';
 
-export const tableCommonOptions = {
+import Handsontable from "handsontable";
+
+export const tableCommonOptions: Handsontable.GridSettings = {
     licenseKey: 'non-commercial-and-evaluation',
     renderAllRows: false,
     rowHeights: 23,
@@ -45,7 +47,7 @@ export const colors = {
  *  @param opacity: Opacity of the returned rgb string. Default is 1.
  *  @returns {string}
  */
-function rgbString(rgb, opacity = 1) {
+function rgbString(rgb: string, opacity = 1): string {
     let r = hexToDecimal(rgb, 1, 2);
     let g = hexToDecimal(rgb, 3, 4);
     let b = hexToDecimal(rgb, 5, 6);
@@ -60,7 +62,7 @@ function rgbString(rgb, opacity = 1) {
  *  @param t:       The ending position of the portion of the string. Inclusive.
  *  @returns {number}
  */
-function hexToDecimal(hex, s, t) {
+function hexToDecimal(hex: string, s: number, t: number): number {
     let result = 0;
     for (let i = s; i <= t; i++) {
         result <<= 4;

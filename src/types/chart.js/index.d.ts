@@ -1,6 +1,6 @@
-// import Chart from 'chart.js/auto'
+// import { ChartDatasetProperties, ChartType } from 'chart.js/auto'
 // declare module 'chart.js/auto'{
-//     interface ChartDataset {
-//         immutableLabel: boolean;
+//     interface ChartDatasetProperties<TType extends ChartType, TData> {
+//         immutableLabel?: boolean;
 //     }
 // }

@@ -3,9 +3,9 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
-import { round, sqr, rad } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { updateLine, updateLabels, updateTableHeight } from "./util"
+import { round, sqr, rad } from "./my-math"
 
 /**
  *  Function for comparing data points with both Heliocentric and geocentric models.

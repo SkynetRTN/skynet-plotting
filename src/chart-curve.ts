@@ -1,17 +1,17 @@
 'use strict';
 
-import Chart from "chart.js/auto";
+import Chart, { ChartDataset, ChartConfiguration, ScatterDataPoint } from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight } from "./util.js"
-import { round } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config";
+import { updateLine, updateLabels, updateTableHeight } from "./util";
+import { round } from "./my-math";
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.
  *  @returns {[Handsontable, Chart]}
  */
-export function curve() {
+export function curve(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Lines" id="line-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
@@ -22,10 +22,6 @@ export function curve() {
         '<div class="flex-item-grow0"><label><input type="checkbox" title="Magnitude" name="magnitude"><span>Magnitudes</span></label></div>\n' +
         '</div>' +
         '</form>\n');
-
-    let lineForm = document.getElementById('line-form');
-
-    let lines = 1;
 
     let tableData = [
         { "x": 0, "y1": 25, "y2": '', "y3": '', "y4": '' },
@@ -45,64 +41,64 @@ export function curve() {
         { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
     ];
 
-    let chartData = [];
-
-    let container = document.getElementById('table-div');
-    let hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
-        data: tableData,
+    const container = document.getElementById('table-div');
+    const curveTableOptions: Handsontable.GridSettings = {
+    // const curveTableOptions = {
+    data: tableData,
         colHeaders: ['x', 'y1', 'y2', 'y3', 'y4'],
         maxCols: 5,
         columns: [
             { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'y1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
-    }));
+    };
+    const hot = new Handsontable(container, {...tableCommonOptions, ...curveTableOptions});
 
-    let ctx = document.getElementById("myChart").getContext('2d');
-    let myChart = new Chart(ctx, {
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const curveChartOptions: ChartConfiguration = {
         type: 'line',
         data: {
             datasets: [
                 {
                     label: 'y1',
-                    data: chartData[0],
+                    data: [],
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     tension: 0.1,
                     fill: false,
                     hidden: false,
-                    immutableLabel: false,
+                    // immutableLabel: false,
                 }, {
                     label: 'y2',
-                    data: chartData[1],
+                    data: [],
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    immutableLabel: false,
+                    // immutableLabel: false,
                 }, {
                     label: 'y3',
-                    data: chartData[2],
+                    data: [],
                     borderColor: colors['purple'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    immutableLabel: false,
+                    // immutableLabel: false,
                 }, {
                     label: 'y4',
-                    data: chartData[3],
+                    data: [],
                     borderColor: colors['orange'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    immutableLabel: false,
+                    // immutableLabel: false,
                 }
             ]
         },
@@ -129,26 +125,17 @@ export function curve() {
                 }
             }
         }
-    });
-
-    let update = function () {
-        updateTableHeight(hot);
-        for (let i = 0; i < lines; i++) {
-            updateLine(tableData, myChart, i, 'x', 'y' + (i + 1));
-        }
     };
 
-    hot.updateSettings({
-        afterChange: update,
-        afterRemoveRow: update,
-        afterCreateRow: update,
-    });
+    const myChart = new Chart(ctx, curveChartOptions) as Chart<'line'>;
 
-    updateLine(tableData, myChart, 0, 'x', 'y1');
+    const lineForm = document.getElementById('line-form') as HTMLFormElement;
+    const elements = lineForm.elements as LineFormElements;
 
+    let lines = 1;
     lineForm.onchange = function () {
-        myChart.options.scales['y'].reverse = lineForm.elements['magnitude'].checked;
-        let lineCount = lineForm.elements['lineCount'].value;
+        myChart.options.scales['y'].reverse = elements['magnitude'].checked;
+        const lineCount = parseInt(elements['lineCount'].value);
         if (lineCount !== lines) {
             let newCols = [{ data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } }];
             for (let i = 0; i < lineCount; i++) {
@@ -172,13 +159,29 @@ export function curve() {
             }
         }
         myChart.update('none');
-        updateLabels(myChart, document.getElementById('chart-info-form'));
+        updateLabels(myChart, (<HTMLFormElement>document.getElementById('chart-info-form')).elements as ChartInfoFormElements);
     };
 
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'));
+    updateLabels(myChart, (<HTMLFormElement>document.getElementById('chart-info-form')).elements as ChartInfoFormElements);
+
+    
+    const update = function () {
+        updateTableHeight(hot);
+        for (let i = 0; i < lines; i++) {
+            updateLine(tableData, myChart, i, 'x', 'y' + (i + 1));
+        }
+    };
+
+    hot.updateSettings({
+        afterChange: update,
+        afterRemoveRow: update,
+        afterCreateRow: update,
+    });
+
+    updateLine(tableData, myChart, 0, 'x', 'y1');
 
     return [hot, myChart];
 }

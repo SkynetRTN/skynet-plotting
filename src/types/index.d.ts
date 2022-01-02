@@ -4,3 +4,8 @@ interface ChartInfoFormElements extends HTMLCollection {
     xAxis: HTMLInputElement,
     yAxis: HTMLInputElement
 }
+
+interface LineFormElements extends HTMLCollection {
+    magnitude: HTMLInputElement,
+    lineCount: HTMLInputElement
+}

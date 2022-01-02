@@ -1,6 +1,6 @@
 
 import { strict as assert } from "assert";
-import { ArrMath } from "../src/my-math.js";
+import { ArrMath } from "../src/my-math";
 
 let arr1 = [1, 2, 3, 4];
 let arr2 = [8, 7, 6, 5];

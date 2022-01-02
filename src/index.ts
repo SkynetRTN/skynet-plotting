@@ -10,8 +10,8 @@ import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util.js';
-import { curve } from './chart-curve.js';
+import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
+import { curve } from './chart-curve';
 import { dual } from './chart-dual.js';
 import { moon } from './chart-moon.js';
 import { scatter } from './chart-scatter.js';
@@ -22,7 +22,7 @@ import { pulsar, pulsarFileUpload } from './chart-pulsar.js';
 import { cluster, clusterFileUpload } from './chart-cluster.js';
 import { round } from './my-math';
 
-import Chart from 'chart.js/auto';
+import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 
 /**
@@ -167,8 +167,8 @@ function chartType(chart: string) {
  */
 function setChartDefaults() {
     // Enable axes labeling
-    (Chart.defaults.scale as any).title.display = true;
-    (Chart.defaults.animation as any).duration = 0;
+    (Chart.defaults.scale as LinearScaleOptions).title.display = true;
+    (Chart.defaults.animation as AnimationSpec<ChartType>).duration = 0;
     Chart.defaults.parsing = false;
     
     // Setting properties about the title.
@@ -210,8 +210,8 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    (myChart.options.scales['x'] as any).title.text = elements['xAxis'].value;
-    (myChart.options.scales['y'] as any).title.text = elements['yAxis'].value;
+    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['xAxis'].value;
+    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['yAxis'].value;
     myChart.update('none');
 }
 

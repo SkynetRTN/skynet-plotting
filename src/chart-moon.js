@@ -3,9 +3,9 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLine, updateLabels, updateTableHeight, linkInputs, debounce, throttle } from "./util.js"
-import { round, sqr, rad } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { updateLine, updateLabels, updateTableHeight, linkInputs, debounce, throttle } from "./util"
+import { round, sqr, rad } from "./my-math"
 
 /**
  *  This function is for the moon of a planet.

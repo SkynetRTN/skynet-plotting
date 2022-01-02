@@ -3,9 +3,9 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { updateLabels, updateTableHeight, sanitizeTableData} from "./util.js"
-import { round, lombScargle } from "./my-math.js"
+import { tableCommonOptions, colors } from "./config"
+import { updateLabels, updateTableHeight, sanitizeTableData} from "./util"
+import { round, lombScargle } from "./my-math"
 
 /**
  *  Returns generated table and chart for variable.
