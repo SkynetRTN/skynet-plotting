@@ -1,11 +1,13 @@
 'use strict';
 
 import Chart from "chart.js/auto";
+import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLabels, updateTableHeight, sanitizeTableData} from "./util"
-import { round, lombScargle } from "./my-math"
+import { round, lombScargle, floatMod } from "./my-math"
+import { PulsarMode } from "./types/chart.js";
 
 /**
  *  Returns generated table and chart for variable.
@@ -47,7 +49,7 @@ export function variable() {
         ],
     }));
 
-    const ctx = document.getElementById("myChart").getContext('2d');
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -148,28 +150,27 @@ export function variable() {
 
     lightCurve(myChart);
     
-    const variableForm = document.getElementById("variable-form");
-    const customLabels = myChart.data.customLabels;
+    const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.onchange = function () {
-        const mode = variableForm.elements["mode"].value;
+        const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
         if (mode === "lc") {
             showDiv("light-curve-div");
             const lightCurveForm = document.getElementById("light-curve-form");
-            lightCurveForm.oninput();
+            lightCurveForm.oninput(null);
         } else if (mode === "ft") {
             showDiv("fourier-div");
             const fourierForm = document.getElementById("fourier-form");
-            fourierForm.oninput();
+            fourierForm.oninput(null);
         } else {
             showDiv("period-folding-div");
             const periodFoldingForm = document.getElementById("period-folding-form");
-            periodFoldingForm.oninput();
+            periodFoldingForm.oninput(null);
         }
         
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.plugins.title.text,
-            x: myChart.options.scales['x'].title.text,
-            y: myChart.options.scales['y'].title.text
+            t: myChart.options.plugins.title.text as string,
+            x: myChart.options.scales['x'].title.text as string,
+            y: myChart.options.scales['y'].title.text as string
         }
         myChart.data.modeLabels.lastMode = mode;
 
@@ -177,7 +178,7 @@ export function variable() {
         myChart.options.scales['x'].title.text = myChart.data.modeLabels[mode].x;
         myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update('none');
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
         updateTableHeight(hot);
     }
@@ -185,7 +186,7 @@ export function variable() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form'), true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     
     updateVariable(hot, myChart);
     updateTableHeight(hot);
@@ -197,14 +198,13 @@ export function variable() {
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
  * and load related information into the table.
  * DATA FLOW: file -> table
- * @param {Event} evt The uploadig event
- * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart
+ * @param evt The uploadig event
+ * @param table The table to be updated
+ * @param myChart
  */
-export function variableFileUpload(evt, table, myChart) {
+export function variableFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("variableFileUpload called");
-    let file = evt.target.files[0];
-
+    let file = (evt.target as HTMLInputElement).files[0];
     if (file === undefined) {
         return;
     }
@@ -220,7 +220,7 @@ export function variableFileUpload(evt, table, myChart) {
 
     let reader = new FileReader();
     reader.onload = () => {
-        let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+        let data = (reader.result as string).split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
 
         // Need to trim because of weired end-of-line issues (potentially a Windows problem).
         let columns = data[0].trim().split(",");
@@ -250,12 +250,12 @@ export function variableFileUpload(evt, table, myChart) {
             return;
         }
 
-        let data1 = srcs.get(src1).filter(val => !isNaN(val[0])).sort((a, b) => a[0] - b[0]);
-        let data2 = srcs.get(src2).filter(val => !isNaN(val[0])).sort((a, b) => a[0] - b[0]);
+        let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
+        let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
 
         let left = 0;
         let right = 0;
-        const tableData = [];
+        const tableData: any[] = [];
 
         while (left < data1.length && right < data2.length) {
             if (data1[left][0] === data2[right][0]) {
@@ -285,9 +285,9 @@ export function variableFileUpload(evt, table, myChart) {
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
         
-        const variableForm = document.getElementById("variable-form");
-        variableForm.elements['mode'][1].disabled = true;
-        variableForm.elements['mode'][2].disabled = true;
+        const variableForm = document.getElementById("variable-form") as VariableForm;
+        variableForm.mode[1].disabled = true;
+        variableForm.mode[2].disabled = true;
 
         myChart.data.modeLabels = {
             lc: { t: 'Title', x: 'x', y: 'y' },
@@ -299,7 +299,7 @@ export function variableFileUpload(evt, table, myChart) {
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
         
         lightCurve(myChart);
 
@@ -319,7 +319,7 @@ export function variableFileUpload(evt, table, myChart) {
  * @param {number} src1 Magnitude of source 1
  * @param {number} src2 Magnitude of source 2
  */
-function pushTableData(tableData, jd, src1, src2) {
+function pushTableData(tableData: any[], jd: number, src1: number, src2: number) {
     if (isNaN(jd)) {
         // Ignore entries with invalid timestamp.
         return;
@@ -335,10 +335,10 @@ function pushTableData(tableData, jd, src1, src2) {
  * This function is called when the values in table is changed (either by manual input or by file upload).
  * It then updates the chart according to the data in the table.
  * DATA FLOW: table -> chart
- * @param {Handsontable} table The table object
- * @param {Chartjs} myChart The chart object
+ * @param table The table object
+ * @param myChart The chart object
  */
-function updateVariable(table, myChart) {
+function updateVariable(table: Handsontable, myChart: Chart) {
     // console.log("updateVariable called");
 
     myChart.data.maxMJD = 0;
@@ -375,9 +375,9 @@ function updateVariable(table, myChart) {
 
     updateChart(myChart, 0, 1);
 
-    const variableForm = document.getElementById("variable-form");
+    const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.mode.value = "lc";
-    variableForm.onchange();
+    variableForm.onchange(null);
 }
 
 /**
@@ -386,7 +386,7 @@ function updateVariable(table, myChart) {
  * DATA FLOW: chart[0], chart[1] -> chart[2]
  * @param myChart The chart object
  */
-function lightCurve(myChart) {
+function lightCurve(myChart: Chart) {
     // console.log("lightCurve called");
     let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -410,43 +410,44 @@ function lightCurve(myChart) {
         '</div>\n' +
         '</form>\n';
     document.getElementById('light-curve-div').innerHTML = lcHTML;
-    const variableForm = document.getElementById('variable-form');
-    const lightCurveForm = document.getElementById('light-curve-form');
+    const variableForm = document.getElementById('variable-form') as VariableForm;
+    const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
     lightCurveForm.oninput = function () {
-        if (this.source.value === "none") {
+        if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1);
-            updateLabels(myChart, document.getElementById('chart-info-form'), true);
-            variableForm.elements['mode'][1].disabled = true;
-            variableForm.elements['mode'][2].disabled = true;
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+            variableForm.mode[1].disabled = true;
+            variableForm.mode[2].disabled = true;
         } else {
             const datasets = myChart.data.datasets;
-            let src, ref;
-            if (this.source.value === datasets[0].label) {
-                src = 0;
-                ref = 1;
+            let srcData: ScatterDataPoint[];
+            let refData: ScatterDataPoint[];
+            if (lightCurveForm.source.value === datasets[0].label) {
+                srcData = datasets[0].data as ScatterDataPoint[];
+                refData = datasets[1].data as ScatterDataPoint[];
             } else {
-                src = 1;
-                ref = 0;
+                srcData = datasets[1].data as ScatterDataPoint[];
+                refData = datasets[0].data as ScatterDataPoint[];
             }
             const lcData = [];
-            let len = Math.min(datasets[0].data.length, datasets[1].data.length);
+            const len = Math.min(datasets[0].data.length, datasets[1].data.length);
             for (let i = 0; i < len; i++) {
                 lcData.push({
-                    "x": datasets[src].data[i]["x"],
-                    "y": datasets[src].data[i]["y"] - datasets[ref].data[i]["y"] + parseFloat(this.mag.value),
+                    "x": srcData[i]["x"],
+                    "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
                 });
             }
-            variableForm.elements['mode'][1].disabled = false;
-            variableForm.elements['mode'][2].disabled = false;
+            variableForm.mode[1].disabled = false;
+            variableForm.mode[2].disabled = false;
 
             myChart.data.datasets[2].data = lcData;
             
             for (let i = 2; i < 5; i++) {
-                myChart.data.datasets[i].label = "Variable Star Mag + (" + this.mag.value + " - Reference Star Mag)";
+                myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
             }
 
             updateChart(myChart, 2);
-            updateLabels(myChart, document.getElementById('chart-info-form'), true);
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
         }
     }
 
@@ -463,19 +464,19 @@ function lightCurve(myChart) {
         '</form>\n';
 
     document.getElementById("fourier-div").innerHTML = fHTML;
-    const fourierForm = document.getElementById("fourier-form");
+    const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
     fourierForm.oninput = function () {
-        let start = parseFloat(this.start.value);
-        let stop = parseFloat(this.stop.value);
+        let start = parseFloat(fourierForm.start.value);
+        let stop = parseFloat(fourierForm.stop.value);
         if (start > stop) {
             // alert("Please make sure the stop value is greater than the start value.");
             return;
         }
         let fData = [];
 
-        let lcData = myChart.data.datasets[2].data;
-        let tArray = lcData.map(entry => entry.x);
-        let yArray = lcData.map(entry => entry.y);
+        let lcData = myChart.data.datasets[2].data as ScatterDataPoint[];
+        let tArray = lcData.map((entry: ScatterDataPoint) => entry.x);
+        let yArray = lcData.map((entry: ScatterDataPoint) => entry.y);
 
         fData = lombScargle(tArray, yArray, start, stop, 2000);
 
@@ -493,17 +494,17 @@ function lightCurve(myChart) {
         '</form>\n';
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
-    const periodFoldingForm = document.getElementById("period-folding-form");
+    const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
     periodFoldingForm.oninput = function () {
-        let period = parseFloat(this.pf.value);
+        let period = parseFloat(periodFoldingForm.pf.value);
         if (period !== 0) {
             let datasets = myChart.data.datasets;
             let minMJD = myChart.data.minMJD;
             let pfData = [];
             for (let i = 0; i < datasets[2].data.length; i++) {
                 pfData.push({
-                    "x": floatMod(datasets[2].data[i].x - minMJD, period),
-                    "y": datasets[2].data[i].y,
+                    "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
+                    "y": (datasets[2].data[i] as ScatterDataPoint).y,
                 });
                 pfData.push({
                     "x": pfData[pfData.length - 1].x + period,
@@ -516,17 +517,17 @@ function lightCurve(myChart) {
         }
 
         updateChart(myChart, 4);
-        updateLabels(myChart, document.getElementById('chart-info-form'), true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
 }
 
 /**
  * This function set up the chart by hiding all unnecessary datasets, and then adjust the chart scaling
  * to fit the data to be displayed.
- * @param {Chartjs object} myChart 
+ * @param {Chart} myChart 
  * @param {Number[]} dataIndex 
  */
-function updateChart(myChart, ...dataIndices) {
+function updateChart(myChart: Chart, ...dataIndices: number[]) {
     // console.log("updateChart called");
     for (let i = 0; i < 5; i++) {
         myChart.data.datasets[i].hidden = true;
@@ -546,9 +547,9 @@ function updateChart(myChart, ...dataIndices) {
 
 /**
  * This function serves as a switch for the visibility of the control div's for the different modes.
- * @param {str} id The name of the div to be displayed.
+ * @param id The name of the div to be displayed.
  */
-function showDiv(id) {
+function showDiv(id: string) {
     document.getElementById("light-curve-div").hidden = true;
     document.getElementById("fourier-div").hidden = true;
     document.getElementById("period-folding-div").hidden = true;
@@ -561,16 +562,4 @@ function showDiv(id) {
         document.getElementById("table-div").hidden = false;
         document.getElementById("add-row-button").hidden = false;
     }
-}
-
-/**
- * This function computes the floating point modulo.
- * @param {number} a The dividend
- * @param {number} b The divisor
- */
-function floatMod(a, b) {
-    while (a > b) {
-        a -= b;
-    }
-    return a;
 }

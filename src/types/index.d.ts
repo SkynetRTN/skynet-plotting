@@ -51,6 +51,26 @@ interface VariableFormElements extends HTMLCollection {
 interface VariableForm extends HTMLFormElement {
     elements: VariableFormElements
 }
+interface VariableLightCurveFormElements extends HTMLCollection {
+    source: HTMLInputElement,
+    mag: HTMLInputElement
+}
+interface VariableLightCurveForm extends HTMLFormElement {
+    elements: LightCurveFormElements
+}
+interface FourierFormElements extends HTMLCollection {
+    start: HTMLInputElement,
+    stop: HTMLInputElement
+}
+interface VariableFourierForm extends HTMLFormElement {
+    elements: FourierFormElements
+}
+interface VariablePeriodFoldingFormElements extends HTMLCollection {
+    pf: HTMLInputElement,
+}
+interface VariablePeriodFoldingForm extends HTMLFormElement {
+    elements: PeriodFoldingFormElements
+}
 
 interface SpectrumFormElements extends HTMLCollection {
     channel: HTMLSelectElement
