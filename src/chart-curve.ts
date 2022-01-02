@@ -68,7 +68,7 @@ export function curve(): [Handsontable, Chart] {
                     tension: 0.1,
                     fill: false,
                     hidden: false,
-                    // immutableLabel: false,
+                    immutableLabel: false,
                 }, {
                     label: 'y2',
                     data: [],
@@ -78,7 +78,7 @@ export function curve(): [Handsontable, Chart] {
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    // immutableLabel: false,
+                    immutableLabel: false,
                 }, {
                     label: 'y3',
                     data: [],
@@ -88,7 +88,7 @@ export function curve(): [Handsontable, Chart] {
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    // immutableLabel: false,
+                    immutableLabel: false,
                 }, {
                     label: 'y4',
                     data: [],
@@ -98,7 +98,7 @@ export function curve(): [Handsontable, Chart] {
                     tension: 0.1,
                     fill: false,
                     hidden: true,
-                    // immutableLabel: false,
+                    immutableLabel: false,
                 }
             ]
         },
@@ -159,13 +159,13 @@ export function curve(): [Handsontable, Chart] {
             }
         }
         myChart.update('none');
-        updateLabels(myChart, (<HTMLFormElement>document.getElementById('chart-info-form')).elements as ChartInfoFormElements);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
     };
 
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, (<HTMLFormElement>document.getElementById('chart-info-form')).elements as ChartInfoFormElements);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     
     const update = function () {
