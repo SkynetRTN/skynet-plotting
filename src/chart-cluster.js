@@ -20,7 +20,7 @@ export function cluster() {
         '<div class="col-sm-3 text"><input type="number" title="Distance" name="d-num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Max Error (mag)</div>\n' +
+        '<div class="col-sm-4 des">Max Error (mag):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Error" name="err"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Error" name="err-num" class="field"></div>\n' +
         '</div>\n' +
