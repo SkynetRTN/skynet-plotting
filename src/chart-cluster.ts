@@ -533,11 +533,11 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
        changeOptions(lum,optionList);
 
        //convrt datadict from dictionary to nested number array tableData
-       let tableData: number[][] = [];
+       let tableData: {[key: string]: number}[] = [];
        datadict.forEach((src, key)=>{
-           let row: number[] = [];
+           let row: {[key: string]: number} = {};
            for (let filterIndex in filters){
-               row.push(src.get(filters[filterIndex]));
+            row[filters[filterIndex]]=src.get(filters[filterIndex]);
            }
            tableData.push(row);
        })
