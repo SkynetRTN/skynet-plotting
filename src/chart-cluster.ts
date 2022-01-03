@@ -637,5 +637,3 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     }
     myChart.update('none');
 }
-
-console.log("Loaded");
