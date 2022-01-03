@@ -518,7 +518,6 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
        let optionList    = [];
        let headers       = [];
        let columns       = [];
-       let tableData     = [];
        let hiddenColumns = [];
        for (let i =0; i<filters.length; i++){//makes a list of options for each filter 
            optionList.push({value: filters[i], title: filters[i]+' Mag', text: filters[i]})
@@ -533,12 +532,21 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
        //red.value = red.options[red.options.length-1].value;
        changeOptions(lum,optionList);
 
-        tableData = Object.values(datadict);//turns our dictionary into an array;
+       //convrt datadict from dictionary to nested number array tableData
+       let tableData: number[][] = [];
+       datadict.forEach((src, key)=>{
+           let row: number[] = [];
+           for (let filterIndex in filters){
+               row.push(src.get(filters[filterIndex]));
+           }
+           tableData.push(row);
+       })
+    //    console.log(tableData);
+
         table.updateSettings({ data: tableData,
                                colHeaders: headers, 
                                columns: columns,
                                hiddenColumns: {columns: hiddenColumns.slice(3)}});//hide all but the first 3 columns
-                
         updateTableHeight(table);
         updateScatter(table, myChart,
             Number((document.getElementById('cluster-form') as ClusterForm)["d_num"].value), 1,
