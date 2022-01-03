@@ -320,3 +320,15 @@ export function formatTime(time: string) {
     tarray[1] = tarray[1].split(':').join('');
     return tarray.join('T');
 }
+
+//takes an html drop down and a array of objects, replaces the drop downs existing options using
+//objects of the form:
+//{value: value, title: title, text: text}
+export function changeOptions(element, newOptions=[]){
+    element.innerHTML='';//empty the drop down options
+    let result = '';
+    for (let i=0; i<newOptions.length; i++){
+        result +='<option value="'+newOptions[i].value+'" title="'+newOptions[i].title+'">'+newOptions[i].text+'</option></div>\n';
+    }
+    element.innerHTML=result;
+}
