@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config";
 import { linkInputs, throttle, updateLabels, updateTableHeight, changeOptions } from "./util";
-import { round } from "./my-math.js"
+import { round } from "./my-math"
 
 /**
  *  This function is for the moon of a planet.
@@ -374,7 +374,7 @@ export function cluster(): [Handsontable, Chart] {
         updateTableHeight(hot);
         updateScatter(hot, myChart,
             Number(clusterForm['d_num'].value),
-            0, //arguement dist is missing. 0 is put in as a default value
+            1, //the dataSet is missing after 
             filterForm, Number(clusterForm['err_num'].value));
         updateHRModel(clusterForm, myChart);
     };
