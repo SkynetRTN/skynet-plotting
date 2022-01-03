@@ -324,7 +324,7 @@ export function formatTime(time: string) {
 //takes an html drop down and a array of objects, replaces the drop downs existing options using
 //objects of the form:
 //{value: value, title: title, text: text}
-export function changeOptions(element, newOptions=[]){
+export function changeOptions(element: HTMLInputElement, newOptions: { value: string, title: string, text: string }[]) {
     element.innerHTML='';//empty the drop down options
     let result = '';
     for (let i=0; i<newOptions.length; i++){

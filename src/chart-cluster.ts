@@ -3,41 +3,41 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config.js"
-import { linkInputs, throttle, updateLabels, updateTableHeight, changeOptions } from "./util.js"
+import { tableCommonOptions, colors } from "./config";
+import { linkInputs, throttle, updateLabels, updateTableHeight, changeOptions } from "./util";
 import { round } from "./my-math.js"
 
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function cluster() {
+export function cluster(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Distance" name="d-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-4 des">Max Error (mag):</div>\n' +
         '<div class="col-sm-5 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Error" name="err-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Age" name="age-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal-num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
@@ -63,13 +63,13 @@ export function cluster() {
         '</form>\n');
 
     // Link each slider with corresponding text box
-    const clusterForm = document.getElementById("cluster-form");
-    const filterForm = document.getElementById("filter-form");
-    linkInputs(clusterForm.elements['d'], clusterForm.elements['d-num'], 0.1, 100, 0.01, 3, true);
-    linkInputs(clusterForm.elements['err'], clusterForm.elements['err-num'], 0, 1, 0.01, 1);
-    linkInputs(clusterForm.elements['age'], clusterForm.elements['age-num'], 6, 11, 0.01, 6);
-    linkInputs(clusterForm.elements['red'], clusterForm.elements['red-num'], 0, 1, 0.01, 0);
-    linkInputs(clusterForm.elements['metal'], clusterForm.elements['metal-num'], -3, 1, 0.01, -3);
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const filterForm = document.getElementById("filter-form") as FilterForm;
+    linkInputs(clusterForm['d'], clusterForm['d_num'], 0.1, 100, 0.01, 3, true);
+    linkInputs(clusterForm['err'], clusterForm['err_num'], 0, 1, 0.01, 1);
+    linkInputs(clusterForm['age'], clusterForm['age_num'], 6, 11, 0.01, 6);
+    linkInputs(clusterForm['red'], clusterForm['red_num'], 0, 1, 0.01, 0);
+    linkInputs(clusterForm['metal'], clusterForm['metal_num'], -3, 1, 0.01, -3);
 
     let tableData = [
         { "B": 15.43097938, "V": 16.27826813 },
@@ -311,10 +311,6 @@ export function cluster() {
         { "B": 16.46675614, "V": 17.15839414 }
     ];
 
-
-
-    let chartData = [];
-
     // create table
     const container = document.getElementById('table-div');
     const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
@@ -327,7 +323,7 @@ export function cluster() {
         hiddenColumns: true
     }));
     // create chart
-    const ctx = document.getElementById("myChart").getContext('2d');
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -344,7 +340,7 @@ export function cluster() {
                     immutableLabel: true,
                 },{
                     label: 'Data',
-                    data: chartData,
+                    data: [],
                     backgroundColor: colors['red'],
                     fill: false,
                     showLine: false,
@@ -377,8 +373,9 @@ export function cluster() {
         //console.log(tableData);
         updateTableHeight(hot);
         updateScatter(hot, myChart,
-            clusterForm.elements['d-num'].value,
-            filterForm, clusterForm.elements['err-num'].value);
+            Number(clusterForm['d_num'].value),
+            0, //arguement dist is missing. 0 is put in as a default value
+            filterForm, Number(clusterForm['err_num'].value));
         updateHRModel(clusterForm, myChart);
     };
 
@@ -398,9 +395,9 @@ export function cluster() {
     filterForm.oninput = function () {
         //console.log(tableData);
 
-        let reveal = [filterForm.elements["red"].value,filterForm.elements["blue"].value,filterForm.elements["lum"].value]
+        let reveal = [filterForm["red"].value,filterForm["blue"].value,filterForm["lum"].value]
 
-        let columns = hot.getColHeader()
+        let columns = hot.getColHeader() as string[];
         let hidden = [];
         for (var col in columns){
             columns[col] = columns[col].substring(0,columns[col].length-4);//cut off " Mag"
@@ -412,12 +409,12 @@ export function cluster() {
         hot.updateSettings({
             hiddenColumns: {
                 columns: [...hidden],
-                copyPasteEnabled: false,
+               // copyPasteEnabled: false,
                 indicators: false}
         });
 
         update();
-        updateLabels(myChart, document.getElementById('chart-info-form'));
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
         myChart.update('none');
     }
     update();
@@ -425,7 +422,7 @@ export function cluster() {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = 'x';
     myChart.options.scales['y'].title.text = 'y';
-    updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false);
 
     return [hot, myChart];
 }
@@ -439,9 +436,9 @@ export function cluster() {
  * @param {Handsontable} table The table to be updated
  * @param {Chartjs} myChart
  */
-export function clusterFileUpload(evt, table, myChart) {
+export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("clusterFileUpload called");
-    let file = evt.target.files[0];
+    let file = (evt.target as HTMLInputElement).files[0];
 
     if (file === undefined) {
         return;
@@ -459,27 +456,27 @@ export function clusterFileUpload(evt, table, myChart) {
     const reader = new FileReader();
     reader.onload = () => {
 
-        const clusterForm = document.getElementById("cluster-form");
+        const clusterForm = document.getElementById("cluster-form") as ClusterForm;
         // console.log(clusterForm.elements['d'].value);
-        clusterForm.elements['d'].value = Math.log(3);
+        clusterForm['d'].value = (Math.log(3)).toString();
         // console.log(clusterForm.elements['d'].value);
-        clusterForm.elements['age'].value = 6;
-        clusterForm.elements['red'].value = 0;
-        clusterForm.elements['metal'].value = -3;
-        clusterForm.elements['d-num'].value = 3;
-        clusterForm.elements['age-num'].value = 6;
-        clusterForm.elements['red-num'].value = 0;
-        clusterForm.elements['metal-num'].value = -3;
+        clusterForm['age'].value = '6';
+        clusterForm['red'].value = '0';
+        clusterForm['metal'].value = '-3';
+        clusterForm['d_num'].value = '3';
+        clusterForm['age_num'].value = '6';
+        clusterForm['red_num'].value = '0';
+        clusterForm['metal_num'].value = '-3';
         myChart.options.plugins.title.text = "Title";;
         myChart.data.datasets[1].label = "Data";
         myChart.options.scales['x'].title.text = 'x';
         myChart.options.scales['y'].title.text = 'y';
-        updateLabels(myChart, document.getElementById('chart-info-form'), false, false, false, false);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false);
 
-        let data = reader.result.split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+        let data = (reader.result as string).split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
       
-        let datadict = {}; // initializes a dictionary for the data
-        let filters = []
+        let datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
+        let filters: string[] = [];
         data.splice(0, 1);
 
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
@@ -488,32 +485,26 @@ export function clusterFileUpload(evt, table, myChart) {
             let src    = items[1]
             let filter = items[10]
             let mag    = parseFloat(items[12])
-            try{//If an object for this source exists, add an attribute for this filter
-            datadict[src][filter] = isNaN(mag)? null:mag;
+            if (!datadict.has(src)) {
+                datadict.set(src, new Map<string, number>());
             }
-            catch{//Otherwise? create an object for this source and add the filter
-                datadict[src] = {}
-                datadict[src][filter] = isNaN(mag)? null:mag;
-            }
-            if (!filters.includes(filter)){
+            datadict.get(src).set(filter, isNaN(mag)? null: mag);
+            if (!filters.includes(filter)) {
                 filters.push(filter);
             }
         }
         //add null values for sources that didn't show up under each filter
-        for (let src in datadict){
-            for (let f in filters){
-                try{
-                    src[f];
-                }
-                catch{
-                    src[f]=null;
+        for (let src of datadict.keys()) {
+            for (let f of filters) {
+                if (!datadict.get(src).has(f)) {
+                    datadict.get(src).set(f, null);
                 }
             }
         }
 
-        let blue = document.getElementById("filter-form").elements["blue"];
-        let red = document.getElementById("filter-form").elements["red"];
-        let lum = document.getElementById("filter-form").elements["lum"];
+        let blue = (document.getElementById("filter-form") as FilterForm)["blue"];
+        let red = (document.getElementById("filter-form") as FilterForm)["red"];
+        let lum = (document.getElementById("filter-form") as FilterForm)["lum"];
 
         //Change filter options to match file
 
@@ -539,7 +530,7 @@ export function clusterFileUpload(evt, table, myChart) {
        //blue and lum are most blue by default, red is set to most red
        changeOptions(blue,optionList);
        changeOptions(red,optionList);
-       red.value = red.options[red.options.length-1].value;
+       //red.value = red.options[red.options.length-1].value;
        changeOptions(lum,optionList);
 
         tableData = Object.values(datadict);//turns our dictionary into an array;
@@ -550,8 +541,8 @@ export function clusterFileUpload(evt, table, myChart) {
                 
         updateTableHeight(table);
         updateScatter(table, myChart,
-            document.getElementById('cluster-form').elements["d-num"].value, 1,
-            document.getElementById('filter-form')
+            Number((document.getElementById('cluster-form') as ClusterForm)["d_num"].value), 1,
+            (document.getElementById('filter-form') as FilterForm)
         )
     }
     reader.readAsText(file);
@@ -565,12 +556,12 @@ export function clusterFileUpload(evt, table, myChart) {
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(form, chart) {
+function updateHRModel(form: ClusterForm, chart: Chart) {
     chart.data.datasets[0].data = HRGenerator(
-        //form.elements['r-num'].value,
-        form.elements['age-num'].value,
-        form.elements['red-num'].value,
-        form.elements['metal-num'].value,
+        //form.elements['r_num'].value,
+        Number(form['age_num'].value),
+        form['red_num'].value,
+        Number(form['metal_num'].value),
         -8,
         8,
         2000
@@ -591,7 +582,7 @@ function updateHRModel(form, chart) {
 *  @param steps:        Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 500) {
+function HRGenerator(age: number, reddening: string, metallicity: number, start = -8, end = 8, steps = 500): Array<any> {
     //To Change
     let data = [];
     let y = start;
@@ -611,17 +602,17 @@ function HRGenerator(age, reddening, metallicity, start = -8, end = 8, steps = 5
     return data;
 }
 
-function updateScatter(table, myChart, dist, dataSet, form, err = 1) {
+function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSetIndex: number, form: FilterForm, err = 1) {
 
     let start = 0;
-    let chart = myChart.data.datasets[dataSet].data;
+    let chart = myChart.data.datasets[dataSetIndex].data;
     let tableData = table.getData();
     let columns = table.getColHeader();
 
     //Identify the column the selected filter refers to
-    let blue = columns.indexOf(form.elements["blue"].value + " Mag");
-    let red = columns.indexOf(form.elements["red"].value + " Mag");
-    let lum = columns.indexOf(form.elements["lum"].value + " Mag");
+    let blue = columns.indexOf(form["blue"].value + " Mag");
+    let red = columns.indexOf(form["red"].value + " Mag");
+    let lum = columns.indexOf(form["lum"].value + " Mag");
 
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null) {
