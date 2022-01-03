@@ -20,9 +20,9 @@ export function cluster(): [Handsontable, Chart] {
         '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-4 des">Max Error (mag):</div>\n' +
-        '<div class="col-sm-5 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+        '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
@@ -30,14 +30,14 @@ export function cluster(): [Handsontable, Chart] {
         '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
         '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
