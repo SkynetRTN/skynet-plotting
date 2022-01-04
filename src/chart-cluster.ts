@@ -710,14 +710,12 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     myChart.options.scales['y'] = {min:minY, max:maxY};
 }
 
-
-
 //Now we need to create the function for the reddening curve
-let filterlambda = 0;
+let filterlambda = 0.5;
 let lambda = filterlambda;
 let R_v = 3.1;
 //connect the value of A_v to the reddening slider
-let A_v = 'red_num';
+let A_v = Number((document.getElementById('cluster-form') as ClusterForm)["red_num"].value);
 let x = (lambda/(10^(-6)))^(-1);
 let y = x-1.82;
 let a = 0;
@@ -737,5 +735,3 @@ let b = 0;
     }
 
     let A_lambda = Number(A_v) * (a + (b/R_v));
-
-
