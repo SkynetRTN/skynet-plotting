@@ -536,9 +536,9 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             for (let i =0; i<knownFilters.length; i++){
                 filterMap.set(knownFilters[i], i);
             }
-         blue.value = knownFilters[0];
-            red.value = knownFilters[knownFilters.length-2];
-            lum.value = knownFilters[knownFilters.length-2];
+            blue.value = knownFilters[0];
+            red.value = knownFilters[1];
+            lum.value = knownFilters[1];
             //this might be it??????????
         //console.log (filters)
 
