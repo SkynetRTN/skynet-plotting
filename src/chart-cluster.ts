@@ -76,10 +76,39 @@ export function cluster(): [Handsontable, Chart] {
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const filterForm = document.getElementById("filter-form") as FilterForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1);
-  linkInputs(clusterForm["age"], clusterForm["age_num"], 6, 11, 0.01, 6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0);
-  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -3, 1, 0.01, -3);
+  linkInputs(
+    clusterForm["err"],
+    clusterForm["err_num"],
+    0,
+    1,
+    0.01,
+    1,
+    false,
+    true,
+    0,
+    100000000
+  );
+  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.1, 0.01, 6);
+  linkInputs(
+    clusterForm["red"],
+    clusterForm["red_num"],
+    0,
+    1,
+    0.01,
+    0,
+    false,
+    true,
+    0,
+    100000000
+  );
+  linkInputs(
+    clusterForm["metal"],
+    clusterForm["metal_num"],
+    -2.3,
+    0.2,
+    0.01,
+    -3
+  );
 
   const tableData = [
     { B: 15.43097938, V: 16.27826813 },
@@ -540,7 +569,7 @@ export function clusterFileUpload(
     for (const row of data) {
       let items = row.trim().split(",");
       let src = items[1];
-      let filter = items[10].toUpperCase();
+      let filter = items[10];
       let mag = parseFloat(items[12]);
       let err = parseFloat(items[13]);
       if (!datadict.has(src)) {
@@ -572,20 +601,20 @@ export function clusterFileUpload(
     //order filters by temperature
     let knownFilters = [
       "U",
-      "UPRIME",
+      "uprime",
       "B",
-      "GPRIME",
+      "gprime",
       "V",
-      "VPRIME",
-      "RPRIME",
+      "vprime",
+      "rprime",
       "R",
-      "IPRIME",
+      "iprime",
       "I",
-      "ZPRIME",
+      "zprime",
       "Y",
       "J",
       "H",
-      "KS",
+      "Ks",
       "K",
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
@@ -755,6 +784,18 @@ function updateScatter(
   let red = columns.indexOf(filterForm["red"].value + " Mag");
   let lum = columns.indexOf(filterForm["lum"].value + " Mag");
 
+  let A_v1 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["blue"].value]
+  );
+  let A_v2 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["red"].value]
+  );
+  let A_v3 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["lum"].value]
+  );
   let blueErr =
     columns.indexOf(filterForm["blue"].value + "err") < 0
       ? null
@@ -788,8 +829,8 @@ function updateScatter(
     }
     //red-blue,lum
 
-    let x = tableData[i][blue] - A_lambda - (tableData[i][red] - A_lambda);
-    let y = tableData[i][lum] - A_lambda - 5 * Math.log10(dist / 0.01);
+    let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
+    let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
       x: x,
       y: y,
@@ -845,11 +886,30 @@ function updateScatter(
   };
 }
 
+//assign wavelength to each knownfilter
+let filterWavelength: { [key: string]: number } = {
+  U: 0.364,
+  B: 0.442,
+  V: 0.54,
+  R: 0.647,
+  I: 0.7865,
+  uprime: 0.354,
+  gprime: 0.475,
+  rprime: 0.622,
+  iprime: 0.763,
+  zprime: 0.905,
+  J: 1.25,
+  H: 1.65,
+  K: 2.15,
+  Ks: 2.15,
+};
+
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
+
   let lambda = filterlambda;
   let R_v = 3.1;
-  let x = (lambda / 10 ** -6) ** -1;
+  let x = (lambda / 1) ** -1;
   let y = x - 1.82;
   let a = 0;
   let b = 0;
