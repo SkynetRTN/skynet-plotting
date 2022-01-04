@@ -6,7 +6,9 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config";
 import { linkInputs, throttle, updateLabels, updateTableHeight, changeOptions } from "./util";
 import { round } from "./my-math"
+import zoomPlugin from 'chartjs-plugin-zoom';
 
+Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
@@ -365,6 +367,20 @@ export function cluster(): [Handsontable, Chart] {
                     reverse: true,
                     suggestedMin: 0,
                 },
+            },
+            plugins:{
+                zoom:{
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
+                    zoom: {
+                        wheel:{
+                            enabled: true
+                        },
+                        mode: 'x',
+                    },
+                }
             }
         }
     });
@@ -651,7 +667,9 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     let blueErr = columns.indexOf(form["blue"].value + "err")<0? null:columns.indexOf(form["blue"].value + "err"); //checks for supplied err data
     let redErr  = columns.indexOf(form["red"].value + "err")<0? null:columns.indexOf(form["red"].value + "err");
     let lumErr  = columns.indexOf(form["lum"].value + "err")<0? null:columns.indexOf(form["lum"].value + "err");
-    console.log(blueErr);
+    
+    let maxY = NaN;
+    let minY = NaN;
 
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null ||
@@ -661,13 +679,32 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
             continue;
         }
         //red-blue,lum
+        let x = tableData[i][blue] - tableData[i][red]
+        let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01)
         chart[start++] = {
-            x: tableData[i][blue] - tableData[i][red],
-            y: tableData[i][lum] - 5 * Math.log10(dist / 0.01)
+            x: x,
+            y: y,
         };
+
+        //finding the maximum and minimum of y value for chart scaling
+        if (isNaN(maxY)){
+            maxY = y;
+            minY = y;
+        } else {
+            if (y > maxY){
+                maxY = y;
+                // console.log(maxY);
+            } else if (y < minY) {
+                minY = y;
+                // console.log(minY);
+            }
+        }
     }
     while (chart.length !== start) {
         chart.pop();
     }
     myChart.update('none');
+
+    //scale chart y-axis based on minimum and maximum y value
+    myChart.options.scales['y'] = {min:minY, max:maxY};
 }

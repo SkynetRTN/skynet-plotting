@@ -39,6 +39,7 @@
   "dependencies": {
     "bootstrap": "^4.6.1",
     "chart.js": "^3.7.0",
+    "chartjs-plugin-zoom": "^1.2.0",
     "file-saver": "^2.0.5",
     "handsontable": "11",
     "jquery": "^3.6.0",
