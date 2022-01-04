@@ -78,10 +78,10 @@ export function cluster(): [Handsontable, Chart] {
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const filterForm = document.getElementById("filter-form") as FilterForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1);
-  linkInputs(clusterForm["age"], clusterForm["age_num"], 6, 11, 0.01, 6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0);
-  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -3, 1, 0.01, -3);
+  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
+  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.10, 0.01, 6);
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -2.3, 0.2, 0.01, -3);
 
   const tableData = [
     { B: 15.43097938, V: 16.27826813 },
