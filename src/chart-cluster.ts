@@ -12,9 +12,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
-import zoomPlugin from "chartjs-plugin-zoom";
 
-Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
@@ -78,10 +76,39 @@ export function cluster(): [Handsontable, Chart] {
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const filterForm = document.getElementById("filter-form") as FilterForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
-  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.10, 0.01, 6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
-  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -2.3, 0.2, 0.01, -3);
+  linkInputs(
+    clusterForm["err"],
+    clusterForm["err_num"],
+    0,
+    1,
+    0.01,
+    1,
+    false,
+    true,
+    0,
+    100000000
+  );
+  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.1, 0.01, 6);
+  linkInputs(
+    clusterForm["red"],
+    clusterForm["red_num"],
+    0,
+    1,
+    0.01,
+    0,
+    false,
+    true,
+    0,
+    100000000
+  );
+  linkInputs(
+    clusterForm["metal"],
+    clusterForm["metal_num"],
+    -2.3,
+    0.2,
+    0.01,
+    -3
+  );
 
   const tableData = [
     { B: 15.43097938, V: 16.27826813 },
@@ -392,20 +419,6 @@ export function cluster(): [Handsontable, Chart] {
           suggestedMin: 0,
         },
       },
-      plugins: {
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: "x",
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-            },
-            mode: "x",
-          },
-        },
-      },
     },
   });
 
@@ -602,7 +615,7 @@ export function clusterFileUpload(
       "J",
       "H",
       "Ks",
-      "K"
+      "K",
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
     knownFilters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
@@ -760,7 +773,6 @@ function updateScatter(
   let dist = parseFloat(clusterForm["d_num"].value);
   let reddening = parseFloat(clusterForm["red_num"].value);
   let A_lambda = calculateLambda(reddening);
-  console.log(A_lambda);
 
   let start = 0;
   let chart = myChart.data.datasets[dataSetIndex].data;
@@ -772,9 +784,18 @@ function updateScatter(
   let red = columns.indexOf(filterForm["red"].value + " Mag");
   let lum = columns.indexOf(filterForm["lum"].value + " Mag");
 
-let A_v1 = calculateLambda(reddening, filterWavelength[filterForm["blue"].value]);
-let A_v2 = calculateLambda(reddening, filterWavelength[filterForm["red"].value]);
-let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value]);
+  let A_v1 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["blue"].value]
+  );
+  let A_v2 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["red"].value]
+  );
+  let A_v3 = calculateLambda(
+    reddening,
+    filterWavelength[filterForm["lum"].value]
+  );
   let blueErr =
     columns.indexOf(filterForm["blue"].value + "err") < 0
       ? null
@@ -788,8 +809,12 @@ let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value])
       ? null
       : columns.indexOf(filterForm["lum"].value + "err");
 
-  let maxY = 0;
-  let minY = 0;
+  let scaleLimits: { [key: string]: number } = {
+    minX: NaN,
+    minY: NaN,
+    maxX: NaN,
+    maxY: NaN,
+  };
 
   for (let i = 0; i < tableData.length; i++) {
     if (
@@ -804,24 +829,29 @@ let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value])
     }
     //red-blue,lum
 
-    let x = (tableData[i][blue] - A_v1) - (tableData[i][red] - A_v2);
-    let y = (tableData[i][lum] - A_v3) - (5 * Math.log10(dist / 0.01));
+    let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
+    let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
       x: x,
       y: y,
     };
 
     //finding the maximum and minimum of y value for chart scaling
-    if (isNaN(maxY)) {
-      maxY = y;
-      minY = y;
+    if (isNaN(scaleLimits["minX"])) {
+      scaleLimits["minX"] = x;
+      scaleLimits["maxX"] = x;
+      scaleLimits["minY"] = y;
+      scaleLimits["maxY"] = y;
     } else {
-      if (y > maxY) {
-        maxY = y;
-        // console.log(maxY);
-      } else if (y < minY) {
-        minY = y;
-        // console.log(minY);
+      if (y > scaleLimits["maxY"]) {
+        scaleLimits["maxY"] = y;
+      } else if (y < scaleLimits["minY"]) {
+        scaleLimits["minY"] = y;
+      }
+      if (x > scaleLimits["maxX"]) {
+        scaleLimits["maxX"] = x;
+      } else if (x < scaleLimits["minX"]) {
+        scaleLimits["minX"] = x;
       }
     }
   }
@@ -830,37 +860,53 @@ let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value])
   }
   myChart.update("none");
 
-  //scale chart y-axis based on minimum and maximum y value
+  //   scale chart y-axis based on minimum and maximum y value
+  let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
+  let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
+  let buffer = 0.3;
   myChart.options.scales["y"] = {
-    min: minY - 0.5,
-    max: maxY + 0.5,
+    min: isNaN(scaleLimits["minY"])
+      ? 0
+      : scaleLimits["minY"] - (yBuffer < buffer ? yBuffer : buffer),
+    max: isNaN(scaleLimits["maxY"])
+      ? 0
+      : scaleLimits["maxY"] + (yBuffer < buffer ? yBuffer : buffer),
     reverse: true,
     suggestedMin: 0,
   };
+  myChart.options.scales["x"] = {
+    min: isNaN(scaleLimits["minX"])
+      ? 0
+      : scaleLimits["minX"] - (xBuffer < buffer ? xBuffer : buffer),
+    max: isNaN(scaleLimits["maxX"])
+      ? 0
+      : scaleLimits["maxX"] + (xBuffer < buffer ? xBuffer : buffer),
+    type: "linear",
+    position: "bottom",
+  };
 }
 
- //assign wavelength to each knownfilter
- let filterWavelength: {[key:string]:number} = {
-  'U': .364,
-  'B': .442,
-  'V': .540,
-  'R': .647,
-  'I': .7865,
-  'uprime': .354,
-  'gprime': .475,
-  'rprime': .622,
-  'iprime': .763,
-  'zprime': .905,
-  'J': 1.25,
-  'H': 1.65,
-  'K': 2.15,
-  'Ks': 2.15,
-}
+//assign wavelength to each knownfilter
+let filterWavelength: { [key: string]: number } = {
+  U: 0.364,
+  B: 0.442,
+  V: 0.54,
+  R: 0.647,
+  I: 0.7865,
+  uprime: 0.354,
+  gprime: 0.475,
+  rprime: 0.622,
+  iprime: 0.763,
+  zprime: 0.905,
+  J: 1.25,
+  H: 1.65,
+  K: 2.15,
+  Ks: 2.15,
+};
 
- 
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
-  
+
   let lambda = filterlambda;
   let R_v = 3.1;
   let x = (lambda / 1) ** -1;
@@ -896,4 +942,3 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
   return Number(A_v) * (a + b / R_v);
 }
-
