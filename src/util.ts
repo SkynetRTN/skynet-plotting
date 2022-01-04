@@ -160,7 +160,7 @@ export function updateTableHeight(table: Handsontable) {
 
 // Credits: https://stackoverflow.com/a/30407959/1154380
 export function dataURLtoBlob(dataurl: string) {
-    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
     while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
