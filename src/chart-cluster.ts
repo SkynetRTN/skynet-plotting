@@ -71,7 +71,7 @@ export function cluster(): [Handsontable, Chart] {
     linkInputs(clusterForm['red'], clusterForm['red_num'], 0, 1, 0.01, 0);
     linkInputs(clusterForm['metal'], clusterForm['metal_num'], -3, 1, 0.01, -3);
 
-    let tableData = [
+    const tableData = [
         { "B": 15.43097938, "V": 16.27826813 },
         { "B": 16.77254031, "V": 25.11862975 },
         { "B": 15.8596803, "V": 16.02283206 },
@@ -338,7 +338,7 @@ export function cluster(): [Handsontable, Chart] {
                     pointRadius: 0,
                     fill: false,
                     immutableLabel: true,
-                },{
+                }, {
                     label: 'Data',
                     data: [],
                     backgroundColor: colors['red'],
@@ -386,8 +386,8 @@ export function cluster(): [Handsontable, Chart] {
         afterCreateRow: update,
     });
 
-    let fps = 60;
-    let frameTime = Math.floor(1000 / fps);
+    const fps = 100;
+    const frameTime = Math.floor(1000 / fps);
 
     // link chart to model form (slider + text)
     clusterForm.oninput = throttle(update, frameTime);
@@ -395,22 +395,27 @@ export function cluster(): [Handsontable, Chart] {
     filterForm.oninput = function () {
         //console.log(tableData);
 
-        let reveal = [filterForm["red"].value,filterForm["blue"].value,filterForm["lum"].value]
+        const reveal: string[] = [
+            filterForm["red"].value,
+            filterForm["blue"].value,
+            filterForm["lum"].value
+        ]
 
-        let columns = hot.getColHeader() as string[];
-        let hidden = [];
-        for (var col in columns){
-            columns[col] = columns[col].substring(0,columns[col].length-4);//cut off " Mag"
-            if(!reveal.includes(columns[col])){//if the column isn't selected in the drop down, hide it
+        const columns: string[] = hot.getColHeader() as string[];
+        const hidden: number[] = [];
+        for (const col in columns) {
+            columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+            if (!reveal.includes(columns[col])) { //if the column isn't selected in the drop down, hide it
                 hidden.push(parseFloat(col));
             }
         }
 
         hot.updateSettings({
             hiddenColumns: {
-                columns: [...hidden],
-               // copyPasteEnabled: false,
-                indicators: false}
+                columns: hidden,
+                // copyPasteEnabled: false,
+                indicators: false
+            }
         });
 
         update();
@@ -438,7 +443,7 @@ export function cluster(): [Handsontable, Chart] {
  */
 export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("clusterFileUpload called");
-    let file = (evt.target as HTMLInputElement).files[0];
+    const file = (evt.target as HTMLInputElement).files[0];
 
     if (file === undefined) {
         return;
@@ -473,90 +478,93 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
         myChart.options.scales['y'].title.text = 'y';
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false);
 
-        let data = (reader.result as string).split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
-      
-        let datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
+        const data: string[] = (reader.result as string).split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+
+        const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
         let filters: string[] = [];
         data.splice(0, 1);
 
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
-            let items = row.trim().split(",");
-            let src    = items[1]
-            let filter = items[10]
-            let mag    = parseFloat(items[12])
+            const items: string[] = row.trim().split(",");
+            const src = items[1]
+            const filter = items[10]
+            const mag = parseFloat(items[12])
             if (!datadict.has(src)) {
                 datadict.set(src, new Map<string, number>());
             }
-            datadict.get(src).set(filter, isNaN(mag)? null: mag);
+            datadict.get(src).set(filter, isNaN(mag) ? null : mag);
             if (!filters.includes(filter)) {
                 filters.push(filter);
             }
         }
         //add null values for sources that didn't show up under each filter
-        for (let src of datadict.keys()) {
-            for (let f of filters) {
+        for (const src of datadict.keys()) {
+            for (const f of filters) {
                 if (!datadict.get(src).has(f)) {
                     datadict.get(src).set(f, null);
                 }
             }
         }
 
-        let blue = (document.getElementById("filter-form") as FilterForm)["blue"];
-        let red = (document.getElementById("filter-form") as FilterForm)["red"];
-        let lum = (document.getElementById("filter-form") as FilterForm)["lum"];
+        const filterForm = document.getElementById("filter-form") as FilterForm;
+        const blue = filterForm["blue"];
+        const red = filterForm["red"];
+        const lum = filterForm["lum"];
 
         //Change filter options to match file
 
         //order filters by temperature
-        let knownFilters = ["U","UPRIME","USTAR","B","GPRIME","V","VPRIME","RPRIME","R","IPRIME","I","ZPRIME","Y","J","H","KS", "K", "L", "M", "N", "Q"];
+        let knownFilters = ["U", "UPRIME", "USTAR", "B", "GPRIME", "V", "VPRIME", "RPRIME", "R", "IPRIME", "I", "ZPRIME", "Y", "J", "H", "KS", "K", "L", "M", "N", "Q"];
         //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
-        knownFilters = knownFilters.filter(f => filters.indexOf(f)>=0);
-        filters = knownFilters.concat(filters.filter(f => knownFilters.indexOf(f)<0));//slap unknowns on the end
+        knownFilters = knownFilters.filter(f => filters.indexOf(f) >= 0);
+        filters = knownFilters.concat(filters.filter(f => knownFilters.indexOf(f) < 0));//slap unknowns on the end
         //console.log(filters)
 
-       let optionList    = [];
-       let headers       = [];
-       let columns       = [];
-       let hiddenColumns = [];
-       for (let i =0; i<filters.length; i++){//makes a list of options for each filter 
-           optionList.push({value: filters[i], title: filters[i]+' Mag', text: filters[i]})
-           hiddenColumns[i]=i;
-           headers.push(filters[i]+" Mag")
-           columns.push({data: filters[i], type: 'numeric', numericFormat: { pattern: { mantissa: 2 } }})
-       }
-       //Change the options in the drop downs to the file's filters
-       //blue and lum are most blue by default, red is set to most red
-       changeOptions(blue,optionList);
-       changeOptions(red,optionList);
-       //red.value = red.options[red.options.length-1].value;
-       changeOptions(lum,optionList);
-       //now we need to assign a number to the filters based off their order in knownFilters
-         let filterMap = new Map<string, number>();
-            for (let i =0; i<knownFilters.length; i++){
-                filterMap.set(knownFilters[i], i);
-            }
-            blue.value = knownFilters[0];
-            red.value = knownFilters[1];
-            lum.value = knownFilters[1];
-            //this might be it??????????
+        const optionList = [];
+        const headers = [];
+        const columns = [];
+        const hiddenColumns = [];
+        for (let i = 0; i < filters.length; i++) {//makes a list of options for each filter 
+            optionList.push({ value: filters[i], title: filters[i] + ' Mag', text: filters[i] })
+            hiddenColumns[i] = i;
+            headers.push(filters[i] + " Mag")
+            columns.push({ data: filters[i], type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } })
+        }
+        //Change the options in the drop downs to the file's filters
+        //blue and lum are most blue by default, red is set to most red
+        changeOptions(blue, optionList);
+        changeOptions(red, optionList);
+        //red.value = red.options[red.options.length-1].value;
+        changeOptions(lum, optionList);
+        //now we need to assign a number to the filters based off their order in knownFilters
+        const filterMap = new Map<string, number>();
+        for (let i = 0; i < knownFilters.length; i++) {
+            filterMap.set(knownFilters[i], i);
+        }
+        blue.value = knownFilters[0];
+        red.value = knownFilters[knownFilters.length - 2];
+        lum.value = knownFilters[knownFilters.length - 2];
+        //this might be it??????????
         //console.log (filters)
 
-       //convrt datadict from dictionary to nested number array tableData
-       let tableData: {[key: string]: number}[] = [];
-       datadict.forEach((src, key)=>{
-           let row: {[key: string]: number} = {};
-           for (let filterIndex in filters){
-            row[filters[filterIndex]]=src.get(filters[filterIndex]);
-           }
-           tableData.push(row);
-       })
-    //    console.log(tableData);
+        //convrt datadict from dictionary to nested number array tableData
+        const tableData: { [key: string]: number }[] = [];
+        datadict.forEach((src, key) => {
+            const row: { [key: string]: number } = {};
+            for (let filterIndex in filters) {
+                row[filters[filterIndex]] = src.get(filters[filterIndex]);
+            }
+            tableData.push(row);
+        })
+        //    console.log(tableData);
 
-        table.updateSettings({ data: tableData,
-                               colHeaders: headers, 
-                               columns: columns,
-                               hiddenColumns: {columns: hiddenColumns.slice(3)}});//hide all but the first 3 columns
+        table.updateSettings({
+            data: tableData,
+            colHeaders: headers,
+            columns: columns,
+            hiddenColumns: { columns: hiddenColumns.slice(3) }
+        });//hide all but the first 3 columns
         updateTableHeight(table);
         updateScatter(table, myChart,
             Number((document.getElementById('cluster-form') as ClusterForm)["d_num"].value), 1,
