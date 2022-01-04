@@ -488,7 +488,7 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
         for (const row of data) {
             const items: string[] = row.trim().split(",");
             const src = items[1]
-            const filter = items[10]
+            const filter = items[10].toUpperCase();
             const mag = parseFloat(items[12])
             if (!datadict.has(src)) {
                 datadict.set(src, new Map<string, number>());
