@@ -371,13 +371,14 @@ export function cluster(): [Handsontable, Chart] {
             plugins:{
                 zoom:{
                     pan: {
-                        enabled: true
+                        enabled: true,
+                        mode: 'x',
                     },
                     zoom: {
                         wheel:{
                             enabled: true
                         },
-                        mode: 'x'
+                        mode: 'x',
                     },
                 }
             }
@@ -654,19 +655,40 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     let blue = columns.indexOf(form["blue"].value + " Mag");
     let red = columns.indexOf(form["red"].value + " Mag");
     let lum = columns.indexOf(form["lum"].value + " Mag");
+    let maxY = NaN;
+    let minY = NaN;
 
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null) {
             continue;
         }
         //red-blue,lum
+        let x = tableData[i][blue] - tableData[i][red]
+        let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01)
         chart[start++] = {
-            x: tableData[i][blue] - tableData[i][red],
-            y: tableData[i][lum] - 5 * Math.log10(dist / 0.01)
+            x: x,
+            y: y,
         };
+
+        //finding the maximum and minimum of y value for chart scaling
+        if (isNaN(maxY)){
+            maxY = y;
+            minY = y;
+        } else {
+            if (y > maxY){
+                maxY = y;
+                // console.log(maxY);
+            } else if (y < minY) {
+                minY = y;
+                // console.log(minY);
+            }
+        }
     }
     while (chart.length !== start) {
         chart.pop();
     }
     myChart.update('none');
+
+    //scale chart y-axis based on minimum and maximum y value
+    myChart.options.scales['y'] = {min:minY, max:maxY};
 }
