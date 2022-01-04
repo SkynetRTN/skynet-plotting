@@ -12,9 +12,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
-import zoomPlugin from "chartjs-plugin-zoom";
 
-Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
@@ -392,20 +390,6 @@ export function cluster(): [Handsontable, Chart] {
           suggestedMin: 0,
         },
       },
-      plugins: {
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: "x",
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-            },
-            mode: "x",
-          },
-        },
-      },
     },
   });
 
@@ -760,7 +744,6 @@ function updateScatter(
   let dist = parseFloat(clusterForm["d_num"].value);
   let reddening = parseFloat(clusterForm["red_num"].value);
   let A_lambda = calculateLambda(reddening);
-  console.log(A_lambda);
 
   let start = 0;
   let chart = myChart.data.datasets[dataSetIndex].data;
@@ -785,8 +768,12 @@ function updateScatter(
       ? null
       : columns.indexOf(filterForm["lum"].value + "err");
 
-  let maxY = 0;
-  let minY = 0;
+  let scaleLimits: { [key: string]: number } = {
+    minX: NaN,
+    minY: NaN,
+    maxX: NaN,
+    maxY: NaN,
+  };
 
   for (let i = 0; i < tableData.length; i++) {
     if (
@@ -801,24 +788,29 @@ function updateScatter(
     }
     //red-blue,lum
 
-    let x = (tableData[i][blue] - A_lambda) - (tableData[i][red] - A_lambda);
-    let y = (tableData[i][lum] - A_lambda) - (5 * Math.log10(dist / 0.01));
+    let x = tableData[i][blue] - A_lambda - (tableData[i][red] - A_lambda);
+    let y = tableData[i][lum] - A_lambda - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
       x: x,
       y: y,
     };
 
     //finding the maximum and minimum of y value for chart scaling
-    if (isNaN(maxY)) {
-      maxY = y;
-      minY = y;
+    if (isNaN(scaleLimits["minX"])) {
+      scaleLimits["minX"] = x;
+      scaleLimits["maxX"] = x;
+      scaleLimits["minY"] = y;
+      scaleLimits["maxY"] = y;
     } else {
-      if (y > maxY) {
-        maxY = y;
-        // console.log(maxY);
-      } else if (y < minY) {
-        minY = y;
-        // console.log(minY);
+      if (y > scaleLimits["maxY"]) {
+        scaleLimits["maxY"] = y;
+      } else if (y < scaleLimits["minY"]) {
+        scaleLimits["minY"] = y;
+      }
+      if (x > scaleLimits["maxX"]) {
+        scaleLimits["maxX"] = x;
+      } else if (x < scaleLimits["minX"]) {
+        scaleLimits["minX"] = x;
       }
     }
   }
@@ -827,16 +819,32 @@ function updateScatter(
   }
   myChart.update("none");
 
-  //scale chart y-axis based on minimum and maximum y value
+  //   scale chart y-axis based on minimum and maximum y value
+  let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
+  let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
+  let buffer = 0.3;
   myChart.options.scales["y"] = {
-    min: minY - 0.5,
-    max: maxY + 0.5,
+    min: isNaN(scaleLimits["minY"])
+      ? 0
+      : scaleLimits["minY"] - (yBuffer < buffer ? yBuffer : buffer),
+    max: isNaN(scaleLimits["maxY"])
+      ? 0
+      : scaleLimits["maxY"] + (yBuffer < buffer ? yBuffer : buffer),
     reverse: true,
     suggestedMin: 0,
   };
+  myChart.options.scales["x"] = {
+    min: isNaN(scaleLimits["minX"])
+      ? 0
+      : scaleLimits["minX"] - (xBuffer < buffer ? xBuffer : buffer),
+    max: isNaN(scaleLimits["maxX"])
+      ? 0
+      : scaleLimits["maxX"] + (xBuffer < buffer ? xBuffer : buffer),
+    type: "linear",
+    position: "bottom",
+  };
 }
 
- 
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
   let lambda = filterlambda;
