@@ -134,7 +134,7 @@ function chartType(chart: string) {
         objects = cluster();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, objects[0], objects[1]);
+            clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     }
 
