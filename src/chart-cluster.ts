@@ -6,7 +6,9 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config";
 import { linkInputs, throttle, updateLabels, updateTableHeight, changeOptions } from "./util";
 import { round } from "./my-math"
+import zoomPlugin from 'chartjs-plugin-zoom';
 
+Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
@@ -365,6 +367,19 @@ export function cluster(): [Handsontable, Chart] {
                     reverse: true,
                     suggestedMin: 0,
                 },
+            },
+            plugins:{
+                zoom:{
+                    pan: {
+                        enabled: true
+                    },
+                    zoom: {
+                        wheel:{
+                            enabled: true
+                        },
+                        mode: 'x'
+                    },
+                }
             }
         }
     });
@@ -486,17 +501,10 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
 
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
-<<<<<<< HEAD
             let items = row.trim().split(",");
             let src    = items[1]
             let filter = items[10].toUpperCase()
             let mag    = parseFloat(items[12])
-=======
-            const items: string[] = row.trim().split(",");
-            const src = items[1]
-            const filter = items[10].toUpperCase();
-            const mag = parseFloat(items[12])
->>>>>>> 2a963204737da3e6be58a67b8ebc5d8760eb8360
             if (!datadict.has(src)) {
                 datadict.set(src, new Map<string, number>());
             }
