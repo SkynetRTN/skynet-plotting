@@ -594,6 +594,7 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             Number((document.getElementById('cluster-form') as ClusterForm)["d_num"].value), 1,
             (document.getElementById('filter-form') as FilterForm)
         )
+    
     }
     reader.readAsText(file);
 }
@@ -708,3 +709,33 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     //scale chart y-axis based on minimum and maximum y value
     myChart.options.scales['y'] = {min:minY, max:maxY};
 }
+
+
+
+//Now we need to create the function for the reddening curve
+//let filterlambda = []
+//let lambda = filterlambda.value;
+//let R_v = 3.1;
+//connect the value of A_v to the reddening slider
+//let A_v = 'red_num';
+//let x = (lambda/(10^(-6)))^(-1);
+//let y = x-1.82;
+//let a = 0;
+//let b = 0;
+    //if (x > 0.3 && x < 1.1) {
+        //a = 0.574*x^1.61
+    //}
+    //else if (x > 1.1 && x < 3.3) {
+       // a = (1 + 0.17699*y - 0.50447*y^2 - 0.02427*y^3 + 0.72085*y^4 + 0.01979*y^5 - 0.77530*y^6 + 0.32999*y^7)
+   // }
+
+    //if (x > 0.3 && x < 1.1) {
+    //    b = -0.527*x^1.61
+    //}
+    //else if (x > 1.1 && x < 3.3) {
+    //    b = (1.41338*y + 2.28305*y^2 + 1.07233*y^3 - 5.38434*y^4 - 0.62251*y^5 + 5.30260*y^6 - 2.09002*y^7)
+    //}
+
+//let A_lambda = Number(A_v) * (a + (b/R_v));
+
+
