@@ -801,8 +801,8 @@ function updateScatter(
     }
     //red-blue,lum
 
-    let x = tableData[i][blue] - A_lambda - (tableData[i][red] - A_lambda);
-    let y = tableData[i][lum] - A_lambda - 5 * Math.log10(dist / 0.01);
+    let x = (tableData[i][blue] - A_lambda) - (tableData[i][red] - A_lambda);
+    let y = (tableData[i][lum] - A_lambda) - (5 * Math.log10(dist / 0.01));
     chart[start++] = {
       x: x,
       y: y,
@@ -831,6 +831,7 @@ function updateScatter(
   myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
 }
 
+ 
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
   let lambda = filterlambda;
