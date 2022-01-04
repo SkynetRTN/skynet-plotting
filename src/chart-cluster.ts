@@ -556,7 +556,7 @@ export function clusterFileUpload(
     for (const row of data) {
       let items = row.trim().split(",");
       let src = items[1];
-      let filter = items[10].toUpperCase();
+      let filter = items[10];
       let mag = parseFloat(items[12]);
       let err = parseFloat(items[13]);
       if (!datadict.has(src)) {
@@ -588,20 +588,20 @@ export function clusterFileUpload(
     //order filters by temperature
     let knownFilters = [
       "U",
-      "UPRIME",
+      "uprime",
       "B",
-      "GPRIME",
+      "gprime",
       "V",
-      "VPRIME",
-      "RPRIME",
+      "vprime",
+      "rprime",
       "R",
-      "IPRIME",
+      "iprime",
       "I",
-      "ZPRIME",
+      "zprime",
       "Y",
       "J",
       "H",
-      "KS",
+      "Ks",
       "K"
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
@@ -772,6 +772,9 @@ function updateScatter(
   let red = columns.indexOf(filterForm["red"].value + " Mag");
   let lum = columns.indexOf(filterForm["lum"].value + " Mag");
 
+let A_v1 = calculateLambda(reddening, filterWavelength[filterForm["blue"].value]);
+let A_v2 = calculateLambda(reddening, filterWavelength[filterForm["red"].value]);
+let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value]);
   let blueErr =
     columns.indexOf(filterForm["blue"].value + "err") < 0
       ? null
@@ -801,8 +804,8 @@ function updateScatter(
     }
     //red-blue,lum
 
-    let x = (tableData[i][blue] - A_lambda) - (tableData[i][red] - A_lambda);
-    let y = (tableData[i][lum] - A_lambda) - (5 * Math.log10(dist / 0.01));
+    let x = (tableData[i][blue] - A_v1) - (tableData[i][red] - A_v2);
+    let y = (tableData[i][lum] - A_v3) - (5 * Math.log10(dist / 0.01));
     chart[start++] = {
       x: x,
       y: y,
@@ -831,12 +834,31 @@ function updateScatter(
   myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
 }
 
+ //assign wavelength to each knownfilter
+ let filterWavelength: {[key:string]:number} = {
+  'U': .364,
+  'B': .442,
+  'V': .540,
+  'R': .647,
+  'I': .7865,
+  'uprime': .354,
+  'gprime': .475,
+  'rprime': .622,
+  'iprime': .763,
+  'zprime': .905,
+  'J': 1.25,
+  'H': 1.65,
+  'K': 2.15,
+  'Ks': 2.15,
+}
+
  
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
+  
   let lambda = filterlambda;
   let R_v = 3.1;
-  let x = (lambda / 10 ** -6) ** -1;
+  let x = (lambda / 1) ** -1;
   let y = x - 1.82;
   let a = 0;
   let b = 0;
@@ -869,3 +891,4 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
   return Number(A_v) * (a + b / R_v);
 }
+
