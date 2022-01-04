@@ -831,7 +831,12 @@ let A_v3 = calculateLambda(reddening, filterWavelength[filterForm["lum"].value])
   myChart.update("none");
 
   //scale chart y-axis based on minimum and maximum y value
-  myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
+  myChart.options.scales["y"] = {
+    min: minY - 0.5,
+    max: maxY + 0.5,
+    reverse: true,
+    suggestedMin: 0,
+  };
 }
 
  //assign wavelength to each knownfilter
