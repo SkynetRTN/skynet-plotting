@@ -526,9 +526,9 @@ export function clusterFileUpload(
     // console.log(clusterForm.elements['d'].value);
     clusterForm["age"].value = "6";
     clusterForm["red"].value = "0";
-    clusterForm["metal"].value = "-3";
+    clusterForm["metal"].value = "-2.3";
     clusterForm["d_num"].value = "3";
-    clusterForm["age_num"].value = "6";
+    clusterForm["age_num"].value = "6.6";
     clusterForm["red_num"].value = "0";
     clusterForm["metal_num"].value = "-3";
     myChart.options.plugins.title.text = "Title";
