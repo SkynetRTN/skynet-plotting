@@ -690,5 +690,5 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     myChart.update('none');
 
     //scale chart y-axis based on minimum and maximum y value
-    myChart.options.scales['y'] = {min:minY, max:maxY};
+    myChart.options.scales['y'] = {min:minY-0.5, max:maxY+0.5};
 }
