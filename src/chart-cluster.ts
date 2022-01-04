@@ -386,8 +386,8 @@ export function cluster(): [Handsontable, Chart] {
         afterCreateRow: update,
     });
 
-    let fps = 60;
-    let frameTime = Math.floor(1000 / fps);
+    const fps = 100;
+    const frameTime = Math.floor(1000 / fps);
 
     // link chart to model form (slider + text)
     clusterForm.oninput = throttle(update, frameTime);
