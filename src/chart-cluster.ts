@@ -602,7 +602,7 @@ export function clusterFileUpload(
       "J",
       "H",
       "KS",
-      "K"
+      "K",
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
     knownFilters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
@@ -828,7 +828,12 @@ function updateScatter(
   myChart.update("none");
 
   //scale chart y-axis based on minimum and maximum y value
-  myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
+  myChart.options.scales["y"] = {
+    min: minY - 0.5,
+    max: maxY + 0.5,
+    reverse: true,
+    suggestedMin: 0,
+  };
 }
 
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
