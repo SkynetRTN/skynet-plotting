@@ -506,10 +506,12 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             let src    = items[1]
             let filter = items[10].toUpperCase()
             let mag    = parseFloat(items[12])
+            let err    = parseFloat(items[13])
             if (!datadict.has(src)) {
                 datadict.set(src, new Map<string, number>());
             }
             datadict.get(src).set(filter, isNaN(mag) ? null : mag);
+            datadict.get(src).set(filter+'err', isNaN(err) ? 0 : err);
             if (!filters.includes(filter)) {
                 filters.push(filter);
             }
@@ -519,6 +521,7 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             for (const f of filters) {
                 if (!datadict.get(src).has(f)) {
                     datadict.get(src).set(f, null);
+                    datadict.get(src).set(f+'err', null);
                 }
             }
         }
@@ -540,13 +543,17 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
         const optionList = [];
         const headers = [];
         const columns = [];
-        const hiddenColumns = [];
+        var hiddenColumns = [];
         for (let i = 0; i < filters.length; i++) {//makes a list of options for each filter 
             optionList.push({ value: filters[i], title: filters[i] + ' Mag', text: filters[i] })
             hiddenColumns[i] = i;
-            headers.push(filters[i] + " Mag")
+            hiddenColumns[i+filters.length] = i+filters.length;//we have to double up the length for the error data
+            headers.push(filters[i] + " Mag")//every other column is err
+            headers.push(filters[i] + "err")
             columns.push({ data: filters[i], type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } })
+            columns.push({ data: filters[i]+'err', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } })
         }
+        hiddenColumns = hiddenColumns.filter(c => [0,2].indexOf(c) < 0)//get rid of the columns we want revealed
         //Change the options in the drop downs to the file's filters
         //blue and lum are most blue by default, red is set to most red
         changeOptions(blue, optionList);
@@ -570,6 +577,7 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             const row: { [key: string]: number } = {};
             for (let filterIndex in filters) {
                 row[filters[filterIndex]] = src.get(filters[filterIndex]);
+                row[filters[filterIndex]+'err'] = src.get(filters[filterIndex]+'err');
             }
             tableData.push(row);
         })
@@ -579,7 +587,7 @@ export function clusterFileUpload(evt: Event, table: Handsontable, myChart: Char
             data: tableData,
             colHeaders: headers,
             columns: columns,
-            hiddenColumns: { columns: hiddenColumns.slice(3) }
+            hiddenColumns: { columns: hiddenColumns }
         });//hide all but the first 3 columns
         updateTableHeight(table);
         updateScatter(table, myChart,
@@ -653,14 +661,22 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     let columns = table.getColHeader();
 
     //Identify the column the selected filter refers to
-    let blue = columns.indexOf(form["blue"].value + " Mag");
-    let red = columns.indexOf(form["red"].value + " Mag");
-    let lum = columns.indexOf(form["lum"].value + " Mag");
-    let maxY = NaN;
-    let minY = NaN;
+    let blue    = columns.indexOf(form["blue"].value + " Mag");
+    let red     = columns.indexOf(form["red"].value + " Mag");
+    let lum     = columns.indexOf(form["lum"].value + " Mag");
+
+    let blueErr = columns.indexOf(form["blue"].value + "err")<0? null:columns.indexOf(form["blue"].value + "err"); //checks for supplied err data
+    let redErr  = columns.indexOf(form["red"].value + "err")<0? null:columns.indexOf(form["red"].value + "err");
+    let lumErr  = columns.indexOf(form["lum"].value + "err")<0? null:columns.indexOf(form["lum"].value + "err");
+    
+    let maxY = 0;
+    let minY = 0;
 
     for (let i = 0; i < tableData.length; i++) {
-        if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null) {
+        if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null ||
+            (blueErr != null && tableData[i][blueErr] >= err) ||
+            (redErr != null && tableData[i][redErr] >= err)||
+            (lumErr != null && tableData[i][lumErr] >= err)) {
             continue;
         }
         //red-blue,lum
