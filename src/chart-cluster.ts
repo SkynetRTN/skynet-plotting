@@ -668,8 +668,8 @@ function updateScatter(table: Handsontable, myChart: Chart, dist: number, dataSe
     let redErr  = columns.indexOf(form["red"].value + "err")<0? null:columns.indexOf(form["red"].value + "err");
     let lumErr  = columns.indexOf(form["lum"].value + "err")<0? null:columns.indexOf(form["lum"].value + "err");
     
-    let maxY = NaN;
-    let minY = NaN;
+    let maxY = 0;
+    let minY = 0;
 
     for (let i = 0; i < tableData.length; i++) {
         if (tableData[i][blue] === null || tableData[i][red] === null || tableData[i][lum] === null ||
