@@ -715,8 +715,6 @@ function updateScatter(table: Handsontable, myChart: Chart, clusterForm: Cluster
     //scale chart y-axis based on minimum and maximum y value
     myChart.options.scales['y'] = {min:minY-0.5, max:maxY+0.5};
 }
-
-<<<<<<< HEAD
 function calculateLambda(A_v: Number, filterlambda = 10**-6){
 //Now we need to create the function for the reddening curve
     let lambda = filterlambda;
@@ -740,56 +738,4 @@ function calculateLambda(A_v: Number, filterlambda = 10**-6){
     }
 
     return Number(A_v) * (a + (b/R_v));
-
-=======
-function plotCoordinate(
-  blue: number,
-  red: number,
-  lum: number,
-  dist: number
-): number[] {
-  //Now we need to create the function for the reddening curve
-  let filterlambda = 10 ^ -6;
-  let lambda = filterlambda;
-  let R_v = 3.1;
-  //connect the value of A_v to the reddening slider
-  let A_v = Number(
-    (document.getElementById("cluster-form") as ClusterForm)["red_num"].value
-  );
-  let x = (lambda / (10 ^ -6)) ^ -1;
-  let y = x - 1.82;
-  let a = 0;
-  let b = 0;
-  if (x > 0.3 && x < 1.1) {
-    a = (0.574 * x) ^ 1.61;
-  } else if (x > 1.1 && x < 3.3) {
-    a =
-      1 +
-      0.17699 * y -
-      ((0.50447 * y) ^ 2) -
-      ((0.02427 * y) ^ 3) +
-      ((0.72085 * y) ^ 4) +
-      ((0.01979 * y) ^ 5) -
-      ((0.7753 * y) ^ 6) +
-      ((0.32999 * y) ^ 7);
-  }
-
-  if (x > 0.3 && x < 1.1) {
-    b = (-0.527 * x) ^ 1.61;
-  } else if (x > 1.1 && x < 3.3) {
-    b =
-      1.41338 * y +
-      ((2.28305 * y) ^ 2) +
-      ((1.07233 * y) ^ 3) -
-      ((5.38434 * y) ^ 4) -
-      ((0.62251 * y) ^ 5) +
-      ((5.3026 * y) ^ 6) -
-      ((2.09002 * y) ^ 7);
-  }
-  let A_lambda = Number(A_v) * (a + b / R_v);
-  return [
-    blue - A_lambda - (red - A_lambda),
-    lum - A_lambda - 5 * Math.log10(dist / 0.01),
-  ];
->>>>>>> refs/remotes/origin/main
 }
