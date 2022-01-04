@@ -589,7 +589,6 @@ export function clusterFileUpload(
     let knownFilters = [
       "U",
       "UPRIME",
-      "USTAR",
       "B",
       "GPRIME",
       "V",
@@ -603,11 +602,7 @@ export function clusterFileUpload(
       "J",
       "H",
       "KS",
-      "K",
-      "L",
-      "M",
-      "N",
-      "Q",
+      "K"
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
     knownFilters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
