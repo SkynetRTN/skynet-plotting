@@ -415,7 +415,7 @@ export function cluster(): [Handsontable, Chart] {
     updateScatter(
       hot,
       myChart,
-      Number(clusterForm["d_num"].value),
+      clusterForm,
       1, //the dataSet is missing after
       filterForm,
       Number(clusterForm["err_num"].value)
@@ -679,9 +679,7 @@ export function clusterFileUpload(
     updateScatter(
       table,
       myChart,
-      Number(
-        (document.getElementById("cluster-form") as ClusterForm)["d_num"].value
-      ),
+      document.getElementById("cluster-form") as ClusterForm,
       1,
       document.getElementById("filter-form") as FilterForm
     );
@@ -743,7 +741,7 @@ function HRGenerator(
       //cut off at x=2
       data.push({
         y: y,
-        x: x1 + parseFloat(reddening),
+        x: x1,
       });
     }
     y += step;
@@ -754,33 +752,38 @@ function HRGenerator(
 function updateScatter(
   table: Handsontable,
   myChart: Chart,
-  dist: number,
+  clusterForm: ClusterForm,
   dataSetIndex: number,
-  form: FilterForm,
+  filterForm: FilterForm,
   err = 1
 ) {
+  let dist = parseFloat(clusterForm["d_num"].value);
+  let reddening = parseFloat(clusterForm["red_num"].value);
+  let A_lambda = calculateLambda(reddening);
+  console.log(A_lambda);
+
   let start = 0;
   let chart = myChart.data.datasets[dataSetIndex].data;
   let tableData = table.getData();
   let columns = table.getColHeader();
 
   //Identify the column the selected filter refers to
-  let blue = columns.indexOf(form["blue"].value + " Mag");
-  let red = columns.indexOf(form["red"].value + " Mag");
-  let lum = columns.indexOf(form["lum"].value + " Mag");
+  let blue = columns.indexOf(filterForm["blue"].value + " Mag");
+  let red = columns.indexOf(filterForm["red"].value + " Mag");
+  let lum = columns.indexOf(filterForm["lum"].value + " Mag");
 
   let blueErr =
-    columns.indexOf(form["blue"].value + "err") < 0
+    columns.indexOf(filterForm["blue"].value + "err") < 0
       ? null
-      : columns.indexOf(form["blue"].value + "err"); //checks for supplied err data
+      : columns.indexOf(filterForm["blue"].value + "err"); //checks for supplied err data
   let redErr =
-    columns.indexOf(form["red"].value + "err") < 0
+    columns.indexOf(filterForm["red"].value + "err") < 0
       ? null
-      : columns.indexOf(form["red"].value + "err");
+      : columns.indexOf(filterForm["red"].value + "err");
   let lumErr =
-    columns.indexOf(form["lum"].value + "err") < 0
+    columns.indexOf(filterForm["lum"].value + "err") < 0
       ? null
-      : columns.indexOf(form["lum"].value + "err");
+      : columns.indexOf(filterForm["lum"].value + "err");
 
   let maxY = 0;
   let minY = 0;
@@ -797,27 +800,24 @@ function updateScatter(
       continue;
     }
     //red-blue,lum
-    let coordinates = plotCoordinate(
-      tableData[i][blue],
-      tableData[i][red],
-      tableData[i][lum],
-      dist
-    );
+
+    let x = tableData[i][blue] - A_lambda - (tableData[i][red] - A_lambda);
+    let y = tableData[i][lum] - A_lambda - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
-      x: coordinates[0],
-      y: coordinates[1],
+      x: x,
+      y: y,
     };
 
     //finding the maximum and minimum of y value for chart scaling
     if (isNaN(maxY)) {
-      maxY = coordinates[1];
-      minY = coordinates[1];
+      maxY = y;
+      minY = y;
     } else {
-      if (coordinates[1] > maxY) {
-        maxY = coordinates[1];
+      if (y > maxY) {
+        maxY = y;
         // console.log(maxY);
-      } else if (coordinates[1] < minY) {
-        minY = coordinates[1];
+      } else if (y < minY) {
+        minY = y;
         // console.log(minY);
       }
     }
@@ -831,54 +831,40 @@ function updateScatter(
   myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
 }
 
-function plotCoordinate(
-  blue: number,
-  red: number,
-  lum: number,
-  dist: number
-): number[] {
+function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   //Now we need to create the function for the reddening curve
-  let filterlambda = 10 ^ -6;
   let lambda = filterlambda;
   let R_v = 3.1;
-  //connect the value of A_v to the reddening slider
-  let A_v = Number(
-    (document.getElementById("cluster-form") as ClusterForm)["red_num"].value
-  );
-  let x = (lambda / (10 ^ -6)) ^ -1;
+  let x = (lambda / 10 ** -6) ** -1;
   let y = x - 1.82;
   let a = 0;
   let b = 0;
   if (x > 0.3 && x < 1.1) {
-    a = (0.574 * x) ^ 1.61;
+    a = 0.574 * x ** 1.61;
   } else if (x > 1.1 && x < 3.3) {
     a =
-      (1 + 0.17699 * y - 0.50447 * y) ^
-      (2 - 0.02427 * y) ^
-      (3 + 0.72085 * y) ^
-      (4 + 0.01979 * y) ^
-      (5 - 0.7753 * y) ^
-      (6 + 0.32999 * y) ^
-      7;
+      1 +
+      0.17699 * y -
+      0.50447 * y ** 2 -
+      0.02427 * y ** 3 +
+      0.72085 * y ** 4 +
+      0.01979 * y ** 5 -
+      0.7753 * y ** 6 +
+      0.32999 * y ** 7;
   }
 
   if (x > 0.3 && x < 1.1) {
-    b = (-0.527 * x) ^ 1.61;
+    b = -0.527 * x ** 1.61;
   } else if (x > 1.1 && x < 3.3) {
     b =
-      (1.41338 * y + 2.28305 * y) ^
-      (2 + 1.07233 * y) ^
-      (3 - 5.38434 * y) ^
-      (4 - 0.62251 * y) ^
-      (5 + 5.3026 * y) ^
-      (6 - 2.09002 * y) ^
-      7;
+      1.41338 * y +
+      2.28305 * y ** 2 +
+      1.07233 * y ** 3 -
+      5.38434 * y ** 4 -
+      0.62251 * y ** 5 +
+      5.3026 * y ** 6 -
+      2.09002 * y ** 7;
   }
 
-  let A_lambda = Number(A_v) * (a + b / R_v);
-
-  return [
-    blue - A_lambda - (red - A_lambda),
-    lum - A_lambda - 5 * Math.log10(dist / 0.01),
-  ];
+  return Number(A_v) * (a + b / R_v);
 }
