@@ -141,8 +141,8 @@ export function gravity(): [Handsontable, Chart] {
           data: [],
           backgroundColor: colors["red"],
           fill: false,
-          showLine: false,
-          pointRadius: 5,
+          showLine: true,
+          pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
         },
@@ -292,8 +292,50 @@ export function gravityFileUpload(
       false,
       false
     );
-
-    }
+    function updateScatter(
+      table: Handsontable,
+      myChart: Chart,
+      gravityForm: GravityForm,
+      modelForm: ModelForm,
+      dataSetIndex: 1
+    ) {
+      let inc = parseFloat(gravityForm["inc_num"].value);
+      let dist = parseFloat(gravityForm["dist_num"].value);
+      let merge = parseFloat(gravityForm["merge_num"].value);
+    
+      let start = 0;
+      let chart = myChart.data.datasets[dataSetIndex].data;
+      let tableData = table.getData();
+      let columns = table.getColHeader();
+    
+      //Identify the column the selected filter refers to
+      let Time = columns.indexOf(gravityForm["Time"].value);
+      let Strain = columns.indexOf(gravityForm["Strain"].value);
+    
+    
+      let scaleLimits: { [key: string]: number } = {
+        minX: null,
+        minY: null,
+        maxX: null,
+        maxY: null,
+      };
+    
+      for (let i = 0; i < tableData.length; i++) {
+        if (
+          tableData[i][Time] === null ||
+          tableData[i][Strain] === null
+         ) {
+          continue;
+        }
+        //red-blue,lum
+    
+        let x = (tableData[i][Time] + merge);
+        let y = (tableData[i][Strain] *(1-(0.5*Math.sin(inc)*100/dist)));
+        chart[start++] = {
+          x: x,
+          y: y,
+        };
+    }}}
    
 }
 /**
