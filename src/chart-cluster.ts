@@ -625,7 +625,7 @@ export function cluster(): [Handsontable, Chart] {
     frameTime);
 
   // link chart to model form (slider + text)
-  modelForm.onchange = function () {
+  modelForm.onmouseout = function () {
     //console.log(tableData);
 
     const reveal: string[] = [
@@ -955,10 +955,10 @@ function updateScatter(
       : columns.indexOf(modelForm["lum"].value + "err");
 
   let scaleLimits: { [key: string]: number } = {
-    minX: NaN,
-    minY: NaN,
-    maxX: NaN,
-    maxY: NaN,
+    minX: null,
+    minY: null,
+    maxX: null,
+    maxY: null,
   };
 
   for (let i = 0; i < tableData.length; i++) {
@@ -1007,24 +1007,27 @@ function updateScatter(
   //   scale chart y-axis based on minimum and maximum y value
   let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
   let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
-  let buffer = 0.3;
+  let minbuffer = 0.1;
+  let maxbuffer = 1;
+  xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer)  : minbuffer)
+  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
   myChart.options.scales["y"] = {
     min: isNaN(scaleLimits["minY"])
       ? 0
-      : scaleLimits["minY"] - (yBuffer < buffer ? yBuffer : buffer),
+      : scaleLimits["minY"] - yBuffer,
     max: isNaN(scaleLimits["maxY"])
       ? 0
-      : scaleLimits["maxY"] + (yBuffer < buffer ? yBuffer : buffer),
+      : scaleLimits["maxY"] + yBuffer,
     reverse: true,
     suggestedMin: 0,
   };
   myChart.options.scales["x"] = {
     min: isNaN(scaleLimits["minX"])
       ? 0
-      : scaleLimits["minX"] - (xBuffer < buffer ? xBuffer : buffer),
+      : scaleLimits["minX"] - xBuffer,
     max: isNaN(scaleLimits["maxX"])
       ? 0
-      : scaleLimits["maxX"] + (xBuffer < buffer ? xBuffer : buffer),
+      : scaleLimits["maxX"] + xBuffer,
     type: "linear",
     position: "bottom",
   };
