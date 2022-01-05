@@ -1010,7 +1010,8 @@ function updateScatter(
   }
 
  chartRescale(myChart, scaleLimits)
-
+ myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+  modelForm["red"].value,modelForm["blue"].value)
 }
 
 //finding the maximum and minimum of y value for chart scaling
@@ -1069,8 +1070,7 @@ function chartRescale(myChart: Chart, scaleLimits: { [key: string]: number }){
     type: "linear",
     position: "bottom",
   };
-  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
-    modelForm["red"].value,modelForm["blue"].value)
+
   myChart.update()
 }
 
