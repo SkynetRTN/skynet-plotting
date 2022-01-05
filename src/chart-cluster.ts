@@ -632,15 +632,20 @@ export function cluster(): [Handsontable, Chart] {
     frameTime);
 
   // link chart to model form (slider + text)
-  modelForm.onmouseout = function () {
+  // modelForm.oninput=
+  
+  const updateModel = function (precise: boolean) {
     //console.log(tableData);
-
+    
     const reveal: string[] = [
       modelForm["red"].value,
       modelForm["blue"].value,
       modelForm["lum"].value,
     ];
-
+    console.log(Number(modelForm['age_num'].value)*10%5)
+    if (precise 
+      || Number(modelForm['age_num'].value)*10%3 === 0
+      ||Number(modelForm['metal'].value)*10%2 === 0){
     const columns: string[] = hot.getColHeader() as string[];
     const hidden: number[] = [];
     for (const col in columns) {
@@ -649,6 +654,7 @@ export function cluster(): [Handsontable, Chart] {
         //if the column isn't selected in the drop down, hide it
         hidden.push(parseFloat(col));
       }
+    updateHRModel(modelForm, myChart);
     }
 
     hot.updateSettings({
@@ -666,6 +672,11 @@ export function cluster(): [Handsontable, Chart] {
     );
     myChart.update("none");
   };
+  }
+
+  // link chart to model form (slider + text)
+  modelForm.oninput=function(){updateModel(false)};
+  modelForm.onchange=function(){updateModel(true)};
 
   update();
 
@@ -904,7 +915,7 @@ function updateHRModel(form: ModelForm, chart: Chart) {
   let dataTable = JSON.parse(response);
   let form: ScatterDataPoint[] = []
   for (let i = 0; i < dataTable.length; i++) {
-    console.log(dataTable[i])
+    // console.log(dataTable[i])
     let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
     form.push(row);
   }
