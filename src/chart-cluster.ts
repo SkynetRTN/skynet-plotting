@@ -548,6 +548,13 @@ export function cluster(): [Handsontable, Chart] {
   const ctx = (
     document.getElementById("myChart") as HTMLCanvasElement
   ).getContext("2d");
+
+  const rainbow = ctx.createLinearGradient(0,0, 300,0);
+// color stops
+  rainbow.addColorStop(1, 'red');
+  rainbow.addColorStop(0.7, 'orange');
+  rainbow.addColorStop(0.3, 'yellow');
+  rainbow.addColorStop(0, 'cyan');
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -556,7 +563,7 @@ export function cluster(): [Handsontable, Chart] {
           type:"line",
           label: "Model",
           data: null, // will be generated later
-          borderColor: colors["blue"],
+          borderColor: colors["black"],
           backgroundColor: colors["white-0"],
           borderWidth: 2,
           tension: 0.1,
@@ -568,7 +575,7 @@ export function cluster(): [Handsontable, Chart] {
           type: "scatter",
           label: "Data",
           data: [],
-          backgroundColor: colors["red"],
+          backgroundColor: rainbow,
           fill: false,
           showLine: false,
           pointRadius: 5,
