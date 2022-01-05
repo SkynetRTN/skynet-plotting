@@ -58,7 +58,7 @@ export function gravity(): [Handsontable, Chart] {
 
   // Link each slider with corresponding text box
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
-  const filterForm = document.getElementById("filter-form") as FilterForm;
+  const filterForm = document.getElementById("filter-form") as ModelForm;
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 100, 0.01, 50);
   linkInputs(
     gravityForm["dist"],
