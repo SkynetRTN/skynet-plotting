@@ -41,8 +41,10 @@
     "chart.js": "^3.7.0",
     "chartjs-plugin-zoom": "^1.2.0",
     "file-saver": "^2.0.5",
+    "flask": "^0.2.10",
     "handsontable": "11",
     "jquery": "^3.6.0",
+    "np": "^7.6.0",
     "piexif-ts": "^2.0.16"
   }
 }
