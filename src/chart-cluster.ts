@@ -914,13 +914,21 @@ function updateHRModel(form: ModelForm, chart: Chart) {
   httpGetAsync(url, (response: string) => {
   let dataTable = JSON.parse(response);
   let form: ScatterDataPoint[] = []
+  let scaleLimits: { [key: string]: number } = {
+    minX: null,
+    minY: null,
+    maxX: null,
+    maxY: null,
+  };
   for (let i = 0; i < dataTable.length; i++) {
     // console.log(dataTable[i])
     let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
+    scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1])
     form.push(row);
   }
   chart.data.datasets[0].data = form
   chart.update("none")
+  chartRescale(chart, scaleLimits)
   });
 }
 
@@ -998,54 +1006,69 @@ function updateScatter(
       x: x,
       y: y,
     };
-
-    //finding the maximum and minimum of y value for chart scaling
-    if (isNaN(scaleLimits["minX"])) {
-      scaleLimits["minX"] = x;
-      scaleLimits["maxX"] = x;
-      scaleLimits["minY"] = y;
-      scaleLimits["maxY"] = y;
-    } else {
-      if (y > scaleLimits["maxY"]) {
-        scaleLimits["maxY"] = y;
-      } else if (y < scaleLimits["minY"]) {
-        scaleLimits["minY"] = y;
-      }
-      if (x > scaleLimits["maxX"]) {
-        scaleLimits["maxX"] = x;
-      } else if (x < scaleLimits["minX"]) {
-        scaleLimits["minX"] = x;
-      }
-    }
+    scaleLimits = pointMinMax(scaleLimits, x, y);
   }
   while (chart.length !== start) {
     chart.pop();
   }
 
+ chartRescale(myChart, scaleLimits)
+
+}
+
+//finding the maximum and minimum of y value for chart scaling
+function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number){
+  let newLimits = scaleLimits;
+  if (isNaN(newLimits["minX"])) {
+    newLimits["minX"] = x;
+    newLimits["maxX"] = x;
+    newLimits["minY"] = y;
+    newLimits["maxY"] = y;
+  } else {
+    newLimits["maxY"] = Math.max(newLimits["maxY"], y);
+    newLimits["maxX"] = Math.max(newLimits["maxX"], x)   
+    newLimits["minY"] = Math.min(newLimits["minY"], y)   
+    newLimits["minX"] = Math.min(newLimits["minX"], x)   
+  }
+  return newLimits
+}
+
+//rescale scatter to contain all the data points
+function chartRescale(myChart: Chart, scaleLimits: { [key: string]: number }){
   //   scale chart y-axis based on minimum and maximum y value
   let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
   let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
   let minbuffer = 0.1;
   let maxbuffer = 1;
   xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer)  : minbuffer)
-  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
+  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer) 
+  // let adjustScale = {
+  //   minX: myChart.options.scales["x"]["min"] < scaleLimits['minX'] ? myChart.options.scales["x"]["min"] : scaleLimits['minX'],
+  //   maxX: myChart.options.scales["x"]["max"] > scaleLimits['maxX'] ? myChart.options.scales["x"]["max"] : scaleLimits['maxX'],
+  //   minY: myChart.options.scales["y"]["min"] < scaleLimits['minY'] ? myChart.options.scales["y"]["min"] : scaleLimits['minY'],
+  //   maxY: myChart.options.scales["y"]["max"] > scaleLimits['maxY'] ? myChart.options.scales["y"]["max"] : scaleLimits['maxY'], 
+  // }
+  let adjustScale = {
+    minX: scaleLimits['minX'], 
+    maxX: scaleLimits['maxX'], 
+    minY: scaleLimits['minY'], 
+    maxY: scaleLimits['maxY'], 
+  }
+  adjustScale = {
+    minX:isNaN(adjustScale["minX"]) ? 0 : adjustScale["minX"],
+    maxX:isNaN(adjustScale["maxX"]) ? 0 : adjustScale["maxX"],
+    minY:isNaN(adjustScale["minY"]) ? 0 : adjustScale["minY"],
+    maxY:isNaN(adjustScale["maxX"]) ? 0 : adjustScale["maxY"],
+  }
   myChart.options.scales["y"] = {
-    min: isNaN(scaleLimits["minY"])
-      ? 0
-      : scaleLimits["minY"] - yBuffer,
-    max: isNaN(scaleLimits["maxY"])
-      ? 0
-      : scaleLimits["maxY"] + yBuffer,
+    min: adjustScale["minY"] - yBuffer,
+    max: adjustScale["maxY"] + yBuffer,
     reverse: true,
     suggestedMin: 0,
   };
   myChart.options.scales["x"] = {
-    min: isNaN(scaleLimits["minX"])
-      ? 0
-      : scaleLimits["minX"] - xBuffer,
-    max: isNaN(scaleLimits["maxX"])
-      ? 0
-      : scaleLimits["maxX"] + xBuffer,
+    min: adjustScale["minX"] - xBuffer,
+    max: adjustScale["maxX"] + xBuffer,
     type: "linear",
     position: "bottom",
   };
