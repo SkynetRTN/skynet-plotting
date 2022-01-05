@@ -131,3 +131,15 @@ interface ModelForm extends HTMLFormElement {
     blue: HTMLInputElement,
     lum: HTMLInputElement
 }
+
+interface GravityForm extends HTMLFormElement {
+    mass: HTMLInputElement,
+    ratio: HTMLInputElement,
+    mass_num: HTMLInputElement,
+    ratio_num: HTMLInputElement
+    dist: HTMLInputElement,
+    dist_num: HTMLInputElement
+    merge: HTMLInputElement,
+    merge_num: HTMLInputElement
+
+}
