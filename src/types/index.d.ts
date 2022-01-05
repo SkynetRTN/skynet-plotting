@@ -116,17 +116,17 @@ interface PolarizationForm extends HTMLFormElement {
 interface ClusterForm extends HTMLFormElement {
     d: HTMLInputElement,
     err: HTMLInputElement,
-    age: HTMLInputElement,
     red: HTMLInputElement,
-    metal: HTMLInputElement,
     d_num: HTMLInputElement,
     err_num: HTMLInputElement,
-    age_num: HTMLInputElement,
     red_num: HTMLInputElement,
-    metal_num: HTMLInputElement
 }
 
-interface FilterForm extends HTMLFormElement {
+interface ModelForm extends HTMLFormElement {
+    age: HTMLInputElement,
+    age_num: HTMLInputElement,
+    metal: HTMLInputElement,
+    metal_num: HTMLInputElement,
     red: HTMLInputElement,
     blue: HTMLInputElement,
     lum: HTMLInputElement

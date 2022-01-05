@@ -25,63 +25,63 @@ export function cluster(): [Handsontable, Chart] {
     .insertAdjacentHTML(
       "beforeend",
       '<form title="Cluster Diagram" id="cluster-form">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-        "</div>\n" +
-        "</form>\n" +
-        '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-4">Blue:</div>\n' +
-        '<div class="col-sm-4">Red:</div>\n' +
-        '<div class="col-sm-4">Luminosity:</div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
-        '<option value="B" title="B filter" selected>B</option></div>\n' +
-        '<option value="V" title="V filter">V</option></select></div>\n' +
-        '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter">\n' +
-        '<option value="B" title="B filter">B</option></div>\n' +
-        '<option value="V" title="V filter" selected>V</option></select></div>\n' +
-        '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
-        '<option value="B" title="B filter">B</option></div>\n' +
-        '<option value="V" title="V filter" selected>V</option></select></div>\n' +
-        "</div>\n" +
-        "</form>\n"
+      '<div class="row">\n' +
+      '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
+      '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
+      '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+      '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+      "</div>\n" +
+      "</form>\n" +
+      '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
+      '<div class="row">\n' +
+      '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
+      '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+      '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-4">Blue:</div>\n' +
+      '<div class="col-sm-4">Red:</div>\n' +
+      '<div class="col-sm-4">Luminosity:</div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
+      '<option value="B" title="B filter" selected>B</option></div>\n' +
+      '<option value="V" title="V filter">V</option></select></div>\n' +
+      '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter">\n' +
+      '<option value="B" title="B filter">B</option></div>\n' +
+      '<option value="V" title="V filter" selected>V</option></select></div>\n' +
+      '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
+      '<option value="B" title="B filter">B</option></div>\n' +
+      '<option value="V" title="V filter" selected>V</option></select></div>\n' +
+      "</div>\n" +
+      "</form>\n"
     );
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-  const filterForm = document.getElementById("filter-form") as FilterForm;
+  const modelForm = document.getElementById("model-form") as ModelForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1);
-  linkInputs(clusterForm["age"], clusterForm["age_num"], 6, 11, 0.01, 6);
+  linkInputs(modelForm["age"], modelForm["age_num"], 6, 11, 0.01, 6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0);
-  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -3, 1, 0.01, -3);
+  linkInputs(modelForm["metal"], modelForm["metal_num"], -3, 1, 0.01, -3);
 
   const tableData = [
     { B: 15.43097938, V: 16.27826813 },
@@ -354,6 +354,7 @@ export function cluster(): [Handsontable, Chart] {
     data: {
       datasets: [
         {
+          type:"line",
           label: "Model",
           data: null, // will be generated later
           borderColor: colors["blue"],
@@ -365,6 +366,7 @@ export function cluster(): [Handsontable, Chart] {
           immutableLabel: true,
         },
         {
+          type: "scatter",
           label: "Data",
           data: [],
           backgroundColor: colors["red"],
@@ -416,11 +418,10 @@ export function cluster(): [Handsontable, Chart] {
       hot,
       myChart,
       clusterForm,
-      1, //the dataSet is missing after
-      filterForm,
-      Number(clusterForm["err_num"].value)
+      modelForm,
+      1
     );
-    updateHRModel(clusterForm, myChart);
+    updateHRModel(modelForm, myChart);
   };
 
   // link chart to table
@@ -433,16 +434,18 @@ export function cluster(): [Handsontable, Chart] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
-  // link chart to model form (slider + text)
-  clusterForm.oninput = throttle(update, frameTime);
+  clusterForm.oninput = throttle(
+    function () {updateScatter(hot,myChart,clusterForm,modelForm,1)},
+    frameTime);
 
-  filterForm.oninput = function () {
+  // link chart to model form (slider + text)
+  modelForm.onchange = function () {
     //console.log(tableData);
 
     const reveal: string[] = [
-      filterForm["red"].value,
-      filterForm["blue"].value,
-      filterForm["lum"].value,
+      modelForm["red"].value,
+      modelForm["blue"].value,
+      modelForm["lum"].value,
     ];
 
     const columns: string[] = hot.getColHeader() as string[];
@@ -470,6 +473,7 @@ export function cluster(): [Handsontable, Chart] {
     );
     myChart.update("none");
   };
+
   update();
 
   myChart.options.plugins.title.text = "Title";
@@ -578,10 +582,10 @@ export function clusterFileUpload(
       }
     }
 
-    const filterForm = document.getElementById("filter-form") as FilterForm;
-    const blue = filterForm["blue"];
-    const red = filterForm["red"];
-    const lum = filterForm["lum"];
+    const modelForm = document.getElementById("model-form") as ModelForm;
+    const blue = modelForm["blue"];
+    const red = modelForm["red"];
+    const lum = modelForm["lum"];
 
     //Change filter options to match file
 
@@ -680,8 +684,8 @@ export function clusterFileUpload(
       table,
       myChart,
       document.getElementById("cluster-form") as ClusterForm,
-      1,
-      document.getElementById("filter-form") as FilterForm
+      document.getElementById("filter-form") as ModelForm,
+      1
     );
   };
   reader.readAsText(file);
@@ -695,15 +699,9 @@ export function clusterFileUpload(
  *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(form: ClusterForm, chart: Chart) {
+function updateHRModel(form: ModelForm, chart: Chart) {
   chart.data.datasets[0].data = HRGenerator(
-    //form.elements['r_num'].value,
-    Number(form["age_num"].value),
-    form["red_num"].value,
-    Number(form["metal_num"].value),
-    -8,
-    8,
-    2000
+    form
   );
   chart.update("none");
 }
@@ -711,52 +709,25 @@ function updateHRModel(form: ClusterForm, chart: Chart) {
 /**
  *  This function generates the data used for functions "updateHRModel" and "clusterGenerator."
  *
- *  @param d:            Distance to the Cluster
- *  @param r:            % of the range
- *  @param age:          Age of the Cluster
- *  @param reddening:    The reddening of the observation
- *  @param metallicity:  Metallicity of the cluster
- *  @param start:        The starting point of the data points
- *  @param end:          The end point of the data points
+ *  @param modelForm:    Form with necessary data
  *  @param steps:        Steps generated to be returned in the array. Default is 500
  *  @returns {Array}
  */
 function HRGenerator(
-  age: number,
-  reddening: string,
-  metallicity: number,
-  start = -8,
-  end = 8,
-  steps = 500
-): Array<any> {
-  //To Change
-  let data = [];
-  let y = start;
-  let step = (end - start) / steps;
-  for (let i = 0; i < steps; i++) {
-    let x3 = 0.2 * Math.pow((y - 8) / (-22.706 + 2.7236 * age - 8), 3);
-    let x2 = -0.0959 + 0.1088 * y + 0.0073 * Math.pow(y, 2);
-    let x1 = x3 + x2;
-    if (x1 <= 2) {
-      //cut off at x=2
-      data.push({
-        y: y,
-        x: x1,
-      });
-    }
-    y += step;
-  }
-  return data;
+  modelForm: ModelForm, 
+
+){
+  return [{x:0,y:1},{x:1,y:2}]
 }
 
 function updateScatter(
   table: Handsontable,
   myChart: Chart,
   clusterForm: ClusterForm,
-  dataSetIndex: number,
-  filterForm: FilterForm,
-  err = 1
+  modelForm: ModelForm,
+  dataSetIndex: 1
 ) {
+  let err = parseFloat(clusterForm["err_num"].value);
   let dist = parseFloat(clusterForm["d_num"].value);
   let reddening = parseFloat(clusterForm["red_num"].value);
   let A_lambda = calculateLambda(reddening);
@@ -768,22 +739,22 @@ function updateScatter(
   let columns = table.getColHeader();
 
   //Identify the column the selected filter refers to
-  let blue = columns.indexOf(filterForm["blue"].value + " Mag");
-  let red = columns.indexOf(filterForm["red"].value + " Mag");
-  let lum = columns.indexOf(filterForm["lum"].value + " Mag");
+  let blue = columns.indexOf(modelForm["blue"].value + " Mag");
+  let red = columns.indexOf(modelForm["red"].value + " Mag");
+  let lum = columns.indexOf(modelForm["lum"].value + " Mag");
 
   let blueErr =
-    columns.indexOf(filterForm["blue"].value + "err") < 0
+    columns.indexOf(modelForm["blue"].value + "err") < 0
       ? null
-      : columns.indexOf(filterForm["blue"].value + "err"); //checks for supplied err data
+      : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
   let redErr =
-    columns.indexOf(filterForm["red"].value + "err") < 0
+    columns.indexOf(modelForm["red"].value + "err") < 0
       ? null
-      : columns.indexOf(filterForm["red"].value + "err");
+      : columns.indexOf(modelForm["red"].value + "err");
   let lumErr =
-    columns.indexOf(filterForm["lum"].value + "err") < 0
+    columns.indexOf(modelForm["lum"].value + "err") < 0
       ? null
-      : columns.indexOf(filterForm["lum"].value + "err");
+      : columns.indexOf(modelForm["lum"].value + "err");
 
   let maxY = 0;
   let minY = 0;
@@ -825,10 +796,10 @@ function updateScatter(
   while (chart.length !== start) {
     chart.pop();
   }
-  myChart.update("none");
 
   //scale chart y-axis based on minimum and maximum y value
   myChart.options.scales["y"] = { min: minY - 0.5, max: maxY + 0.5 };
+  myChart.update("none");
 }
 
 function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
