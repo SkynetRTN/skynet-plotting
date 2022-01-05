@@ -1085,3 +1085,25 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
   return Number(A_v) * (a + b / R_v);
 }
+
+//Api Get Request Testing
+// let url = 'http://localhost:5000/data?age=6.80&metallicity=-0.35&filters=[%22uprime%22,%22H%22,%22J%22]'
+
+// httpGetAsync(url, (response: string) => {
+//   var resultJson = JSON.parse(response);
+//   console.log(resultJson[0])
+// });
+
+/**Get http request asynchronously
+ * @param {string} theUrl -request ultra link
+ * @param {function} callback -function to execute with http response
+ */
+ function httpGetAsync(theUrl: string, callback: Function) {
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function () {
+    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+      callback(xmlHttp.responseText);
+  };
+  xmlHttp.open("GET", theUrl, true); // true for asynchronous
+  xmlHttp.send(null);
+}
