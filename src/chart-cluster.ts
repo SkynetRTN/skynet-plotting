@@ -13,6 +13,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
+import { ModuleFilenameHelpers } from "webpack";
 
 /**
  *  This function is for the moon of a planet.
@@ -550,12 +551,6 @@ export function cluster(): [Handsontable, Chart] {
     document.getElementById("myChart") as HTMLCanvasElement
   ).getContext("2d");
 
-  const rainbow = ctx.createLinearGradient(0,0, 300,0);
-// color stops
-  rainbow.addColorStop(1, 'red');
-  rainbow.addColorStop(0.7, 'orange');
-  rainbow.addColorStop(0.3, 'yellow');
-  rainbow.addColorStop(0, 'cyan');
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -576,7 +571,9 @@ export function cluster(): [Handsontable, Chart] {
           type: "scatter",
           label: "Data",
           data: [],
-          backgroundColor: rainbow,
+          backgroundColor: colors["red"],
+          borderColor: colors["gray"],
+          borderWidth: 0.5,
           fill: false,
           showLine: false,
           pointRadius: 5,
@@ -888,7 +885,7 @@ export function clusterFileUpload(
       table,
       myChart,
       document.getElementById("cluster-form") as ClusterForm,
-      document.getElementById("filter-form") as ModelForm,
+      document.getElementById("model-form") as ModelForm,
       1
     );
   };
@@ -1072,6 +1069,8 @@ function chartRescale(myChart: Chart, scaleLimits: { [key: string]: number }){
     type: "linear",
     position: "bottom",
   };
+  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+    modelForm["red"].value,modelForm["blue"].value)
   myChart.update()
 }
 
@@ -1156,4 +1155,31 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
 function HRModelRounding(number: number | string){
   return (Math.ceil(Number(number)*20)/20).toFixed(2)
+}
+
+//red stop at +2.0, blue at -0.5
+function HRrainbow (chart:Chart,red:string,blue:string){
+  let {ctx, chartArea} = chart;
+  let rlambda = filterWavelength[red]
+  let blambda = filterWavelength[blue]
+  let max = chart.options.scales["x"].max
+  let min = chart.options.scales["x"].min
+  max = max/Math.log10(rlambda/blambda)
+  min = min/Math.log10(rlambda/blambda)
+  let bluestar = -0.5/Math.log10(rlambda/blambda)
+  let redstar = 2/Math.log10(rlambda/blambda)
+
+  let pixelrat = chartArea.width/(max-min);
+
+  let start = chartArea.left + (pixelrat*bluestar)-(pixelrat*min)
+  let stop  = chartArea.left + (pixelrat*redstar)-(pixelrat*min)
+  let gradient = ctx.createLinearGradient(start,0,stop,0)
+  console.log([start,stop])
+  gradient.addColorStop(1,"red");
+  gradient.addColorStop(0.68,"orange");
+  gradient.addColorStop(0.48,"yellow");
+  gradient.addColorStop(0.28,"white");
+  gradient.addColorStop(0,"#7df9ff");
+  
+  return gradient;
 }
