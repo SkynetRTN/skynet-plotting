@@ -2,6 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
+import { ScatterDataPoint } from "chart.js";
 
 import { tableCommonOptions, colors } from "./config";
 import {
@@ -877,33 +878,34 @@ export function clusterFileUpload(
 }
 
 /**
- *  This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
- *  relationship between a moon's angular distance and Julian date, and generates a dataset that
- *  spans over the range determined by the max and min value present in the table.
+ *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
+ *  request HR diagram model from server and plot on the graph.
  *  @param table:   A table used to determine the max and min value for the range
- *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
+ *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(form: ModelForm, chart: Chart) {
-  chart.data.datasets[0].data = HRGenerator(
-    form
-  );
-  chart.update("none");
+  let url = "http://localhost:5000/data?" 
+  +"age=" + HRModelRounding(form['age_num'].value)
+  + "&metallicity=" + HRModelRounding(form['metal_num'].value)
+  + "&filters=[%22"+ form['red'].value 
+  + "%22,%22" + form['blue'].value 
+  + "%22,%22" + form['lum'].value + "%22]"
+
+  console.log(url)
+  httpGetAsync(url, (response: string) => {
+  let dataTable = JSON.parse(response);
+  let form: ScatterDataPoint[] = []
+  for (let i = 0; i < dataTable.length; i++) {
+    console.log(dataTable[i])
+    let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
+    form.push(row);
+  }
+  chart.data.datasets[0].data = form
+  chart.update("none")
+  });
 }
 
-/**
- *  This function generates the data used for functions "updateHRModel" and "clusterGenerator."
- *
- *  @param modelForm:    Form with necessary data
- *  @param steps:        Steps generated to be returned in the array. Default is 500
- *  @returns {Array}
- */
-function HRGenerator(
-  modelForm: ModelForm, 
-
-){
-  return [{x:0,y:1},{x:1,y:2}]
-}
 
 function updateScatter(
   table: Handsontable,
@@ -1106,4 +1108,8 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
   };
   xmlHttp.open("GET", theUrl, true); // true for asynchronous
   xmlHttp.send(null);
+}
+
+function HRModelRounding(number: number | string){
+  return (Math.ceil(Number(number)*20)/20).toFixed(2)
 }
