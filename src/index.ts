@@ -23,6 +23,7 @@ import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster, clusterFileUpload } from './chart-cluster';
 import { round } from './my-math';
+import {gravity, gravityFileUpload} from './chart-gravity';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -138,8 +139,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
+    
+    } else if (chart === 'gravity') {
+    objects = gravity();
+    document.getElementById('file-upload-button').style.display = 'inline';
+    document.getElementById('file-upload').onchange = function (evt) {
+        gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
     }
-
+}
     updateTableHeight(objects[0]);
     // Update the height of the table when the chart resizes.
     objects[1].options.onResize = function () {
