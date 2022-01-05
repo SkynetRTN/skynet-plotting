@@ -1144,19 +1144,22 @@ function HRrainbow (chart:Chart,red:string,blue:string){
   max = max/Math.log10(rlambda/blambda)
   min = min/Math.log10(rlambda/blambda)
   let bluestar = -0.5/Math.log10(rlambda/blambda)
-  let redstar = 2/Math.log10(rlambda/blambda)
+  let redstar = 0.9/Math.log10(rlambda/blambda)
 
   let pixelrat = chartArea.width/(max-min);
 
   let start = chartArea.left + (pixelrat*bluestar)-(pixelrat*min)
   let stop  = chartArea.left + (pixelrat*redstar)-(pixelrat*min)
   let gradient = ctx.createLinearGradient(start,0,stop,0)
-  console.log([start,stop])
-  gradient.addColorStop(1,"red");
-  gradient.addColorStop(0.68,"orange");
-  gradient.addColorStop(0.48,"yellow");
-  gradient.addColorStop(0.28,"white");
-  gradient.addColorStop(0,"#7df9ff");
   
+  gradient.addColorStop(1,"red");        //M
+  gradient.addColorStop(0.929,"orange"); //K
+  gradient.addColorStop(0.786,"#fbff87");//G
+  gradient.addColorStop(0.786,"#fdffe0");//F
+  gradient.addColorStop(0.357,"white");  //A
+  gradient.addColorStop(0.107,"#baf9ff");//B
+  gradient.addColorStop(0,"#38eeff");    //O
+  //From: https://asterism.org/wp-content/uploads/2019/03/tut39-HR-Diagram.pdf
+
   return gradient;
 }
