@@ -559,7 +559,7 @@ export function cluster(): [Handsontable, Chart] {
           label: "Model",
           data: null, // will be generated later
           borderColor: colors["black"],
-          backgroundColor: colors["white-0"],
+          backgroundColor: colors["black"],
           borderWidth: 2,
           tension: 0.1,
           pointRadius: 0,
@@ -569,9 +569,9 @@ export function cluster(): [Handsontable, Chart] {
         {
           type: "scatter",
           label: "Data",
-          data: [],
+          data: [{x:0,y:0}],
           backgroundColor: colors["red"],
-          borderColor: colors["gray"],
+          borderColor: colors["black"],
           borderWidth: 0.5,
           fill: false,
           showLine: false,
@@ -756,7 +756,6 @@ export function clusterFileUpload(
     const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
     let filters: string[] = [];
     data.splice(0, 1);
-
     //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
     for (const row of data) {
       let items = row.trim().split(",");
@@ -954,7 +953,6 @@ function updateScatter(
   let dist = parseFloat(clusterForm["d_num"].value);
   let reddening = parseFloat(clusterForm["red_num"].value);
 
-  let start = 0;
   let chart = myChart.data.datasets[dataSetIndex].data;
   let tableData = table.getData();
   let columns = table.getColHeader();
@@ -997,11 +995,12 @@ function updateScatter(
     maxY: null,
   };
 
+  let start = 0;
   for (let i = 0; i < tableData.length; i++) {
     if (
-      tableData[i][blue] === null ||
-      tableData[i][red] === null ||
-      tableData[i][lum] === null ||
+      typeof(tableData[i][blue])!='number' ||
+      typeof(tableData[i][red])!='number' ||
+      typeof(tableData[i][lum])!='number' ||
       (blueErr != null && tableData[i][blueErr] >= err) ||
       (redErr != null && tableData[i][redErr] >= err) ||
       (lumErr != null && tableData[i][lumErr] >= err)
@@ -1009,12 +1008,12 @@ function updateScatter(
       continue;
     }
     //red-blue,lum
-
+    
     let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
     let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
       x: x,
-      y: y,
+      y: y
     };
     scaleLimits = pointMinMax(scaleLimits, x, y);
   }
@@ -1199,29 +1198,45 @@ function HRModelRounding(number: number | string){
   return (Math.round(Number(number)*20)/20).toFixed(2)
 }
 
-//red stop at +2.0, blue at -0.5
+
+//create a gradient for HR stars
 function HRrainbow (chart:Chart,red:string,blue:string){
   let {ctx, chartArea} = chart;
-  let rlambda = filterWavelength[red]
-  let blambda = filterWavelength[blue]
-  let max = chart.options.scales["x"].max
-  let min = chart.options.scales["x"].min
-  max = max/Math.log10(rlambda/blambda)
-  min = min/Math.log10(rlambda/blambda)
-  let bluestar = -0.5/Math.log10(rlambda/blambda)
-  let redstar = 2/Math.log10(rlambda/blambda)
+  let rl = isNaN(filterWavelength[red])? Math.log10(0.442*1000) : Math.log10(filterWavelength[red]*1000);//default to B-V for unknowns
+  let bl = isNaN(filterWavelength[blue])? Math.log10(0.54*1000) : Math.log10(filterWavelength[blue]*1000);
+  console.log([rl,bl])
 
-  let pixelrat = chartArea.width/(max-min);
+  let mMag = function(r: number) {return (13.247*(r**2))-(87.9*r)+150.87};//magnitude of m star
+  let oMag = function(b: number) {return -4.7791*b**2+30.408*b-52.201};//magnitude of o star
 
-  let start = chartArea.left + (pixelrat*bluestar)-(pixelrat*min)
-  let stop  = chartArea.left + (pixelrat*redstar)-(pixelrat*min)
-  let gradient = ctx.createLinearGradient(start,0,stop,0)
-  console.log([start,stop])
-  gradient.addColorStop(1,"red");
-  gradient.addColorStop(0.68,"orange");
-  gradient.addColorStop(0.48,"yellow");
-  gradient.addColorStop(0.28,"white");
-  gradient.addColorStop(0,"#7df9ff");
+  console.log(mMag(rl))
+  let mColor = mMag(bl)-mMag(rl);
+  let oColor = oMag(bl)-oMag(rl)
+  console.log([oColor,mColor])
+  let max = chart.options.scales["x"].max;
+  let min = chart.options.scales["x"].min;
   
-  return gradient;
+  //p(c)=(W/DC)*c-(W/DC)*min+left
+  let pixelrat: number = chartArea.width/(max-min);
+  let start = chartArea.left + (pixelrat*oColor)-(pixelrat*min);
+  let stop  = chartArea.left + (pixelrat*mColor)-(pixelrat*min);
+  console.log([start,stop])
+  if (isNaN(start) || isNaN(stop)){//stop div/0
+    return "red"
+  }
+  else{
+
+    let gradient = ctx.createLinearGradient(start,0,stop,0);
+    
+    gradient.addColorStop(1,"red");        //M
+    gradient.addColorStop(0.929,"#ff6600"); //K
+    gradient.addColorStop(0.526,"#ffdc60");//G
+    gradient.addColorStop(0.441,"#fdffe0");//F
+    gradient.addColorStop(0.357,"white");  //A
+    //gradient.addColorStop(0.107,"#baf9ff");//B
+    gradient.addColorStop(0,"#38eeff");    //O
+    //From: https://asterism.org/wp-content/uploads/2019/03/tut39-HR-Diagram.pdf
+
+    return gradient;
+  }
 }
