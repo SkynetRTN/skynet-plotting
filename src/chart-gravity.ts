@@ -956,14 +956,15 @@ export function gravity(): [Handsontable, Chart] {
     data: {
       datasets: [
         {
-          label: "Model",
-          data: null, // will be generated later
-          borderColor: colors["blue"],
-          backgroundColor: colors["white-0"],
+          label: 'Model',
+          data: null,
+          borderColor: colors['blue'],
+          backgroundColor: colors['blue'],
+          pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
-          pointRadius: 0,
           fill: false,
+          hidden: false,
           immutableLabel: true,
         },
         {
@@ -990,8 +991,18 @@ export function gravity(): [Handsontable, Chart] {
           type: "linear",
           position: "bottom",
         },
+        x2: {
+          type: "linear",
+          position: "bottom",
+        },
         y: {
           //label: 'V',
+          reverse: false,
+          suggestedMin: 0,
+        },
+        y2: {
+          type: "linear",
+          position: "left",
           reverse: false,
           suggestedMin: 0,
         },
@@ -1147,11 +1158,13 @@ function updateWave(
     
     let x = (tableData[i][0]);
     let y = (tableData[i][1])
-    let x2 = (tableData[i][0]);
-    let y2 = (tableData[i][2])
+    let x2 = (tableData[i][0] + merge);
+    let y2 = (tableData[i][2]*(1-((0.5*Math.sin(inc))*(dist/100))));
     chart[start++] = {
       x: x,
+     // x2: x2,
       y: y,
+     // y2: y2,
         };
 //console.log(x);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //console.log(y);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
