@@ -12,6 +12,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
+import { HiddenColumns } from "handsontable/plugins";
 
 /**
  *  This function is for the moon of a planet.
@@ -924,7 +925,7 @@ export function gravity(): [Handsontable, Chart] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain"], // need to change to filter1, filter2
+      colHeaders: ["Time", "Strain", "Model"], // need to change to filter1, filter2
       columns: [
         {
           data: "Time",
@@ -936,12 +937,13 @@ export function gravity(): [Handsontable, Chart] {
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
-       // {
-          //data: "Model",
-         // type: "numeric",
-         // numericFormat: { pattern: { mantissa: 2 } },
-        //},
-      ]
+        {
+          data: "Model",
+          type: "numeric",
+          numericFormat: { pattern: { mantissa: 2 } },
+        },
+      ],
+      hiddenColumns: { columns: [2] },
     })
   );
   //now we need to hide the model column
@@ -1136,14 +1138,17 @@ function updateWave(
     for (let i = 0; i < tableData.length; i++) {
       if (
       tableData[i][0] === null ||
-      tableData[i][1] === null
+      tableData[i][1] === null ||
+      tableData[i][2] === null 
       ) {
       continue;
         }
         //red-blue,lum
     
     let x = (tableData[i][0]);
-    let y = (tableData[i][1]);
+    let y = (tableData[i][1])
+    let x2 = (tableData[i][0]);
+    let y2 = (tableData[i][2])
     chart[start++] = {
       x: x,
       y: y,
