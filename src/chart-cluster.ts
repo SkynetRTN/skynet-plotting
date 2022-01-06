@@ -1161,7 +1161,7 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 }
 
 function HRModelRounding(number: number | string){
-  return (Math.ceil(Number(number)*20)/20).toFixed(2)
+  return (Math.round(Number(number)*20)/20).toFixed(2)
 }
 
 //red stop at +2.0, blue at -0.5
