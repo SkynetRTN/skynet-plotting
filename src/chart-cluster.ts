@@ -570,7 +570,7 @@ export function cluster(): [Handsontable, Chart] {
           type: "scatter",
           label: "Data",
           data: [{x:0,y:0}],
-          backgroundColor: colors["red"],
+          backgroundColor: colors["gray"],
           borderColor: colors["black"],
           borderWidth: 0.5,
           fill: false,
@@ -808,11 +808,8 @@ export function clusterFileUpload(
       "K",
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
-    knownFilters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
-    filters = knownFilters.concat(
-      filters.filter((f) => knownFilters.indexOf(f) < 0)
-    ); //slap unknowns on the end
-    //console.log(filters)
+    filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
+    //if it ain't known ignore it
 
     const optionList = [];
     const headers = [];
@@ -847,16 +844,10 @@ export function clusterFileUpload(
     changeOptions(red, optionList);
     //red.value = red.options[red.options.length-1].value;
     changeOptions(lum, optionList);
-    //now we need to assign a number to the filters based off their order in knownFilters
-    const filterMap = new Map<string, number>();
-    for (let i = 0; i < knownFilters.length; i++) {
-      filterMap.set(knownFilters[i], i);
-    }
-    blue.value = knownFilters[0];
-    red.value = knownFilters[1];
-    lum.value = knownFilters[1];
-    //this might be it??????????
-    //console.log (filters)
+    
+    blue.value = filters[0];
+    red.value = filters[1];
+    lum.value = filters[1];
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -1023,7 +1014,8 @@ function updateScatter(
   graphScale[1] = scaleLimits;
   chartRescale(myChart);
   myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
-  modelForm["red"].value,modelForm["blue"].value)
+    modelForm["red"].value,modelForm["blue"].value)
+  myChart.update()
 }
 
 //finding the maximum and minimum of y value for chart scaling
