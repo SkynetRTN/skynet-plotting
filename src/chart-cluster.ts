@@ -1055,29 +1055,48 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     
     if (isNaN(frameParam[frameOn][0])){
       let magList: string[] = ['red','blue','bright'];
-      let filters: number[] = [filterWavelength[modelForm['red'].value],
-        filterWavelength[modelForm['blue'].value], 
-        filterWavelength[modelForm['lum'].value]];
+      let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
       let x: {[key: string]: number} = {'red': 0, 'blue': 0, 'bright': 0}
+      let magIndex: number[] = [0,0,0];
+      console.log(filters)
       for (let i = 0; i < magList.length; i++) {
-        filters[i] = filters[i] * 1000;
-        x[magList[i]]  = Math.log(filters[i]) / Math.log(10);
+        x[magList[i]]  = Math.log(filterWavelength[filters[i]]*1000) / Math.log(10);
+        if ("UBVRI".includes(filters[i])){
+          magIndex[i] = Number(0);
+        } else if ("uprimegprimeiprimezprime".includes(filters[i])){
+          magIndex[i] = Number(1);
+        } else if ("JHKS".includes(filters[i])){
+          magIndex[i] = Number(2);
+        }
       }
-      // console.log(x)
-      let mags: {[key: string]: Function} = {
-        'red': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87}, 
-        'faint': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87}, 
-        'blue': (a: number)=>{return -4.7791 * (a**2) + 30.408 * a - 52.201}, 
-        'bright': (a: number)=>{return -0.0079 * (a**2) - 3.134 * a - 2.1085}};
+      let mags: {[key: string]: Function[]} = {
+        'red': [
+          (a: number)=>{return 12.487 * a**2 - 83.756* a + 145.78}, //for UBVRI
+          (a: number)=>{return 28.573 * a**2 - 171.43 * a + 265.27},  //for upgiz
+          (a: number)=>{return 11.924 * a**2 - 79.948 * a +140.02},],   //forJHK/KS
+        'faint': [
+          (a: number)=>{return 12.487 * a**2 - 83.756* a + 145.78}, //for UBVRI
+          (a: number)=>{return 28.573 * a**2 - 171.43 * a + 265.27},  //for upgiz
+          (a: number)=>{return 11.924 * a**2 - 79.948 * a +140.02},],   //forJHK/KS
+        'blue': [
+          (a: number)=>{return -21.555 * a**2 + 122.3 * a - 177.91},  //for UBVRI
+          (a: number)=>{return 1.7882 * a**2 - 5.8134 * a - 2.2497},    //for upgiz
+          (a: number)=>{return -1.8118 * a**2 + 12.676 * a - 25.95},],  //forJHK/KS
+        'bright': [
+          (a: number)=>{return -11.323 * a**2 + 59.158 * a - 87.835}, //for UBVRI
+          (a: number)=>{return 11.179 * a**2 - 64.762 * a + 82.73}, //for upgiz
+          (a: number)=>{return 10.829 * a**2 - 71.547 * a + 105.65},  //forJHK/KS
+        ]
+      };
 
-      let color_red: number = mags['red'](x['blue']) - mags['red'](x['red']);
-      let color_blue: number = mags['blue'](x['blue']) - mags['blue'](x['red']);
-      
+      let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
+      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
+      console.log(magIndex)
       adjustScale = {
         'minX': color_blue - (color_red - color_blue) /8,
         'maxX': color_red + (color_red - color_blue) /8,
-        'minY': mags['bright'](x['bright']) + (mags['bright'](x['bright']) - mags['faint'](x['bright'])) / 8,
-        'maxY': mags['faint'](x['bright']) - (mags['bright'](x['bright']) - mags['faint'](x['bright'])) / 8
+        'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
+        'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
       };
       console.log(adjustScale)
     } else {
