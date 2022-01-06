@@ -911,13 +911,13 @@ var graphScale: {[key: string] : number}[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(form: ModelForm, chart: Chart) {
+function updateHRModel(modelForm: ModelForm, chart: Chart) {
   let url = "http://localhost:5000/data?" 
-  +"age=" + HRModelRounding(form['age_num'].value)
-  + "&metallicity=" + HRModelRounding(form['metal_num'].value)
-  + "&filters=[%22"+ form['blue'].value 
-  + "%22,%22" + form['red'].value 
-  + "%22,%22" + form['lum'].value + "%22]"
+  +"age=" + HRModelRounding(modelForm['age_num'].value)
+  + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
+  + "&filters=[%22"+ modelForm['blue'].value 
+  + "%22,%22" + modelForm['red'].value 
+  + "%22,%22" + modelForm['lum'].value + "%22]"
 
   // console.log(url)
   httpGetAsync(url, (response: string) => {
@@ -938,7 +938,7 @@ function updateHRModel(form: ModelForm, chart: Chart) {
   chart.data.datasets[0].data = form;
   chart.update("none");
   graphScale[0] = scaleLimits;
-  chartRescale(chart);
+  chartRescale(chart, modelForm);
   });
 }
 
@@ -1022,7 +1022,7 @@ function updateScatter(
     chart.pop();
   }
   graphScale[1] = scaleLimits;
-  chartRescale(myChart);
+  chartRescale(myChart, modelForm);
   myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
   modelForm["red"].value,modelForm["blue"].value)
 }
@@ -1045,20 +1045,50 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
 }
 
 // rescale scatter to contain all the data points
-function chartRescale(myChart: Chart){
+function chartRescale(myChart: Chart, modelForm: ModelForm){
 
   let adjustScale: {[key: string]: number} = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
 
   for (let key in adjustScale) {
     // console.log(key)
-    let frameOn: string = 'data';
-    let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1]}
-    if (key.includes('min')){
-      adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key], 
-        graphScale[frameParam[frameOn][1]][key]) 
+    let frameOn: string = 'auto';
+    let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN]}
+    
+    if (isNaN(frameParam[frameOn][0])){
+      let magList: string[] = ['red','blue','bright'];
+      let filters: number[] = [filterWavelength[modelForm['red'].value],
+        filterWavelength[modelForm['blue'].value], 
+        filterWavelength[modelForm['lum'].value]];
+      let x: {[key: string]: number} = {'red': 0, 'blue': 0, 'bright': 0}
+      for (let i = 0; i < magList.length; i++) {
+        filters[i] = filters[i] * 1000;
+        x[magList[i]]  = Math.log(filters[i]) / Math.log(10);
+      }
+      // console.log(x)
+      let mags: {[key: string]: Function} = {
+        'red': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87}, 
+        'faint': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87}, 
+        'blue': (a: number)=>{return -4.7791 * (a**2) + 30.408 * a - 52.201}, 
+        'bright': (a: number)=>{return -0.0079 * (a**2) - 3.134 * a - 2.1085}};
+
+      let color_red: number = mags['red'](x['blue']) - mags['red'](x['red']);
+      let color_blue: number = mags['blue'](x['blue']) - mags['blue'](x['red']);
+      
+      adjustScale = {
+        'minX': color_blue - (color_red - color_blue) /8,
+        'maxX': color_red + (color_red - color_blue) /8,
+        'minY': mags['bright'](x['bright']) + (mags['bright'](x['bright']) - mags['faint'](x['bright'])) / 8,
+        'maxY': mags['faint'](x['bright']) - (mags['bright'](x['bright']) - mags['faint'](x['bright'])) / 8
+      };
+      console.log(adjustScale)
     } else {
-      adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key], 
-        graphScale[frameParam[frameOn][1]][key]) 
+      if (key.includes('min')){
+        adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key], 
+          graphScale[frameParam[frameOn][1]][key]) 
+      } else {
+        adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key], 
+          graphScale[frameParam[frameOn][1]][key]) 
+      }
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
