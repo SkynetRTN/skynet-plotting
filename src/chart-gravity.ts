@@ -12,6 +12,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
+import { HiddenColumns } from "handsontable/plugins";
 
 /**
  *  This function is for the moon of a planet.
@@ -924,7 +925,7 @@ export function gravity(): [Handsontable, Chart] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain"], // need to change to filter1, filter2
+      colHeaders: ["Time", "Strain", "Model"], // need to change to filter1, filter2
       columns: [
         {
           data: "Time",
@@ -936,12 +937,13 @@ export function gravity(): [Handsontable, Chart] {
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
-       // {
-          //data: "Model",
-         // type: "numeric",
-         // numericFormat: { pattern: { mantissa: 2 } },
-        //},
-      ]
+        {
+          data: "Model",
+          type: "numeric",
+          numericFormat: { pattern: { mantissa: 2 } },
+        },
+      ],
+      hiddenColumns: { columns: [2] },
     })
   );
   //now we need to hide the model column
@@ -954,14 +956,15 @@ export function gravity(): [Handsontable, Chart] {
     data: {
       datasets: [
         {
-          label: "Model",
-          data: null, // will be generated later
-          borderColor: colors["blue"],
-          backgroundColor: colors["white-0"],
+          label: 'Model',
+          data: null,
+          borderColor: colors['blue'],
+          backgroundColor: colors['blue'],
+          pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
-          pointRadius: 0,
           fill: false,
+          hidden: false,
           immutableLabel: true,
         },
         {
@@ -988,8 +991,18 @@ export function gravity(): [Handsontable, Chart] {
           type: "linear",
           position: "bottom",
         },
+        x2: {
+          type: "linear",
+          position: "bottom",
+        },
         y: {
           //label: 'V',
+          reverse: false,
+          suggestedMin: 0,
+        },
+        y2: {
+          type: "linear",
+          position: "left",
           reverse: false,
           suggestedMin: 0,
         },
@@ -1136,17 +1149,22 @@ function updateWave(
     for (let i = 0; i < tableData.length; i++) {
       if (
       tableData[i][0] === null ||
-      tableData[i][1] === null
+      tableData[i][1] === null ||
+      tableData[i][2] === null 
       ) {
       continue;
         }
         //red-blue,lum
     
     let x = (tableData[i][0]);
-    let y = (tableData[i][1]);
+    let y = (tableData[i][1])
+    let x2 = (tableData[i][0] + merge);
+    let y2 = (tableData[i][2]*(1-((0.5*Math.sin(inc))*(dist/100))));
     chart[start++] = {
       x: x,
+     // x2: x2,
       y: y,
+     // y2: y2,
         };
 //console.log(x);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //console.log(y);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

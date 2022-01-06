@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { ScatterDataPoint } from "chart.js";
+import { Color, ScatterDataPoint } from "chart.js";
 
 import { tableCommonOptions, colors } from "./config";
 import {
@@ -13,6 +13,7 @@ import {
   changeOptions,
 } from "./util";
 import { data } from "jquery";
+import { SourceMapDevToolPlugin } from "webpack";
 
 /**
  *  This function is for the moon of a planet.
@@ -546,9 +547,9 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
     })
   );
   // create chart
-  const ctx = (
-    document.getElementById("myChart") as HTMLCanvasElement
-  ).getContext("2d");
+  const canvas = document.getElementById("myChart") as HTMLCanvasElement
+  canvas.title = "Click to change focus"//inform the user of this functionality
+  const ctx = canvas.getContext("2d");
 
   const myChart = new Chart(ctx, {
     type: "line",
@@ -570,8 +571,8 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
           type: "scatter",
           label: "Data",
           data: [{x:0,y:0}],
-          backgroundColor: colors["red"],
-          borderColor: colors["black"],
+          backgroundColor: colors["gray"],
+          borderColor: colors["gray"],
           borderWidth: 0.5,
           fill: false,
           showLine: false,
@@ -808,11 +809,8 @@ export function clusterFileUpload(
       "K",
     ];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
-    knownFilters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
-    filters = knownFilters.concat(
-      filters.filter((f) => knownFilters.indexOf(f) < 0)
-    ); //slap unknowns on the end
-    //console.log(filters)
+    filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
+    //if it ain't known ignore it
 
     const optionList = [];
     const headers = [];
@@ -847,16 +845,10 @@ export function clusterFileUpload(
     changeOptions(red, optionList);
     //red.value = red.options[red.options.length-1].value;
     changeOptions(lum, optionList);
-    //now we need to assign a number to the filters based off their order in knownFilters
-    const filterMap = new Map<string, number>();
-    for (let i = 0; i < knownFilters.length; i++) {
-      filterMap.set(knownFilters[i], i);
-    }
-    blue.value = knownFilters[0];
-    red.value = knownFilters[1];
-    lum.value = knownFilters[1];
-    //this might be it??????????
-    //console.log (filters)
+    
+    blue.value = filters[0];
+    red.value = filters[1];
+    lum.value = filters[1];
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -1022,8 +1014,7 @@ function updateScatter(
   }
   graphScale[1] = scaleLimits;
   chartRescale(myChart, modelForm);
-  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
-  modelForm["red"].value,modelForm["blue"].value)
+  myChart.update()
 }
 
 //finding the maximum and minimum of y value for chart scaling
@@ -1130,7 +1121,8 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     type: "linear",
     position: "bottom",
   };
-
+  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+    modelForm["red"].value,modelForm["blue"].value)
   myChart.update()
 }
 
@@ -1219,27 +1211,27 @@ function HRModelRounding(number: number | string){
 
 
 //create a gradient for HR stars
-function HRrainbow (chart:Chart,red:string,blue:string){
+function HRrainbow (chart:Chart,red:string,blue:string): CanvasGradient | Color {
   let {ctx, chartArea} = chart;
   let rl = isNaN(filterWavelength[red])? Math.log10(0.442*1000) : Math.log10(filterWavelength[red]*1000);//default to B-V for unknowns
   let bl = isNaN(filterWavelength[blue])? Math.log10(0.54*1000) : Math.log10(filterWavelength[blue]*1000);
-  console.log([rl,bl])
 
-  let mMag = function(r: number) {return (13.247*(r**2))-(87.9*r)+150.87};//magnitude of m star
-  let oMag = function(b: number) {return -4.7791*b**2+30.408*b-52.201};//magnitude of o star
+  let mags: {[key: string]: Function} = {
+    'red': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87},  
+    'blue': (a: number)=>{return -4.7791 * (a**2) + 30.408 * a - 52.201}
+  }
 
-  console.log(mMag(rl))
-  let mColor = mMag(bl)-mMag(rl);
-  let oColor = oMag(bl)-oMag(rl)
-  console.log([oColor,mColor])
+  let mColor = mags.red(bl)-mags.red(rl);
+  let oColor = mags.blue(bl)-mags.blue(rl)
+
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
   
   //p(c)=(W/DC)*c-(W/DC)*min+left
-  let pixelrat: number = chartArea.width/(max-min);
+  let pixelrat = chartArea.width/(max-min);
   let start = chartArea.left + (pixelrat*oColor)-(pixelrat*min);
   let stop  = chartArea.left + (pixelrat*mColor)-(pixelrat*min);
-  console.log([start,stop])
+
   if (isNaN(start) || isNaN(stop)){//stop div/0
     return "red"
   }
