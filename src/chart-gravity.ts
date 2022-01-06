@@ -1128,85 +1128,27 @@ function updateWave(
       let start = 0;
       let chart = myChart.data.datasets[dataSetIndex].data;
       let tableData = table.getData();
-      let columns = table.getColHeader();
-    
-      //Identify the column the selected filter refers to
-      let Time = columns.indexOf(gravityForm["Time"].value);
-      let Strain = columns.indexOf(gravityForm["Strain"].value);
-    
-    
-      let scaleLimits: { [key: string]: number } = {
-        minX: null,
-        minY: null,
-        maxX: null,
-        maxY: null,
-      };
     
       for (let i = 0; i < tableData.length; i++) {
         if (
-          tableData[i][Time] === null ||
-          tableData[i][Strain] === null
+          tableData[i][0] === null ||
+          tableData[i][1] === null
          ) {
           continue;
         }
         //red-blue,lum
     
-        let x = (tableData[i][Time] + merge);
-        let y = (tableData[i][Strain] *(1-(0.5*Math.sin(inc)*100/dist)));
+        let x = (tableData[i][0] + merge);
+        let y = (tableData[i][1] *(1-(0.5*Math.sin(inc)*100/dist)));
         chart[start++] = {
           x: x,
           y: y,
         };
 
-        if (isNaN(scaleLimits["minX"])) {
-          scaleLimits["minX"] = x;
-          scaleLimits["maxX"] = x;
-          scaleLimits["minY"] = y;
-          scaleLimits["maxY"] = y;
-        } else {
-         if (y > scaleLimits["maxY"]) {
-            scaleLimits["maxY"] = y;
-         } else if (y < scaleLimits["minY"]) {
-           scaleLimits["minY"] = y;
-    }
-          if (x > scaleLimits["maxX"]) {
-           scaleLimits["maxX"] = x;
-          } else if (x < scaleLimits["minX"]) {
-            scaleLimits["minX"] = x;
-          }
-        }
-  
   while (chart.length !== start) {
     chart.pop();
   }
 
-  //   scale chart y-axis based on minimum and maximum y value
-  let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
-  let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
-  let minbuffer = 0.1;
-  let maxbuffer = 1;
-  xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer)  : minbuffer)
-  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
-  myChart.options.scales["y"] = {
-    min: isNaN(scaleLimits["minY"])
-      ? 0
-      : scaleLimits["minY"] - yBuffer,
-    max: isNaN(scaleLimits["maxY"])
-      ? 0
-      : scaleLimits["maxY"] + yBuffer,
-    reverse: false,
-    suggestedMin: 0,
-  };
-  myChart.options.scales["x"] = {
-    min: isNaN(scaleLimits["minX"])
-      ? 0
-      : scaleLimits["minX"] - xBuffer,
-    max: isNaN(scaleLimits["maxX"])
-      ? 0
-      : scaleLimits["maxX"] + xBuffer,
-    type: "linear",
-    position: "bottom",
-  };
   myChart.update()
 }
 
