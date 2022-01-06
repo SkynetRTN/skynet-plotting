@@ -1051,10 +1051,14 @@ function chartRescale(myChart: Chart){
 
   for (let key in adjustScale) {
     // console.log(key)
+    let frameOn: string = 'data';
+    let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1]}
     if (key.includes('min')){
-      adjustScale[key] = Math.min(graphScale[1][key], graphScale[1][key]) 
+      adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key], 
+        graphScale[frameParam[frameOn][1]][key]) 
     } else {
-      adjustScale[key] = Math.max(graphScale[1][key], graphScale[1][key]) 
+      adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key], 
+        graphScale[frameParam[frameOn][1]][key]) 
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
