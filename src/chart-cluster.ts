@@ -12,8 +12,6 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
-import { round } from "./my-math";
-import { ModuleFilenameHelpers } from "webpack";
 
 /**
  *  This function is for the moon of a planet.
