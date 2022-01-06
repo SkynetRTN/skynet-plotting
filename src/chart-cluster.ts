@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { ScatterDataPoint } from "chart.js";
+import { Color, ScatterDataPoint } from "chart.js";
 
 import { tableCommonOptions, colors } from "./config";
 import {
@@ -1192,19 +1192,17 @@ function HRModelRounding(number: number | string){
 
 
 //create a gradient for HR stars
-function HRrainbow (chart:Chart,red:string,blue:string){
+function HRrainbow (chart:Chart,red:string,blue:string): CanvasGradient | Color {
   let {ctx, chartArea} = chart;
   let rl = isNaN(filterWavelength[red])? Math.log10(0.442*1000) : Math.log10(filterWavelength[red]*1000);//default to B-V for unknowns
   let bl = isNaN(filterWavelength[blue])? Math.log10(0.54*1000) : Math.log10(filterWavelength[blue]*1000);
-  console.log([rl,bl])
 
   let mMag = function(r: number) {return (13.247*(r**2))-(87.9*r)+150.87};//magnitude of m star
   let oMag = function(b: number) {return -4.7791*b**2+30.408*b-52.201};//magnitude of o star
 
-  console.log(mMag(rl))
   let mColor = mMag(bl)-mMag(rl);
   let oColor = oMag(bl)-oMag(rl)
-  console.log([oColor,mColor])
+
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
   
@@ -1212,7 +1210,7 @@ function HRrainbow (chart:Chart,red:string,blue:string){
   let pixelrat: number = chartArea.width/(max-min);
   let start = chartArea.left + (pixelrat*oColor)-(pixelrat*min);
   let stop  = chartArea.left + (pixelrat*mColor)-(pixelrat*min);
-  console.log([start,stop])
+
   if (isNaN(start) || isNaN(stop)){//stop div/0
     return "red"
   }
