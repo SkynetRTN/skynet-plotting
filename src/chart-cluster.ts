@@ -18,7 +18,7 @@ import { data } from "jquery";
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function cluster(): [Handsontable, Chart] {
+export function cluster(): [Handsontable, Chart, ModelForm] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
@@ -688,7 +688,7 @@ export function cluster(): [Handsontable, Chart] {
     false
   );
 
-  return [hot, myChart];
+  return [hot, myChart, modelForm];
 }
 
 /**
@@ -1044,13 +1044,13 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
 }
 
 // rescale scatter to contain all the data points
-function chartRescale(myChart: Chart, modelForm: ModelForm){
+export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null){
 
   let adjustScale: {[key: string]: number} = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
-
+  
   for (let key in adjustScale) {
     // console.log(key)
-    let frameOn: string = 'auto';
+    let frameOn: string = option === null? 'auto' : option;
     let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN]}
     
     if (isNaN(frameParam[frameOn][0])){
