@@ -143,7 +143,7 @@ function chartType(chart: string) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
         document.getElementById('myChart').onclick = ()=>{
-            chartRescale(objects[1], cluster_objects[2], mode === "auto"? mode = "data" : mode = "auto")
+            chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto')
         }
     
     } else if (chart === 'gravity') {

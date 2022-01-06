@@ -881,6 +881,7 @@ export function clusterFileUpload(
   };
   reader.readAsText(file);
 }
+var graphScaleMode = "auto";
 var graphScale: {[key: string] : number}[] = [
   {
     minX: 0,
@@ -893,7 +894,7 @@ var graphScale: {[key: string] : number}[] = [
     maxX: 0,
     minY: 0,
     maxY: 0,
-  }
+  },
 ]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
@@ -1040,8 +1041,8 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
   let adjustScale: {[key: string]: number} = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
   
   for (let key in adjustScale) {
-    // console.log(key)
-    let frameOn: string = option === null? 'auto' : option;
+    let frameOn: string = option === null? graphScaleMode : (graphScaleMode = option);
+    console.log(graphScaleMode)
     let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN]}
     
     if (isNaN(frameParam[frameOn][0])){
@@ -1049,7 +1050,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
       let x: {[key: string]: number} = {'red': 0, 'blue': 0, 'bright': 0}
       let magIndex: number[] = [0,0,0];
-      console.log(filters)
+      // console.log(filters)
       for (let i = 0; i < magList.length; i++) {
         x[magList[i]]  = Math.log(filterWavelength[filters[i]]*1000) / Math.log(10);
         if ("UBVRI".includes(filters[i])){
@@ -1082,14 +1083,14 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
 
       let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
       let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
-      console.log(magIndex)
+      // console.log(magIndex)
       adjustScale = {
         'minX': color_blue - (color_red - color_blue) /8,
         'maxX': color_red + (color_red - color_blue) /8,
         'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
         'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
       };
-      console.log(adjustScale)
+      // console.log(adjustScale)
     } else {
       if (key.includes('min')){
         adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key], 
