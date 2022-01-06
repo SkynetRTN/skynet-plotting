@@ -12,6 +12,7 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
+import { data } from "jquery";
 
 /**
  *  This function is for the moon of a planet.
@@ -914,11 +915,11 @@ function updateHRModel(form: ModelForm, chart: Chart) {
   let url = "http://localhost:5000/data?" 
   +"age=" + HRModelRounding(form['age_num'].value)
   + "&metallicity=" + HRModelRounding(form['metal_num'].value)
-  + "&filters=[%22"+ form['red'].value 
-  + "%22,%22" + form['blue'].value 
+  + "&filters=[%22"+ form['blue'].value 
+  + "%22,%22" + form['red'].value 
   + "%22,%22" + form['lum'].value + "%22]"
 
-  console.log(url)
+  // console.log(url)
   httpGetAsync(url, (response: string) => {
   let dataTable = JSON.parse(response);
   let form: ScatterDataPoint[] = []
@@ -1049,11 +1050,11 @@ function chartRescale(myChart: Chart){
   let adjustScale: {[key: string]: number} = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
 
   for (let key in adjustScale) {
-    console.log(key)
+    // console.log(key)
     if (key.includes('min')){
-      adjustScale[key] = Math.min(graphScale[0][key], graphScale[1][key]) 
+      adjustScale[key] = Math.min(graphScale[1][key], graphScale[1][key]) 
     } else {
-      adjustScale[key] = Math.max(graphScale[0][key], graphScale[1][key]) 
+      adjustScale[key] = Math.max(graphScale[1][key], graphScale[1][key]) 
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
@@ -1072,8 +1073,8 @@ function chartRescale(myChart: Chart){
     suggestedMin: 0,
   };
   myChart.options.scales["x"] = {
-    min: adjustScale["minX"], //- xBuffer,
-    max: adjustScale["maxX"], //+ xBuffer,
+    min: adjustScale["minX"] - xBuffer,
+    max: adjustScale["maxX"] + xBuffer,
     type: "linear",
     position: "bottom",
   };
