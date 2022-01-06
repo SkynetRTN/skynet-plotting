@@ -94,7 +94,7 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
    0,
    100000000
   );
-  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.1, 0.01, 6.6);
+  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(
     clusterForm["red"], clusterForm["red_num"],
     0,
@@ -107,10 +107,10 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
     100000000
   );
   linkInputs(modelForm["metal"], modelForm["metal_num"],
-   -2.3,
+   -3.4,
    0.2,
    0.01,
-   -2.3
+   -3.4
   );
 
   const tableData = [
@@ -732,11 +732,11 @@ export function clusterFileUpload(
     // console.log(clusterForm.elements['d'].value);
     modelForm["age"].value = "6.6";
     clusterForm["red"].value = "0";
-    modelForm["metal"].value = "-2.3";
+    modelForm["metal"].value = "-3.4";
     clusterForm["d_num"].value = "3";
     modelForm["age_num"].value = "6.6";
     clusterForm["red_num"].value = "0";
-    modelForm["metal_num"].value = "-2.3";
+    modelForm["metal_num"].value = "-3.4";
     myChart.options.plugins.title.text = "Title";
     myChart.data.datasets[1].label = "Data";
     myChart.options.scales["x"].title.text = "x";
