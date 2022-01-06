@@ -12,6 +12,7 @@ import {
   changeOptions,
 } from "./util";
 import { round } from "./my-math";
+import { HiddenColumns } from "handsontable/plugins";
 
 /**
  *  This function is for the moon of a planet.
@@ -924,7 +925,7 @@ export function gravity(): [Handsontable, Chart] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain"], // need to change to filter1, filter2
+      colHeaders: ["Time", "Strain", "Model"], // need to change to filter1, filter2
       columns: [
         {
           data: "Time",
@@ -941,10 +942,11 @@ export function gravity(): [Handsontable, Chart] {
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
-      ]
+      ],
+      hiddenColumns: { columns: [2] },
     })
   );
-  //now we need to hide the model column;
+  //now we need to hide the model column
   // create chart
   const ctx = (
     document.getElementById("myChart") as HTMLCanvasElement
@@ -1003,14 +1005,13 @@ export function gravity(): [Handsontable, Chart] {
     updateWave(hot, myChart, gravityForm, 1);  
     
   };
-
+console.log(myChart);
   // link chart to table
   hot.updateSettings({
     afterChange: update,
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
   gravityForm.oninput = throttle(
@@ -1032,7 +1033,6 @@ export function gravity(): [Handsontable, Chart] {
         hidden.push(parseFloat(col));
       }
     }
-
     hot.updateSettings({
       hiddenColumns: {
         columns: hidden,
@@ -1049,7 +1049,6 @@ export function gravity(): [Handsontable, Chart] {
     myChart.update("none");
   };
   update();
-
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
   myChart.options.scales["y"].title.text = "y";
@@ -1061,7 +1060,6 @@ export function gravity(): [Handsontable, Chart] {
     false,
     false
   );
-
   return [hot, myChart];
 }
 
@@ -1075,13 +1073,13 @@ export function gravity(): [Handsontable, Chart] {
  */
 
 //remember later to change the file type to .hdf5
+
 export function gravityFileUpload(
   evt: Event,
   table: Handsontable,
   myChart: Chart<"line">
 ) 
 {
-  // console.log("gravityFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
 
   if (file === undefined) {
@@ -1093,8 +1091,6 @@ export function gravityFileUpload(
     !file.type.match("(text/csv|application/vnd.ms-excel)") &&
     !file.name.match(".*.csv")
   ) {
-    console.log("Uploaded file type is: ", file.type);
-    console.log("Uploaded file name is: ", file.name);
     alert("Please upload a CSV file.");
     return;
   }
@@ -1130,39 +1126,45 @@ function updateWave(
   myChart: Chart,
   gravityForm: GravityForm,
   dataSetIndex: 1) 
-  {
-      let inc = parseFloat(gravityForm["inc_num"].value);
-      let dist = parseFloat(gravityForm["dist_num"].value);
-      let merge = parseFloat(gravityForm["merge_num"].value);
+{
+  let inc = parseFloat(gravityForm["inc_num"].value);
+  let dist = parseFloat(gravityForm["dist_num"].value);
+  let merge = parseFloat(gravityForm["merge_num"].value);
     
-      let start = 0;
-      let chart = myChart.data.datasets[dataSetIndex].data;
-      let tableData = table.getData();
+  let start = 0;
+  let chart = myChart.data.datasets[dataSetIndex].data;
+  let tableData = table.getData();
     
-      for (let i = 0; i < tableData.length; i++) {
-        if (
-          tableData[i][0] === null ||
-          tableData[i][1] === null
-         ) {
-          continue;
+    for (let i = 0; i < tableData.length; i++) {
+      if (
+      tableData[i][0] === null ||
+      tableData[i][1] === null ||
+      tableData[i][2] === null 
+      ) {
+      continue;
         }
         //red-blue,lum
     
-        let x = (tableData[i][0]);
-        let y = (tableData[i][1]);
-        chart[start++] = {
-          x: x,
-          y: y,
+    let x = (tableData[i][0]);
+    let y = (tableData[i][1])
+    let x2 = (tableData[i][0]);
+    let y2 = (tableData[i][2])
+    chart[start++] = {
+      x: x,
+      y: y,
         };
+//console.log(x);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//console.log(y);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  while (chart.length !== start) {
-    chart.pop();
+//broke chart
+  //while (chart.length !== start) {
+    //chart.pop();
   }
 
   myChart.update()
 }
 
-  }
+ // }
    
 /**
  *  This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
