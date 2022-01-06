@@ -12,7 +12,7 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
-import { round } from "./my-math";
+import { data } from "jquery";
 
 /**
  *  This function is for the moon of a planet.
@@ -550,12 +550,6 @@ export function cluster(): [Handsontable, Chart] {
     document.getElementById("myChart") as HTMLCanvasElement
   ).getContext("2d");
 
-  const rainbow = ctx.createLinearGradient(0,0, 300,0);
-// color stops
-  rainbow.addColorStop(1, 'red');
-  rainbow.addColorStop(0.7, 'orange');
-  rainbow.addColorStop(0.3, 'yellow');
-  rainbow.addColorStop(0, 'cyan');
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -576,7 +570,9 @@ export function cluster(): [Handsontable, Chart] {
           type: "scatter",
           label: "Data",
           data: [],
-          backgroundColor: rainbow,
+          backgroundColor: colors["red"],
+          borderColor: colors["gray"],
+          borderWidth: 0.5,
           fill: false,
           showLine: false,
           pointRadius: 5,
@@ -888,13 +884,26 @@ export function clusterFileUpload(
       table,
       myChart,
       document.getElementById("cluster-form") as ClusterForm,
-      document.getElementById("filter-form") as ModelForm,
+      document.getElementById("model-form") as ModelForm,
       1
     );
   };
   reader.readAsText(file);
 }
-
+var graphScale: {[key: string] : number}[] = [
+  {
+    minX: 0,
+    maxX: 0,
+    minY: 0,
+    maxY: 0,
+  },
+  {
+    minX: 0,
+    maxX: 0,
+    minY: 0,
+    maxY: 0,
+  }
+]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
  *  request HR diagram model from server and plot on the graph.
@@ -906,21 +915,30 @@ function updateHRModel(form: ModelForm, chart: Chart) {
   let url = "http://localhost:5000/data?" 
   +"age=" + HRModelRounding(form['age_num'].value)
   + "&metallicity=" + HRModelRounding(form['metal_num'].value)
-  + "&filters=[%22"+ form['red'].value 
-  + "%22,%22" + form['blue'].value 
+  + "&filters=[%22"+ form['blue'].value 
+  + "%22,%22" + form['red'].value 
   + "%22,%22" + form['lum'].value + "%22]"
 
-  console.log(url)
+  // console.log(url)
   httpGetAsync(url, (response: string) => {
   let dataTable = JSON.parse(response);
   let form: ScatterDataPoint[] = []
+  let scaleLimits: { [key: string]: number } = {
+    minX: null,
+    minY: null,
+    maxX: null,
+    maxY: null,
+  };
   for (let i = 0; i < dataTable.length; i++) {
     // console.log(dataTable[i])
     let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
+    scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
     form.push(row);
   }
-  chart.data.datasets[0].data = form
-  chart.update("none")
+  chart.data.datasets[0].data = form;
+  chart.update("none");
+  graphScale[0] = scaleLimits;
+  chartRescale(chart);
   });
 }
 
@@ -998,57 +1016,73 @@ function updateScatter(
       x: x,
       y: y,
     };
-
-    //finding the maximum and minimum of y value for chart scaling
-    if (isNaN(scaleLimits["minX"])) {
-      scaleLimits["minX"] = x;
-      scaleLimits["maxX"] = x;
-      scaleLimits["minY"] = y;
-      scaleLimits["maxY"] = y;
-    } else {
-      if (y > scaleLimits["maxY"]) {
-        scaleLimits["maxY"] = y;
-      } else if (y < scaleLimits["minY"]) {
-        scaleLimits["minY"] = y;
-      }
-      if (x > scaleLimits["maxX"]) {
-        scaleLimits["maxX"] = x;
-      } else if (x < scaleLimits["minX"]) {
-        scaleLimits["minX"] = x;
-      }
-    }
+    scaleLimits = pointMinMax(scaleLimits, x, y);
   }
   while (chart.length !== start) {
     chart.pop();
   }
+  graphScale[1] = scaleLimits;
+  chartRescale(myChart);
+  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+  modelForm["red"].value,modelForm["blue"].value)
+}
 
-  //   scale chart y-axis based on minimum and maximum y value
-  let xBuffer = (scaleLimits["maxX"] - scaleLimits["minX"]) * 0.2;
-  let yBuffer = (scaleLimits["maxY"] - scaleLimits["minY"]) * 0.2;
+//finding the maximum and minimum of y value for chart scaling
+function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number){
+  let newLimits = scaleLimits;
+  if (isNaN(newLimits["minX"])) {
+    newLimits["minX"] = x;
+    newLimits["maxX"] = x;
+    newLimits["minY"] = y;
+    newLimits["maxY"] = y;
+  } else {
+    newLimits["maxY"] = Math.max(newLimits["maxY"], y);
+    newLimits["maxX"] = Math.max(newLimits["maxX"], x)   
+    newLimits["minY"] = Math.min(newLimits["minY"], y)   
+    newLimits["minX"] = Math.min(newLimits["minX"], x)   
+  }
+  return newLimits
+}
+
+// rescale scatter to contain all the data points
+function chartRescale(myChart: Chart){
+
+  let adjustScale: {[key: string]: number} = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
+
+  for (let key in adjustScale) {
+    // console.log(key)
+    let frameOn: string = 'data';
+    let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1]}
+    if (key.includes('min')){
+      adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key], 
+        graphScale[frameParam[frameOn][1]][key]) 
+    } else {
+      adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key], 
+        graphScale[frameParam[frameOn][1]][key]) 
+    }
+    adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
+  }
+
+  let xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
+  let yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
   let minbuffer = 0.1;
   let maxbuffer = 1;
   xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer)  : minbuffer)
-  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
+  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer) 
+
   myChart.options.scales["y"] = {
-    min: isNaN(scaleLimits["minY"])
-      ? 0
-      : scaleLimits["minY"] - yBuffer,
-    max: isNaN(scaleLimits["maxY"])
-      ? 0
-      : scaleLimits["maxY"] + yBuffer,
+    min: adjustScale["minY"] - yBuffer,
+    max: adjustScale["maxY"] + yBuffer,
     reverse: true,
     suggestedMin: 0,
   };
   myChart.options.scales["x"] = {
-    min: isNaN(scaleLimits["minX"])
-      ? 0
-      : scaleLimits["minX"] - xBuffer,
-    max: isNaN(scaleLimits["maxX"])
-      ? 0
-      : scaleLimits["maxX"] + xBuffer,
+    min: adjustScale["minX"] - xBuffer,
+    max: adjustScale["maxX"] + xBuffer,
     type: "linear",
     position: "bottom",
   };
+
   myChart.update()
 }
 
@@ -1132,5 +1166,32 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 }
 
 function HRModelRounding(number: number | string){
-  return (Math.ceil(Number(number)*20)/20).toFixed(2)
+  return (Math.round(Number(number)*20)/20).toFixed(2)
+}
+
+//red stop at +2.0, blue at -0.5
+function HRrainbow (chart:Chart,red:string,blue:string){
+  let {ctx, chartArea} = chart;
+  let rlambda = filterWavelength[red]
+  let blambda = filterWavelength[blue]
+  let max = chart.options.scales["x"].max
+  let min = chart.options.scales["x"].min
+  max = max/Math.log10(rlambda/blambda)
+  min = min/Math.log10(rlambda/blambda)
+  let bluestar = -0.5/Math.log10(rlambda/blambda)
+  let redstar = 2/Math.log10(rlambda/blambda)
+
+  let pixelrat = chartArea.width/(max-min);
+
+  let start = chartArea.left + (pixelrat*bluestar)-(pixelrat*min)
+  let stop  = chartArea.left + (pixelrat*redstar)-(pixelrat*min)
+  let gradient = ctx.createLinearGradient(start,0,stop,0)
+  console.log([start,stop])
+  gradient.addColorStop(1,"red");
+  gradient.addColorStop(0.68,"orange");
+  gradient.addColorStop(0.48,"yellow");
+  gradient.addColorStop(0.28,"white");
+  gradient.addColorStop(0,"#7df9ff");
+  
+  return gradient;
 }
