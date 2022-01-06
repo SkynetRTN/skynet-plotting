@@ -546,9 +546,9 @@ export function cluster(): [Handsontable, Chart] {
     })
   );
   // create chart
-  const ctx = (
-    document.getElementById("myChart") as HTMLCanvasElement
-  ).getContext("2d");
+  const canvas = document.getElementById("myChart") as HTMLCanvasElement
+  canvas.title = "Click to change focus"//inform the user of this functionality
+  const ctx = canvas.getContext("2d");
 
   const myChart = new Chart(ctx, {
     type: "line",
@@ -571,7 +571,7 @@ export function cluster(): [Handsontable, Chart] {
           label: "Data",
           data: [{x:0,y:0}],
           backgroundColor: colors["gray"],
-          borderColor: colors["black"],
+          borderColor: colors["gray"],
           borderWidth: 0.5,
           fill: false,
           showLine: false,
