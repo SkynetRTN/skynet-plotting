@@ -1,10 +1,10 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'handsontable/dist/handsontable.min.css';
+
 @font-face {
     font-family: 'Lato';
     src: url(./assets/Lato-Regular.ttf);
 }
-
-@import '~bootstrap/dist/css/bootstrap.min.css';
-@import '~handsontable/dist/handsontable.full.css';
 
 .handsontable {
     font-family: 'Lato', sans-serif;

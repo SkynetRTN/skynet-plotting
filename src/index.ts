@@ -1,12 +1,5 @@
 'use strict';
 
-import './style.css';
-
-/**
- * "importing for side effect": nothing is actually imported by the line below. 
- * This is used to attach the bootstrap modal plugin to the global jQuery object.
- */ 
-import * as $ from 'jquery';
 import 'bootstrap/js/dist/modal';
 
 import { saveAs } from 'file-saver';
@@ -73,8 +66,8 @@ window.onload = function () {
             document.getElementById('no-signature-alert').style.display = 'block';
         } else {
             document.getElementById('no-signature-alert').style.display = 'none';
-            // jQuery is required for this line of bootstrap functionality to work
-            $('#honor-pledge-modal').modal('hide');
+            // NO MORE JQUERY BYE BYE xD
+            // $('#honor-pledge-modal').modal('hide');
             saveImage('myChart', signature, true, 1.0);
         }
     };
@@ -143,7 +136,7 @@ function chartType(chart: string) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
         document.getElementById('myChart').onclick = ()=>{
-            chartRescale(objects[1], cluster_objects[2], mode === "auto"? mode = "data" : mode = "auto")
+            chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto')
         }
     
     } else if (chart === 'gravity') {
