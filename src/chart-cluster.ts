@@ -601,6 +601,13 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
     },
   });
 
+  window.onresize = function (){
+    myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+      modelForm["red"].value,modelForm["blue"].value)
+    //console.log("bingus")
+    myChart.update()
+  }
+
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
@@ -639,7 +646,7 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
       modelForm["blue"].value,
       modelForm["lum"].value,
     ];
-    console.log(Number(modelForm['age_num'].value)*10%5)
+    //console.log(Number(modelForm['age_num'].value)*10%5)
     if (precise 
       || Number(modelForm['age_num'].value)*10%3 === 0
       ||Number(modelForm['metal'].value)*10%2 === 0){
@@ -1035,7 +1042,7 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
     newLimits["minY"] = Math.min(newLimits["minY"], y)   
     newLimits["minX"] = Math.min(newLimits["minX"], x)   
   }
-  console.log(newLimits)
+  //console.log(newLimits)
   return newLimits
 }
 
@@ -1104,7 +1111,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       }
     }
     if (isNaN(adjustScale[key])){
-      console.log(key)
+      //console.log(key)
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
@@ -1249,8 +1256,6 @@ function HRrainbow (chart:Chart,red:string,blue:string): CanvasGradient | Color 
   
   let mColor = mags.red[magIndex[0]](bl)-mags.red[magIndex[0]](rl);
   let oColor = mags.blue[magIndex[1]](bl)-mags.blue[magIndex[1]](rl)
-
-  
 
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
