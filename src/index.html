@@ -66,20 +66,18 @@
         <input type="file" id="file-upload" style="display: none;">
       </div>
       <div class="col-lg-8 right-column">
-        <button id="save-button" data-toggle="modal" data-target="#honor-pledge-modal">Save Graph</button>
+        <button id="save-button" data-bs-toggle="modal" data-bs-target="#honor-pledge-modal">Save Graph</button>
       </div>
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="honor-pledge-modal" tabindex="-1" role="dialog" aria-labelledby="honor-pledge-title"
+    <div class="modal fade" id="honor-pledge-modal" tabindex="-1" aria-labelledby="honor-pledge-title"
       aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="honor-pledge-title">Honor Code Pledge</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <form id="honor-pledge-form">
@@ -89,7 +87,7 @@
             </form>
           </div>
           <div class="modal-footer" style="flex-direction: row-reverse; justify-content: space-between">
-            <button id="pledge-signed">Save Graph</button>
+            <button type="button" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>
             <div id="no-signature-alert" class="alert alert-warning" role="alert" style="display: none;">
               Please make sure to sign your name.
             </div>
@@ -97,6 +95,7 @@
         </div>
       </div>
     </div>
+
   </main>
   <script defer>
     // If IE is detected, show the unsupported message.
