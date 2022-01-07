@@ -753,7 +753,6 @@ export function clusterFileUpload(
     const data: string[] = (reader.result as string)
       .split("\n")
       .filter((str) => str !== null && str !== undefined && str !== "");
-
     const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
     let filters: string[] = [];
     data.splice(0, 1);
@@ -762,15 +761,18 @@ export function clusterFileUpload(
       let items = row.trim().split(",");
       let src = items[1];
       let filter = items[10];
-      let mag = parseFloat(items[12]);
+      let mag = parseFloat(items.length === 24 ? items[23] : items[12]);
+      // let mag = parseFloat(items[12]);
       let err = parseFloat(items[13]);
       if (!datadict.has(src)) {
         datadict.set(src, new Map<string, number>());
       }
-      datadict.get(src).set(filter, isNaN(mag) ? null : mag);
-      datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
-      if (!filters.includes(filter)) {
-        filters.push(filter);
+      if (items[12] !== "") {
+        datadict.get(src).set(filter, isNaN(mag) ? null : mag);
+        datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
+        if (!filters.includes(filter)) {
+          filters.push(filter);
+        }
       }
     }
     //add null values for sources that didn't show up under each filter
@@ -904,7 +906,8 @@ var graphScale: {[key: string] : number}[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  let url = "http://localhost:5000/isochrone?" 
+  // let url = "http://localhost:5000/isochrone?" 
+  let url = "https://skynet.unc.edu/graph-api/isochrone?"
   +"age=" + HRModelRounding(modelForm['age_num'].value)
   + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
   + "&filters=[%22"+ modelForm['blue'].value 
