@@ -753,7 +753,6 @@ export function clusterFileUpload(
     const data: string[] = (reader.result as string)
       .split("\n")
       .filter((str) => str !== null && str !== undefined && str !== "");
-
     const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
     let filters: string[] = [];
     data.splice(0, 1);
@@ -762,15 +761,18 @@ export function clusterFileUpload(
       let items = row.trim().split(",");
       let src = items[1];
       let filter = items[10];
-      let mag = parseFloat(items[12]);
+      let mag = parseFloat(items.length === 24 ? items[23] : items[12]);
+      // let mag = parseFloat(items[12]);
       let err = parseFloat(items[13]);
       if (!datadict.has(src)) {
         datadict.set(src, new Map<string, number>());
       }
-      datadict.get(src).set(filter, isNaN(mag) ? null : mag);
-      datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
-      if (!filters.includes(filter)) {
-        filters.push(filter);
+      if (items[12] !== "") {
+        datadict.get(src).set(filter, isNaN(mag) ? null : mag);
+        datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
+        if (!filters.includes(filter)) {
+          filters.push(filter);
+        }
       }
     }
     //add null values for sources that didn't show up under each filter
