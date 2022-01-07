@@ -886,16 +886,16 @@ export function clusterFileUpload(
 var graphScaleMode = "auto";
 var graphScale: {[key: string] : number}[] = [
   {
-    minX: 0,
-    maxX: 0,
-    minY: 0,
-    maxY: 0,
+    minX: NaN,
+    maxX: NaN,
+    minY: NaN,
+    maxY: NaN,
   },
   {
-    minX: 0,
-    maxX: 0,
-    minY: 0,
-    maxY: 0,
+    minX: NaN,
+    maxX: NaN,
+    minY: NaN,
+    maxY: NaN,
   },
 ]
 /**
@@ -906,8 +906,8 @@ var graphScale: {[key: string] : number}[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  // let url = "http://localhost:5000/isochrone?" 
-  let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  let url = "http://localhost:5000/isochrone?" 
+  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
   +"age=" + HRModelRounding(modelForm['age_num'].value)
   + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
   + "&filters=[%22"+ modelForm['blue'].value 
@@ -919,12 +919,12 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
   let dataTable = JSON.parse(response);
   let form: ScatterDataPoint[] = []
   let scaleLimits: { [key: string]: number } = {
-    minX: null,
-    minY: null,
-    maxX: null,
-    maxY: null,
+    minX: NaN,
+    minY: NaN,
+    maxX: NaN,
+    maxY: NaN,
   };
-  for (let i = 0; i < dataTable.length; i++) {
+  for (let i = 0; i < dataTable.length-10; i++) {
     // console.log(dataTable[i])
     let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
     scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
@@ -985,10 +985,10 @@ function updateScatter(
       : columns.indexOf(modelForm["lum"].value + "err");
 
   let scaleLimits: { [key: string]: number } = {
-    minX: null,
-    minY: null,
-    maxX: null,
-    maxY: null,
+    minX: NaN,
+    minY: NaN,
+    maxX: NaN,
+    maxY: NaN,
   };
 
   let start = 0;
@@ -1029,12 +1029,13 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
     newLimits["maxX"] = x;
     newLimits["minY"] = y;
     newLimits["maxY"] = y;
-  } else {
+  } else if (x!==0 && y !== 0) {
     newLimits["maxY"] = Math.max(newLimits["maxY"], y);
     newLimits["maxX"] = Math.max(newLimits["maxX"], x)   
     newLimits["minY"] = Math.min(newLimits["minY"], y)   
     newLimits["minX"] = Math.min(newLimits["minX"], x)   
   }
+  console.log(newLimits)
   return newLimits
 }
 
@@ -1045,7 +1046,6 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
   
   for (let key in adjustScale) {
     let frameOn: string = option === null? graphScaleMode : (graphScaleMode = option);
-    console.log(graphScaleMode)
     let frameParam: {[key: string]: number[]} = {'model': [0,0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN]}
     
     if (isNaN(frameParam[frameOn][0])){
@@ -1103,9 +1103,11 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
           graphScale[frameParam[frameOn][1]][key]) 
       }
     }
+    if (isNaN(adjustScale[key])){
+      console.log(key)
+    }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
-
   let xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
   let yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
   let minbuffer = 0.1;
