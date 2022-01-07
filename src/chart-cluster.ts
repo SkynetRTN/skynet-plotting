@@ -19,7 +19,7 @@ import { SourceMapDevToolPlugin } from "webpack";
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function cluster(): [Handsontable, Chart, ModelForm] {
+export function cluster1(): [Handsontable, Chart, ModelForm] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
