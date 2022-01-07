@@ -672,8 +672,8 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
   }
 
   // link chart to model form (slider + text)
-  modelForm.oninput=function(){updateModel(false)};
-  modelForm.onchange=function(){updateModel(true)};
+  modelForm.oninput=throttle(function(){updateModel(false)}, 16);
+  modelForm.onchange=throttle(function(){updateModel(true)}, 16);
 
   update();
 
