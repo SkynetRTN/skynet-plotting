@@ -80,6 +80,8 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
       "</form>\n"
     );
 
+  document.getElementById("focus-prompt").style.display = "inline"
+
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;

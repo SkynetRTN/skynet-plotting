@@ -277,3 +277,11 @@ p.ie {
     margin: 1em 5em;
     text-align: center;
 }
+
+text.focus-prompt {
+    color: grey;
+    float: right;
+    display: none;
+    margin-bottom: .3em;
+    line-height: 2em;
+}

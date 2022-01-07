@@ -14,9 +14,9 @@ import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster, clusterFileUpload, chartRescale} from './chart-cluster';
+import { cluster, clusterFileUpload, chartRescale } from './chart-cluster';
 import { round } from './my-math';
-import {gravity, gravityFileUpload} from './chart-gravity';
+import { gravity, gravityFileUpload } from './chart-gravity';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -95,6 +95,7 @@ function chartType(chart: string) {
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
+    document.getElementById("focus-prompt").style.display = "none"
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart, ModelForm]
@@ -135,17 +136,17 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-        document.getElementById('myChart').onclick = ()=>{
+        document.getElementById('myChart').onclick = () => {
             chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto')
         }
-    
+
     } else if (chart === 'gravity') {
-    objects = gravity();
-    document.getElementById('file-upload-button').style.display = 'inline';
-    document.getElementById('file-upload').onchange = function (evt) {
-        gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        objects = gravity();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }
     }
-}
     updateTableHeight(objects[0]);
     // Update the height of the table when the chart resizes.
     objects[1].options.onResize = function () {
@@ -178,7 +179,7 @@ function setChartDefaults() {
     (Chart.defaults.scale as LinearScaleOptions).title.display = true;
     (Chart.defaults.animation as AnimationSpec<ChartType>).duration = 0;
     Chart.defaults.parsing = false;
-    
+
     // Setting properties about the title.
     Chart.defaults.plugins.title.display = true;
     Chart.defaults.plugins.title.color = 'rgba(0, 0, 0, 1)';
@@ -188,7 +189,7 @@ function setChartDefaults() {
 
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    Chart.defaults.plugins.legend.onClick = function () {};
+    Chart.defaults.plugins.legend.onClick = function () { };
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
@@ -223,7 +224,7 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
     myChart.update('none');
 }
 
-function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
+function saveImage(canvasID: string, signature: string, jpg = true, quality = 1.0) {
     const canvas = document.getElementById(canvasID) as HTMLCanvasElement;
 
     // Create a dummy canvas
@@ -243,7 +244,7 @@ function saveImage(canvasID: string, signature: string, jpg=true, quality=1.0) {
     // Download the dummy canvas
     const time = getDateString();
     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
-    saveAs(dataURLtoBlob(exifImage), 'chart-'+formatTime(time)+'.jpg');
+    saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
@@ -251,7 +252,7 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     const exif: piexif.IExifElement = {};
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
-    
+
     const exifObj = { '0th': zeroth, 'Exif': exif };
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
