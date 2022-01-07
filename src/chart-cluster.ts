@@ -906,8 +906,8 @@ var graphScale: {[key: string] : number}[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  // let url = "http://localhost:5000/isochrone?" 
-  let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  let url = "http://localhost:5000/isochrone?" 
+  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
   +"age=" + HRModelRounding(modelForm['age_num'].value)
   + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
   + "&filters=[%22"+ modelForm['blue'].value 
@@ -924,7 +924,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
     maxX: NaN,
     maxY: NaN,
   };
-  for (let i = 0; i < dataTable.length; i++) {
+  for (let i = 0; i < dataTable.length-10; i++) {
     // console.log(dataTable[i])
     let row: ScatterDataPoint = {x: dataTable[i][0], y: dataTable[i][1]};
     scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
@@ -1108,7 +1108,6 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
-  console.log(adjustScale)
   let xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
   let yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
   let minbuffer = 0.1;
