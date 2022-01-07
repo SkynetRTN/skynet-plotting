@@ -601,12 +601,12 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
     },
   });
 
-  window.onresize = function (){
+  window.onresize = function(){setTimeout(function(){
     myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
       modelForm["red"].value,modelForm["blue"].value)
     //console.log("bingus")
     myChart.update()
-  }
+  },10)}
 
   const update = function () {
     //console.log(tableData);
