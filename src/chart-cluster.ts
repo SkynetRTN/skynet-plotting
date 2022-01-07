@@ -646,19 +646,6 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
       modelForm["blue"].value,
       modelForm["lum"].value,
     ];
-<<<<<<< HEAD
-    //console.log(Number(modelForm['age_num'].value)*10%5)
-    if (precise 
-      || Number(modelForm['age_num'].value)*10%3 === 0
-      ||Number(modelForm['metal'].value)*10%2 === 0){
-    const columns: string[] = hot.getColHeader() as string[];
-    const hidden: number[] = [];
-    for (const col in columns) {
-      columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-      if (!reveal.includes(columns[col])) {
-        //if the column isn't selected in the drop down, hide it
-        hidden.push(parseFloat(col));
-=======
     console.log(Number(modelForm['age_num'].value) * 10 % 5)
     if (precise
       || Number(modelForm['age_num'].value) * 10 % 3 === 0
@@ -672,7 +659,6 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
           hidden.push(parseFloat(col));
         }
         updateHRModel(modelForm, myChart);
->>>>>>> 17c8fb371b05126029642c6ed8455f5d1365a1cc
       }
 
       hot.updateSettings({
@@ -1124,13 +1110,8 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
           graphScale[frameParam[frameOn][1]][key])
       }
     }
-<<<<<<< HEAD
     if (isNaN(adjustScale[key])){
       //console.log(key)
-=======
-    if (isNaN(adjustScale[key])) {
-      console.log(key)
->>>>>>> 17c8fb371b05126029642c6ed8455f5d1365a1cc
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
@@ -1273,14 +1254,9 @@ function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Co
   };
 
 
-<<<<<<< HEAD
-=======
   let mColor = mags.red[magIndex[0]](bl) - mags.red[magIndex[0]](rl);
   let oColor = mags.blue[magIndex[1]](bl) - mags.blue[magIndex[1]](rl)
 
-
-
->>>>>>> 17c8fb371b05126029642c6ed8455f5d1365a1cc
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
 
