@@ -601,12 +601,14 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
     },
   });
 
-  window.onresize = function(){setTimeout(function(){
-    myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
-      modelForm["red"].value,modelForm["blue"].value)
-    //console.log("bingus")
-    myChart.update()
-  },10)}
+  window.onresize = function () {
+    setTimeout(function () {
+      myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+        modelForm["red"].value, modelForm["blue"].value)
+      //console.log("bingus")
+      myChart.update()
+    }, 10)
+  }
 
   const update = function () {
     //console.log(tableData);
@@ -1042,10 +1044,6 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
     newLimits["minY"] = Math.min(newLimits["minY"], y)
     newLimits["minX"] = Math.min(newLimits["minX"], x)
   }
-<<<<<<< HEAD
-=======
-  //console.log(newLimits)
->>>>>>> refs/remotes/origin/main
   return newLimits
 }
 
@@ -1120,12 +1118,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer) : minbuffer)
       yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
     }
-<<<<<<< HEAD
     if (isNaN(adjustScale[key])) {
-=======
-    if (isNaN(adjustScale[key])){
-      //console.log(key)
->>>>>>> refs/remotes/origin/main
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
