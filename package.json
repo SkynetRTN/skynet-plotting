@@ -43,7 +43,6 @@
     "file-saver": "^2.0.5",
     "flask": "^0.2.10",
     "handsontable": "11",
-    "np": "^7.6.0",
     "piexif-ts": "^2.0.16"
   }
 }
