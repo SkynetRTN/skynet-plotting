@@ -572,11 +572,11 @@ export function cluster(): [Handsontable, Chart, ModelForm] {
           label: "Data",
           data: [{x:0,y:0}],
           backgroundColor: colors["gray"],
-          borderColor: colors["gray"],
-          borderWidth: 0.5,
+          borderColor: colors["black"],
+          borderWidth: 0.2,
           fill: false,
           showLine: false,
-          pointRadius: 5,
+          pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
         },
@@ -1055,9 +1055,9 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
         x[magList[i]]  = Math.log(filterWavelength[filters[i]]*1000) / Math.log(10);
         if ("UBVRI".includes(filters[i])){
           magIndex[i] = Number(0);
-        } else if ("uprimegprimeiprimezprime".includes(filters[i])){
+        } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])){
           magIndex[i] = Number(1);
-        } else if ("JHKS".includes(filters[i])){
+        } else if ("JHKs".includes(filters[i])){
           magIndex[i] = Number(2);
         }
       }
@@ -1217,13 +1217,32 @@ function HRrainbow (chart:Chart,red:string,blue:string): CanvasGradient | Color 
   let rl = isNaN(filterWavelength[red])? Math.log10(0.442*1000) : Math.log10(filterWavelength[red]*1000);//default to B-V for unknowns
   let bl = isNaN(filterWavelength[blue])? Math.log10(0.54*1000) : Math.log10(filterWavelength[blue]*1000);
 
-  let mags: {[key: string]: Function} = {
-    'red': (a: number)=>{return 13.347 * (a**2) - 87.9 * a + 150.87},  
-    'blue': (a: number)=>{return -4.7791 * (a**2) + 30.408 * a - 52.201}
-  }
+  let filters: string[] = [red, blue];
+  let magIndex: number[] = [0,0];
+  // console.log(filters)
+  for (let i = 0; i < filters.length; i++) {
+    if ("UBVRI".includes(filters[i])){
+      magIndex[i] = Number(0);
+    } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])){
+      magIndex[i] = Number(1);
+    } else if ("JHKs".includes(filters[i])){
+      magIndex[i] = Number(2);
+    }
+  } 
 
-  let mColor = mags.red(bl)-mags.red(rl);
-  let oColor = mags.blue(bl)-mags.blue(rl)
+  let mags: {[key: string]: Function[]} = {
+    'red': [
+      (a: number)=>{return 12.487 * a**2 - 83.756* a + 145.78}, //for UBVRI
+      (a: number)=>{return 28.573 * a**2 - 171.43 * a + 265.27},  //for upgiz
+      (a: number)=>{return 11.924 * a**2 - 79.948 * a +140.02},],   //forJHK/KS
+    'blue': [
+      (a: number)=>{return -21.555 * a**2 + 122.3 * a - 177.91},  //for UBVRI
+      (a: number)=>{return 1.7882 * a**2 - 5.8134 * a - 2.2497},    //for upgiz
+      (a: number)=>{return -1.8118 * a**2 + 12.676 * a - 25.95},],  //forJHK/KS
+  };
+
+  let mColor = mags.red[magIndex[0]](bl)-mags.red[magIndex[0]](rl);
+  let oColor = mags.blue[magIndex[1]](bl)-mags.blue[magIndex[1]](rl)
 
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
