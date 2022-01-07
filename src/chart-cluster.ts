@@ -1035,7 +1035,6 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
     newLimits["minY"] = Math.min(newLimits["minY"], y)
     newLimits["minX"] = Math.min(newLimits["minX"], x)
   }
-  console.log(newLimits)
   return newLimits
 }
 
@@ -1043,7 +1042,8 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
 
   let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
-
+  let xBuffer: number = 0;
+  let yBuffer: number = 0;
   for (let key in adjustScale) {
     let frameOn: string = option === null ? graphScaleMode : (graphScaleMode = option);
     let frameParam: { [key: string]: number[] } = { 'model': [0, 0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN] }
@@ -1093,7 +1093,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
         'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
         'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
       };
-      // console.log(adjustScale)
+
     } else {
       if (key.includes('min')) {
         adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key],
@@ -1102,18 +1102,17 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
         adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key],
           graphScale[frameParam[frameOn][1]][key])
       }
+      xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
+      yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
+      let minbuffer = 0.1;
+      let maxbuffer = 1;
+      xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer) : minbuffer)
+      yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
     }
     if (isNaN(adjustScale[key])) {
-      console.log(key)
     }
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
-  let xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
-  let yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
-  let minbuffer = 0.1;
-  let maxbuffer = 1;
-  xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer) : minbuffer)
-  yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
 
   myChart.options.scales["y"] = {
     min: adjustScale["minY"] - yBuffer,
