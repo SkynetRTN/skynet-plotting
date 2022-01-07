@@ -760,8 +760,8 @@ export function clusterFileUpload(
     for (const row of data) {
       let items = row.trim().split(",");
       let src = items[1];
-      let filter = items[10];
-      let mag = parseFloat(items.length === 24 ? items[23] : items[12]);
+      let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
+      let mag = parseFloat((items.length>=24 && items[23] != '') ? items[23] : items[12]);//if no calibrated mag, return mag
       // let mag = parseFloat(items[12]);
       let err = parseFloat(items[13]);
       if (!datadict.has(src)) {
@@ -1244,8 +1244,11 @@ function HRrainbow (chart:Chart,red:string,blue:string): CanvasGradient | Color 
       (a: number)=>{return -1.8118 * a**2 + 12.676 * a - 25.95},],  //forJHK/KS
   };
 
+  
   let mColor = mags.red[magIndex[0]](bl)-mags.red[magIndex[0]](rl);
   let oColor = mags.blue[magIndex[1]](bl)-mags.blue[magIndex[1]](rl)
+
+  
 
   let max = chart.options.scales["x"].max;
   let min = chart.options.scales["x"].min;
