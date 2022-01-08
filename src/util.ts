@@ -130,6 +130,11 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
  *  @param table:   The Handsontable object whose height is to be updated.
  */
 export function updateTableHeight(table: Handsontable) {
+    const tableDiv = document.getElementById('table-div');
+    if (tableDiv.hidden) {
+        return;
+    }
+
     const rowHeights = 23;
     const columnHeaderHeight = 26;
 
