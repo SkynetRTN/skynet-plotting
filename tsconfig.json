@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "lib": ["ES2016", "DOM"],
         "outDir": "./dist/",
         "sourceMap": true,
         "noImplicitAny": true,

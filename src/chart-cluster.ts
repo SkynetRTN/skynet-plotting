@@ -12,8 +12,6 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
-import { data } from "jquery";
-import { SourceMapDevToolPlugin } from "webpack";
 
 /**
  *  This function is for the moon of a planet.
