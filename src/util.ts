@@ -307,7 +307,7 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
 }
 
 export function debounce(func: Function, wait: number) {
-    let timeout: NodeJS.Timeout;
+    let timeout: number = undefined;
     return function (...args: any[]) {
         clearTimeout(timeout);
         timeout = setTimeout(() => { func.apply(this, args); }, wait);

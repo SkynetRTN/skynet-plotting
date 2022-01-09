@@ -6,7 +6,6 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLine, updateLabels, updateTableHeight } from "./util"
-import { round } from "./my-math"
 
 /**
  *  Function for two curves with independent x values.
