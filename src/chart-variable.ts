@@ -114,7 +114,7 @@ export function variable(): [Handsontable, Chart] {
             plugins: {
                 legend: {
                     labels: {
-                        filter: function (legendItem, chartData) {
+                        filter: function (legendItem) {
                             return !legendItem.hidden;
                         }
                     }

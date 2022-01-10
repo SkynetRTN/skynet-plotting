@@ -4,7 +4,7 @@ import Chart, { ScatterDataPoint } from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { updateLine, updateLabels, updateTableHeight, linkInputs, debounce, throttle } from "./util"
+import { updateLine, updateLabels, updateTableHeight, linkInputs, throttle } from "./util"
 import { round, sqr, rad } from "./my-math"
 
 /**

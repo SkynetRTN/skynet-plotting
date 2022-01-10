@@ -9,10 +9,7 @@ import {
   throttle,
   updateLabels,
   updateTableHeight,
-  changeOptions,
 } from "./util";
-import { round } from "./my-math";
-import { HiddenColumns } from "handsontable/plugins";
 
 /**
  *  This function is for the moon of a planet.
@@ -1138,9 +1135,9 @@ function updateWave(
   gravityForm: GravityForm,
   dataSetIndex: 1) 
 {
-  let inc = parseFloat(gravityForm["inc_num"].value);
-  let dist = parseFloat(gravityForm["dist_num"].value);
-  let merge = parseFloat(gravityForm["merge_num"].value);
+  // let inc = parseFloat(gravityForm["inc_num"].value);
+  // let dist = parseFloat(gravityForm["dist_num"].value);
+  // let merge = parseFloat(gravityForm["merge_num"].value);
     
   let start = 0;
   let chart = myChart.data.datasets[dataSetIndex].data;
@@ -1158,8 +1155,8 @@ function updateWave(
     
     let x = (tableData[i][0]);
     let y = (tableData[i][1])
-    let x2 = (tableData[i][0] + merge);
-    let y2 = (tableData[i][2]*(1-((0.5*Math.sin(inc))*(dist/100))));
+    // let x2 = (tableData[i][0] + merge);
+    // let y2 = (tableData[i][2]*(1-((0.5*Math.sin(inc))*(dist/100))));
     chart[start++] = {
       x: x,
      // x2: x2,

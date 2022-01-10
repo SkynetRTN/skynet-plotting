@@ -120,7 +120,7 @@ function chartType(chart: string) {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            spectrumFileUpload(evt, objects[0], objects[1]);
+            spectrumFileUpload(evt, objects[0]);
         }
     } else if (chart === 'pulsar') {
         objects = pulsar();
@@ -193,7 +193,7 @@ function setChartDefaults() {
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
-    Chart.defaults.plugins.tooltip.callbacks.title = function (context): null {
+    Chart.defaults.plugins.tooltip.callbacks.title = function (): null {
         return null;
     };
     Chart.defaults.plugins.tooltip.callbacks.label = function (context) {
@@ -243,8 +243,12 @@ function saveImage(canvasID: string, signature: string, jpg = true, quality = 1.
 
     // Download the dummy canvas
     const time = getDateString();
-    const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', 1.0), signature, time);
-    saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    if (jpg) {
+        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    } else {
+        console.log('Only jpg export is supported for EXIF info.');
+    }
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {

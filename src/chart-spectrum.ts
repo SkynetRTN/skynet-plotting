@@ -78,7 +78,7 @@ export function spectrum(): [Handsontable, Chart] {
             plugins: {
                 legend: {
                     labels: {
-                        filter: function (legendItem, chartData) {
+                        filter: function (legendItem) {
                             return !legendItem.hidden;
                         }
                     }
@@ -185,7 +185,7 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
  * @param {Handsontable} table The table to be updated
  * @param {Chart} myChart
  */
-export function spectrumFileUpload(evt: Event, table: Handsontable, myChart: Chart) {
+export function spectrumFileUpload(evt: Event, table: Handsontable) {
     // console.log("spectrumFileUpload called");
     const file = (evt.target as HTMLInputElement).files[0];
     if (file === undefined) {
@@ -250,6 +250,6 @@ function freqToWL(freq: number): number {
  * This function converts a wavelength in cm to its frequency in MHz
  * @param {number} wl The wavelength of the light in centimeters
  */
-function wlToFreq(wl: number): number {
-    return c / (wl * 1e4)
-}
+// function wlToFreq(wl: number): number {
+//     return c / (wl * 1e4)
+// }

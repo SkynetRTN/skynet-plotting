@@ -15,8 +15,8 @@ body {
     font-family: 'Lato', sans-serif;
 }
 
-main {
-    margin: 3em;
+main.container {
+    margin-top: 2rem;
 }
 
 h2 {
@@ -33,11 +33,9 @@ select {
     box-shadow: none;
     padding: 2.6px;
 }
-
 select:hover {
     background-color: #E7E7E7;
 }
-
 select:focus {
     background-color: #E7E7E7;
 }
@@ -56,11 +54,9 @@ p.caption {
 .flex-container {
     display: flex;
 }
-
 .flex-item-grow1 {
     flex-grow: 1;
 }
-
 .flex-item-grow0 {
     flex-grow: 0;
 }
@@ -68,7 +64,6 @@ p.caption {
 label {
     margin: 0;
 }
-
 label span {
     padding: 0.1em 0.5em;
     border-radius: 5px;
@@ -81,17 +76,14 @@ label span {
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
 }
-
 label input:checked ~ span {
     background-color: #41A3D1;
     color: white;
     opacity: 1;
 }
-
 label input:disabled ~ span {
     opacity: 0.3; 
 }
-
 label:hover span {
     background-color: #E7E7E7;
     color: black;
@@ -116,9 +108,76 @@ label:hover span {
     padding-left: 0;
 }
 
+#chart-info-form {
+    margin-top: 0.5em;
+}
+#chart-info-form .des {
+    line-height: 2em;
+}
+#chart-info-form .row {
+    margin-bottom: 0.3em;
+}
+
+#button-row {
+    margin-top: 0.5em;
+}
+
+/* Compute button for Periodogram in Pulsar */
+#compute {
+    color: #41A3D1;
+    background-color: white;
+    opacity: 1;
+}
+#compute:focus {
+    outline: none;
+    opacity: 1;
+}
+#compute:hover {
+    color: white;
+    background-color: #41A3D1;
+    /* background-color: #E7E7E7; */
+}
+
+button {
+    border: 2px solid #E7E7E7;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    opacity: 0.7;
+    transition: .2s;
+    margin-bottom: .5em;
+    line-height: 2em;
+    outline: none;
+}
+button:focus {
+    outline: none;
+    opacity: 1;
+    /*background-color: #E7E7E7;*/
+}
+button:hover {
+    opacity: 1;
+    background-color: #E7E7E7;
+}
+
 input {
     float: right;
     width: 100%;
+}
+
+input.field {
+    padding-left: 0.5em;
+    border-radius: 10px;
+    border: 2px solid #E7E7E7;
+    -webkit-transition: all 0.1s;
+    transition: all 0.1s;
+    outline: none;
+    box-shadow: none;
+}
+input.field:focus {
+    background-color: #E7E7E7;
+}
+input.field:disabled {
+    opacity: 0.7;
 }
 
 input[type=radio] {
@@ -137,89 +196,13 @@ input[type=checkbox] {
     height: 0;
 }
 
-input.field {
-    padding-left: 0.5em;
-    border-radius: 10px;
-    border: 2px solid #E7E7E7;
-    -webkit-transition: all 0.1s;
-    transition: all 0.1s;
-    outline: none;
-    box-shadow: none;
-}
-
-input.field:focus {
-    background-color: #E7E7E7;
-}
-
-input.field:disabled {
-    opacity: 0.7;
-}
-
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 input[type=number] {
     -moz-appearance:textfield;
-}
-
-#chart-info-form {
-    margin-top: 0.5em;
-}
-
-#chart-info-form .des {
-    line-height: 2em;
-}
-
-#chart-info-form .row {
-    margin-bottom: 0.3em;
-}
-
-#button-row {
-    margin-top: 0.5em;
-}
-
-button {
-    border: 2px solid #E7E7E7;
-    border-radius: 10px;
-    background-color: white;
-    color: black;
-    opacity: 0.7;
-    transition: .2s;
-    margin-bottom: .5em;
-    line-height: 2em;
-    outline: none;
-}
-
-button:focus {
-    outline: none;
-    opacity: 1;
-    /*background-color: #E7E7E7;*/
-}
-
-button:hover {
-    opacity: 1;
-    background-color: #E7E7E7;
-}
-
-/* Compute button for Periodogram in Pulsar */
-#compute {
-    color: #41A3D1;
-    background-color: white;
-    opacity: 1;
-}
-
-#compute:focus {
-    outline: none;
-    opacity: 1;
-}
-
-#compute:hover {
-    color: white;
-    background-color: #41A3D1;
-    /* background-color: #E7E7E7; */
 }
 
 input[type=range] {
@@ -232,17 +215,14 @@ input[type=range] {
     -webkit-transition: .2s;
     transition: opacity .2s;
 }
-
 /* Mouse-over effects */
 input[type=range]:hover {
     opacity: 1; /* Fully shown on mouse-over */
 }
-
 input[type=range]:focus {
     outline: none;
     opacity: 1;
 }
-
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 20px;
@@ -252,12 +232,10 @@ input[type=range]::-webkit-slider-thumb {
     cursor: pointer;
     border: none;
 }
-
 input[type=range]::-moz-range-track {
     background-color: transparent;
     /*outline: none;*/
 }
-
 input[type=range]::-moz-range-thumb {
     width: 20px;
     height: 20px;
@@ -272,7 +250,6 @@ h2.ie {
     font-size: 48px;
     font-weight: bold;
 }
-
 p.ie {
     margin: 1em 5em;
     text-align: center;

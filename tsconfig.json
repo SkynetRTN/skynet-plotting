@@ -1,11 +1,15 @@
 {
     "compilerOptions": {
+        "lib": ["ES2016", "DOM"],
         "outDir": "./dist/",
         "sourceMap": true,
         "noImplicitAny": true,
         "module": "es6",
         "target": "es6",
         "allowJs": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true
     }
 }

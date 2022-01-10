@@ -110,13 +110,13 @@ export function scatter(): [Handsontable, Chart] {
             plugins: {
                 legend: {
                     labels: {
-                        filter: function (legendItem, chartData) {
+                        filter: function (legendItem) {
                             return legendItem.datasetIndex !== 2;
                         }
                     }
                 },
                 tooltip: {
-                    filter: function (tooltipItem, index, tooltipItems, data) {
+                    filter: function (tooltipItem) {
                         return tooltipItem.datasetIndex !== 3;
                     },
                 },

@@ -12,8 +12,6 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
-import { data } from "jquery";
-import { SourceMapDevToolPlugin } from "webpack";
 
 /**
  *  This function is for the moon of a planet.
@@ -865,7 +863,7 @@ export function clusterFileUpload(
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
-    datadict.forEach((src, key) => {
+    datadict.forEach((src) => {
       const row: { [key: string]: number } = {};
       for (let filterIndex in filters) {
         row[filters[filterIndex]] = src.get(filters[filterIndex]);

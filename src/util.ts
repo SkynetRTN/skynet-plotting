@@ -130,6 +130,11 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
  *  @param table:   The Handsontable object whose height is to be updated.
  */
 export function updateTableHeight(table: Handsontable) {
+    const tableDiv = document.getElementById('table-div');
+    if (tableDiv.hidden) {
+        return;
+    }
+
     const rowHeights = 23;
     const columnHeaderHeight = 26;
 
@@ -302,7 +307,7 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
 }
 
 export function debounce(func: Function, wait: number) {
-    let timeout: NodeJS.Timeout;
+    let timeout: number = undefined;
     return function (...args: any[]) {
         clearTimeout(timeout);
         timeout = setTimeout(() => { func.apply(this, args); }, wait);

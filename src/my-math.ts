@@ -64,7 +64,7 @@ export function rad(degree: number): number {
 export function lombScargle(ts: number[], ys: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
-        return;
+        return null;
     }
 
     let step = (stop - start) / steps;

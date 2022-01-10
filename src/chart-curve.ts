@@ -1,11 +1,10 @@
 'use strict';
 
-import Chart, { ChartDataset, ChartConfiguration, ScatterDataPoint } from "chart.js/auto";
+import Chart, { ChartConfiguration } from "chart.js/auto";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config";
 import { updateLine, updateLabels, updateTableHeight } from "./util";
-import { round } from "./my-math";
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.
@@ -108,7 +107,7 @@ export function curve(): [Handsontable, Chart] {
             plugins: {
                 legend: {
                     labels: {
-                        filter: function (legendItem, chartData) {
+                        filter: function (legendItem) {
                             return !legendItem.hidden;
                         }
                     }
