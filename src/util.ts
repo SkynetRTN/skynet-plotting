@@ -77,7 +77,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 *  @param numMin:       Min value for number field when @param numOverride is true.
 *  @param numMax:       Max value for number field when @param numOverride is true.
 */
-export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number, 
+export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
     log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
     if (!numOverride) {
@@ -145,7 +145,7 @@ export function updateTableHeight(table: Handsontable) {
 
     const minHeight = Math.min(5, table.countRows()) * rowHeights + columnHeaderHeight + 5;
     const maxHeight = Math.max(minHeight, chartDiv + infoForm - typeForm - inputDiv);
-    
+
     let height = table.countRows() * rowHeights + columnHeaderHeight + 5;
     if (height > maxHeight) {
         height = maxHeight;
@@ -268,7 +268,7 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
     const trailFunc = function (...args: any[]) {
         if (changed) {
             changed = false;
-            
+
             // This is WRONGGG, becaues func() is NOT DEFINED IN the triggering event.
             //   We want to bind `this` only so that we have access to the values that
             //   came with the triggering event (usually a changed input field).
@@ -310,7 +310,7 @@ export function debounce(func: Function, wait: number) {
     let timeout: number = undefined;
     return function (...args: any[]) {
         clearTimeout(timeout);
-        timeout = setTimeout(() => { func.apply(this, args); }, wait);
+        timeout = setTimeout(() => { func.apply(this, args); }, wait) as unknown as number;
     }
 }
 
@@ -330,10 +330,10 @@ export function formatTime(time: string) {
 //objects of the form:
 //{value: value, title: title, text: text}
 export function changeOptions(element: HTMLInputElement, newOptions: { value: string, title: string, text: string }[]) {
-    element.innerHTML='';//empty the drop down options
+    element.innerHTML = '';//empty the drop down options
     let result = '';
-    for (let i=0; i<newOptions.length; i++){
-        result +='<option value="'+newOptions[i].value+'" title="'+newOptions[i].title+'">'+newOptions[i].text+'</option></div>\n';
+    for (let i = 0; i < newOptions.length; i++) {
+        result += '<option value="' + newOptions[i].value + '" title="' + newOptions[i].title + '">' + newOptions[i].text + '</option></div>\n';
     }
-    element.innerHTML=result;
+    element.innerHTML = result;
 }
