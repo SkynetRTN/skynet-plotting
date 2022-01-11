@@ -915,8 +915,8 @@ var graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  // let url = "http://localhost:5000/isochrone?"
-  let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  let url = "http://localhost:5000/isochrone?"
+    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
@@ -1245,13 +1245,25 @@ function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Co
 
   let mags: { [key: string]: Function[] } = {
     'red': [
-      (a: number) => { return 12.487 * a ** 2 - 83.756 * a + 145.78 }, //for UBVRI
-      (a: number) => { return 28.573 * a ** 2 - 171.43 * a + 265.27 },  //for upgiz
-      (a: number) => { return 11.924 * a ** 2 - 79.948 * a + 140.02 },],   //forJHK/KS
+      (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
+      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+    ],
+    'faint': [
+      (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
+      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+    ],
     'blue': [
-      (a: number) => { return -21.555 * a ** 2 + 122.3 * a - 177.91 },  //for UBVRI
-      (a: number) => { return 1.7882 * a ** 2 - 5.8134 * a - 2.2497 },    //for upgiz
-      (a: number) => { return -1.8118 * a ** 2 + 12.676 * a - 25.95 },],  //forJHK/KS
+      (a: number) => { return -21.5551066693 * a ** 2 + 122.2999424840 * a - 177.9118351325 },
+      (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
+      (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
+    ],
+    'bright': [
+      (a: number) => { return -11.3225471576 * a ** 2 + 59.1582638941 * a - 87.8350265479 },
+      (a: number) => { return 11.1785806766 * a ** 2 - 64.7619969586 * a + 82.7295898695 },
+      (a: number) => { return 10.8290320338 * a ** 2 - 71.5469551223 * a + 105.6498422000 },
+    ]
   };
 
 
