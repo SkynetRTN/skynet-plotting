@@ -180,12 +180,16 @@ input.field:disabled {
     opacity: 0.7;
 }
 
-input[type=radio] {
+input[type=radio].table {
     position: absolute;
     cursor: pointer;
     opacity: 0;
     width: 0;
     height: 0;
+}
+
+input[type=radio].scale {
+    cursor: pointer;
 }
 
 input[type=checkbox] {
@@ -243,6 +247,32 @@ input[type=range]::-moz-range-thumb {
     background: #41A3D1;
     cursor: pointer;
     border: none;
+}
+
+input[type=radio].scaleSelection {
+    cursor: pointer;
+    position: absolute;
+    opacity: 0;
+}
+
+label.scaleSelection{
+    border-radius: 10px;
+    border: 2px solid #E7E7E7;
+    margin-bottom: 0.5em;
+    line-height: 2em;
+    padding-bottom: 0.13em;
+    padding-top: 0.1em;
+}
+label.scaleSelection:hover{
+    opacity: 1;
+    background-color: #E7E7E7; 
+}
+label.scaleSelection.left{
+    float: right;
+}
+
+label.scaleSelection.right{
+    float: left;
 }
 
 h2.ie {

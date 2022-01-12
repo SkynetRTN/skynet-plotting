@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { updateLabels, updateTableHeight, sanitizeTableData} from "./util"
+import { updateLabels, updateTableHeight, sanitizeTableData } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
@@ -18,9 +18,9 @@ export function variable(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
-        '<div class="flex-item-grow0"><label><input type="radio" name="mode" value="pf" disabled><span>Period Folding</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
+        '<div class="flex-item-grow0"><label><input type="radio" class="table" name="mode" value="pf" disabled><span>Period Folding</span></label></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<div id="light-curve-div"></div>\n' +
@@ -123,7 +123,7 @@ export function variable(): [Handsontable, Chart] {
                     callbacks: {
                         label: function (context) {
                             return '(' + round(context.parsed.x, 4) + ', ' +
-                                   round(context.parsed.y, 4) + ')';
+                                round(context.parsed.y, 4) + ')';
                         },
                     },
                 },
@@ -149,7 +149,7 @@ export function variable(): [Handsontable, Chart] {
     });
 
     lightCurve(myChart);
-    
+
     const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.onchange = function () {
         const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
@@ -166,7 +166,7 @@ export function variable(): [Handsontable, Chart] {
             const periodFoldingForm = document.getElementById("period-folding-form");
             periodFoldingForm.oninput(null);
         }
-        
+
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
             t: myChart.options.plugins.title.text as string,
             x: myChart.options.scales['x'].title.text as string,
@@ -182,12 +182,12 @@ export function variable(): [Handsontable, Chart] {
 
         updateTableHeight(hot);
     }
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
-    
+
     updateVariable(hot, myChart);
     updateTableHeight(hot);
 
@@ -284,7 +284,7 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
         })
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
-        
+
         const variableForm = document.getElementById("variable-form") as VariableForm;
         variableForm.mode[1].disabled = true;
         variableForm.mode[2].disabled = true;
@@ -300,7 +300,7 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
-        
+
         lightCurve(myChart);
 
         // Need to put this line down in the end, because it will trigger update on the Chart, which will 
@@ -343,7 +343,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
 
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
-    
+
     for (let i = 0; i < 5; i++) {
         myChart.data.datasets[i].data = [];
     }
@@ -441,7 +441,7 @@ function lightCurve(myChart: Chart) {
             variableForm.mode[2].disabled = false;
 
             myChart.data.datasets[2].data = lcData;
-            
+
             for (let i = 2; i < 5; i++) {
                 myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
             }
@@ -481,7 +481,7 @@ function lightCurve(myChart: Chart) {
         fData = lombScargle(tArray, yArray, start, stop, 2000);
 
         myChart.data.datasets[3].data = fData;
-        
+
         updateChart(myChart, 3);
     }
 

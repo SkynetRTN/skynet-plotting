@@ -17,9 +17,9 @@ export function pulsar(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Pulsar" id="pulsar-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" name="mode" value="ft"><span>Periodogram</span></label></div>\n' +
-        '<div class="flex-item-grow0"><label><input type="radio" name="mode" value="pf"><span>Period Folding</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
+        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="ft"><span>Periodogram</span></label></div>\n' +
+        '<div class="flex-item-grow0"><label><input type="radio" class="table" name="mode" value="pf"><span>Period Folding</span></label></div>\n' +
         '</div>\n' +
         '</form>\n' +
         '<div id="light-curve-div"></div>\n' +
@@ -87,7 +87,7 @@ export function pulsar(): [Handsontable, Chart] {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
         '</div>\n' +
         '</form>\n' +
-        
+
         '<form title="Polarization Detection" id="polarization-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="flex-container" style="padding-bottom: 1em">\n' +
         '<div class="flex-item-grow1" style="color: grey;">Polarization Detection: </div>\n' +
@@ -121,9 +121,9 @@ export function pulsar(): [Handsontable, Chart] {
             { data: 'chn2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
-    const ctx = (document.getElementById("myChart")  as HTMLCanvasElement).getContext('2d');
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
@@ -219,8 +219,8 @@ export function pulsar(): [Handsontable, Chart] {
                 tooltip: {
                     callbacks: {
                         label: function (context) {
-                            let precision = context.datasetIndex === 2 || 
-                                            context.datasetIndex === 3 ? 6 : 4
+                            let precision = context.datasetIndex === 2 ||
+                                context.datasetIndex === 3 ? 6 : 4
                             return '(' + round(context.parsed.x, precision) + ', ' +
                                 round(context.parsed.y, 4) + ')';
                         },
@@ -257,7 +257,7 @@ export function pulsar(): [Handsontable, Chart] {
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value as PulsarMode;
         switchMode(myChart, mode);
-        
+
         // This needs to happen after switchMode() since different parts of height
         // updates during switching.
         if (mode === 'lc') {
@@ -359,7 +359,7 @@ export function pulsar(): [Handsontable, Chart] {
 
         myChart.update('none')
     }
-    
+
     const computeButton = document.getElementById('compute');
     computeButton.onclick = (...args) => {
         fourierOninput.apply(fourierForm, args);
@@ -367,7 +367,7 @@ export function pulsar(): [Handsontable, Chart] {
 
 
     const periodFoldingOninput = function () {
-        this.pf.value   = clamp(this.pf.value, 0, NaN);
+        this.pf.value = clamp(this.pf.value, 0, NaN);
         this.bins.value = clamp(this.bins.value, 0, 10000);
 
         let period = parseFloat(this.pf.value);
@@ -379,7 +379,7 @@ export function pulsar(): [Handsontable, Chart] {
             point => ({ x: point.x, y: point.y * eqaulizer })
         );
         myChart.data.datasets[4].data = chartDataDiff(
-            myChart.data.datasets[5].data as ScatterDataPoint[], 
+            myChart.data.datasets[5].data as ScatterDataPoint[],
             myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.update('none');
@@ -569,7 +569,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         polarizationForm.eq.value = 0;
         polarizationForm.eq_num.value = 1;
         polarizationForm.diff.checked = false;
-        
+
         myChart.data.modeLabels = {
             lc: { t: 'Title', x: 'x', y: 'y' },
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
@@ -584,11 +584,11 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         }
         myChart.data.modeLabels.lastMode = mode;
     }
-    
+
     myChart.options.plugins.title.text = myChart.data.modeLabels[reset ? 'lc' : mode].t;
     myChart.options.scales['x'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].x;
     myChart.options.scales['y'].title.text = myChart.data.modeLabels[reset ? 'lc' : mode].y;
-    
+
     myChart.update('none');
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 }
