@@ -78,8 +78,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</form>\n"
     );
 
-  document.getElementById("focus-prompt").style.display = "inline"
-
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
@@ -169,7 +167,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   );
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement
-  canvas.title = "Click to change focus"//inform the user of this functionality
   const ctx = canvas.getContext("2d");
 
   const myChart = new Chart(ctx, {

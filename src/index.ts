@@ -95,7 +95,6 @@ function chartType(chart: string) {
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
-    document.getElementById("focus-prompt").style.display = "none"
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart, ModelForm]
@@ -136,9 +135,8 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-        document.getElementById('myChart').onclick = () => {
-            chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto')
-        }
+        // document.getElementById('myChart').onclick = () => {
+        // chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto'}
 
     } else if (chart === 'gravity') {
         objects = gravity();
