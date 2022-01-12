@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { Color, ScatterDataPoint } from "chart.js";
-import { dummyData } from "./chart-cluster-dummy";
+import { dummyData, filterMags } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
   linkInputs,
@@ -694,25 +694,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
           magIndex[i] = Number(2);
         }
       }
-      let mags: { [key: string]: Function[] } = {
-        'red': [
-          (a: number) => { return 12.487 * a ** 2 - 83.756 * a + 145.78 }, //for UBVRI
-          (a: number) => { return 28.573 * a ** 2 - 171.43 * a + 265.27 },  //for upgiz
-          (a: number) => { return 11.924 * a ** 2 - 79.948 * a + 140.02 },],   //forJHK/KS
-        'faint': [
-          (a: number) => { return 12.487 * a ** 2 - 83.756 * a + 145.78 }, //for UBVRI
-          (a: number) => { return 28.573 * a ** 2 - 171.43 * a + 265.27 },  //for upgiz
-          (a: number) => { return 11.924 * a ** 2 - 79.948 * a + 140.02 },],   //forJHK/KS
-        'blue': [
-          (a: number) => { return -21.555 * a ** 2 + 122.3 * a - 177.91 },  //for UBVRI
-          (a: number) => { return 1.7882 * a ** 2 - 5.8134 * a - 2.2497 },    //for upgiz
-          (a: number) => { return -1.8118 * a ** 2 + 12.676 * a - 25.95 },],  //forJHK/KS
-        'bright': [
-          (a: number) => { return -11.323 * a ** 2 + 59.158 * a - 87.835 }, //for UBVRI
-          (a: number) => { return 11.179 * a ** 2 - 64.762 * a + 82.73 }, //for upgiz
-          (a: number) => { return 10.829 * a ** 2 - 71.547 * a + 105.65 },  //forJHK/KS
-        ]
-      };
+      let mags: { [key: string]: Function[] } = filterMags()
 
       let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
       let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
@@ -864,28 +846,7 @@ function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Co
     }
   }
 
-  let mags: { [key: string]: Function[] } = {
-    'red': [
-      (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
-      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-    ],
-    'faint': [
-      (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
-      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-      (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-    ],
-    'blue': [
-      (a: number) => { return -21.5551066693 * a ** 2 + 122.2999424840 * a - 177.9118351325 },
-      (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
-      (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
-    ],
-    'bright': [
-      (a: number) => { return -11.3225471576 * a ** 2 + 59.1582638941 * a - 87.8350265479 },
-      (a: number) => { return 11.1785806766 * a ** 2 - 64.7619969586 * a + 82.7295898695 },
-      (a: number) => { return 10.8290320338 * a ** 2 - 71.5469551223 * a + 105.6498422000 },
-    ]
-  };
+  let mags: { [key: string]: Function[] } = filterMags()
 
 
   let mColor = mags.red[magIndex[0]](bl) - mags.red[magIndex[0]](rl);
