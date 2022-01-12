@@ -113,6 +113,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   const tableData = dummyData()
 
+  //make graph scaling options visible to users
+  document.getElementById("grpah-scaling-options").style.display = "inline"
+
   // create table
   const container = document.getElementById("table-div");
   const hot = new Handsontable(
