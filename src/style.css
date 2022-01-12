@@ -268,11 +268,11 @@ label.scaleSelection:hover{
     background-color: #E7E7E7; 
 }
 label.scaleSelection.left{
-    float: right;
+    align-self: right;
 }
 
 label.scaleSelection.right{
-    float: left;
+    align-self: left;
 }
 
 h2.ie {
