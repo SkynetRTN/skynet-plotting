@@ -12,7 +12,10 @@ import {
   updateTableHeight,
   changeOptions,
 } from "./util";
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { rad } from "./my-math";
 
+Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
@@ -131,15 +134,26 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //The selected option is highlighted by making the background Carolina blue
   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
     radioOnClicked.checked = true;
-    document.getElementById(radioOnClicked.id + "Label").style.backgroundColor = "#4B9CD3"
+    setRadioLabelColor(radioOnClicked, true)
     otherRadio.checked = false;
-    document.getElementById(otherRadio.id + "Label").style.backgroundColor = "white"
+    setRadioLabelColor(otherRadio, false)
 
     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
     chartRescale(myChart, modelForm)
   }
 
+  function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
+    let color: string = activate ? "#4B9CD3" : "white";
+    document.getElementById(radio.id + "Label").style.backgroundColor = color
+  }
+  function zoompanDeactivate(): any {
+    console.log("yes")
+    standardViewRadio.checked = false;
+    frameOnDataRadio.checked = false;
+    setRadioLabelColor(standardViewRadio, false)
+    setRadioLabelColor(frameOnDataRadio, false)
 
+  }
 
 
   // create table
@@ -245,6 +259,22 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           suggestedMin: 0,
         },
       },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+            onPan: () => { zoompanDeactivate() },
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            mode: 'x',
+            onZoom: () => { zoompanDeactivate() },
+          },
+        }
+      }
     },
   });
 
