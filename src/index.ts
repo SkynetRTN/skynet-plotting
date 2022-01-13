@@ -14,7 +14,7 @@ import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster1, clusterFileUpload, chartRescale } from './chart-cluster';
+import { cluster1, clusterFileUpload } from './chart-cluster';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
@@ -130,14 +130,11 @@ function chartType(chart: string) {
         }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
-        let mode: string = "auto"
         objects = [cluster_objects[0], cluster_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-        // document.getElementById('myChart').onclick = () => {
-        // chartRescale(objects[1], cluster_objects[2], mode === 'auto' ? mode = 'data' : mode = 'auto'}
 
     } else if (chart === 'gravity') {
         objects = gravity();
