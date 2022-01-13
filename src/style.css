@@ -262,6 +262,7 @@ label.scaleSelection{
     line-height: 2em;
     padding-bottom: 0.13em;
     padding-top: 0.1em;
+    background-color: white;
 }
 label.scaleSelection:hover{
     opacity: 1;

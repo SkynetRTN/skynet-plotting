@@ -116,6 +116,29 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //make graph scaling options visible to users
   document.getElementById("grpah-scaling-options").style.display = "inline"
 
+  //handel scaling options input
+  let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
+  let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
+
+  standardViewRadio.addEventListener("click", () => {
+    radioOnclick(standardViewRadio, frameOnDataRadio);
+  })
+  frameOnDataRadio.addEventListener("click", () => {
+    radioOnclick(frameOnDataRadio, standardViewRadio)
+  })
+
+  //only one option can be selected at one time. 
+  //The selected option is highlighted by making the background Carolina blue
+  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
+    radioOnClicked.checked = true;
+    document.getElementById(radioOnClicked.id + "Label").style.backgroundColor = "#4B9CD3"
+    otherRadio.checked = false;
+    document.getElementById(otherRadio.id + "Label").style.backgroundColor = "white"
+  }
+
+
+
+
   // create table
   const container = document.getElementById("table-div");
   const hot = new Handsontable(
