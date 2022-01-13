@@ -134,6 +134,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     document.getElementById(radioOnClicked.id + "Label").style.backgroundColor = "#4B9CD3"
     otherRadio.checked = false;
     document.getElementById(otherRadio.id + "Label").style.backgroundColor = "white"
+
+    graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
+    chartRescale(myChart, modelForm)
   }
 
 
