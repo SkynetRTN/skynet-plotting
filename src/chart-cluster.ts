@@ -13,7 +13,7 @@ import {
   changeOptions,
 } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { rad } from "./my-math";
+// import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
 /**
@@ -147,7 +147,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     document.getElementById(radio.id + "Label").style.backgroundColor = color
   }
   function zoompanDeactivate(): any {
-    console.log("yes")
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
     setRadioLabelColor(standardViewRadio, false)
@@ -592,8 +591,8 @@ var graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  let url = "http://localhost:5000/isochrone?"
-    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "http://localhost:5000/isochrone?"
+  let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
