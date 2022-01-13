@@ -358,8 +358,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   }
 
   // link chart to model form (slider + text)
-  modelForm.oninput = throttle(function () { updateModel(false) }, 100);
-  modelForm.onchange = throttle(function () { updateModel(true) }, 16);
+  // modelForm.oninput = throttle(function () { updateModel(false) }, 100);
+  modelForm.onchange = throttle(function () { updateModel(true) }, 100);
 
   update();
 
