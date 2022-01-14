@@ -297,7 +297,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       modelForm,
       1
     );
-    updateHRModel(modelForm, myChart);
   };
 
   // link chart to table
@@ -337,7 +336,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           //if the column isn't selected in the drop down, hide it
           hidden.push(parseFloat(col));
         }
-        updateHRModel(modelForm, myChart);
       }
 
       hot.updateSettings({
@@ -349,6 +347,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       });
 
       update();
+      updateHRModel(modelForm, myChart);
       updateLabels(
         myChart,
         document.getElementById("chart-info-form") as ChartInfoForm
@@ -358,10 +357,11 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   }
 
   // link chart to model form (slider + text)
-  // modelForm.oninput = throttle(function () { updateModel(false) }, 100);
-  modelForm.onchange = throttle(function () { updateModel(true) }, 100);
+  modelForm.oninput = throttle(function () { updateModel(true) }, 100);
+  // modelForm.onchange = throttle(function () { updateModel(true) }, 100);
 
   update();
+  updateHRModel(modelForm, myChart);
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -592,8 +592,8 @@ var graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
-  // let url = "http://localhost:5000/isochrone?"
-  let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  let url = "http://localhost:5000/isochrone?"
+  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value

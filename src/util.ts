@@ -310,7 +310,7 @@ export function debounce(func: Function, wait: number) {
     let timeout: number = undefined;
     return function (...args: any[]) {
         clearTimeout(timeout);
-        timeout = setTimeout(() => { func.apply(this, args); }, wait) as unknown as number;
+        timeout = setTimeout(() => { func.apply(this, args); }, wait);
     }
 }
 
