@@ -277,6 +277,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     },
   });
 
+  //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
       myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
@@ -749,8 +750,9 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
           magIndex[i] = Number(2);
         }
       }
-      let mags: { [key: string]: Function[] } = filterMags()
 
+      let mags: { [key: string]: Function[] } = filterMags()
+      
       let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
       let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
       // console.log(magIndex)
@@ -781,18 +783,17 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
 
-  myChart.options.scales["y"] = {
-    min: adjustScale["minY"] - yBuffer,
-    max: adjustScale["maxY"] + yBuffer,
-    reverse: true,
-    suggestedMin: 0,
-  };
-  myChart.options.scales["x"] = {
-    min: adjustScale["minX"] - xBuffer,
-    max: adjustScale["maxX"] + xBuffer,
-    type: "linear",
-    position: "bottom",
-  };
+  myChart.options.scales["y"].min=adjustScale["minY"] - yBuffer
+  myChart.options.scales["y"].max=adjustScale["maxY"] + yBuffer
+  myChart.options.scales["y"].reverse =true
+  //myChart.options.scales["y"].suggestedMin = 0
+
+  myChart.options.scales["x"].min = adjustScale["minX"] - xBuffer
+  myChart.options.scales["x"].max = adjustScale["maxX"] + xBuffer
+  myChart.options.scales["x"].type = "linear"
+  //myChart.options.scales["x"].position = "bottom"
+  //what is ^this^ for?
+
   myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
     modelForm["red"].value, modelForm["blue"].value)
   myChart.update()
@@ -887,7 +888,7 @@ function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Co
   let { ctx, chartArea } = chart;
   let rl = isNaN(filterWavelength[red]) ? Math.log10(0.442 * 1000) : Math.log10(filterWavelength[red] * 1000);//default to B-V for unknowns
   let bl = isNaN(filterWavelength[blue]) ? Math.log10(0.54 * 1000) : Math.log10(filterWavelength[blue] * 1000);
-
+ 
   let filters: string[] = [red, blue];
   let magIndex: number[] = [0, 0];
   // console.log(filters)
