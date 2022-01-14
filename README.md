@@ -1,7 +1,7 @@
 # skynet-plotting
 
 ## Getting Started
-First, make sure you have installed [node](https://nodejs.org/en/) using [nvm](https://github.com/nvm-sh/nvm). Then [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository. Once cloned, run the following command to install required Node.js packages.
+First, make sure you have installed [node](https://nodejs.org/en/) using [nvm](https://github.com/nvm-sh/nvm). If you are using Windows, I recommend [setting up Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install). Then [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository. Once cloned, run the following command to install required Node.js packages.
 ```bash
 $ npm install
 ```
