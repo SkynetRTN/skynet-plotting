@@ -593,7 +593,7 @@ var graphScale: { [key: string]: number }[] = [
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart) {
   let url = "http://localhost:5000/isochrone?"
-  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
@@ -752,7 +752,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       }
 
       let mags: { [key: string]: Function[] } = filterMags()
-      
+
       let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
       let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
       // console.log(magIndex)
@@ -783,9 +783,9 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
   }
 
-  myChart.options.scales["y"].min=adjustScale["minY"] - yBuffer
-  myChart.options.scales["y"].max=adjustScale["maxY"] + yBuffer
-  myChart.options.scales["y"].reverse =true
+  myChart.options.scales["y"].min = adjustScale["minY"] - yBuffer
+  myChart.options.scales["y"].max = adjustScale["maxY"] + yBuffer
+  myChart.options.scales["y"].reverse = true
   //myChart.options.scales["y"].suggestedMin = 0
 
   myChart.options.scales["x"].min = adjustScale["minX"] - xBuffer
@@ -888,7 +888,7 @@ function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Co
   let { ctx, chartArea } = chart;
   let rl = isNaN(filterWavelength[red]) ? Math.log10(0.442 * 1000) : Math.log10(filterWavelength[red] * 1000);//default to B-V for unknowns
   let bl = isNaN(filterWavelength[blue]) ? Math.log10(0.54 * 1000) : Math.log10(filterWavelength[blue] * 1000);
- 
+
   let filters: string[] = [red, blue];
   let magIndex: number[] = [0, 0];
   // console.log(filters)
