@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { Color, Legend, LegendElement, LegendItem, LegendOptions, ScatterDataPoint } from "chart.js";
+import { Color, LegendItem, ScatterDataPoint } from "chart.js";
 import { dummyData, filterMags } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
