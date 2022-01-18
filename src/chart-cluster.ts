@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { Color, ScatterDataPoint } from "chart.js";
+import { Color, Legend, LegendElement, LegendItem, LegendOptions, ScatterDataPoint } from "chart.js";
 import { dummyData, filterMags } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
@@ -146,12 +146,32 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     let color: string = activate ? "#4B9CD3" : "white";
     document.getElementById(radio.id + "Label").style.backgroundColor = color
   }
+
   function zoompanDeactivate(): any {
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
-    setRadioLabelColor(standardViewRadio, false)
-    setRadioLabelColor(frameOnDataRadio, false)
+    setRadioLabelColor(standardViewRadio, false);
+    setRadioLabelColor(frameOnDataRadio, false);
+    myChart.options.plugins.legend.labels.color = "#000000";
 
+  }
+
+  function setLegendColor(legend: LegendItem, activate: boolean) {
+    let fontColor: string = activate ? "#FF0000" : "#000000";
+    legend.fontColor = fontColor;
+  }
+
+  function newLegendClickHandler(e: any, legendItem: LegendItem, legend: any) {
+    let legendItems = legend.legendItems;
+    if (legendItem.text === "Model") {
+      radioOnclick(standardViewRadio, frameOnDataRadio);
+      setLegendColor(legendItems[0], true)
+      setLegendColor(legendItems[1], false)
+    } else {
+      radioOnclick(frameOnDataRadio, standardViewRadio);
+      setLegendColor(legendItems[1], true)
+      setLegendColor(legendItems[0], false)
+    }
   }
 
 
@@ -214,6 +234,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
+      labels: ["Model", "Data"],
       datasets: [
         {
           type: "line",
@@ -272,6 +293,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
             mode: 'x',
             onZoom: () => { zoompanDeactivate() },
           },
+        },
+        legend: {
+          onClick: newLegendClickHandler,
         }
       }
     },
