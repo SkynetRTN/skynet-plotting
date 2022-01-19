@@ -294,9 +294,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
             onZoom: () => { zoompanDeactivate() },
           },
         },
-        legend: {
-          onClick: newLegendClickHandler,
-        }
+        // legend: {
+        //   onClick: newLegendClickHandler,
+        // }
       }
     },
   });
