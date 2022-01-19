@@ -253,6 +253,7 @@ input[type=radio].scaleSelection {
     cursor: pointer;
     position: absolute;
     opacity: 0;
+    width: 0;
 }
 
 label.scaleSelection{
