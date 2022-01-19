@@ -17,6 +17,7 @@ import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1, clusterFileUpload } from './chart-cluster';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
+import {cluster2, cluster2FileUpload } from './chart-cluster2';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -142,7 +143,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-    }
+    } else if (chart === 'cluster2') {
+        cluster_objects = cluster2();
+        objects = [cluster_objects[0], cluster_objects[1]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }
+    } 
     updateTableHeight(objects[0]);
     // Update the height of the table when the chart resizes.
     objects[1].options.onResize = function () {

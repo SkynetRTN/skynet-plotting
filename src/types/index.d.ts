@@ -145,3 +145,12 @@ interface GravityForm extends HTMLFormElement {
     Strain: HTMLInputElement,
 
 }
+
+interface Cluster2Form extends HTMLFormElement {
+    d: HTMLInputElement,
+    err: HTMLInputElement,
+    red: HTMLInputElement,
+    d_num: HTMLInputElement,
+    err_num: HTMLInputElement,
+    red_num: HTMLInputElement,
+}
