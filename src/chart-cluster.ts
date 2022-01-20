@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { Color, LegendItem, ScatterDataPoint } from "chart.js";
+import { Color, ScatterDataPoint } from "chart.js";
 import { dummyData, filterMags } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
@@ -81,38 +81,16 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</form>\n"
     );
 
-  // Link each slider with corresponding text box
+  //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
+
+  // Link each slider with corresponding text box
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"],
-    0,
-    1,
-    0.01,
-    1,
-    false,
-    true,
-    0,
-    100000000
-  );
+  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(
-    clusterForm["red"], clusterForm["red_num"],
-    0,
-    1,
-    0.01,
-    0,
-    false,
-    true,
-    0,
-    100000000
-  );
-  linkInputs(modelForm["metal"], modelForm["metal_num"],
-    -3.4,
-    0.2,
-    0.01,
-    -3.4
-  );
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
 
   const tableData = dummyData()
 
@@ -122,13 +100,12 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
-
   standardViewRadio.addEventListener("click", () => {
     radioOnclick(standardViewRadio, frameOnDataRadio);
-  })
+  });
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
-  })
+  });
 
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
@@ -142,12 +119,15 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     chartRescale(myChart, modelForm)
   }
 
+  //Alter radio input background color between Carolina blue and white
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
     let color: string = activate ? "#4B9CD3" : "white";
     document.getElementById(radio.id + "Label").style.backgroundColor = color
   }
 
+  //Unchecked and reset both radio buttons to white background
   function zoompanDeactivate(): any {
+    graphScaleMode = null
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
     setRadioLabelColor(standardViewRadio, false);
@@ -156,24 +136,26 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   }
 
-  function setLegendColor(legend: LegendItem, activate: boolean) {
-    let fontColor: string = activate ? "#FF0000" : "#000000";
-    legend.fontColor = fontColor;
-  }
-
-  function newLegendClickHandler(e: any, legendItem: LegendItem, legend: any) {
-    let legendItems = legend.legendItems;
-    if (legendItem.text === "Model") {
-      radioOnclick(standardViewRadio, frameOnDataRadio);
-      setLegendColor(legendItems[0], true)
-      setLegendColor(legendItems[1], false)
-    } else {
-      radioOnclick(frameOnDataRadio, standardViewRadio);
-      setLegendColor(legendItems[1], true)
-      setLegendColor(legendItems[0], false)
+  //Legend clicking no longer in use
+  /*  
+    function setLegendColor(legend: LegendItem, activate: boolean) {
+      let fontColor: string = activate ? "#FF0000" : "#000000";
+      legend.fontColor = fontColor;
     }
-  }
-
+  
+    function newLegendClickHandler(e: any, legendItem: LegendItem, legend: any) {
+      let legendItems = legend.legendItems;
+      if (legendItem.text === "Model") {
+        radioOnclick(standardViewRadio, frameOnDataRadio);
+        setLegendColor(legendItems[0], true)
+        setLegendColor(legendItems[1], false)
+      } else {
+        radioOnclick(frameOnDataRadio, standardViewRadio);
+        setLegendColor(legendItems[1], true)
+        setLegendColor(legendItems[0], false)
+      }
+    }
+  */
 
   // create table
   const container = document.getElementById("table-div");
@@ -183,52 +165,21 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       data: tableData,
       colHeaders: ["B Mag", "Berr", "V Mag", "Verr", "R Mag", "Rerr", "I Mag", "Ierr"], // need to change to filter1, filter2
       columns: [
-        {
-          data: "B",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Berr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "V",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Verr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "R",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Rerr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "I",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Ierr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
+        { data: "B", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Berr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "V", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Verr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "R", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rerr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "I", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Ierr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
       ],
       hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
     })
   );
+
   // create chart
-  const canvas = document.getElementById("myChart") as HTMLCanvasElement
+  const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
 
   const myChart = new Chart(ctx, {
@@ -264,9 +215,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       ],
     },
     options: {
-      hover: {
-        mode: "nearest",
-      },
+      hover: { mode: "nearest", },
       scales: {
         x: {
           //label: 'B-V',
@@ -301,57 +250,44 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     },
   });
 
+
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
       myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
         modelForm["red"].value, modelForm["blue"].value)
-      //console.log("bingus")
       myChart.update()
     }, 10)
   }
 
+  //update table height and scatter plotting
   const update = function () {
-    //console.log(tableData);
     updateTableHeight(hot);
-    updateScatter(
-      hot,
-      myChart,
-      clusterForm,
-      modelForm,
-      1
-    );
+    updateScatter(hot, myChart, clusterForm, modelForm, 1);
   };
 
-  // link chart to table
-  hot.updateSettings({
-    afterChange: update,
-    afterRemoveRow: update,
-    afterCreateRow: update,
-  });
-
+  //update scatter plotting when clusterFrom being updated by user
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
-
   clusterForm.oninput = throttle(
     function () { updateScatter(hot, myChart, clusterForm, modelForm, 1) },
     frameTime);
 
   // link chart to model form (slider + text)
-  // modelForm.oninput=
+  modelForm.oninput = throttle(function () { updateHRModel(modelForm, myChart) }, 100);
 
+  /*
+  //update HR model and plot on graph
   const updateModel = function (precise: boolean) {
-    //console.log(tableData);
-
     const reveal: string[] = [
       modelForm["red"].value,
       modelForm["blue"].value,
       modelForm["lum"].value,
     ];
-    console.log(Number(modelForm['age_num'].value) * 10 % 5)
     if (precise
       || Number(modelForm['age_num'].value) * 10 % 3 === 0
       || Number(modelForm['metal'].value) * 10 % 2 === 0) {
+
       const columns: string[] = hot.getColHeader() as string[];
       const hidden: number[] = [];
       for (const col in columns) {
@@ -370,6 +306,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         },
       });
 
+      // link chart to table
+      hot.updateSettings({
+        afterChange: update,
+        afterRemoveRow: update,
+        afterCreateRow: update,
+      });
+
       update();
       updateHRModel(modelForm, myChart);
       updateLabels(
@@ -379,11 +322,11 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       myChart.update("none");
     };
   }
+  */
 
-  // link chart to model form (slider + text)
-  modelForm.oninput = throttle(function () { updateModel(true) }, 100);
-  // modelForm.onchange = throttle(function () { updateModel(true) }, 100);
 
+
+  //initializing website
   update();
   updateHRModel(modelForm, myChart);
 
@@ -593,20 +536,12 @@ export function clusterFileUpload(
   };
   reader.readAsText(file);
 }
+
+
 var graphScaleMode = "auto";
 var graphScale: { [key: string]: number }[] = [
-  {
-    minX: NaN,
-    maxX: NaN,
-    minY: NaN,
-    maxY: NaN,
-  },
-  {
-    minX: NaN,
-    maxX: NaN,
-    minY: NaN,
-    maxY: NaN,
-  },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
 ]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
@@ -624,26 +559,21 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
     + "%22,%22" + modelForm['red'].value
     + "%22,%22" + modelForm['lum'].value + "%22]"
 
-  // console.log(url)
   httpGetAsync(url, (response: string) => {
     let dataTable = JSON.parse(response);
     let form: ScatterDataPoint[] = []
-    let scaleLimits: { [key: string]: number } = {
-      minX: NaN,
-      minY: NaN,
-      maxX: NaN,
-      maxY: NaN,
-    };
+    let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
     for (let i = 0; i < dataTable.length - 10; i++) {
-      // console.log(dataTable[i])
       let row: ScatterDataPoint = { x: dataTable[i][0], y: dataTable[i][1] };
       scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
       form.push(row);
     }
     chart.data.datasets[0].data = form;
     chart.update("none");
-    graphScale[0] = scaleLimits;
-    chartRescale(chart, modelForm);
+    if (graphScaleMode === "model") {
+      graphScale[0] = scaleLimits;
+      chartRescale(chart, modelForm);
+    }
   });
 }
 
@@ -694,12 +624,7 @@ function updateScatter(
       ? null
       : columns.indexOf(modelForm["lum"].value + "err");
 
-  let scaleLimits: { [key: string]: number } = {
-    minX: NaN,
-    minY: NaN,
-    maxX: NaN,
-    maxY: NaN,
-  };
+  let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
 
   let start = 0;
   for (let i = 0; i < tableData.length; i++) {
@@ -726,8 +651,10 @@ function updateScatter(
   while (chart.length !== start) {
     chart.pop();
   }
-  graphScale[1] = scaleLimits;
-  chartRescale(myChart, modelForm);
+  if (graphScaleMode !== null) {
+    graphScale[1] = scaleLimits;
+    chartRescale(myChart, modelForm);
+  }
   myChart.update()
 }
 
@@ -879,14 +806,6 @@ function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
   return Number(A_v) * (a + b / R_v);
 }
-
-//Api Get Request Testing
-// let url = 'http://localhost:5000/data?age=6.80&metallicity=-0.35&filters=[%22uprime%22,%22H%22,%22J%22]'
-
-// httpGetAsync(url, (response: string) => {
-//   var resultJson = JSON.parse(response);
-//   console.log(resultJson[0])
-// });
 
 /**Get http request asynchronously
  * @param {string} theUrl -request ultra link
