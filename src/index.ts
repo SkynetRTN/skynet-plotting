@@ -148,7 +148,7 @@ function chartType(chart: string) {
         objects = [cluster_objects[0], cluster_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>, objects[1] as Chart<'line'>);
         }
     } 
     updateTableHeight(objects[0]);
