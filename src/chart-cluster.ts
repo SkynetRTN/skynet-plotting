@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { ScatterDataPoint } from "chart.js";
-import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow} from "./chart-cluster-util";
+import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
   linkInputs,
@@ -91,7 +91,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(
     clusterForm["red"], clusterForm["red_num"],
-    0, 
+    0,
     3,
     0.01,
     0,
@@ -216,6 +216,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 0,
           fill: false,
           immutableLabel: true,
+          parsing: {},
         },
         {
           type: "scatter",
@@ -229,7 +230,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
-          parsing:{ }        
+          parsing: {}
         },
       ],
     },
@@ -252,14 +253,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate()},
+            onPan: () => { zoompanDeactivate() },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate()},
+            onZoom: () => { zoompanDeactivate() },
           },
         },
         // legend: {
