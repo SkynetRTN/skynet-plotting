@@ -142,7 +142,7 @@ export function median(arr: number[]) {
     return a;
 }
 
-export let ArrMath = {
+export const ArrMath = {
     max: function (arr: number[]): number {
         return Math.max.apply(null, arr);
     },
