@@ -296,55 +296,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   // link chart to model form (slider + text)
   modelForm.oninput = throttle(function () { updateHRModel(modelForm, myChart) }, 100);
 
-  /*
-  //update HR model and plot on graph
-  const updateModel = function (precise: boolean) {
-    const reveal: string[] = [
-      modelForm["red"].value,
-      modelForm["blue"].value,
-      modelForm["lum"].value,
-    ];
-    if (precise
-      || Number(modelForm['age_num'].value) * 10 % 3 === 0
-      || Number(modelForm['metal'].value) * 10 % 2 === 0) {
-
-      const columns: string[] = hot.getColHeader() as string[];
-      const hidden: number[] = [];
-      for (const col in columns) {
-        columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-        if (!reveal.includes(columns[col])) {
-          //if the column isn't selected in the drop down, hide it
-          hidden.push(parseFloat(col));
-        }
-      }
-
-      hot.updateSettings({
-        hiddenColumns: {
-          columns: hidden,
-          // copyPasteEnabled: false,
-          indicators: false,
-        },
-      });
-
-      // link chart to table
-      hot.updateSettings({
-        afterChange: update,
-        afterRemoveRow: update,
-        afterCreateRow: update,
-      });
-
-      update();
-      updateHRModel(modelForm, myChart);
-      updateLabels(
-        myChart,
-        document.getElementById("chart-info-form") as ChartInfoForm
-      );
-      myChart.update("none");
-    };
-  }
-  */
-
-
 
   //initializing website
   update();
@@ -361,6 +312,34 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     false,
     false
   );
+
+  //link table with chart
+  const reveal: string[] = [
+    modelForm["red"].value,
+    modelForm["blue"].value,
+    modelForm["lum"].value,
+  ];
+  const columns: string[] = hot.getColHeader() as string[];
+  const hidden: number[] = [];
+  for (const col in columns) {
+    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+    if (!reveal.includes(columns[col])) {
+      //if the column isn't selected in the drop down, hide it
+      hidden.push(parseFloat(col));
+    }
+  }
+  hot.updateSettings({
+    hiddenColumns: {
+      columns: hidden,
+      // copyPasteEnabled: false,
+      indicators: false,
+    },
+  });
+  hot.updateSettings({
+    afterChange: update,
+    afterRemoveRow: update,
+    afterCreateRow: update,
+  });
 
   return [hot, myChart, modelForm];
 }
