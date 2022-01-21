@@ -19,7 +19,7 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function cluster2(): [Handsontable, Chart, ModelForm] {
+export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
@@ -243,12 +243,9 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
     })
   );
   // create chart1
-  const canvas = document.getElementById("myChart1") as HTMLCanvasElement;
-  const canvas2 = document.getElementById("myChart2") as HTMLCanvasElement;
-  const ctx = canvas.getContext("2d")
-  const ctx2 = canvas2.getContext("2d")
+  const ctx1 = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
 
-  const myChart1 = new Chart(ctx, {
+  const myChart1 = new Chart(ctx1, {
     type: "line",
     data: {
       labels: ["Model", "Data"],
@@ -317,7 +314,8 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
       }
     },
   });
-
+  const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
+  
   const myChart2 = new Chart(ctx2, {
     type: "line",
     data: {
@@ -499,25 +497,8 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
     false
   );
 
-  return [hot, myChart1, modelForm];
+  return [hot, myChart1, myChart2, modelForm];
 
-
-  update();
-  updateHRModel(modelForm, myChart2);
-
-  myChart2.options.plugins.title.text = "Title";
-  myChart2.options.scales["x"].title.text = "x";
-  myChart2.options.scales["y"].title.text = "y";
-  updateLabels(
-    myChart2,
-    document.getElementById("chart-info-form") as ChartInfoForm,
-    false,
-    false,
-    false,
-    false
-  );
-
-  return [hot, myChart2, modelForm];
 }
 
 /**

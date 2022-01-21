@@ -100,6 +100,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart, ModelForm]
+    let cluster_objects2: [Handsontable, Chart, Chart, ModelForm]
 
     if (chart === 'curve') {
         objects = curve();
@@ -144,8 +145,8 @@ function chartType(chart: string) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'cluster2') {
-        cluster_objects = cluster2();
-        objects = [cluster_objects[0], cluster_objects[1]]
+        cluster_objects2 = cluster2();
+        objects = [cluster_objects2[0], cluster_objects2[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>, objects[1] as Chart<'line'>);
