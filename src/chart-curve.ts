@@ -127,7 +127,6 @@ export function curve(): [Handsontable, Chart] {
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-
     const lineForm = document.getElementById('line-form') as LineForm;
 
     let lines = 1;
