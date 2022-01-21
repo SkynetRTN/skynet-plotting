@@ -130,6 +130,9 @@ interface ModelForm extends HTMLFormElement {
     red: HTMLInputElement,
     blue: HTMLInputElement,
     lum: HTMLInputElement
+    red2: HTMLInputElement,
+    blue2: HTMLInputElement,
+    lum2: HTMLInputElement,
 }
 
 interface GravityForm extends HTMLFormElement {

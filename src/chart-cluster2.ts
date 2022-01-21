@@ -14,7 +14,6 @@ import {
 } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 // import { rad } from "./my-math";
-
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -243,11 +242,11 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
       hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
     })
   );
-  // create chart
-  const canvas1 = document.getElementById("myChart1") as HTMLCanvasElement
-  const canvas2 = document.getElementById("myChart2") as HTMLCanvasElement
-  const ctx = canvas1.getContext("2d");
-  const ctx2 = canvas2.getContext("2d");
+  // create chart1
+  const canvas = document.getElementById("myChart1") as HTMLCanvasElement;
+  const canvas2 = document.getElementById("myChart2") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")
+  const ctx2 = canvas2.getContext("2d")
 
   const myChart1 = new Chart(ctx, {
     type: "line",
@@ -318,6 +317,7 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
       }
     },
   });
+
   const myChart2 = new Chart(ctx2, {
     type: "line",
     data: {
@@ -387,7 +387,6 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
       }
     },
   });
-
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
@@ -395,7 +394,7 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
         modelForm["red"].value, modelForm["blue"].value)
       //console.log("bingus")
       myChart2.data.datasets[1].backgroundColor = HRrainbow(myChart2,
-        modelForm["red"].value, modelForm["blue"].value)
+        modelForm["red2"].value, modelForm["blue2"].value)
       myChart1.update()
       myChart2.update()
     }, 10)
@@ -407,17 +406,12 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
     updateScatter(
       hot,
       myChart1,
+      myChart2,
       cluster2Form,
       modelForm,
       1
     );
-    updateScatter(
-        hot,
-        myChart2,
-        cluster2Form,
-        modelForm,
-        1
-    );
+
   };
 
   // link chart to table
@@ -431,10 +425,7 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
   const frameTime = Math.floor(1000 / fps);
 
   cluster2Form.oninput = throttle(
-    function () { updateScatter(hot, myChart1, cluster2Form, modelForm, 1) }, 
-    frameTime);
-  cluster2Form.oninput = throttle(
-    function () { updateScatter(hot, myChart2, cluster2Form, modelForm, 1) },
+    function () { updateScatter(hot, myChart1, myChart2, cluster2Form, modelForm, 1) }, 
     frameTime);
 
   // link chart to model form (slider + text)
@@ -447,6 +438,9 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
       modelForm["red"].value,
       modelForm["blue"].value,
       modelForm["lum"].value,
+      modelForm["red2"].value,
+      modelForm["blue2"].value,
+      modelForm["lum2"].value,
     ];
     console.log(Number(modelForm['age_num'].value) * 10 % 5)
     if (precise
@@ -533,11 +527,13 @@ export function cluster2(): [Handsontable, Chart, ModelForm] {
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
  * @param {Chartjs} myChart1
+ * @param {Chartjs} myChart2
  */
 export function cluster2FileUpload(
   evt: Event,
   table: Handsontable,
   myChart1: Chart<"line">,
+  myChart2: Chart<"line">
 ) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
@@ -621,7 +617,9 @@ export function cluster2FileUpload(
     const blue = modelForm["blue"];
     const red = modelForm["red"];
     const lum = modelForm["lum"];
-
+    const blue2 = modelForm["blue2"];
+    const red2 = modelForm["red2"];
+    const lum2 = modelForm["lum2"];
     //Change filter options to match file
 
     //order filters by temperature
@@ -684,6 +682,9 @@ export function cluster2FileUpload(
     blue.value = filters[0];
     red.value = filters[1];
     lum.value = filters[1];
+    blue2.value = filters[0];
+    red2.value = filters[1];
+    lum2.value = filters[1];
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -709,6 +710,7 @@ export function cluster2FileUpload(
     updateScatter(
       table,
       myChart1,
+      myChart2,
       document.getElementById("cluster-form") as Cluster2Form,
       document.getElementById("model-form") as ModelForm,
       1
@@ -774,6 +776,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
 function updateScatter(
   table: Handsontable,
   myChart1: Chart,
+  myChart2: Chart,
   cluster2Form: Cluster2Form,
   modelForm: ModelForm,
   dataSetIndex: 1
@@ -782,7 +785,7 @@ function updateScatter(
   let dist = parseFloat(cluster2Form["d_num"].value);
   let reddening = parseFloat(cluster2Form["red_num"].value);
 
-  let chart = myChart1.data.datasets[dataSetIndex].data;
+  let chart = myChart1.data.datasets[dataSetIndex].data && myChart2.data.datasets[dataSetIndex].data
   let tableData = table.getData();
   let columns = table.getColHeader();
 
@@ -790,6 +793,9 @@ function updateScatter(
   let blue = columns.indexOf(modelForm["blue"].value + " Mag");
   let red = columns.indexOf(modelForm["red"].value + " Mag");
   let lum = columns.indexOf(modelForm["lum"].value + " Mag");
+  let blue2 = columns.indexOf(modelForm["blue2"].value + " Mag");
+  let red2 = columns.indexOf(modelForm["red2"].value + " Mag");
+  let lum2 = columns.indexOf(modelForm["lum2"].value + " Mag");
 
   let A_v1 = calculateLambda(
     reddening,
@@ -802,6 +808,18 @@ function updateScatter(
   let A_v3 = calculateLambda(
     reddening,
     filterWavelength[modelForm["lum"].value]
+  );
+  let A_v4 = calculateLambda(
+    reddening,
+    filterWavelength[modelForm["blue2"].value]
+  );
+  let A_v5 = calculateLambda(
+    reddening,
+    filterWavelength[modelForm["red2"].value]
+  );
+  let A_v6 = calculateLambda(
+    reddening,
+    filterWavelength[modelForm["lum2"].value]
   );
 
   let blueErr =
@@ -816,6 +834,18 @@ function updateScatter(
     columns.indexOf(modelForm["lum"].value + "err") < 0
       ? null
       : columns.indexOf(modelForm["lum"].value + "err");
+  let blu2eErr =
+      columns.indexOf(modelForm["blue2"].value + "err") < 0
+        ? null
+        : columns.indexOf(modelForm["blue2"].value + "err"); //checks for supplied err data
+  let red2Err =
+      columns.indexOf(modelForm["red2"].value + "err") < 0
+        ? null
+        : columns.indexOf(modelForm["red2"].value + "err");
+  let lum2Err =
+      columns.indexOf(modelForm["lum2"].value + "err") < 0
+        ? null
+        : columns.indexOf(modelForm["lum2"].value + "err");
 
   let scaleLimits: { [key: string]: number } = {
     minX: NaN,
@@ -832,7 +862,10 @@ function updateScatter(
       typeof (tableData[i][lum]) != 'number' ||
       (blueErr != null && tableData[i][blueErr] >= err) ||
       (redErr != null && tableData[i][redErr] >= err) ||
-      (lumErr != null && tableData[i][lumErr] >= err)
+      (lumErr != null && tableData[i][lumErr] >= err) ||
+      (blu2eErr != null && tableData[i][blu2eErr] >= err) ||
+      (red2Err != null && tableData[i][red2Err] >= err) ||
+      (lum2Err != null && tableData[i][lum2Err] >= err)
     ) {
       continue;
     }
@@ -840,11 +873,18 @@ function updateScatter(
 
     let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
     let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+    let x2 = tableData[i][blue2] - A_v4 - (tableData[i][red2] - A_v5);
+    let y2 = tableData[i][lum2] - A_v6 - 5 * Math.log10(dist / 0.01);
     chart[start++] = {
       x: x,
       y: y
     };
     scaleLimits = pointMinMax(scaleLimits, x, y);
+    chart[start++] = {
+      x: x2,
+      y: y2
+    };
+    scaleLimits = pointMinMax(scaleLimits, x2, y2);
   }
   while (chart.length !== start) {
     chart.pop();
@@ -852,6 +892,7 @@ function updateScatter(
   graphScale[1] = scaleLimits;
   chartRescale(myChart1, modelForm);
   myChart1.update()
+  myChart2.update()
 }
 
 //finding the maximum and minimum of y value for chart scaling
