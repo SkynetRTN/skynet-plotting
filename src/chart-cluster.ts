@@ -132,7 +132,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     frameOnDataRadio.checked = false;
     setRadioLabelColor(standardViewRadio, false);
     setRadioLabelColor(frameOnDataRadio, false);
-    myChart.options.plugins.legend.labels.color = "#000000";
 
   }
 
@@ -356,7 +355,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 export function clusterFileUpload(
   evt: Event,
   table: Handsontable,
-  myChart: Chart<"line">
+  myChart: Chart<"line">,
 ) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
@@ -535,6 +534,8 @@ export function clusterFileUpload(
     );
   };
   reader.readAsText(file);
+  // chartRescale(myChart, modelForm, "auto")
+  document.getElementById("standardView").click();
 }
 
 
