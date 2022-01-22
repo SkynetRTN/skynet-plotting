@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { ScatterDataPoint } from "chart.js";
-import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow } from "./chart-cluster-util";
+import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow} from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
   linkInputs,
@@ -91,7 +91,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(
     clusterForm["red"], clusterForm["red_num"],
-    0,
+    0, 
     3,
     0.01,
     0,
@@ -216,7 +216,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 0,
           fill: false,
           immutableLabel: true,
-          parsing: {},
+          parsing: { }//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
         {
           type: "scatter",
@@ -230,7 +230,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
-          parsing: {}
+          parsing:{ }        
         },
       ],
     },
@@ -253,14 +253,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate() },
+            onPan: () => { zoompanDeactivate()},
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate() },
+            onZoom: () => { zoompanDeactivate()},
           },
         },
         // legend: {
@@ -286,6 +286,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     updateScatter(hot, myChart, clusterForm, modelForm, 1);
   };
 
+  // link chart to table
+  hot.updateSettings({
+    afterChange: update,
+    afterRemoveRow: update,
+    afterCreateRow: update,
+  });
+
   //update scatter plotting when clusterFrom being updated by user
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
@@ -293,13 +300,15 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     function () { updateScatter(hot, myChart, clusterForm, modelForm, 1) },
     frameTime);
 
-  // link chart to model form (slider + text)
-  modelForm.oninput = throttle(function () { updateHRModel(modelForm, myChart) }, 100);
-
+  // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
+  modelForm.oninput = throttle(function () { 
+                      updateHRModel(modelForm, myChart, hot);
+                      updateScatter(hot, myChart, clusterForm, modelForm, 1) 
+                                          }, 100);
 
   //initializing website
   update();
-  updateHRModel(modelForm, myChart);
+  updateHRModel(modelForm, myChart, hot);
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -312,34 +321,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     false,
     false
   );
-
-  //link table with chart
-  const reveal: string[] = [
-    modelForm["red"].value,
-    modelForm["blue"].value,
-    modelForm["lum"].value,
-  ];
-  const columns: string[] = hot.getColHeader() as string[];
-  const hidden: number[] = [];
-  for (const col in columns) {
-    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-    if (!reveal.includes(columns[col])) {
-      //if the column isn't selected in the drop down, hide it
-      hidden.push(parseFloat(col));
-    }
-  }
-  hot.updateSettings({
-    hiddenColumns: {
-      columns: hidden,
-      // copyPasteEnabled: false,
-      indicators: false,
-    },
-  });
-  hot.updateSettings({
-    afterChange: update,
-    afterRemoveRow: update,
-    afterCreateRow: update,
-  });
 
   return [hot, myChart, modelForm];
 }
@@ -462,7 +443,7 @@ export function clusterFileUpload(
       "Ks",
       "K",
     ];
-    //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters
+    //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
     //if it ain't known ignore it
 
@@ -551,7 +532,7 @@ var graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart) {
+function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable) {
   let url = "http://localhost:5000/isochrone?"
     // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -575,6 +556,29 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
       graphScale[0] = scaleLimits;
       chartRescale(chart, modelForm);
     }
+  });
+  const reveal: string[] = [
+    modelForm["red"].value,
+    modelForm["blue"].value,
+    modelForm["lum"].value,
+  ];
+
+  let columns: string[] = hot.getColHeader() as string[];
+  let hidden: number[] = [];
+  for (const col in columns) {
+    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+    if (!reveal.includes(columns[col])) {
+      //if the column isn't selected in the drop down, hide it
+      hidden.push(parseFloat(col));
+    }
+  }
+
+  hot.updateSettings({
+    hiddenColumns: {
+      columns: hidden,
+      // copyPasteEnabled: false,
+      indicators: false,
+    },
   });
 }
 
