@@ -32,29 +32,46 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
 
 /**
  *  This function takes the labels from the chart and updates the the data property of the form with the labels.
- *  @param myChart:     The Chart object
+ *  @param myChart1:     The Chart object
  *  @param form:        The form to be updated.
  */
-export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false) {
+export function updateLabels(myChart1: Chart, myChart2: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false) {
     let labels = "";
-    for (let i = 0; i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel) {
+    for (let i = 0; i < myChart1.data.datasets.length; i++) {
+        if (!myChart1.data.datasets[i].hidden && !(myChart1.data.datasets[i] as any).immutableLabel) {
             if (labels !== "") {
                 labels += ", ";
             }
-            labels += myChart.data.datasets[i].label;
+            labels += myChart1.data.datasets[i].label;
+        }
+    }
+    for (let i = 0; i < myChart2.data.datasets.length; i++) {
+        if (!myChart2.data.datasets[i].hidden && !(myChart2.data.datasets[i] as any).immutableLabel) {
+            if (labels !== "") {
+                labels += ", ";
+            }
+            labels += myChart2.data.datasets[i].label;
         }
     }
     form.elements['data'].value = labels;
 
-    if (myChart.options.plugins.title.text) {
-        form.elements['title'].value = myChart.options.plugins.title.text as string;
+    if (myChart1.options.plugins.title.text) {
+        form.elements['title'].value = myChart1.options.plugins.title.text as string;
     }
-    if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
-        form.elements['xAxis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+    if ((myChart1.options.scales['x'] as LinearScaleOptions).title.text) {
+        form.elements['xAxis'].value = (myChart1.options.scales['x'] as LinearScaleOptions).title.text as string;
     }
-    if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
-        form.elements['yAxis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+    if ((myChart1.options.scales['y'] as LinearScaleOptions).title.text) {
+        form.elements['yAxis'].value = (myChart1.options.scales['y'] as LinearScaleOptions).title.text as string;
+    }
+    if (myChart2.options.plugins.title.text) {
+        form.elements['title'].value = myChart2.options.plugins.title.text as string;
+    }
+    if ((myChart2.options.scales['x'] as LinearScaleOptions).title.text) {
+        form.elements['xAxis'].value = (myChart2.options.scales['x'] as LinearScaleOptions).title.text as string;
+    }
+    if ((myChart2.options.scales['y'] as LinearScaleOptions).title.text) {
+        form.elements['yAxis'].value = (myChart2.options.scales['y'] as LinearScaleOptions).title.text as string;
     }
 
     form.elements['data'].disabled = immData;
