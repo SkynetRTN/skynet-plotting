@@ -154,27 +154,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     }, 10)
   }
 
-  //Legend clicking no longer in use
-  /*  
-    function setLegendColor(legend: LegendItem, activate: boolean) {
-      let fontColor: string = activate ? "#FF0000" : "#000000";
-      legend.fontColor = fontColor;
-    }
-  
-    function newLegendClickHandler(e: any, legendItem: LegendItem, legend: any) {
-      let legendItems = legend.legendItems;
-      if (legendItem.text === "Model") {
-        radioOnclick(standardViewRadio, frameOnDataRadio);
-        setLegendColor(legendItems[0], true)
-        setLegendColor(legendItems[1], false)
-      } else {
-        radioOnclick(frameOnDataRadio, standardViewRadio);
-        setLegendColor(legendItems[1], true)
-        setLegendColor(legendItems[0], false)
-      }
-    }
-  */
-
   // create table
   const container = document.getElementById("table-div");
   const hot = new Handsontable(
@@ -497,7 +476,6 @@ export function clusterFileUpload(
       }
       tableData.push(row);
     });
-    //    console.log(tableData);
 
     table.updateSettings({
       data: tableData,
@@ -738,11 +716,3 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
     modelForm["red"].value, modelForm["blue"].value)
   myChart.update()
 }
-
-//Api Get Request Testing
-// let url = 'http://localhost:5000/data?age=6.80&metallicity=-0.35&filters=[%22uprime%22,%22H%22,%22J%22]'
-
-// httpGetAsync(url, (response: string) => {
-//   var resultJson = JSON.parse(response);
-//   console.log(resultJson[0])
-// });
