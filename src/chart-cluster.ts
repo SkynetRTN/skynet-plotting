@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { ScatterDataPoint } from "chart.js";
-import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow} from "./chart-cluster-util";
+import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow } from "./chart-cluster-util";
 import { tableCommonOptions, colors } from "./config";
 import {
   linkInputs,
@@ -91,7 +91,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(
     clusterForm["red"], clusterForm["red_num"],
-    0, 
+    0,
     3,
     0.01,
     0,
@@ -216,7 +216,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 0,
           fill: false,
           immutableLabel: true,
-          parsing: { }//This fixes the disappearing issue. Why? What do I look like, a CS major?
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
         {
           type: "scatter",
@@ -230,7 +230,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
-          parsing:{ }        
+          parsing: {}
         },
       ],
     },
@@ -253,14 +253,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate()},
+            onPan: () => { zoompanDeactivate() },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate()},
+            onZoom: () => { zoompanDeactivate() },
           },
         },
         // legend: {
@@ -301,10 +301,10 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
-  modelForm.oninput = throttle(function () { 
-                      updateHRModel(modelForm, myChart, hot);
-                      updateScatter(hot, myChart, clusterForm, modelForm, 1) 
-                                          }, 100);
+  modelForm.oninput = throttle(function () {
+    updateHRModel(modelForm, myChart, hot);
+    updateScatter(hot, myChart, clusterForm, modelForm, 1)
+  }, 100);
 
   //initializing website
   update();
@@ -693,9 +693,9 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
 
       let mags: { [key: string]: Function[] } = filterMags()
 
-      let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
-      // console.log(magIndex)
+      let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
+      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
+
       adjustScale = {
         'minX': color_blue - (color_red - color_blue) / 8,
         'maxX': color_red + (color_red - color_blue) / 8,
