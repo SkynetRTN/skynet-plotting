@@ -6,8 +6,8 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "vite",
-    "build": "vite build"
+    "start": "npm i && vite",
+    "build": "npm i && vite build"
   },
   "repository": {
     "type": "git",
