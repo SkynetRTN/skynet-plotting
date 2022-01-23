@@ -153,8 +153,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     setRadioLabelColor(otherRadio, false)
 
     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale(myChart1, modelForm)
-    chartRescale(myChart2, modelForm)
+    chartRescale(myChart1, myChart2, modelForm)
   }
 
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
@@ -243,7 +242,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     })
   );
   // create chart1
-  const ctx1 = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+  const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
     type: "line",
@@ -463,18 +462,14 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       });
 
       update();
-      updateHRModel(modelForm, myChart1);
+      updateHRModel(modelForm, myChart1, myChart2);
       updateLabels(
-        myChart1,
+        myChart1, 
+        myChart2,
         document.getElementById("chart-info-form") as ChartInfoForm
       );
-        updateHRModel(modelForm, myChart2);
-        updateLabels(
-            myChart2,
-            document.getElementById("chart-info-form") as ChartInfoForm
-        );
       myChart1.update("none");
-        myChart2.update("none");
+      myChart2.update("none");
     };
   }
 
@@ -483,13 +478,17 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   // modelForm.onchange = throttle(function () { updateModel(true) }, 100);
 
   update();
-  updateHRModel(modelForm, myChart1);
+  updateHRModel(modelForm, myChart1, myChart2);
 
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x";
   myChart1.options.scales["y"].title.text = "y";
+  myChart2.options.plugins.title.text = "Title";
+  myChart2.options.scales["x"].title.text = "x";
+  myChart2.options.scales["y"].title.text = "y";
   updateLabels(
     myChart1,
+    myChart2,
     document.getElementById("chart-info-form") as ChartInfoForm,
     false,
     false,
@@ -552,8 +551,13 @@ export function cluster2FileUpload(
     myChart1.data.datasets[1].label = "Data";
     myChart1.options.scales["x"].title.text = "x";
     myChart1.options.scales["y"].title.text = "y";
+    myChart2.options.plugins.title.text = "Title";
+    myChart2.data.datasets[1].label = "Data";
+    myChart2.options.scales["x"].title.text = "x";
+    myChart2.options.scales["y"].title.text = "y";
     updateLabels(
       myChart1,
+      myChart2,
       document.getElementById("chart-info-form") as ChartInfoForm,
       false,
       false,
@@ -659,6 +663,10 @@ export function cluster2FileUpload(
     changeOptions(red, optionList);
     //red.value = red.options[red.options.length-1].value;
     changeOptions(lum, optionList);
+    changeOptions(blue2, optionList);
+    changeOptions(red2, optionList);
+    changeOptions(lum2, optionList);
+
 
     blue.value = filters[0];
     red.value = filters[1];
@@ -714,6 +722,20 @@ var graphScale: { [key: string]: number }[] = [
     maxY: NaN,
   },
 ]
+var graphScale2: { [key: string]: number }[] = [
+  {
+    minX: NaN,
+    maxX: NaN,
+    minY: NaN,
+    maxY: NaN,
+  },
+  {
+    minX: NaN,
+    maxX: NaN,
+    minY: NaN,
+    maxY: NaN,
+  },
+]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
  *  request HR diagram model from server and plot on the graph.
@@ -721,7 +743,7 @@ var graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart) {
+function updateHRModel(modelForm: ModelForm, myChart1: Chart, myChart2: Chart) {
   let url = "http://localhost:5000/isochrone?"
     // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -729,6 +751,9 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
     + "&filters=[%22" + modelForm['blue'].value
     + "%22,%22" + modelForm['red'].value
     + "%22,%22" + modelForm['lum'].value + "%22]"
+    + "&filters=[%22" + modelForm['blue2'].value
+    + "%22,%22" + modelForm['red2'].value
+    + "%22,%22" + modelForm['lum2'].value + "%22]"
 
   // console.log(url)
   httpGetAsync(url, (response: string) => {
@@ -746,10 +771,12 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
       scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
       form.push(row);
     }
-    chart.data.datasets[0].data = form;
-    chart.update("none");
+    myChart1.data.datasets[0].data = form;
+    myChart1.update("none");
+    myChart2.data.datasets[0].data = form;
+    myChart2.update("none");
     graphScale[0] = scaleLimits;
-    chartRescale(chart, modelForm);
+    chartRescale(myChart1, myChart2, modelForm);
   });
 }
 
@@ -766,7 +793,8 @@ function updateScatter(
   let dist = parseFloat(cluster2Form["d_num"].value);
   let reddening = parseFloat(cluster2Form["red_num"].value);
 
-  let chart = myChart1.data.datasets[dataSetIndex].data && myChart2.data.datasets[dataSetIndex].data
+  let chart1 = myChart1.data.datasets[dataSetIndex].data
+  let chart2 = myChart2.data.datasets[dataSetIndex].data
   let tableData = table.getData();
   let columns = table.getColHeader();
 
@@ -834,6 +862,12 @@ function updateScatter(
     maxX: NaN,
     maxY: NaN,
   };
+  let scaleLimits2: { [key: string]: number } = {
+    minX: NaN,
+    minY: NaN,
+    maxX: NaN,
+    maxY: NaN,
+  };
 
   let start = 0;
   for (let i = 0; i < tableData.length; i++) {
@@ -841,6 +875,9 @@ function updateScatter(
       typeof (tableData[i][blue]) != 'number' ||
       typeof (tableData[i][red]) != 'number' ||
       typeof (tableData[i][lum]) != 'number' ||
+      typeof (tableData[i][blue2]) != 'number' ||
+      typeof (tableData[i][red2]) != 'number' ||
+      typeof (tableData[i][lum2]) != 'number' ||
       (blueErr != null && tableData[i][blueErr] >= err) ||
       (redErr != null && tableData[i][redErr] >= err) ||
       (lumErr != null && tableData[i][lumErr] >= err) ||
@@ -856,26 +893,28 @@ function updateScatter(
     let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
     let x2 = tableData[i][blue2] - A_v4 - (tableData[i][red2] - A_v5);
     let y2 = tableData[i][lum2] - A_v6 - 5 * Math.log10(dist / 0.01);
-    chart[start++] = {
+    chart1[start++] = {
       x: x,
       y: y
     };
     scaleLimits = pointMinMax(scaleLimits, x, y);
-    chart[start++] = {
+    chart2[start++] = {
       x: x2,
       y: y2
     };
-    scaleLimits = pointMinMax(scaleLimits, x2, y2);
+    scaleLimits2 = pointMinMax2(scaleLimits2, x2, y2);
   }
-  while (chart.length !== start) {
-    chart.pop();
+
+  //this keeps breaking the code and i dunno why
+  while (chart1.length !== start && chart2.length !== start) {
+    chart1.pop() && chart2.pop();
   }
   graphScale[1] = scaleLimits;
-  chartRescale(myChart1, modelForm);
+  graphScale2[1] = scaleLimits2;
+  chartRescale(myChart1, myChart2, modelForm);
   myChart1.update()
   myChart2.update()
 }
-
 //finding the maximum and minimum of y value for chart scaling
 function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
   let newLimits = scaleLimits;
@@ -892,9 +931,24 @@ function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: numbe
   }
   return newLimits
 }
+function pointMinMax2(scaleLimits2: { [key: string]: number }, x: number, y: number) {
+  let newLimits2 = scaleLimits2;
+  if (isNaN(newLimits2["minX"])) {
+    newLimits2["minX"] = x;
+    newLimits2["maxX"] = x;
+    newLimits2["minY"] = y;
+    newLimits2["maxY"] = y;
+  } else if (x !== 0 && y !== 0) {
+    newLimits2["maxY"] = Math.max(newLimits2["maxY"], y);
+    newLimits2["maxX"] = Math.max(newLimits2["maxX"], x)
+    newLimits2["minY"] = Math.min(newLimits2["minY"], y)
+    newLimits2["minX"] = Math.min(newLimits2["minX"], x)
+  }
+  return newLimits2
+}
 
 // rescale scatter to contain all the data points
-export function chartRescale(myChart1: Chart, modelForm: ModelForm, option: string = null) {
+export function chartRescale(myChart1: Chart, myChart2: Chart, modelForm: ModelForm, option: string = null) {
 
   let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
   let xBuffer: number = 0;
@@ -955,18 +1009,26 @@ export function chartRescale(myChart1: Chart, modelForm: ModelForm, option: stri
   myChart1.options.scales["y"].min = adjustScale["minY"] - yBuffer
   myChart1.options.scales["y"].max = adjustScale["maxY"] + yBuffer
   myChart1.options.scales["y"].reverse = true
+  myChart2.options.scales["y"].min = adjustScale["minY"] - yBuffer
+  myChart2.options.scales["y"].max = adjustScale["maxY"] + yBuffer
+  myChart2.options.scales["y"].reverse = true
   //myChart1.options.scales["y"].suggestedMin = 0
 
   myChart1.options.scales["x"].min = adjustScale["minX"] - xBuffer
   myChart1.options.scales["x"].max = adjustScale["maxX"] + xBuffer
   myChart1.options.scales["x"].type = "linear"
+  myChart2.options.scales["x"].min = adjustScale["minX"] - xBuffer
+  myChart2.options.scales["x"].max = adjustScale["maxX"] + xBuffer
+  myChart2.options.scales["x"].type = "linear"
   //myChart1.options.scales["x"].position = "bottom"
   //what is ^this^ for?
 
   myChart1.data.datasets[1].backgroundColor = HRrainbow(myChart1,
     modelForm["red"].value, modelForm["blue"].value)
-  myChart1.update()
+  myChart1.update();
+  myChart2.update();
 }
+
 
 //assign wavelength to each knownfilter
 const filterWavelength: { [key: string]: number } = {
