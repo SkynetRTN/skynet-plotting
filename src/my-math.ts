@@ -135,7 +135,7 @@ export function median(arr: number[]) {
  * @param {number} a The dividend
  * @param {number} b The divisor
  */
- export function floatMod(a: number, b: number) {
+export function floatMod(a: number, b: number) {
     while (a > b) {
         a -= b;
     }

@@ -44,7 +44,7 @@ export function dual(): [Handsontable, Chart] {
             { data: 'y2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
