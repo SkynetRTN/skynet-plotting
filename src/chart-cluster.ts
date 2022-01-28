@@ -342,6 +342,8 @@ export function clusterFileUpload(
     // console.log(clusterForm.elements['d'].value);
     clusterForm["d"].value = Math.log(3).toString();
     // console.log(clusterForm.elements['d'].value);
+    clusterForm["err"].value = "1";
+    clusterForm["err_num"].value = "1";
     modelForm["age"].value = "6.6";
     clusterForm["red"].value = "0";
     modelForm["metal"].value = "-3.4";
