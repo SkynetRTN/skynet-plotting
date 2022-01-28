@@ -24,7 +24,7 @@ export function spectrum(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>'
     );
-    
+
     const tableData = [];
     for (let i = 0; i < 200; i++) {
         let wl = i / 200 * 0.03 + 21.09;
@@ -46,7 +46,7 @@ export function spectrum(): [Handsontable, Chart] {
             { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
@@ -126,7 +126,7 @@ export function spectrum(): [Handsontable, Chart] {
         myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
@@ -225,7 +225,7 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
             });
         }
         tableData.sort((a, b) => a.wl - b.wl);
-        
+
         const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
         spectrumForm.elements['channel'].selectedIndex = 0;
 

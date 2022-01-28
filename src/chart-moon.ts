@@ -125,7 +125,7 @@ export function moon(): [Handsontable, Chart] {
 
     updateLine(tableData, myChart);
     updateFormula(tableData, moonForm, myChart);
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
@@ -183,7 +183,7 @@ function updateFormula(table: ScatterDataPoint[], form: MoonForm, chart: Chart) 
 *  @param steps:   Steps generated to be returned in the array. Default is 500
 *  @returns {Array}
 */
-function trigGenerator(a:number, p:number, phase:number, tilt:number, start:number, end:number, steps:number = 500): ScatterDataPoint[] {
+function trigGenerator(a: number, p: number, phase: number, tilt: number, start: number, end: number, steps: number = 500): ScatterDataPoint[] {
     const data: ScatterDataPoint[] = [];
     const step = (end - start) / steps;
 

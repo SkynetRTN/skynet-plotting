@@ -28,7 +28,7 @@ export function venus(): [Handsontable, Chart] {
 
     // const venusForm = document.getElementById("venus-form");
     // linkInputs(venusForm.elements['x'], venusForm.elements['x-num'], 0.414, 1, 0.001, 0.5);
-    
+
     // venusForm.oninput = function () {
     //     myChart.data.datasets[1].data = geocentric(10, 60, venusForm.elements['x-num'].value);
     //     // console.log(geocentricData);
@@ -66,7 +66,7 @@ export function venus(): [Handsontable, Chart] {
             { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
     // create chart
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
@@ -153,7 +153,7 @@ export function venus(): [Handsontable, Chart] {
     });
 
     updateLine(tableData, myChart);
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
@@ -182,7 +182,7 @@ const maxA = 60;
 *  @param steps:   The number of data points to be generated. Default is 500.
 *  @returns {Array}
 */
-function geocentric(start:number, end:number, x:number, steps: number = 500): ScatterDataPoint[] {
+function geocentric(start: number, end: number, x: number, steps: number = 500): ScatterDataPoint[] {
     const data: ScatterDataPoint[] = [];
     const step = (end - start) / steps;
 
