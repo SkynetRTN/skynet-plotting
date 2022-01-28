@@ -509,10 +509,14 @@ export function clusterFileUpload(
     updateScatter(
       table,
       myChart,
-      document.getElementById("cluster-form") as ClusterForm,
-      document.getElementById("model-form") as ModelForm,
+      clusterForm,
+      modelForm,
       1
     );
+    updateHRModel(
+      modelForm, 
+      myChart, 
+      table)
   };
   reader.readAsText(file);
   // chartRescale(myChart, modelForm, "auto")
