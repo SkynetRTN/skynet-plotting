@@ -2,16 +2,19 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { ScatterDataPoint } from "chart.js";
-import { dummyData, filterMags, filterWavelength, calculateLambda, pointMinMax, httpGetAsync, HRModelRounding, HRrainbow } from "./chart-cluster-util";
-import { tableCommonOptions, colors } from "./config";
+import {ScatterDataPoint} from "chart.js";
 import {
-  linkInputs,
-  throttle,
-  updateLabels,
-  updateTableHeight,
-  changeOptions,
-} from "./util";
+  calculateLambda,
+  dummyData,
+  filterMags,
+  filterWavelength,
+  HRModelRounding,
+  HRrainbow,
+  httpGetAsync,
+  pointMinMax
+} from "./chart-cluster-util";
+import {colors, tableCommonOptions} from "./config";
+import {changeOptions, linkInputs, throttle, updateLabels, updateTableHeight,} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 // import { rad } from "./my-math";
 
@@ -136,8 +139,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   //Alter radio input background color between Carolina blue and white
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    let color: string = activate ? "#4B9CD3" : "white";
-    document.getElementById(radio.id + "Label").style.backgroundColor = color
+    document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
   }
 
   //Unchecked and reset both radio buttons to white background
@@ -281,8 +283,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, myChart, hot);
-    updateScatter(hot, myChart, clusterForm, modelForm, 1)
+    updateHRModel(modelForm, myChart, hot, ()=>{
+      updateScatter(hot, myChart, clusterForm, modelForm, 1)
+    });
   }, 100);
 
   //initializing website
@@ -310,7 +313,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
  * DATA FLOW: file -> table
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart
+ * @param {Chartjs} myChart The chart to be plotted
  */
 export function clusterFileUpload(
   evt: Event,
@@ -343,6 +346,8 @@ export function clusterFileUpload(
     clusterForm["d"].value = Math.log(3).toString();
     clusterForm["err"].value = "1";
     // console.log(clusterForm.elements['d'].value);
+    clusterForm["err"].value = "1";
+    clusterForm["err_num"].value = "1";
     modelForm["age"].value = "6.6";
     clusterForm["red"].value = "0";
     modelForm["metal"].value = "-3.4";
@@ -363,7 +368,6 @@ export function clusterFileUpload(
       false,
       false
     );
-
     const data: string[] = (reader.result as string)
       .split("\n")
       .filter((str) => str !== null && str !== undefined && str !== "");
@@ -429,9 +433,9 @@ export function clusterFileUpload(
     //if it ain't known ignore it
 
     const optionList = [];
-    const headers = [];
-    const columns = [];
-    var hiddenColumns = [];
+    const headers: any[] = [];
+    const columns: any[] = [];
+    let hiddenColumns: any[] = [];
     for (let i = 0; i < filters.length; i++) {
       //makes a list of options for each filter
       optionList.push({
@@ -479,33 +483,28 @@ export function clusterFileUpload(
       tableData.push(row);
     });
 
-    table.updateSettings({
-      data: tableData,
-      colHeaders: headers,
-      columns: columns,
-      hiddenColumns: { columns: hiddenColumns },
-    }); //hide all but the first 3 columns
-    updateTableHeight(table);
-    updateScatter(
-      table,
-      myChart,
-      clusterForm,
-      modelForm,
-      1
-    );
-    updateHRModel(
-      modelForm, 
-      myChart, 
-      table)
+
+    updateHRModel(modelForm, myChart, table,
+        ()=>{
+          table.updateSettings({
+            data: tableData,
+            colHeaders: headers,
+            columns: columns,
+            hiddenColumns: { columns: hiddenColumns },
+          }); //hide all but the first 3 columns
+          updateTableHeight(table);
+          updateScatter(table, myChart, clusterForm, modelForm, 1);
+          document.getElementById("standardView").click();
+        });
   };
   reader.readAsText(file);
   // chartRescale(myChart, modelForm, "auto")
-  document.getElementById("standardView").click();
+
 }
 
 
-var graphScaleMode = "auto";
-var graphScale: { [key: string]: number }[] = [
+let graphScaleMode = "auto";
+let graphScale: { [key: string]: number }[] = [
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
 ]
@@ -516,7 +515,7 @@ var graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable) {
+function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = ()=>{}) {
   let url = "http://localhost:5000/isochrone?"
     // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -536,6 +535,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable) {
     }
     chart.data.datasets[0].data = form;
     chart.update("none");
+    callback();
     if (graphScaleMode === "model") {
       graphScale[0] = scaleLimits;
       chartRescale(chart, modelForm);
@@ -650,7 +650,6 @@ function updateScatter(
 
 // rescale scatter to contain all the data points
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
-
   let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
   let xBuffer: number = 0;
   let yBuffer: number = 0;
@@ -663,7 +662,6 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
       let x: { [key: string]: number } = { 'red': 0, 'blue': 0, 'bright': 0 }
       let magIndex: number[] = [0, 0, 0];
-      // console.log(filters)
       for (let i = 0; i < magList.length; i++) {
         x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
         if ("UBVRI".includes(filters[i])) {
