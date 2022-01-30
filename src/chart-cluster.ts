@@ -2,7 +2,7 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import {ScatterDataPoint} from "chart.js";
+import { ScatterDataPoint } from "chart.js";
 import {
   calculateLambda,
   dummyData,
@@ -13,9 +13,10 @@ import {
   httpGetAsync,
   pointMinMax
 } from "./chart-cluster-util";
-import {colors, tableCommonOptions} from "./config";
-import {changeOptions, linkInputs, throttle, updateLabels, updateTableHeight,} from "./util";
+import { colors, tableCommonOptions } from "./config";
+import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
+import {median} from "./my-math";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -213,6 +214,19 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           immutableLabel: false,
           parsing: {}
         },
+        {
+          type: "line",
+          label: "Model2",
+          data: null, // will be generated later
+          borderColor: colors["red"],
+          backgroundColor: colors["red"],
+          borderWidth: 2,
+          tension: 0.1,
+          pointRadius: 0,
+          fill: false,
+          immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+        },
       ],
     },
     options: {
@@ -247,6 +261,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         // legend: {
         //   onClick: newLegendClickHandler,
         // }
+        legend: {
+          labels: {
+            filter: function(item, chart) {
+              // Logic to remove a particular legend item goes here
+              return !item.text.includes('Model2');
+            }
+          }
+        }
       }
     },
   });
@@ -283,7 +305,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, myChart, hot, ()=>{
+    updateHRModel(modelForm, myChart, hot, () => {
       updateScatter(hot, myChart, clusterForm, modelForm, 1)
     });
   }, 100);
@@ -483,17 +505,17 @@ export function clusterFileUpload(
 
 
     updateHRModel(modelForm, myChart, table,
-        ()=>{
-          table.updateSettings({
-            data: tableData,
-            colHeaders: headers,
-            columns: columns,
-            hiddenColumns: { columns: hiddenColumns },
-          }); //hide all but the first 3 columns
-          updateTableHeight(table);
-          updateScatter(table, myChart, clusterForm, modelForm, 1);
-          document.getElementById("standardView").click();
-        });
+      () => {
+        table.updateSettings({
+          data: tableData,
+          colHeaders: headers,
+          columns: columns,
+          hiddenColumns: { columns: hiddenColumns },
+        }); //hide all but the first 3 columns
+        updateTableHeight(table);
+        updateScatter(table, myChart, clusterForm, modelForm, 1);
+        document.getElementById("standardView").click();
+      });
   };
   reader.readAsText(file);
   // chartRescale(myChart, modelForm, "auto")
@@ -513,7 +535,7 @@ let graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = ()=>{}) {
+function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
   let url = "http://localhost:5000/isochrone?"
     // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -522,20 +544,68 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     + "%22,%22" + modelForm['red'].value
     + "%22,%22" + modelForm['lum'].value + "%22]"
 
-  httpGetAsync(url, (response: string) => {
-    let dataTable = JSON.parse(response);
-    let form: ScatterDataPoint[] = []
+  function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+    let form: ScatterDataPoint[] = [] //the array containing all model points
     let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-    for (let i = 0; i < dataTable.length - 10; i++) {
-      let row: ScatterDataPoint = { x: dataTable[i][0], y: dataTable[i][1] };
-      scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
+    let breakupIndex: number = 0;
+    let deltas: number[] = [NaN];
+    let maxDelta: number = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      let x_i: number = dataArray[i][0];
+      let y_i: number = dataArray[i][1];
+      let row: ScatterDataPoint = { x: x_i, y: y_i };
+      scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
       form.push(row);
+      if (i > 0) {
+        let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
+        deltas.push(delta);
+      }
     }
-    chart.data.datasets[0].data = form;
+    let medianValue = median(deltas);
+    form.pop();
+    deltas.shift();
+    for (let i = 0; i < deltas.length; i ++) {
+      if (deltas[i] > medianValue) {
+        form.shift();
+        deltas.shift();
+      } else {
+        break;
+      }
+    }
+    for (let i = deltas.length; i >= 0; i--) {
+      let deltaOutOfRange: boolean = false;
+      for (let j = 0; j < 7; j++) {
+        if (deltas[i-j] > medianValue) {
+          deltaOutOfRange = true;
+          break;
+        }
+      }
+      if (deltaOutOfRange) {
+        form.pop();
+        deltas.pop();
+      } else {
+        break;
+      }
+    }
+    for (let i = 40; i < deltas.length; i++) {
+      if (deltas[i] > maxDelta) {
+        maxDelta = deltas[i];
+        breakupIndex = i+1;
+      }
+    }
+    console.log(deltas);
+    console.log(maxDelta + ' ' + breakupIndex);
+    return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
+  }
+
+  httpGetAsync(url, (response: string) => {
+    let dataTable: number[][] = JSON.parse(response);
+    chart.data.datasets[0].data = modelFilter(dataTable)[0];
+    chart.data.datasets[2].data = modelFilter(dataTable)[1];
     chart.update("none");
     callback();
     if (graphScaleMode === "model") {
-      graphScale[0] = scaleLimits;
+      graphScale[0] = modelFilter(dataTable)[2];
       chartRescale(chart, modelForm);
     }
   });
