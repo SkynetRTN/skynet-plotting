@@ -218,8 +218,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           type: "line",
           label: "Model2",
           data: null, // will be generated later
-          borderColor: colors["red"],
-          backgroundColor: colors["red"],
+          borderColor: colors["black"],
+          backgroundColor: colors["black"],
           borderWidth: 2,
           tension: 0.1,
           pointRadius: 0,
@@ -576,7 +576,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     }
     for (let i = deltas.length; i >= 0; i--) {
       let deltaOutOfRange: boolean = false;
-      for (let j = 0; j < 7; j++) {
+      for (let j = 0; j < 10; j++) {
         if (deltas[i-j] > medianValue) {
           deltaOutOfRange = true;
           break;
@@ -595,8 +595,11 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
         breakupIndex = i+1;
       }
     }
-    console.log(deltas);
-    console.log(maxDelta + ' ' + breakupIndex);
+    // console.log(deltas);
+    // console.log(maxDelta + ' ' + breakupIndex);
+    if (maxDelta < 10 * medianValue) {
+      breakupIndex = 0;
+    }
     return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
   }
 
