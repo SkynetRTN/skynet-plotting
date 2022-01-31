@@ -464,8 +464,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       update();
       updateHRModel(modelForm, myChart1, myChart2);
       updateLabels(
-        myChart1, 
-        myChart2,
+        myChart1,
         document.getElementById("chart-info-form") as ChartInfoForm
       );
       myChart1.update("none");
@@ -488,7 +487,6 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   myChart2.options.scales["y"].title.text = "y";
   updateLabels(
     myChart1,
-    myChart2,
     document.getElementById("chart-info-form") as ChartInfoForm,
     false,
     false,
@@ -513,7 +511,7 @@ export function cluster2FileUpload(
   evt: Event,
   table: Handsontable,
   myChart1: Chart<"line">,
-  myChart2: Chart<"line">
+  myChart2: Chart<"line">,
 ) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
@@ -557,7 +555,6 @@ export function cluster2FileUpload(
     myChart2.options.scales["y"].title.text = "y";
     updateLabels(
       myChart1,
-      myChart2,
       document.getElementById("chart-info-form") as ChartInfoForm,
       false,
       false,
@@ -1025,8 +1022,10 @@ export function chartRescale(myChart1: Chart, myChart2: Chart, modelForm: ModelF
 
   myChart1.data.datasets[1].backgroundColor = HRrainbow(myChart1,
     modelForm["red"].value, modelForm["blue"].value)
-  myChart1.update();
-  myChart2.update();
+  myChart2.data.datasets[1].backgroundColor = HRrainbow(myChart2,
+    modelForm["red2"].value, modelForm["blue2"].value)
+  myChart1.update()
+  myChart2.update()
 }
 
 
