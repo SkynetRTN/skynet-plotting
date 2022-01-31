@@ -245,8 +245,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     })
   );
   // create chart
-  const canvas1 = document.getElementById("myChart1") as HTMLCanvasElement
-  const ctx1 = canvas1.getContext("2d");
+  const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
     type: "line",
@@ -318,8 +317,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     },
   });
 
-  const canvas2 = document.getElementById("myChart2") as HTMLCanvasElement
-    const ctx2 = canvas2.getContext("2d");
+  const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
     const myChart2 = new Chart(ctx2, {
         type: "line",
