@@ -15,6 +15,7 @@ import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1, clusterFileUpload } from './chart-cluster';
+import { cluster2, cluster2FileUpload } from './chart-cluster2';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
@@ -98,7 +99,8 @@ function chartType(chart: string) {
     document.getElementById('add-row-button').hidden = false;
 
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart, ModelForm]
+    let cluster_objects: [Handsontable, Chart, ModelForm];
+    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm];
 
     if (chart === 'curve') {
         objects = curve();
@@ -134,6 +136,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }
+    } else if (chart === 'cluster2') {
+        cluster2_objects = cluster2();
+        objects = [cluster2_objects[0], cluster2_objects[1]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
 
     } else if (chart === 'gravity') {
