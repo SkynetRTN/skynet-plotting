@@ -263,7 +263,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         // }
         legend: {
           labels: {
-            filter: function(item, chart) {
+            filter: function(item) {
               // Logic to remove a particular legend item goes here
               return !item.text.includes('Model2');
             }
@@ -313,6 +313,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //initializing website
   update();
   updateHRModel(modelForm, myChart, hot);
+  document.getElementById("standardView").click();
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -538,8 +539,8 @@ let graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  let url = "http://localhost:5000/isochrone?"
-    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "http://localhost:5000/isochrone?"
+  let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
