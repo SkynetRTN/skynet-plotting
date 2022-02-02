@@ -151,7 +151,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     setRadioLabelColor(standardViewRadio, false)
     setRadioLabelColor(frameOnDataRadio, false)
     setTimeout(function () {
-      myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
         modelForm["red"].value, modelForm["blue"].value)
       myChart.update()
     }, 5)
