@@ -8,6 +8,7 @@ import { updateLabels, updateTableHeight } from "./util"
 import { round } from "./my-math"
 import { ChartConfiguration } from "chart.js";
 
+
 /**
  * 
  * @returns {[Handsontable, Chart]}
