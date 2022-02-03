@@ -151,7 +151,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     setRadioLabelColor(standardViewRadio, false)
     setRadioLabelColor(frameOnDataRadio, false)
     setTimeout(function () {
-      myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
         modelForm["red"].value, modelForm["blue"].value)
       myChart.update()
     }, 5)
@@ -201,6 +201,19 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
         {
+          type: "line",
+          label: "Model2",
+          data: null, // will be generated later
+          borderColor: colors["black"],
+          backgroundColor: colors["black"],
+          borderWidth: 2,
+          tension: 0.1,
+          pointRadius: 0,
+          fill: false,
+          immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+        },
+        {
           type: "scatter",
           label: "Data",
           data: [{ x: 0, y: 0 }],
@@ -213,19 +226,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pointHoverRadius: 7,
           immutableLabel: false,
           parsing: {}
-        },
-        {
-          type: "line",
-          label: "Model2",
-          data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
-          borderWidth: 2,
-          tension: 0.1,
-          pointRadius: 0,
-          fill: false,
-          immutableLabel: true,
-          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
       ],
     },
@@ -263,7 +263,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         // }
         legend: {
           labels: {
-            filter: function(item, chart) {
+            filter: function(item) {
               // Logic to remove a particular legend item goes here
               return !item.text.includes('Model2');
             }
@@ -277,7 +277,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
-      myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
         modelForm["red"].value, modelForm["blue"].value)
       myChart.update()
     }, 10)
@@ -286,7 +286,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //update table height and scatter plotting
   const update = function () {
     updateTableHeight(hot);
-    updateScatter(hot, myChart, clusterForm, modelForm, 1);
+    updateScatter(hot, myChart, clusterForm, modelForm, 2);
   };
 
   // link chart to table
@@ -300,19 +300,20 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, myChart, clusterForm, modelForm, 1) },
+    function () { updateScatter(hot, myChart, clusterForm, modelForm, 2) },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
-      updateScatter(hot, myChart, clusterForm, modelForm, 1)
+      updateScatter(hot, myChart, clusterForm, modelForm, 2)
     });
   }, 100);
 
   //initializing website
   update();
   updateHRModel(modelForm, myChart, hot);
+  document.getElementById("standardView").click();
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -379,7 +380,7 @@ export function clusterFileUpload(
     clusterForm["red_num"].value = "0";
     modelForm["metal_num"].value = "-3.4";
     myChart.options.plugins.title.text = "Title";
-    myChart.data.datasets[1].label = "Data";
+    myChart.data.datasets[2].label = "Data";
     myChart.options.scales["x"].title.text = "x";
     myChart.options.scales["y"].title.text = "y";
     updateLabels(
@@ -515,7 +516,7 @@ export function clusterFileUpload(
           hiddenColumns: { columns: hiddenColumns },
         }); //hide all but the first 3 columns
         updateTableHeight(table);
-        updateScatter(table, myChart, clusterForm, modelForm, 1);
+        updateScatter(table, myChart, clusterForm, modelForm, 2);
         document.getElementById("standardView").click();
       });
   };
@@ -539,7 +540,7 @@ let graphScale: { [key: string]: number }[] = [
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
   let url = "http://localhost:5000/isochrone?"
-    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
@@ -606,7 +607,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
   httpGetAsync(url, (response: string) => {
     let dataTable: number[][] = JSON.parse(response);
     chart.data.datasets[0].data = modelFilter(dataTable)[0];
-    chart.data.datasets[2].data = modelFilter(dataTable)[1];
+    chart.data.datasets[1].data = modelFilter(dataTable)[1];
     chart.update("none");
     callback();
     if (graphScaleMode === "model") {
@@ -645,7 +646,7 @@ function updateScatter(
   myChart: Chart,
   clusterForm: ClusterForm,
   modelForm: ModelForm,
-  dataSetIndex: 1
+  dataSetIndex: number,
 ) {
   let err = parseFloat(clusterForm["err_num"].value);
   let dist = parseFloat(clusterForm["d_num"].value);
@@ -789,7 +790,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
   //myChart.options.scales["x"].position = "bottom"
   //what is ^this^ for?
 
-  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+  myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
     modelForm["red"].value, modelForm["blue"].value)
   myChart.update()
 }
