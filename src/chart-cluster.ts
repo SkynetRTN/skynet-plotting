@@ -119,11 +119,19 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
+  let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+  let panRight = document.getElementById("panRight") as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
     radioOnclick(standardViewRadio, frameOnDataRadio);
   });
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
+  });
+  panLeft.addEventListener("click", () => {
+    myChart.pan(-10)
+  });
+  panRight.addEventListener("click", () => {
+    myChart.pan(10)
   });
 
   //only one option can be selected at one time. 
