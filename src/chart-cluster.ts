@@ -121,33 +121,43 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
   let panLeft = document.getElementById("panLeft") as HTMLInputElement;
   let panRight = document.getElementById("panRight") as HTMLInputElement;
+  let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+  let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
     radioOnclick(standardViewRadio, frameOnDataRadio);
   });
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
-  panLeft.addEventListener("click", () => {
-    myChart.pan(-10)
-  });
-  panRight.addEventListener("click", () => {
-    myChart.pan(10)
-  });
+  let pan: number;
+  panLeft.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(1)}, 20 )
+  }
+  panLeft.onmouseup = panLeft.onmouseleave = function() {
+    clearInterval(pan);
+  }
+  panRight.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(-1)}, 20 )
+  }
+  panRight.onmouseup = panRight.onmouseleave = function() {
+    clearInterval(pan);
+  }
 
   //handel zoom/pan buttons
   let zoom: number;
-  document.getElementById('zoomIn').onmousedown = function() {
+  zoomIn.onmousedown = function() {
     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.05);}, 200);;
   }
-  document.getElementById('zoomIn').onmouseup = function() {
+  zoomIn.onmouseup = zoomIn.onmouseleave = function() {
     clearInterval(zoom);
   }
-  document.getElementById('zoomOut').onmousedown = function() {
+  zoomOut.onmousedown = function() {
     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.05);}, 200);;
   }
-  document.getElementById('zoomOut').onmouseup = function() {
+  zoomOut.onmouseup = zoomOut.onmouseleave = function() {
     clearInterval(zoom);
   }
+  /*
   document.getElementById("zoomIn").addEventListener("click", ()=>{
     myChart.zoom(myChart.getZoomLevel()+0.1);
   });
@@ -155,6 +165,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   document.getElementById("zoomOut").addEventListener("click", ()=>{
     myChart.zoom(myChart.getZoomLevel()-0.1);
   });
+  */
+  
 
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
