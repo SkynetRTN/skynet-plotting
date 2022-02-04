@@ -1,5 +1,6 @@
 'use strict';
 
+
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
@@ -9,7 +10,7 @@ import { round } from "./my-math"
 import { ChartConfiguration } from "chart.js";
 
 
-/**
+/**wwwww
  * 
  * @returns {[Handsontable, Chart]}
  */
