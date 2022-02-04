@@ -10,7 +10,7 @@ import { round } from "./my-math"
 import { ChartConfiguration } from "chart.js";
 
 
-/**wwwww
+/**
  * 
  * @returns {[Handsontable, Chart]}
  */
@@ -183,9 +183,7 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
     // console.log('mark')
-    console.log(src1Data[0].x < 3000)
     if (src1Data[0].x > 3000){
-        console.log('helloworld')
         myChart.options.elements.point.radius = 0;
         myChart.data.datasets[0].borderWidth = 1;
         myChart.data.datasets[1].borderWidth = 1;
@@ -197,6 +195,7 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
     myChart.update();
 
     const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
+    spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange(null);
 
     myChart.update('none');
@@ -250,14 +249,21 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
                 let wl = freqToWL(parseFloat(entry[0]));
                 let x = parseFloat(entry[1]);
                 let y = parseFloat(entry[2]);
-                if (isNaN(wl) || isNaN(x) || isNaN(y) || wl < 21.085 || wl > 21.125) {
+                if (isNaN(wl) || isNaN(x) || wl < 21.085 || wl > 21.125) {
                     continue;
                 }
-                tableData.push({
-                    "wl": wl,
-                    "x": x,
-                    "y": y,
-            });
+                if (isNaN(y)) {
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,  
+                    })
+                }else{
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,
+                        "y": y,  
+                    })
+                };
 
         }}else{
             for (let i = 0; i < data.length; i++) {
@@ -270,14 +276,24 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
                 // console.log(x)
                 let y = parseFloat(entry[2]);
                 // console.log(y)
-                if (isNaN(wl) || isNaN(x) || isNaN(y) || wl < 4966  || wl > 6545.6) {
+                if(isNaN(wl) || isNaN(x) || wl < 4966  || wl > 6545.6){
                     continue;
+
                 }
-                tableData.push({
-                    "wl": wl,
-                    "x": x,
-                    "y": y,  
-                })}};
+                if (isNaN(y)) {
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,  
+                    })
+                }else{
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,
+                        "y": y,  
+                    })
+                };
+            }
+        };
         
         // console.log(tableData);
         tableData.sort((a, b) => a.wl - b.wl);
