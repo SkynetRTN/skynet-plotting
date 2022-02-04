@@ -126,6 +126,28 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
 
+  //handel zoom/pan buttons
+  let zoom: number;
+  document.getElementById('zoomIn').onmousedown = function() {
+    zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.05);}, 200);;
+  }
+  document.getElementById('zoomIn').onmouseup = function() {
+    clearInterval(zoom);
+  }
+  document.getElementById('zoomOut').onmousedown = function() {
+    zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.05);}, 200);;
+  }
+  document.getElementById('zoomOut').onmouseup = function() {
+    clearInterval(zoom);
+  }
+  document.getElementById("zoomIn").addEventListener("click", ()=>{
+    myChart.zoom(myChart.getZoomLevel()+0.1);
+  });
+
+  document.getElementById("zoomOut").addEventListener("click", ()=>{
+    myChart.zoom(myChart.getZoomLevel()-0.1);
+  });
+
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
@@ -309,6 +331,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       updateScatter(hot, myChart, clusterForm, modelForm, 2)
     });
   }, 100);
+
 
   //initializing website
   update();
