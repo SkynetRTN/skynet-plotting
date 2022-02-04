@@ -131,13 +131,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   panLeft.onmousedown = function() {
     pan = setInterval( () => {myChart.pan(10)}, 200 )
   }
-  panLeft.onmouseup = function() {
+  panLeft.onmouseleave = function() {
     clearInterval(pan);
   }
   panRight.onmousedown = function() {
     pan = setInterval( () => {myChart.pan(-10)}, 200 )
   }
-  panRight.onmouseup = function() {
+  panRight.onmouseleave = function() {
     clearInterval(pan);
   }
 
@@ -146,13 +146,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   document.getElementById('zoomIn').onmousedown = function() {
     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.05);}, 200);;
   }
-  document.getElementById('zoomIn').onmouseup = function() {
+  document.getElementById('zoomIn').onmouseleave = function() {
     clearInterval(zoom);
   }
   document.getElementById('zoomOut').onmousedown = function() {
     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.05);}, 200);;
   }
-  document.getElementById('zoomOut').onmouseup = function() {
+  document.getElementById('zoomOut').onmouseleave = function() {
     clearInterval(zoom);
   }
   
