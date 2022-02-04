@@ -127,12 +127,19 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
-  panLeft.addEventListener("click", () => {
-    myChart.pan(-10)
-  });
-  panRight.addEventListener("click", () => {
-    myChart.pan(10)
-  });
+  let pan: number;
+  panLeft.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(10)}, 200 )
+  }
+  panLeft.onmouseup = function() {
+    clearInterval(pan);
+  }
+  panRight.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(-10)}, 200 )
+  }
+  panRight.onmouseup = function() {
+    clearInterval(pan);
+  }
 
   //handel zoom/pan buttons
   let zoom: number;
@@ -148,6 +155,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   document.getElementById('zoomOut').onmouseup = function() {
     clearInterval(zoom);
   }
+  
   document.getElementById("zoomIn").addEventListener("click", ()=>{
     myChart.zoom(myChart.getZoomLevel()+0.1);
   });
@@ -155,6 +163,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   document.getElementById("zoomOut").addEventListener("click", ()=>{
     myChart.zoom(myChart.getZoomLevel()-0.1);
   });
+  
 
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
