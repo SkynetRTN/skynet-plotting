@@ -157,16 +157,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   zoomOut.onmouseup = zoomOut.onmouseleave = function() {
     clearInterval(zoom);
   }
-  /*
-  document.getElementById("zoomIn").addEventListener("click", ()=>{
-    myChart.zoom(myChart.getZoomLevel()+0.1);
-  });
-
-  document.getElementById("zoomOut").addEventListener("click", ()=>{
-    myChart.zoom(myChart.getZoomLevel()-0.1);
-  });
-  */
-  
 
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
