@@ -84,6 +84,20 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</div>\n" +
       "</form>\n"
     );
+    //make graph scaling options visible to users
+  document.getElementById("extra-options").style.display = "inline"
+  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+  '<div style="float: right;">\n' +
+  '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
+  '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
+  '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+  '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
+      '<button id="panLeft">◀</button>\n' +
+      '<button id="panRight">▶</button>\n' +
+      '<button id="zoomIn">➕</button>\n' +
+      '<button id="zoomOut">&#10134;</button>\n' +
+  '</div>\n'
+  )
 
   //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
@@ -111,10 +125,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     -3.4
   );
 
-  const tableData = dummyData()
-
-  //make graph scaling options visible to users
-  document.getElementById("grpah-scaling-options").style.display = "inline"
+  const tableData = dummyData;
 
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
@@ -466,7 +477,7 @@ export function clusterFileUpload(
     //Change filter options to match file
 
     //order filters by temperature
-    let knownFilters = [
+    const knownFilters = [
       "U",
       "uprime",
       "B",

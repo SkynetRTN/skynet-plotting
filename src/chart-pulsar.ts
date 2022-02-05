@@ -100,6 +100,13 @@ export function pulsar(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>\n'
     );
+    //create sonification options
+  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+  '<div style="float: right;">\n' +
+  '<button id="sonify"/>Sonify</button>\n' +
+  '<button id="saveSonification"/>Save Sonification</button>\n' +
+  '</div>\n'
+  )
 
     const tableData = [];
     for (let i = 0; i < 1000; i++) {
@@ -530,6 +537,9 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         showDiv("light-curve-div");
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
+
+        document.getElementById("extra-options").style.display = 'block';
+
     } else if (mode === 'ft') {
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
@@ -541,6 +551,9 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
+
+        document.getElementById("extra-options").style.display = 'none';
+
     } else {
         if (modified.periodFoldingChanged) {
             modified.periodFoldingChanged = false;
@@ -550,6 +563,8 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         myChart.data.datasets[5].hidden = false;
         myChart.data.datasets[6].hidden = false;
         myChart.data.datasets[4].hidden = !polarizationForm.diff.checked;
+
+        document.getElementById("extra-options").style.display = 'block';
     }
     myChart.update('none');
 
