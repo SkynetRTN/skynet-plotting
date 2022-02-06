@@ -93,14 +93,16 @@ function chartType(chart: string) {
     document.getElementById('table-div').innerHTML = '';
     document.getElementById('chart-div').innerHTML =
         '<canvas id="myChart" width=300 height=200></canvas>\n';
+    document.getElementById('chart-div1')
     document.getElementById('file-upload-button').style.display = 'none';
-    document.getElementById('graph-scaling-options').style.display = 'none';
+    document.getElementById('extra-options').innerHTML = '';
+    document.getElementById('extra-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart, ModelForm];
-    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm];
+    let cluster_objects: [Handsontable, Chart, ModelForm]
+    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm]
 
     if (chart === 'curve') {
         objects = curve();
