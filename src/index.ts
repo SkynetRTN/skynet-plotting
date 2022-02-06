@@ -92,8 +92,7 @@ function chartType(chart: string) {
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
     document.getElementById('chart-div').innerHTML =
-        '<canvas id="myChart" width=300 height=200></canvas>\n';
-    document.getElementById('chart-div1')
+        '<canvas id="myChart" width=300 height=200></canvas>\n', '<canvas id="myChart1" width=300 height=200></canvas>\n', '<canvas id="myChart2" width=300 height=200></canvas>\n', '<canvas id="myChart3" width=300 height=200></canvas>\n', '<canvas id="myChart4" width=300 height=200></canvas>\n';
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
     document.getElementById('extra-options').style.display = 'none';

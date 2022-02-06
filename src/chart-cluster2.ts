@@ -132,7 +132,8 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   const tableData = dummyData()
 
   //make graph scaling options visible to users
-  document.getElementById("grpah-scaling-options").style.display = "inline"
+  document.getElementById('extra-options').innerHTML = '';
+  document.getElementById('extra-options').style.display = 'none';
 
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
