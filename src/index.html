@@ -24,40 +24,16 @@
             <option value="cluster1" title="Cluster 1">Cluster 1</option>
             <option value="pulsar" title="Pulsar">Pulsar</option>
             <option value="gravity" title="Gravity">Gravity</option>
-            <option value="cluster2" title="Cluster 2">Cluster 2</option>
+            <option value="cluster2" title="Cluster 2">Cluster 2</option>`
           </select>
         </form>
         <div id="input-div"></div>
         <div id="table-div"></div>
       </div>
       <div class="col-lg-8" id="chart-col">
-        <div id="chart-div"></div>
-        <canvas id="myChart" width = "300" heigth = "200"></canvas>
-        <div class = "row">
-          <div class="col-lg-6">
-            <div id="chart-div">
-              <canvas id="myChart1" width="300" height="200"></canvas>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div id="chart-div2">
-              <canvas id="myChart2" width="300" height="200"></canvas>
-            </div>
-          </div>
+        <div id="chart-div">
+          <canvas id="myChart" width="300" height="200"></canvas>
         </div>
-        <div class = "row">
-          <div class="col-lg-6">
-            <div id="chart-div3">
-              <canvas id="myChart3" width="300" height="200"></canvas>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div id="chart-div4">
-              <canvas id="myChart4" width="300" height="200"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
         <form id="chart-info-form" class="text">
           <div class="row">
             <div class="col-sm-6">
@@ -83,30 +59,17 @@
           </div>
         </form>
       </div>
+    </div>
     <div class="row" id="button-row">
       <div class="col-lg-4">
         <button id="file-upload-button">Upload Data File</button>
         <button id="add-row-button">Add Row</button>
         <input type="file" id="file-upload" style="display: none;">
       </div>
-      <div class="col-lg-5" id="below-graph-column">
+      <div class="col-lg-4" id="below-graph-column">
         <button id="save-button" data-bs-toggle="modal" data-bs-target="#honor-pledge-modal">Save Graph</button>
       </div>
-      <div class="col-lg-3" id ="grpah-scaling-options">
-        <div class="row">
-          <div class="col-lg-6">
-             <label class="scaleSelection left" id="standardViewLabel" style="background-color: #4B9CD3;">
-              <input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked/>
-              &nbsp;Standard View&nbsp;
-            </label>
-          </div>
-          <div class="col-lg-6">
-            <label class="scaleSelection right" id="frameOnDataLabel">
-              <input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data"/>
-              &nbsp;Frame on Data&nbsp;
-            </label>
-          </div>
-        </div>
+      <div class="col-lg-4" id="extra-options">
       </div>
     </div>
 

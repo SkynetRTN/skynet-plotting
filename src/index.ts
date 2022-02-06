@@ -94,7 +94,7 @@ function chartType(chart: string) {
     document.getElementById('chart-div').innerHTML =
         '<canvas id="myChart" width=300 height=200></canvas>\n';
     document.getElementById('file-upload-button').style.display = 'none';
-    document.getElementById('grpah-scaling-options').style.display = 'none';
+    document.getElementById('graph-scaling-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
