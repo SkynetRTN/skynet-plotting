@@ -31,31 +31,31 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "beforeend",
       '<form title="Cluster Diagram" id="cluster-form">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
+      '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
+      '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Extinction in V (mag):</div>\n' +
+      '<div class="col-sm-6 des">Extinction in V (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
       "</div>\n" +
       "</form>\n" +
       '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
+      '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
+      '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
       '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
@@ -91,10 +91,12 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
   '<label class="scaleSelection" id="frameOnDataLabel">\n' +
   '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-      '<button class = "graphControl" id="panLeft">◀</button>\n' +
-      '<button class = "graphControl" id="panRight">▶</button>\n' +
-      '<button class = "graphControl" id="zoomIn">➕</button>\n' +
-      '<button class = "graphControl" id="zoomOut">&#10134;</button>\n' +
+      // '<button class = "graphControl" id="panLeft">◀</button>\n' +
+      // '<button class = "graphControl" id="panRight">▶</button>\n' +
+      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8676;</center></button>\n' +
+      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8677;</center></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&#10133;</center></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&#10134;</center></button>\n' +
   '</div>\n'
   )
 

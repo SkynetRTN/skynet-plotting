@@ -160,7 +160,13 @@ button:hover {
 }
 
 button.graphControl {
-    width: 40px;
+    width: 42px;
+    position: relative;
+    bottom: -0.15em;
+}
+
+center.graphControl {
+    font-size: 27px;
 }
 
 input {
