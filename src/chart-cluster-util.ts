@@ -1,8 +1,7 @@
 import Chart from "chart.js/auto";
 import { Color } from "chart.js";
 
-export function dummyData() {
-    return [
+export const dummyData: { [key: string]: any}[] = [
         { B: 18.807516, Berr: 1.306704865, V: 18.19052002, Verr: 0.7973605, R: 18.11280155, Rerr: 0.723537231, I: 17.79363434, Ierr: 0.557995614 },
         { B: 18.31450635, Berr: 0.986607341, V: "", Verr: "", R: "", Rerr: "", I: "", Ierr: "" },
         { B: 17.0295588, Berr: 0.406773688, V: 16.54415977, Verr: 0.232736113, R: 16.55188337, Rerr: 0.221326622, I: 17.58082975, Ierr: 0.477963639 },
@@ -382,7 +381,6 @@ export function dummyData() {
         { B: 16.12806397, Berr: 0.196583609, V: 16.2679369, Verr: 0.1847317, R: 16.08223732, Rerr: 0.148972784, I: 16.95351028, Ierr: 0.293765209 },
         { B: 16.55373764, Berr: 0.279410411, V: 15.59791331, Verr: 0.104062918, R: 15.05383942, Rerr: 0.060972206, I: 15.71111893, Ierr: 0.10325909 }
     ];
-}
 
 export function filterMags(): { [key: string]: Function[] } {
     return {
