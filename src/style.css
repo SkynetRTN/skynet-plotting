@@ -159,6 +159,10 @@ button:hover {
     background-color: #E7E7E7;
 }
 
+button.graphControl {
+    width: 40px;
+}
+
 input {
     float: right;
     width: 100%;
