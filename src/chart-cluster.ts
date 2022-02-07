@@ -85,17 +85,16 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</form>\n"
     );
     //make graph scaling options visible to users
-  document.getElementById("extra-options").style.display = "inline"
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
   '<label class="scaleSelection" id="frameOnDataLabel">\n' +
   '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-      '<button id="panLeft">◀</button>\n' +
-      '<button id="panRight">▶</button>\n' +
-      '<button id="zoomIn">➕</button>\n' +
-      '<button id="zoomOut">&#10134;</button>\n' +
+      '<button class = "graphControl" id="panLeft">◀</button>\n' +
+      '<button class = "graphControl" id="panRight">▶</button>\n' +
+      '<button class = "graphControl" id="zoomIn">➕</button>\n' +
+      '<button class = "graphControl" id="zoomOut">&#10134;</button>\n' +
   '</div>\n'
   )
 
