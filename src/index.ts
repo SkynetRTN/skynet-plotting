@@ -79,6 +79,7 @@ window.onload = function () {
 
     setChartDefaults();
     chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
+
 };
 
 /**
@@ -91,12 +92,15 @@ function chartType(chart: string) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
-    document.getElementById('chart-div').innerHTML =
-        '<canvas id="myChart" width=300 height=200></canvas>\n'
+    document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
     document.getElementById('chart-div1').innerHTML =
-        '<canvas id="myChart1" width=300 height=200></canvas>\n'
+        '<canvas id="myChart1" width=300 height=200></canvas>'
     document.getElementById('chart-div2').innerHTML =
-        '<canvas id="myChart2" width=300 height=200></canvas>\n'
+        '<canvas id="myChart2" width=300 height=200></canvas>'
+    document.getElementById('chart-div3').innerHTML =
+        '<canvas id="myChart3" width=300 height=200></canvas>'
+    document.getElementById('chart-div4').innerHTML =
+        '<canvas id="myChart4" width=300 height=200></canvas>'
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
     document.getElementById('extra-options').style.display = 'none';
