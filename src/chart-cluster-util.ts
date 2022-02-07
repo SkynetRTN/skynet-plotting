@@ -1,5 +1,7 @@
-export function dummyData() {
-    return [
+import Chart from "chart.js/auto";
+import { Color } from "chart.js";
+
+export const dummyData: { [key: string]: any}[] = [
         { B: 18.807516, Berr: 1.306704865, V: 18.19052002, Verr: 0.7973605, R: 18.11280155, Rerr: 0.723537231, I: 17.79363434, Ierr: 0.557995614 },
         { B: 18.31450635, Berr: 0.986607341, V: "", Verr: "", R: "", Rerr: "", I: "", Ierr: "" },
         { B: 17.0295588, Berr: 0.406773688, V: 16.54415977, Verr: 0.232736113, R: 16.55188337, Rerr: 0.221326622, I: 17.58082975, Ierr: 0.477963639 },
@@ -379,29 +381,173 @@ export function dummyData() {
         { B: 16.12806397, Berr: 0.196583609, V: 16.2679369, Verr: 0.1847317, R: 16.08223732, Rerr: 0.148972784, I: 16.95351028, Ierr: 0.293765209 },
         { B: 16.55373764, Berr: 0.279410411, V: 15.59791331, Verr: 0.104062918, R: 15.05383942, Rerr: 0.060972206, I: 15.71111893, Ierr: 0.10325909 }
     ];
-}
 
 export function filterMags(): { [key: string]: Function[] } {
     return {
         'red': [
-            (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
-            (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-            (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+            (a: number) => { return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381 },
+            (a: number) => { return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823 },
+            (a: number) => { return 11.9244167337 * a ** 2 - 79.9482119938 * a ** + 140.0181065948 },
         ],
         'faint': [
-            (a: number) => { return 12.4865272251 * a ** 2 - 83.7563746340 * a + 145.7808748691 },
-            (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
-            (a: number) => { return 28.5730928822 * a ** 2 - 171.4250954419 * a + 265.2744453387 },
+            (a: number) => { return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381 },
+            (a: number) => { return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823 },
+            (a: number) => { return 11.9244167337 * a ** 2 - 79.9482119938 * a ** + 140.0181065948 },
         ],
         'blue': [
-            (a: number) => { return -21.5551066693 * a ** 2 + 122.2999424840 * a - 177.9118351325 },
-            (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
-            (a: number) => { return 1.7882013317 * a ** 2 - 5.8133577658 * a - 2.2497496264 },
+            (a: number) => { return -432.3187790466 * a ** 4 + 4844.3907659246 * a ** 3 - 20351.2132865810 * a ** 2 + 37989.5444003501 * a - 26593.1590790576 },
+            (a: number) => { return 64.2415377544 * a ** 4 - 716.2518817838 * a ** 3 + 2993.0524145205 * a ** 2 - 5551.5482754012 * a + 3848.8331639064 },
+            (a: number) => { return -1.8118436212 * a ** 2 + 12.6764507556 * a - 25.9497039289 },
         ],
         'bright': [
-            (a: number) => { return -11.3225471576 * a ** 2 + 59.1582638941 * a - 87.8350265479 },
-            (a: number) => { return 11.1785806766 * a ** 2 - 64.7619969586 * a + 82.7295898695 },
+            (a: number) => { return 496.2961271126 * a ** 4 - 5416.9941114328 * a ** 3 + 22145.4191356992 * a ** 2 - 40191.1352476384 * a + 27312.8317216371 },
+            (a: number) => { return 415.1740517030 * a ** 4 - 4647.3324718671 * a ** 3 + 19494.9006610996 * a ** 2 - 36323.2785086341 * a + 25353.6661077333 },
             (a: number) => { return 10.8290320338 * a ** 2 - 71.5469551223 * a + 105.6498422000 },
         ]
     };
+}
+
+//assign wavelength to each knownfilter
+export const filterWavelength: { [key: string]: number } = {
+    U: 0.364,
+    B: 0.442,
+    V: 0.54,
+    R: 0.647,
+    I: 0.7865,
+    uprime: 0.354,
+    gprime: 0.475,
+    rprime: 0.622,
+    iprime: 0.763,
+    zprime: 0.905,
+    J: 1.25,
+    H: 1.65,
+    K: 2.15,
+    Ks: 2.15,
+};
+
+export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
+    //Now we need to create the function for the reddening curve
+
+    let lambda = filterlambda;
+    let R_v = 3.1;
+    let x = (lambda / 1) ** -1;
+    let y = x - 1.82;
+    let a = 0;
+    let b = 0;
+    if (x > 0.3 && x < 1.1) {
+        a = 0.574 * x ** 1.61;
+    } else if (x > 1.1 && x < 3.3) {
+        a =
+            1 +
+            0.17699 * y -
+            0.50447 * y ** 2 -
+            0.02427 * y ** 3 +
+            0.72085 * y ** 4 +
+            0.01979 * y ** 5 -
+            0.7753 * y ** 6 +
+            0.32999 * y ** 7;
+    }
+
+    if (x > 0.3 && x < 1.1) {
+        b = -0.527 * x ** 1.61;
+    } else if (x > 1.1 && x < 3.3) {
+        b =
+            1.41338 * y +
+            2.28305 * y ** 2 +
+            1.07233 * y ** 3 -
+            5.38434 * y ** 4 -
+            0.62251 * y ** 5 +
+            5.3026 * y ** 6 -
+            2.09002 * y ** 7;
+    }
+
+    return Number(A_v) * (a + b / R_v);
+}
+
+//finding the maximum and minimum of y value for chart scaling
+export function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
+    let newLimits = scaleLimits;
+    if (isNaN(newLimits["minX"])) {
+        newLimits["minX"] = x;
+        newLimits["maxX"] = x;
+        newLimits["minY"] = y;
+        newLimits["maxY"] = y;
+    } else if (x !== 0 && y !== 0) {
+        newLimits["maxY"] = Math.max(newLimits["maxY"], y);
+        newLimits["maxX"] = Math.max(newLimits["maxX"], x)
+        newLimits["minY"] = Math.min(newLimits["minY"], y)
+        newLimits["minX"] = Math.min(newLimits["minX"], x)
+    }
+    return newLimits
+}
+
+/**Get http request asynchronously
+ * @param {string} theUrl -request ultra link
+ * @param {function} callback -function to execute with http response
+ */
+export function httpGetAsync(theUrl: string, callback: Function) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    };
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous
+    xmlHttp.send(null);
+}
+
+export function HRModelRounding(number: number | string) {
+    return (Math.round(Number(number) * 20) / 20).toFixed(2)
+}
+
+//create a gradient for HR stars
+export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Color {
+    let { ctx, chartArea } = chart;
+    let rl = isNaN(filterWavelength[red]) ? Math.log10(0.442 * 1000) : Math.log10(filterWavelength[red] * 1000);//default to B-V for unknowns
+    let bl = isNaN(filterWavelength[blue]) ? Math.log10(0.54 * 1000) : Math.log10(filterWavelength[blue] * 1000);
+
+    let filters: string[] = [red, blue];
+    let magIndex: number[] = [0, 0];
+    // console.log(filters)
+    for (let i = 0; i < filters.length; i++) {
+        if ("UBVRI".includes(filters[i])) {
+            magIndex[i] = Number(0);
+        } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+            magIndex[i] = Number(1);
+        } else if ("JHKs".includes(filters[i])) {
+            magIndex[i] = Number(2);
+        }
+    }
+
+    let mags: { [key: string]: Function[] } = filterMags()
+
+
+    let mColor = mags.red[magIndex[0]](bl) - mags.red[magIndex[0]](rl);
+    let oColor = mags.blue[magIndex[1]](bl) - mags.blue[magIndex[1]](rl)
+
+    let max = chart.options.scales["x"].max;
+    let min = chart.options.scales["x"].min;
+
+    //p(c)=(W/DC)*c-(W/DC)*min+left
+    let pixelrat = chartArea.width / (max - min);
+    let start = chartArea.left + (pixelrat * oColor) - (pixelrat * min);
+    let stop = chartArea.left + (pixelrat * mColor) - (pixelrat * min);
+
+    if (isNaN(start) || isNaN(stop)) {//stop div/0
+        return "red"
+    }
+    else {
+
+        let gradient = ctx.createLinearGradient(start, 0, stop, 0);
+
+        gradient.addColorStop(1, "red");        //M
+        gradient.addColorStop(0.929, "#ff6600"); //K
+        gradient.addColorStop(0.526, "#ffdc60");//G
+        gradient.addColorStop(0.441, "#fdffe0");//F
+        gradient.addColorStop(0.357, "white");  //A
+        //gradient.addColorStop(0.107,"#baf9ff");//B
+        gradient.addColorStop(0, "#38eeff");    //O
+        //From: https://asterism.org/wp-content/uploads/2019/03/tut39-HR-Diagram.pdf
+
+        return gradient;
+    }
 }

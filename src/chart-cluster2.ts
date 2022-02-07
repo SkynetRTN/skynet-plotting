@@ -2,17 +2,21 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { Color, LegendItem, ScatterDataPoint } from "chart.js";
-import { dummyData, filterMags } from "./chart-cluster-util";
-import { tableCommonOptions, colors } from "./config";
+import { ScatterDataPoint } from "chart.js";
 import {
-  linkInputs,
-  throttle,
-  updateLabels,
-  updateTableHeight,
-  changeOptions,
-} from "./util";
+  calculateLambda,
+  dummyData,
+  filterMags,
+  filterWavelength,
+  HRModelRounding,
+  HRrainbow,
+  httpGetAsync,
+  pointMinMax
+} from "./chart-cluster-util";
+import { colors, tableCommonOptions } from "./config";
+import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
+import {median} from "./my-math";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -37,7 +41,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Reddening (mag):</div>\n' +
+      '<div class="col-sm-5 des">Extinction in V (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
       '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
       "</div>\n" +
@@ -95,7 +99,20 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       "</div>\n" +
       "</form>\n"
     );
-
+    //make graph scaling options visible to users
+    document.getElementById("extra-options").style.display = "inline"
+    document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+    '<div style="float: right;">\n' +
+    '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
+    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
+    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
+        '<button id="panLeft">◀</button>\n' +
+        '<button id="panRight">▶</button>\n' +
+        '<button id="zoomIn">➕</button>\n' +
+        '<button id="zoomOut">&#10134;</button>\n' +
+    '</div>\n'
+    )
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
@@ -114,7 +131,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   linkInputs(
     clusterForm["red"], clusterForm["red_num"],
     0,
-    1,
+    3,
     0.01,
     0,
     false,
@@ -129,23 +146,49 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     -3.4
   );
 
-  const tableData = dummyData()
-
-  //make graph scaling options visible to users
-  document.getElementById('extra-options').innerHTML = '';
-  document.getElementById('extra-options').style.display = 'none';
+  const tableData = dummyData;
 
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
-
+  let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+  let panRight = document.getElementById("panRight") as HTMLInputElement;
+  let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+  let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
     radioOnclick(standardViewRadio, frameOnDataRadio);
-  })
+  });
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
-  })
+  });
+   let pan: number;
+   panLeft.onmousedown = function() {
+     pan = setInterval( () => {myChart1.pan(5)}, 20 )
+  }
+  panLeft.onmouseup = panLeft.onmouseleave = function() {
+    clearInterval(pan);
+  }
+  panRight.onmousedown = function() {
+    pan = setInterval( () => {myChart1.pan(-5)}, 20 )
+  }
+  panRight.onmouseup = panRight.onmouseleave = function() {
+    clearInterval(pan);
+  }
 
+  //handel zoom/pan buttons
+  let zoom: number;
+  zoomIn.onmousedown = function() {
+    zoom = setInterval( () => {myChart1.zoom(1.03)} , 20);;
+  }
+  zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+    clearInterval(zoom);
+  }
+  zoomOut.onmousedown = function() {
+    zoom = setInterval(()=>{myChart1.zoom(0.97);}, 20);;
+  }
+  zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+    clearInterval(zoom);
+  }
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
@@ -159,37 +202,23 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     chartRescale2(myChart2, modelForm)
   }
 
+//Alter radio input background color between Carolina blue and white
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    let color: string = activate ? "#4B9CD3" : "white";
-    document.getElementById(radio.id + "Label").style.backgroundColor = color
+    document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
   }
-
+//remember you may have to change the dependencies here to work for the chart
   function zoompanDeactivate(): any {
+    graphScaleMode = null
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
-    setRadioLabelColor(standardViewRadio, false);
-    setRadioLabelColor(frameOnDataRadio, false);
-    myChart1.options.plugins.legend.labels.color = "#000000";
-    myChart2.options.plugins.legend.labels.color = "#000000";
+    setRadioLabelColor(standardViewRadio, false)
+    setRadioLabelColor(frameOnDataRadio, false)
+    setTimeout(function () {
+      myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
+        modelForm["red"].value, modelForm["blue"].value)
+      myChart1.update()
+    }, 5)
 
-  }
-
-  function setLegendColor(legend: LegendItem, activate: boolean) {
-    let fontColor: string = activate ? "#FF0000" : "#000000";
-    legend.fontColor = fontColor;
-  }
-
-  function newLegendClickHandler(e: any, legendItem: LegendItem, legend: any) {
-    let legendItems = legend.legendItems;
-    if (legendItem.text === "Model") {
-      radioOnclick(standardViewRadio, frameOnDataRadio);
-      setLegendColor(legendItems[0], true)
-      setLegendColor(legendItems[1], false)
-    } else {
-      radioOnclick(frameOnDataRadio, standardViewRadio);
-      setLegendColor(legendItems[1], true)
-      setLegendColor(legendItems[0], false)
-    }
   }
 
 
@@ -264,6 +293,20 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           pointRadius: 0,
           fill: false,
           immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+        },
+        {
+          type: "line",
+          label: "Model2",
+          data: null, // will be generated later
+          borderColor: colors["black"],
+          backgroundColor: colors["black"],
+          borderWidth: 2,
+          tension: 0.1,
+          pointRadius: 0,
+          fill: false,
+          immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
         {
           type: "scatter",
@@ -277,6 +320,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
+          parsing: {}
         },
       ],
     },
@@ -312,7 +356,12 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           },
         },
         legend: {
-          onClick: newLegendClickHandler,
+          labels: {
+            filter: function(item) {
+              // Logic to remove a particular legend item goes here
+              return !item.text.includes('Model2');
+            }
+          }
         }
       }
     },
@@ -336,6 +385,20 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           pointRadius: 0,
           fill: false,
           immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+        },
+        {
+          type: "line",
+          label: "Model2",
+          data: null, // will be generated later
+          borderColor: colors["black"],
+          backgroundColor: colors["black"],
+          borderWidth: 2,
+          tension: 0.1,
+          pointRadius: 0,
+          fill: false,
+          immutableLabel: true,
+          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
         },
         {
           type: "scatter",
@@ -349,6 +412,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           pointRadius: 2,
           pointHoverRadius: 7,
           immutableLabel: false,
+          parsing: {}
         },
       ],
     },
@@ -384,7 +448,12 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           },
         },
         legend: {
-          onClick: newLegendClickHandler,
+          labels: {
+            filter: function(item) {
+              // Logic to remove a particular legend item goes here
+              return !item.text.includes('Model2');
+            }
+          }
         }
       }
     },
@@ -393,9 +462,9 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
-      myChart1.data.datasets[1].backgroundColor = HRrainbow(myChart1,
+      myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
         modelForm["red"].value, modelForm["blue"].value)
-      myChart2.data.datasets[1].backgroundColor = HRrainbow(myChart2,
+      myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
             modelForm["red2"].value, modelForm["blue2"].value)
       //console.log("bingus")
       myChart1.update()
@@ -412,7 +481,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       myChart2,
       clusterForm,
       modelForm,
-      1
+      2
     );
   };
 
@@ -427,69 +496,27 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 1) },
+    function () { updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2) },
     frameTime);
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
-
-  const updateModel = function (precise: boolean) {
-    //console.log(tableData);
-
-    const reveal: string[] = [
-      modelForm["red"].value,
-      modelForm["blue"].value,
-      modelForm["lum"].value,
-      modelForm["red2"].value,
-      modelForm["blue2"].value,
-      modelForm["lum2"].value,
-    ];
-    console.log(Number(modelForm['age_num'].value) * 10 % 5)
-    if (precise
-      || Number(modelForm['age_num'].value) * 10 % 3 === 0
-      || Number(modelForm['metal'].value) * 10 % 2 === 0) {
-      const columns: string[] = hot.getColHeader() as string[];
-      const hidden: number[] = [];
-      for (const col in columns) {
-        columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-        if (!reveal.includes(columns[col])) {
-          //if the column isn't selected in the drop down, hide it
-          hidden.push(parseFloat(col));
-        }
-      }
-
-      hot.updateSettings({
-        hiddenColumns: {
-          columns: hidden,
-          // copyPasteEnabled: false,
-          indicators: false,
-        },
+  modelForm.oninput = throttle(function () {
+    updateHRModel(modelForm, myChart1, hot, () => {
+      updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2)
       });
+    updateHRModel2(modelForm, myChart2, hot, () => {
+      updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2)
+      });
+   }, 100);
 
-      update();
-      updateHRModel(modelForm, myChart1);
-      updateHRModel2(modelForm, myChart2);
-      updateLabels(
-        myChart1,
-        document.getElementById("chart-info-form") as ChartInfoForm
-      );
-      updateLabels(
-        myChart2,
-        document.getElementById("chart-info-form") as ChartInfoForm
-        );
-        //do i need to add a chart-info-form2????????
-      myChart1.update("none");
-      myChart2.update("none");
-    };
-  }
+  //initializing website
 
-  // link chart to model form (slider + text)
-  modelForm.oninput = throttle(function () { updateModel(true) }, 100);
-  // modelForm.onchange = throttle(function () { updateModel(true) }, 100);
 
   update();
-  updateHRModel(modelForm, myChart1);
-  updateHRModel2(modelForm, myChart2);
+  updateHRModel(modelForm, myChart1, hot);
+  updateHRModel2(modelForm, myChart2, hot);
+  document.getElementById("standardView").click();
 
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x";
@@ -528,7 +555,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
 export function cluster2FileUpload(
   evt: Event,
   table: Handsontable,
-  myChart: Chart<"line">
+  myChart: Chart<"line">,
 ) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
@@ -554,7 +581,9 @@ export function cluster2FileUpload(
     const modelForm = document.getElementById("model-form") as ModelForm;
     // console.log(clusterForm.elements['d'].value);
     clusterForm["d"].value = Math.log(3).toString();
+    clusterForm["err"].value = "1";
     // console.log(clusterForm.elements['d'].value);
+    clusterForm["err_num"].value = "1";
     modelForm["age"].value = "6.6";
     clusterForm["red"].value = "0";
     modelForm["metal"].value = "-3.4";
@@ -563,7 +592,7 @@ export function cluster2FileUpload(
     clusterForm["red_num"].value = "0";
     modelForm["metal_num"].value = "-3.4";
     myChart.options.plugins.title.text = "Title";
-    myChart.data.datasets[1].label = "Data";
+    myChart.data.datasets[2].label = "Data";
     myChart.options.scales["x"].title.text = "x";
     myChart.options.scales["y"].title.text = "y";
     updateLabels(
@@ -620,7 +649,7 @@ export function cluster2FileUpload(
     //Change filter options to match file
 
     //order filters by temperature
-    let knownFilters = [
+    const knownFilters = [
       "U",
       "uprime",
       "B",
@@ -643,9 +672,9 @@ export function cluster2FileUpload(
     //if it ain't known ignore it
 
     const optionList = [];
-    const headers = [];
-    const columns = [];
-    var hiddenColumns = [];
+    const headers: any[] = [];
+    const columns: any[] = [];
+    let hiddenColumns: any[] = [];
     for (let i = 0; i < filters.length; i++) {
       //makes a list of options for each filter
       optionList.push({
@@ -702,6 +731,9 @@ export function cluster2FileUpload(
     });
     //    console.log(tableData);
 
+
+    updateHRModel(modelForm, myChart, table,
+      () => {
     table.updateSettings({
       data: tableData,
       colHeaders: headers,
@@ -713,15 +745,17 @@ export function cluster2FileUpload(
       table,
       myChart,
       myChart,
-      document.getElementById("cluster-form") as ClusterForm,
-      document.getElementById("model-form") as ModelForm,
-      1
+      clusterForm,
+      modelForm,
+      2,
     );
-  };
+    document.getElementById("standardView").click();
+  });
+  }
   reader.readAsText(file);
 }
-var graphScaleMode = "auto";
-var graphScale: { [key: string]: number }[] = [
+let graphScaleMode = "auto";
+let graphScale: { [key: string]: number }[] = [
   {
     minX: NaN,
     maxX: NaN,
@@ -742,7 +776,7 @@ var graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart) {
+function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
   let url = "http://localhost:5000/isochrone?"
     // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -751,30 +785,101 @@ function updateHRModel(modelForm: ModelForm, chart: Chart) {
     + "%22,%22" + modelForm['red'].value
     + "%22,%22" + modelForm['lum'].value + "%22]"
 
-  // console.log(url)
-  httpGetAsync(url, (response: string) => {
-    let dataTable = JSON.parse(response);
-    let form: ScatterDataPoint[] = []
-    let scaleLimits: { [key: string]: number } = {
-      minX: NaN,
-      minY: NaN,
-      maxX: NaN,
-      maxY: NaN,
-    };
-    for (let i = 0; i < dataTable.length - 10; i++) {
-      // console.log(dataTable[i])
-      let row: ScatterDataPoint = { x: dataTable[i][0], y: dataTable[i][1] };
-      scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
+    function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+      let form: ScatterDataPoint[] = [] //the array containing all model points
+      let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
+      let breakupIndex: number = 0;
+      let deltas: number[] = [NaN];
+      let maxDelta: number = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        let x_i: number = dataArray[i][0];
+        let y_i: number = dataArray[i][1];
+        let row: ScatterDataPoint = { x: x_i, y: y_i };
+        scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
       form.push(row);
+      if (i > 0) {
+        let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
+        deltas.push(delta);
+      }
     }
-    chart.data.datasets[0].data = form;
+    let medianValue = median(deltas);
+    form.pop();
+    deltas.shift();
+    for (let i = 0; i < deltas.length; i ++) {
+      if (deltas[i] > medianValue) {
+        form.shift();
+        deltas.shift();
+      } else {
+        break;
+      }
+    }
+    for (let i = deltas.length; i >= 0; i--) {
+      let deltaOutOfRange: boolean = false;
+      for (let j = 0; j < 10; j++) {
+        if (deltas[i-j] > medianValue) {
+          deltaOutOfRange = true;
+          break;
+        }
+      }
+      if (deltaOutOfRange) {
+        form.pop();
+        deltas.pop();
+      } else {
+        break;
+      }
+    }
+    for (let i = 40; i < deltas.length; i++) {
+      if (deltas[i] > maxDelta) {
+        maxDelta = deltas[i];
+        breakupIndex = i+1;
+      }
+    }
+    // console.log(deltas);
+    // console.log(maxDelta + ' ' + breakupIndex);
+    if (maxDelta < 10 * medianValue) {
+      breakupIndex = 0;
+    }
+    return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
+    }
+    httpGetAsync(url, (response: string) => {
+      let dataTable: number[][] = JSON.parse(response);
+      chart.data.datasets[0].data = modelFilter(dataTable)[0];
+      chart.data.datasets[1].data = modelFilter(dataTable)[1];
     chart.update("none");
-    graphScale[0] = scaleLimits;
+    callback();
+    if (graphScaleMode === "model") {
+      graphScale[0] = modelFilter(dataTable)[2];
     chartRescale(chart, modelForm);
-  });
+  }
+});
+const reveal: string[] = [
+  modelForm["red"].value,
+  modelForm["blue"].value,
+  modelForm["lum"].value,
+  modelForm["red2"].value,
+  modelForm["blue2"].value,
+  modelForm["lum2"].value,
+];
+
+let columns: string[] = hot.getColHeader() as string[];
+let hidden: number[] = [];
+for (const col in columns) {
+  columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+  if (!reveal.includes(columns[col])) {
+    //if the column isn't selected in the drop down, hide it
+    hidden.push(parseFloat(col));
+  }
 }
 
-function updateHRModel2(modelForm: ModelForm, chart: Chart) {
+hot.updateSettings({
+  hiddenColumns: {
+    columns: hidden,
+    // copyPasteEnabled: false,
+    indicators: false,
+  },
+});
+}
+function updateHRModel2(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
     let url = "http://localhost:5000/isochrone?"
       // let url = "https://skynet.unc.edu/graph-api/isochrone?"
       + "age=" + HRModelRounding(modelForm['age_num'].value)
@@ -783,26 +888,95 @@ function updateHRModel2(modelForm: ModelForm, chart: Chart) {
       + "%22,%22" + modelForm['red2'].value
       + "%22,%22" + modelForm['lum2'].value + "%22]"
   
-    // console.log(url)
-    httpGetAsync(url, (response: string) => {
-      let dataTable = JSON.parse(response);
-      let form: ScatterDataPoint[] = []
-      let scaleLimits: { [key: string]: number } = {
-        minX: NaN,
-        minY: NaN,
-        maxX: NaN,
-        maxY: NaN,
-      };
-      for (let i = 0; i < dataTable.length - 10; i++) {
-        // console.log(dataTable[i])
-        let row: ScatterDataPoint = { x: dataTable[i][0], y: dataTable[i][1] };
-        scaleLimits = pointMinMax(scaleLimits, dataTable[i][0], dataTable[i][1]);
+      function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+        let form: ScatterDataPoint[] = [] //the array containing all model points
+        let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
+        let breakupIndex: number = 0;
+        let deltas: number[] = [NaN];
+        let maxDelta: number = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          let x_i: number = dataArray[i][0];
+          let y_i: number = dataArray[i][1];
+          let row: ScatterDataPoint = { x: x_i, y: y_i };
+          scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
         form.push(row);
+        if (i > 0) {
+          let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
+          deltas.push(delta);
+        }
       }
-      chart.data.datasets[0].data = form;
+      let medianValue = median(deltas);
+      form.pop();
+      deltas.shift();
+      for (let i = 0; i < deltas.length; i ++) {
+        if (deltas[i] > medianValue) {
+          form.shift();
+          deltas.shift();
+        } else {
+          break;
+        }
+      }
+      for (let i = deltas.length; i >= 0; i--) {
+        let deltaOutOfRange: boolean = false;
+        for (let j = 0; j < 10; j++) {
+          if (deltas[i-j] > medianValue) {
+            deltaOutOfRange = true;
+            break;
+          }
+        }
+        if (deltaOutOfRange) {
+          form.pop();
+          deltas.pop();
+        } else {
+          break;
+        }
+      }
+      for (let i = 40; i < deltas.length; i++) {
+        if (deltas[i] > maxDelta) {
+          maxDelta = deltas[i];
+          breakupIndex = i+1;
+        }
+      }
+      // console.log(deltas);
+      // console.log(maxDelta + ' ' + breakupIndex);
+      if (maxDelta < 10 * medianValue) {
+        breakupIndex = 0;
+      }
+      return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
+      }
+      httpGetAsync(url, (response: string) => {
+        let dataTable: number[][] = JSON.parse(response);
+        chart.data.datasets[0].data = modelFilter(dataTable)[0];
+        chart.data.datasets[1].data = modelFilter(dataTable)[1];
       chart.update("none");
-      graphScale[0] = scaleLimits;
+      callback();
+      if (graphScaleMode === "model") {
+        graphScale[0] = modelFilter(dataTable)[2];
       chartRescale(chart, modelForm);
+    }
+  });
+  const reveal: string[] = [
+    modelForm["red"].value,
+    modelForm["blue"].value,
+    modelForm["lum"].value,
+  ];
+
+  let columns: string[] = hot.getColHeader() as string[];
+  let hidden: number[] = [];
+  for (const col in columns) {
+    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+    if (!reveal.includes(columns[col])) {
+      //if the column isn't selected in the drop down, hide it
+      hidden.push(parseFloat(col));
+    }
+  }
+
+  hot.updateSettings({
+    hiddenColumns: {
+      columns: hidden,
+      // copyPasteEnabled: false,
+      indicators: false,
+    },
     });
   }
 
@@ -812,7 +986,7 @@ function updateScatter(
   myChart2: Chart,
   clusterForm: ClusterForm,
   modelForm: ModelForm,
-  dataSetIndex: 1
+  dataSetIndex: number,
 ) {
   let err = parseFloat(clusterForm["err_num"].value);
   let dist = parseFloat(clusterForm["d_num"].value);
@@ -937,32 +1111,21 @@ function updateScatter(
   while (chart1.length !== start) {
     chart1.pop();
   }
+  if (graphScaleMode !== null) {
+    graphScale[1] = scaleLimits;
+    chartRescale(myChart1, modelForm);
+  }
   while (chart2.length !== start) {
     chart2.pop();
  }
+ if (graphScaleMode !== null) {
   graphScale[1] = scaleLimits;
-  chartRescale(myChart1, modelForm);
   chartRescale(myChart2, modelForm);
+}
   myChart1.update()
   myChart2.update()
 }
 
-//finding the maximum and minimum of y value for chart scaling
-function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
-  let newLimits = scaleLimits;
-  if (isNaN(newLimits["minX"])) {
-    newLimits["minX"] = x;
-    newLimits["maxX"] = x;
-    newLimits["minY"] = y;
-    newLimits["maxY"] = y;
-  } else if (x !== 0 && y !== 0) {
-    newLimits["maxY"] = Math.max(newLimits["maxY"], y);
-    newLimits["maxX"] = Math.max(newLimits["maxX"], x)
-    newLimits["minY"] = Math.min(newLimits["minY"], y)
-    newLimits["minX"] = Math.min(newLimits["minX"], x)
-  }
-  return newLimits
-}
 
 // rescale scatter to contain all the data points
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
@@ -993,8 +1156,8 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
 
       let mags: { [key: string]: Function[] } = filterMags()
 
-      let color_red: number = mags['red'][magIndex[0]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[1]](x['red']);
+      let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
+      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
       // console.log(magIndex)
       adjustScale = {
         'minX': color_blue - (color_red - color_blue) / 8,
@@ -1034,7 +1197,7 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
   //myChart.options.scales["x"].position = "bottom"
   //what is ^this^ for?
 
-  myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+  myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
     modelForm["red"].value, modelForm["blue"].value)
   myChart.update()
 }
@@ -1066,8 +1229,8 @@ export function chartRescale2(myChart: Chart, modelForm: ModelForm, option: stri
   
         let mags: { [key: string]: Function[] } = filterMags()
   
-        let color_red: number = mags['red2'][magIndex[0]](x['blue2']) - mags['red2'][magIndex[0]](x['red2']);
-        let color_blue: number = mags['blue2'][magIndex[1]](x['blue2']) - mags['blue2'][magIndex[1]](x['red2']);
+        let color_red: number = mags['red2'][magIndex[1]](x['blue2']) - mags['red2'][magIndex[0]](x['red2']);
+        let color_blue: number = mags['blue2'][magIndex[1]](x['blue2']) - mags['blue2'][magIndex[0]](x['red2']);
         // console.log(magIndex)
         adjustScale = {
           'minX': color_blue - (color_red - color_blue) / 8,
@@ -1107,144 +1270,7 @@ export function chartRescale2(myChart: Chart, modelForm: ModelForm, option: stri
     //myChart.options.scales["x"].position = "bottom"
     //what is ^this^ for?
   
-    myChart.data.datasets[1].backgroundColor = HRrainbow(myChart,
+    myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
       modelForm["red2"].value, modelForm["blue2"].value)
     myChart.update()
   }
-
-//assign wavelength to each knownfilter
-const filterWavelength: { [key: string]: number } = {
-  U: 0.364,
-  B: 0.442,
-  V: 0.54,
-  R: 0.647,
-  I: 0.7865,
-  uprime: 0.354,
-  gprime: 0.475,
-  rprime: 0.622,
-  iprime: 0.763,
-  zprime: 0.905,
-  J: 1.25,
-  H: 1.65,
-  K: 2.15,
-  Ks: 2.15,
-};
-
-function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
-  //Now we need to create the function for the reddening curve
-
-  let lambda = filterlambda;
-  let R_v = 3.1;
-  let x = (lambda / 1) ** -1;
-  let y = x - 1.82;
-  let a = 0;
-  let b = 0;
-  if (x > 0.3 && x < 1.1) {
-    a = 0.574 * x ** 1.61;
-  } else if (x > 1.1 && x < 3.3) {
-    a =
-      1 +
-      0.17699 * y -
-      0.50447 * y ** 2 -
-      0.02427 * y ** 3 +
-      0.72085 * y ** 4 +
-      0.01979 * y ** 5 -
-      0.7753 * y ** 6 +
-      0.32999 * y ** 7;
-  }
-
-  if (x > 0.3 && x < 1.1) {
-    b = -0.527 * x ** 1.61;
-  } else if (x > 1.1 && x < 3.3) {
-    b =
-      1.41338 * y +
-      2.28305 * y ** 2 +
-      1.07233 * y ** 3 -
-      5.38434 * y ** 4 -
-      0.62251 * y ** 5 +
-      5.3026 * y ** 6 -
-      2.09002 * y ** 7;
-  }
-
-  return Number(A_v) * (a + b / R_v);
-}
-
-//Api Get Request Testing
-// let url = 'http://localhost:5000/data?age=6.80&metallicity=-0.35&filters=[%22uprime%22,%22H%22,%22J%22]'
-
-// httpGetAsync(url, (response: string) => {
-//   var resultJson = JSON.parse(response);
-//   console.log(resultJson[0])
-// });
-
-/**Get http request asynchronously
- * @param {string} theUrl -request ultra link
- * @param {function} callback -function to execute with http response
- */
-function httpGetAsync(theUrl: string, callback: Function) {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.onreadystatechange = function () {
-    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-      callback(xmlHttp.responseText);
-  };
-  xmlHttp.open("GET", theUrl, true); // true for asynchronous
-  xmlHttp.send(null);
-}
-
-function HRModelRounding(number: number | string) {
-  return (Math.round(Number(number) * 20) / 20).toFixed(2)
-}
-
-
-//create a gradient for HR stars
-function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Color {
-  let { ctx, chartArea } = chart;
-  let rl = isNaN(filterWavelength[red]) ? Math.log10(0.442 * 1000) : Math.log10(filterWavelength[red] * 1000);//default to B-V for unknowns
-  let bl = isNaN(filterWavelength[blue]) ? Math.log10(0.54 * 1000) : Math.log10(filterWavelength[blue] * 1000);
-
-  let filters: string[] = [red, blue];
-  let magIndex: number[] = [0, 0];
-  // console.log(filters)
-  for (let i = 0; i < filters.length; i++) {
-    if ("UBVRI".includes(filters[i])) {
-      magIndex[i] = Number(0);
-    } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
-      magIndex[i] = Number(1);
-    } else if ("JHKs".includes(filters[i])) {
-      magIndex[i] = Number(2);
-    }
-  }
-
-  let mags: { [key: string]: Function[] } = filterMags()
-
-
-  let mColor = mags.red[magIndex[0]](bl) - mags.red[magIndex[0]](rl);
-  let oColor = mags.blue[magIndex[1]](bl) - mags.blue[magIndex[1]](rl)
-
-  let max = chart.options.scales["x"].max;
-  let min = chart.options.scales["x"].min;
-
-  //p(c)=(W/DC)*c-(W/DC)*min+left
-  let pixelrat = chartArea.width / (max - min);
-  let start = chartArea.left + (pixelrat * oColor) - (pixelrat * min);
-  let stop = chartArea.left + (pixelrat * mColor) - (pixelrat * min);
-
-  if (isNaN(start) || isNaN(stop)) {//stop div/0
-    return "red"
-  }
-  else {
-
-    let gradient = ctx.createLinearGradient(start, 0, stop, 0);
-
-    gradient.addColorStop(1, "red");        //M
-    gradient.addColorStop(0.929, "#ff6600"); //K
-    gradient.addColorStop(0.526, "#ffdc60");//G
-    gradient.addColorStop(0.441, "#fdffe0");//F
-    gradient.addColorStop(0.357, "white");  //A
-    //gradient.addColorStop(0.107,"#baf9ff");//B
-    gradient.addColorStop(0, "#38eeff");    //O
-    //From: https://asterism.org/wp-content/uploads/2019/03/tut39-HR-Diagram.pdf
-
-    return gradient;
-  }
-}
