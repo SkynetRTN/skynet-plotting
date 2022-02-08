@@ -217,6 +217,9 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
         modelForm["red"].value, modelForm["blue"].value)
       myChart1.update()
+      myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
+        modelForm["red2"].value, modelForm["blue2"].value)
+      myChart2.update()
     }, 5)
 
   }
@@ -275,6 +278,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     })
   );
   // create chart
+  console.log('ayyo')
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
@@ -366,7 +370,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       }
     },
   });
-
+console.log('ayyo2')
   const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
     const myChart2 = new Chart(ctx2, {
@@ -471,7 +475,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       myChart2.update()
     }, 10)
   }
-
+console.log('ayyo3')
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
@@ -512,12 +516,13 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
 
   //initializing website
 
-
+console.log('ayyo4.1')
+   //figure out why this update is breaking the code and it does not break the code in the other one
   update();
   updateHRModel(modelForm, myChart1, hot);
   updateHRModel2(modelForm, myChart2, hot);
   document.getElementById("standardView").click();
-
+console.log('ayyo4.2')
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x";
   myChart1.options.scales["y"].title.text = "y";
@@ -540,10 +545,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     false,
     false
 );
-
   return [hot, myChart1, myChart2, modelForm];
+  
 }
-
+console.log('ayyo5.1')
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
  * and load related information into the table.
@@ -574,7 +579,7 @@ export function cluster2FileUpload(
     alert("Please upload a CSV file.");
     return;
   }
-
+console.log('ayyo6.1')
   const reader = new FileReader();
   reader.onload = () => {
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
@@ -716,7 +721,7 @@ export function cluster2FileUpload(
     red2.value = filters[1];
     lum2.value = filters[1];
 
-
+console.log('ayyo4')
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
     datadict.forEach((src) => {
@@ -852,6 +857,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     chartRescale(chart, modelForm);
   }
 });
+//console.log('ayyo5')
 const reveal: string[] = [
   modelForm["red"].value,
   modelForm["blue"].value,
@@ -979,7 +985,7 @@ function updateHRModel2(modelForm: ModelForm, chart: Chart, hot: Handsontable, c
     },
     });
   }
-
+console.log('ayyo6')
 function updateScatter(
   table: Handsontable,
   myChart1: Chart,
@@ -1108,20 +1114,18 @@ function updateScatter(
     };
     scaleLimits = pointMinMax(scaleLimits, x, y);
   }
-  while (chart1.length !== start) {
-    chart1.pop();
-  }
+  //removing both pop codes made good, check with others later
+  //while (chart1.length !== start) {
+    //chart1.pop();
+  //}
+  //while (chart2.length !== start) {
+    //chart2.pop();
+  //}
   if (graphScaleMode !== null) {
     graphScale[1] = scaleLimits;
     chartRescale(myChart1, modelForm);
+    chartRescale2(myChart2, modelForm);
   }
-  while (chart2.length !== start) {
-    chart2.pop();
- }
- if (graphScaleMode !== null) {
-  graphScale[1] = scaleLimits;
-  chartRescale(myChart2, modelForm);
-}
   myChart1.update()
   myChart2.update()
 }
@@ -1155,7 +1159,6 @@ export function chartRescale(myChart: Chart, modelForm: ModelForm, option: strin
       }
 
       let mags: { [key: string]: Function[] } = filterMags()
-
       let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
       let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
       // console.log(magIndex)
@@ -1228,9 +1231,10 @@ export function chartRescale2(myChart: Chart, modelForm: ModelForm, option: stri
         }
   
         let mags: { [key: string]: Function[] } = filterMags()
-  
-        let color_red: number = mags['red2'][magIndex[1]](x['blue2']) - mags['red2'][magIndex[0]](x['red2']);
-        let color_blue: number = mags['blue2'][magIndex[1]](x['blue2']) - mags['blue2'][magIndex[0]](x['red2']);
+        //console.log(mags)
+        //took 2 from filter id titles here, idk if it works like how I want it to
+        let color_red: number = mags['red'][magIndex[1]](x['blue2']) - mags['red'][magIndex[0]](x['red']);
+        let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
         // console.log(magIndex)
         adjustScale = {
           'minX': color_blue - (color_red - color_blue) / 8,
