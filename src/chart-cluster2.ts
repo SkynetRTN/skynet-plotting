@@ -479,6 +479,7 @@ console.log('ayyo3')
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
+    console.log('bongus')
     updateScatter(
       hot,
       myChart1,
@@ -487,15 +488,16 @@ console.log('ayyo3')
       modelForm,
       2
     );
+    console.log('bongus')
   };
-
+console.log('bongus')
   // link chart to table
   hot.updateSettings({
     afterChange: update,
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-
+  console.log('bongus')
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
@@ -519,6 +521,7 @@ console.log('ayyo3')
 console.log('ayyo4.1')
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
+  console.log('bongus')
   updateHRModel(modelForm, myChart1, hot);
   updateHRModel2(modelForm, myChart2, hot);
   document.getElementById("standardView").click();
@@ -529,6 +532,7 @@ console.log('ayyo4.2')
   myChart2.options.plugins.title.text = "Title";
   myChart2.options.scales["x"].title.text = "x";
   myChart2.options.scales["y"].title.text = "y";
+  console.log('bongus')
   updateLabels(
     myChart1,
     document.getElementById("chart-info-form") as ChartInfoForm,
@@ -545,10 +549,11 @@ console.log('ayyo4.2')
     false,
     false
 );
+console.log('bongus')
   return [hot, myChart1, myChart2, modelForm];
   
 }
-console.log('ayyo5.1')
+console.log('bongus')
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
  * and load related information into the table.
@@ -1010,7 +1015,7 @@ function updateScatter(
   let chart2 = myChart2.data.datasets[dataSetIndex].data;
   let tableData = table.getData();
   let columns = table.getColHeader();
-
+  console.log('bongus')
   //Identify the column the selected filter refers to
   let blue = columns.indexOf(modelForm["blue"].value + " Mag");
   let red = columns.indexOf(modelForm["red"].value + " Mag");
@@ -1018,11 +1023,12 @@ function updateScatter(
   let blue2 = columns.indexOf(modelForm["blue2"].value + " Mag");
   let red2 = columns.indexOf(modelForm["red2"].value + " Mag");
   let lum2 = columns.indexOf(modelForm["lum2"].value + " Mag");
-
+  console.log('bongus')
   let A_v1 = calculateLambda(
     reddening,
     filterWavelength[modelForm["blue"].value]
   );
+  console.log('bongus')
   let A_v2 = calculateLambda(
     reddening,
     filterWavelength[modelForm["red"].value]
@@ -1031,7 +1037,7 @@ function updateScatter(
     reddening,
     filterWavelength[modelForm["lum"].value]
   );
-
+  console.log('bongus')
   let A2_v1 = calculateLambda(
     reddening,
     filterWavelength[modelForm["blue2"].value]
@@ -1045,7 +1051,7 @@ function updateScatter(
     filterWavelength[modelForm["lum2"].value]
     );
 
-
+    console.log('bongus')
   let blueErr =
     columns.indexOf(modelForm["blue"].value + "err") < 0
       ? null
@@ -1071,14 +1077,14 @@ function updateScatter(
       columns.indexOf(modelForm["lum2"].value + "err") < 0
         ? null
         : columns.indexOf(modelForm["lum2"].value + "err");
-
+        console.log('bongus')
   let scaleLimits: { [key: string]: number } = {
     minX: NaN,
     minY: NaN,
     maxX: NaN,
     maxY: NaN,
   };
-
+  console.log('bongus')
   let start = 0;
   for (let i = 0; i < tableData.length; i++) {
     if (
@@ -1113,7 +1119,7 @@ function updateScatter(
       continue;
     }
     //red-blue,lum
-
+    console.log('bongus')
     let x = tableData[i][blue2] - A2_v1 - (tableData[i][red2] - A2_v2);
     let y = tableData[i][lum2] - A2_v3 - 5 * Math.log10(dist / 0.01);
     chart2[start++] = {
@@ -1134,8 +1140,11 @@ function updateScatter(
     chartRescale(myChart1, modelForm);
     chartRescale2(myChart2, modelForm);
   }
+  console.log('bongus')
   myChart1.update();
-  myChart2.update();
+  console.log('bongus')
+  //myChart2.update();
+  console.log('bongus')
 }
 
 
