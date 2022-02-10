@@ -216,10 +216,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     setTimeout(function () {
       myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
         modelForm["red"].value, modelForm["blue"].value)
-      myChart1.update()
       myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
         modelForm["red2"].value, modelForm["blue2"].value)
       myChart2.update()
+      myChart1.update()
     }, 5)
 
   }
@@ -557,11 +557,7 @@ console.log('ayyo5.1')
  * @param {Handsontable} table The table to be updated
  * @param {Chartjs} myChart
  */
-export function cluster2FileUpload(
-  evt: Event,
-  table: Handsontable,
-  myChart: Chart<"line">,
-) {
+export function cluster2FileUpload(evt: Event, table: Handsontable, myChart1: Chart<'line'>, myChart2: Chart<"line">,) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
 
@@ -596,12 +592,24 @@ console.log('ayyo6.1')
     modelForm["age_num"].value = "6.6";
     clusterForm["red_num"].value = "0";
     modelForm["metal_num"].value = "-3.4";
-    myChart.options.plugins.title.text = "Title";
-    myChart.data.datasets[2].label = "Data";
-    myChart.options.scales["x"].title.text = "x";
-    myChart.options.scales["y"].title.text = "y";
+    myChart1.options.plugins.title.text = "Title";
+    myChart1.data.datasets[2].label = "Data";
+    myChart1.options.scales["x"].title.text = "x";
+    myChart1.options.scales["y"].title.text = "y";
+    myChart2.options.plugins.title.text = "Title";
+    myChart2.data.datasets[2].label = "Data";
+    myChart2.options.scales["x"].title.text = "x";
+    myChart2.options.scales["y"].title.text = "y";
     updateLabels(
-      myChart,
+      myChart1,
+      document.getElementById("chart-info-form") as ChartInfoForm,
+      false,
+      false,
+      false,
+      false
+    );
+    updateLabels(
+      myChart2,
       document.getElementById("chart-info-form") as ChartInfoForm,
       false,
       false,
@@ -737,7 +745,7 @@ console.log('ayyo4')
     //    console.log(tableData);
 
 
-    updateHRModel(modelForm, myChart, table,
+    updateHRModel(modelForm, myChart1, table,
       () => {
     table.updateSettings({
       data: tableData,
@@ -748,8 +756,8 @@ console.log('ayyo4')
     updateTableHeight(table);
     updateScatter(
       table,
-      myChart,
-      myChart,
+      myChart1,
+      myChart2,
       clusterForm,
       modelForm,
       2,
@@ -1118,16 +1126,16 @@ function updateScatter(
   //while (chart1.length !== start) {
     //chart1.pop();
   //}
-  //while (chart2.length !== start) {
-    //chart2.pop();
-  //}
+  while (chart2.length !== start) {
+    chart2.pop();
+  }
   if (graphScaleMode !== null) {
     graphScale[1] = scaleLimits;
     chartRescale(myChart1, modelForm);
     chartRescale2(myChart2, modelForm);
   }
-  myChart1.update()
-  myChart2.update()
+  myChart1.update();
+  myChart2.update();
 }
 
 

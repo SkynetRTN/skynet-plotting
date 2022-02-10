@@ -151,7 +151,7 @@ function chartType(chart: string) {
         objects = [cluster2_objects[0], cluster2_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>, objects[1] as Chart<'line'>);
         }
 
     } else if (chart === 'gravity') {
