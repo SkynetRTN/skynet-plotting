@@ -17,6 +17,7 @@ import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {median} from "./my-math";
+import { ContextMenu } from "handsontable/plugins";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -570,6 +571,17 @@ console.log('ayyo4.2')
     false
 );
 console.log('bongus')
+const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+//chartTypeForm.addEventListener("change" , function () {
+//console.log("glizzy");
+//destroy the chart
+ //testing a bunch of creating charts and destroying them to make the thing work
+ //myChart1.destroy();
+ //myChart2.destroy();
+
+ //(document.getElementById("myChart1")).remove();
+ //(document.getElementById("myChart2")).remove();
+//});
   return [hot, myChart1, myChart2, modelForm];
   
 }
