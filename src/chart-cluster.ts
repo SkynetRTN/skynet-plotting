@@ -584,8 +584,9 @@ let graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  let url = "http://localhost:5000/isochrone?"
-  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "http://localhost:5000/isochrone?"
+  // let url = "http://152.2.18.8:8080/isochrone?"
+  let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
