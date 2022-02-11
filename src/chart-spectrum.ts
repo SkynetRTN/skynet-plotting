@@ -195,7 +195,6 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
     myChart.update();
 
     const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
-    spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange(null);
 
     myChart.update('none');
