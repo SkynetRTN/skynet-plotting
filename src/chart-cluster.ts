@@ -142,14 +142,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
   let pan: number;
-  panLeft.onmousedown = function () {
-    pan = setInterval(() => { myChart.pan(5) }, 20)
+  panLeft.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(-5)}, 20 )
   }
   panLeft.onmouseup = panLeft.onmouseleave = function () {
     clearInterval(pan);
   }
-  panRight.onmousedown = function () {
-    pan = setInterval(() => { myChart.pan(-5) }, 20)
+  panRight.onmousedown = function() {
+    pan = setInterval( () => {myChart.pan(5)}, 20 )
   }
   panRight.onmouseup = panRight.onmouseleave = function () {
     clearInterval(pan);
@@ -350,6 +350,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
+      console.log("Update Scatter")
       updateScatter(hot, myChart, clusterForm, modelForm, 2)
     });
   }, 100);
@@ -649,18 +650,22 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     }
     return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
   }
-
+  let requestFailed = true;
   httpGetAsync(url, (response: string) => {
     let dataTable: number[][] = JSON.parse(response);
     chart.data.datasets[0].data = modelFilter(dataTable)[0];
     chart.data.datasets[1].data = modelFilter(dataTable)[1];
     chart.update("none");
-    callback();
+    callback(); //needs to be asyncronous
     if (graphScaleMode === "model") {
       graphScale[0] = modelFilter(dataTable)[2];
       chartRescale(chart, modelForm);
     }
+    requestFailed = false;
   });
+  if(requestFailed)
+    callback();//We need this to run anyways if the request fails
+
   const reveal: string[] = [
     modelForm["red"].value,
     modelForm["blue"].value,
@@ -765,6 +770,12 @@ function updateScatter(
     graphScale[1] = scaleLimits;
     chartRescale(myChart, modelForm);
   }
+  else{
+    myChart.data.datasets[dataSetIndex].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
+      modelForm["red"].value, modelForm["blue"].value)
+      console.log("YYYYYYYYYYYYYYYYYYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYYYYYYYYYYYYYYYY")
+  }
+
   myChart.update()
 }
 
