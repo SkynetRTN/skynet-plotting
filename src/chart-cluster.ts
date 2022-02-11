@@ -87,15 +87,15 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     //make graph scaling options visible to users
   document.getElementById("extra-options").style.display = "inline"
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
+  '<div style="float: right; border:0px0px0px0px; padding;0px0px0px0px">\n' +
   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
   '<label class="scaleSelection" id="frameOnDataLabel">\n' +
   '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-      '<button id="panLeft">◀</button>\n' +
-      '<button id="panRight">▶</button>\n' +
-      '<button id="zoomIn">➕</button>\n' +
-      '<button id="zoomOut">&#10134;</button>\n' +
+  '<button  id="panLeft"><b>&#x2B05;</b></button>\n' +
+  '<button  id="panRight"><b>&#x27A1;</b></button>\n' +
+  '<button  id="zoomIn"><b>&plus;</b></button>\n' +
+  '<button "width: 100px;" id="zoomOut"><b>&minus;</b></button>\n' +
   '</div>\n'
   )
 
@@ -142,13 +142,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   });
   let pan: number;
   panLeft.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(5)}, 20 )
+    pan = setInterval( () => {myChart.pan(-5)}, 20 )
   }
   panLeft.onmouseup = panLeft.onmouseleave = function() {
     clearInterval(pan);
   }
   panRight.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(-5)}, 20 )
+    pan = setInterval( () => {myChart.pan(5)}, 20 )
   }
   panRight.onmouseup = panRight.onmouseleave = function() {
     clearInterval(pan);
