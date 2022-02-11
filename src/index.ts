@@ -275,3 +275,28 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }
+//make it work later
+const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+chartTypeForm.ontoggle = function () {
+    //destroy the chart
+     //testing a bunch of creating charts and destroying them to make the thing work
+     const bajukabog = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+     var myChart = new Chart(bajukabog, { type: 'bar', data: null, options: null });
+     myChart.destroy();
+
+     const bajukabog1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
+     var myChart = new Chart(bajukabog1, { type: 'bar', data: null, options: null });
+     myChart.destroy();
+
+     const bajukabog2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
+     var myChart = new Chart(bajukabog2, { type: 'bar', data: null, options: null });
+     myChart.destroy();
+
+     const bajukabog3 = (document.getElementById("myChart3") as HTMLCanvasElement).getContext('2d');
+     var myChart = new Chart(bajukabog3, { type: 'bar', data: null, options: null });
+     myChart.destroy();
+
+     const bajukabog4 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
+     var myChart = new Chart(bajukabog4, { type: 'bar', data: null, options: null });
+     myChart.destroy();
+} 
