@@ -26,75 +26,76 @@ export function spectrum(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>'
     );
-    // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
-    // let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
-    // let panLeft = document.getElementById("panLeft") as HTMLInputElement;
-    // let panRight = document.getElementById("panRight") as HTMLInputElement;
-    // let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
-    // let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+    document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+  '<div style="float: right;">\n' +
+//   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
+//   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
 
-    // standardViewRadio.addEventListener("click", () => {
-    //     radioOnclick(standardViewRadio, frameOnDataRadio);
-    //   });
-    //   frameOnDataRadio.addEventListener("click", () => {
-    //     radioOnclick(frameOnDataRadio, standardViewRadio)
-    //   });
-    //   let pan: number;
-    //   panLeft.onmousedown = function() {
-    //     pan = setInterval( () => {myChart.pan(1)}, 20 )
-    //   }
-    //   panLeft.onmouseup = panLeft.onmouseleave = function() {
-    //     clearInterval(pan);
-    //   }
-    //   panRight.onmousedown = function() {
-    //     pan = setInterval( () => {myChart.pan(-1)}, 20 )
-    //   }
-    //   panRight.onmouseup = panRight.onmouseleave = function() {
-    //     clearInterval(pan);
-    //   }
+    //   '<button class = "graphControl" id="panLeft">◀</button>\n' +
+    //   '<button class = "graphControl" id="panRight">▶</button>\n' +
+      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8676;</center></button>\n' +
+      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8677;</center></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&#10133;</center></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&#10134;</center></button>\n' +
+      '<button id="Reset">Reset</button>\n'+
+    //   '<button class = "scaleSelection" id="Reset"><center class = "ScaleControl">Reset</center></button>\n' +
+    //   '<button class="scaleSelection" id="ResetLabel">\n' +
+    //     '<input type="radio" class="scaleSelection" id="Reset" value="Reset" />&nbsp;Reset&nbsp;</label>\n' +
+  '</div>\n'
+    )
+
+    // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
+    let Reset = document.getElementById("Reset") as HTMLInputElement;
+    // console.log(Reset)
+    let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+    let panRight = document.getElementById("panRight") as HTMLInputElement;
+    let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+    let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
     
-    //   //handel zoom/pan buttons
-    //   let zoom: number;
-    //   zoomIn.onmousedown = function() {
-    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.05);}, 200);;
-    //   }
-    //   zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+    
+    let pan: number;
+    panLeft.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(5)}, 20 )
+    }
+    panLeft.onmouseup = panLeft.onmouseleave = function() {
+        clearInterval(pan);
+    }
+    panRight.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(-5)}, 20 )
+      }
+    panRight.onmouseup = panRight.onmouseleave = function() {
+        clearInterval(pan);
+    }
+
+    
+    Reset.onclick = function(){
+        myChart.options.scales = {
+            x: {
+                type: 'linear',
+                position: 'bottom'
+            }
+        }
+        myChart.update();
+    }
+    
+      //handel zoom/pan buttons
+    // let zoom: number;
+    // zoomIn.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.01)}, 200);;
+    // }
+    // zoomIn.onmouseup = zoomIn.onmouseleave = function() {
     //     clearInterval(zoom);
-    //   }
-    //   zoomOut.onmousedown = function() {
-    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.05);}, 200);;
-    //   }
-    //   zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+    // }
+    // zoomOut.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.01)}, 200);;
+    // }
+    // zoomOut.onmouseup = zoomOut.onmouseleave = function() {
     //     clearInterval(zoom);
-    //   }
-    //   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
-    //     radioOnClicked.checked = true;
-    //     setRadioLabelColor(radioOnClicked, true)
-    //     otherRadio.checked = false;
-    //     setRadioLabelColor(otherRadio, false)
+    // }
     
-    //     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    //     chartRescale(myChart, modelForm)
-    //   }
     
-    //   //Alter radio input background color between Carolina blue and white
-    //   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    //     document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
-    //   }
-    
-    //   //Unchecked and reset both radio buttons to white background
-    //   function zoompanDeactivate(): any {
-    //     graphScaleMode = null
-    //     standardViewRadio.checked = false;
-    //     frameOnDataRadio.checked = false;
-    //     setRadioLabelColor(standardViewRadio, false)
-    //     setRadioLabelColor(frameOnDataRadio, false)
-    //     setTimeout(function () {
-    //       myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-    //         modelForm["red"].value, modelForm["blue"].value)
-    //       myChart.update()
-    //     }, 5)
-    //   }
+      
 
 
 
@@ -139,7 +140,7 @@ export function spectrum(): [Handsontable, Chart] {
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    tension: 0.1,
+                    tension: 0.01,
                     fill: false,
                     hidden: false,
 
@@ -149,7 +150,7 @@ export function spectrum(): [Handsontable, Chart] {
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    tension: 0.1,
+                    tension: 0.01,
                     fill: false,
                     hidden: true,
 
@@ -279,7 +280,7 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
     }
     // console.log('mark')
     if (src1Data[0].x > 3000){
-        myChart.options.elements.point.radius = 0;
+        myChart.options.elements.point.radius = 0; // control the radius of the optical spectrum dots
         myChart.data.datasets[0].borderWidth = 1;
         myChart.data.datasets[1].borderWidth = 1;
     }else{
