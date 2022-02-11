@@ -162,8 +162,8 @@ button:hover {
 button.graphControl {
     height: 41px;
     width: 41px;
-    position: relative;
-    bottom: -0.35em;
+    /* position: relative;
+    bottom: -0.13em; */
 }
 
 center.graphControl {
@@ -270,24 +270,19 @@ input[type=radio].scaleSelection {
 label.scaleSelection{
     border-radius: 10px;
     border: 2px solid #E7E7E7;
-    margin-bottom: 1.5em;
-    line-height: 2em;
-    padding-bottom: 0em;
-    padding-top: 0em;
+    line-height: 2.7em;
+    margin-bottom: 8px;
+    padding-bottom: 3px;
     background-color: white;
     width:max-content;
     height: 41px;
+    display: inline-flex;
+    align-content: center;
+
 }
 label.scaleSelection:hover{
     opacity: 1;
     background-color: #E7E7E7; 
-}
-label.scaleSelection.left{
-    align-self: right;
-}
-
-label.scaleSelection.right{
-    align-self: left;
 }
 
 h2.ie {
@@ -309,7 +304,7 @@ text.focus-prompt {
 }
 
 div.extra {
-    margin-top: -4.55px;
+    /* margin-top: -4.55px; */
     /* margin: 0;
     padding: 0; */
     float: right;
