@@ -26,6 +26,83 @@ export function spectrum(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>'
     );
+    // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
+    // let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
+    // let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+    // let panRight = document.getElementById("panRight") as HTMLInputElement;
+    // let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+    // let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
+    // standardViewRadio.addEventListener("click", () => {
+    //     radioOnclick(standardViewRadio, frameOnDataRadio);
+    //   });
+    //   frameOnDataRadio.addEventListener("click", () => {
+    //     radioOnclick(frameOnDataRadio, standardViewRadio)
+    //   });
+    //   let pan: number;
+    //   panLeft.onmousedown = function() {
+    //     pan = setInterval( () => {myChart.pan(1)}, 20 )
+    //   }
+    //   panLeft.onmouseup = panLeft.onmouseleave = function() {
+    //     clearInterval(pan);
+    //   }
+    //   panRight.onmousedown = function() {
+    //     pan = setInterval( () => {myChart.pan(-1)}, 20 )
+    //   }
+    //   panRight.onmouseup = panRight.onmouseleave = function() {
+    //     clearInterval(pan);
+    //   }
+    
+    //   //handel zoom/pan buttons
+    //   let zoom: number;
+    //   zoomIn.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.05);}, 200);;
+    //   }
+    //   zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+    //     clearInterval(zoom);
+    //   }
+    //   zoomOut.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.05);}, 200);;
+    //   }
+    //   zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+    //     clearInterval(zoom);
+    //   }
+    //   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
+    //     radioOnClicked.checked = true;
+    //     setRadioLabelColor(radioOnClicked, true)
+    //     otherRadio.checked = false;
+    //     setRadioLabelColor(otherRadio, false)
+    
+    //     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
+    //     chartRescale(myChart, modelForm)
+    //   }
+    
+    //   //Alter radio input background color between Carolina blue and white
+    //   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
+    //     document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
+    //   }
+    
+    //   //Unchecked and reset both radio buttons to white background
+    //   function zoompanDeactivate(): any {
+    //     graphScaleMode = null
+    //     standardViewRadio.checked = false;
+    //     frameOnDataRadio.checked = false;
+    //     setRadioLabelColor(standardViewRadio, false)
+    //     setRadioLabelColor(frameOnDataRadio, false)
+    //     setTimeout(function () {
+    //       myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
+    //         modelForm["red"].value, modelForm["blue"].value)
+    //       myChart.update()
+    //     }, 5)
+    //   }
+
+
+
+
+
+
+
+
 
     const tableData = [];
     for (let i = 0; i < 200; i++) {
@@ -82,10 +159,23 @@ export function spectrum(): [Handsontable, Chart] {
         options: {
             elements: {
                 point:{
-                    radius: 3
+                    radius : 3,
+                    hitRadius : 20
                 }
             },
             plugins: {
+                zoom: {
+                    pan: {
+                      enabled: true,
+                      mode: 'x',
+                    },
+                    zoom: {
+                      wheel: {
+                        enabled: true,
+                      },
+                      mode: 'x',
+                    },
+                  },
                 legend: {
                     labels: {
                         filter: function (legendItem) {
@@ -182,6 +272,12 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
 
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
+    myChart.options.scales = {
+        x: {
+            type: 'linear',
+            position: 'bottom'
+        }
+    }
     // console.log('mark')
     if (src1Data[0].x > 3000){
         myChart.options.elements.point.radius = 0;
@@ -195,7 +291,6 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
     myChart.update();
 
     const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
-    spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange(null);
 
     myChart.update('none');

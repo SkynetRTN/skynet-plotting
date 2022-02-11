@@ -16,7 +16,7 @@ import {
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {median} from "./my-math";
+import { median } from "./my-math";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -31,31 +31,31 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "beforeend",
       '<form title="Cluster Diagram" id="cluster-form">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
+      '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
+      '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Extinction in V (mag):</div>\n' +
+      '<div class="col-sm-6 des">Extinction in V (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
       "</div>\n" +
       "</form>\n" +
       '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
+      '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
+      '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
       '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
@@ -84,19 +84,20 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</div>\n" +
       "</form>\n"
     );
-    //make graph scaling options visible to users
-  document.getElementById("extra-options").style.display = "inline"
+  //make graph scaling options visible to users
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right; border:0px0px0px0px; padding;0px0px0px0px">\n' +
-  '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
-  '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
-  '<label class="scaleSelection" id="frameOnDataLabel">\n' +
-  '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-  '<button  id="panLeft"><b>&#x2B05;</b></button>\n' +
-  '<button  id="panRight"><b>&#x27A1;</b></button>\n' +
-  '<button  id="zoomIn"><b>&plus;</b></button>\n' +
-  '<button "width: 100px;" id="zoomOut"><b>&minus;</b></button>\n' +
-  '</div>\n'
+    '<div class = "extra">\n' +
+    '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
+    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
+    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
+    // '<button class = "graphControl" id="panLeft">◀</button>\n' +
+    // '<button class = "graphControl" id="panRight">▶</button>\n' +
+    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+    '</div>\n'
   )
 
   //Declare UX forms. Seperate based on local and server side forms.
@@ -144,28 +145,28 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   panLeft.onmousedown = function() {
     pan = setInterval( () => {myChart.pan(-5)}, 20 )
   }
-  panLeft.onmouseup = panLeft.onmouseleave = function() {
+  panLeft.onmouseup = panLeft.onmouseleave = function () {
     clearInterval(pan);
   }
   panRight.onmousedown = function() {
     pan = setInterval( () => {myChart.pan(5)}, 20 )
   }
-  panRight.onmouseup = panRight.onmouseleave = function() {
+  panRight.onmouseup = panRight.onmouseleave = function () {
     clearInterval(pan);
   }
 
   //handel zoom/pan buttons
   let zoom: number;
-  zoomIn.onmousedown = function() {
-    zoom = setInterval( () => {myChart.zoom(1.03)} , 20);;
+  zoomIn.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
   }
-  zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+  zoomIn.onmouseup = zoomIn.onmouseleave = function () {
     clearInterval(zoom);
   }
-  zoomOut.onmousedown = function() {
-    zoom = setInterval(()=>{myChart.zoom(0.97);}, 20);;
+  zoomOut.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
   }
-  zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+  zoomOut.onmouseup = zoomOut.onmouseleave = function () {
     clearInterval(zoom);
   }
 
@@ -306,7 +307,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         // }
         legend: {
           labels: {
-            filter: function(item) {
+            filter: function (item) {
               // Logic to remove a particular legend item goes here
               return !item.text.includes('Model2');
             }
@@ -583,8 +584,9 @@ let graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  let url = "http://localhost:5000/isochrone?"
-  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "http://localhost:5000/isochrone?"
+  // let url = "http://152.2.18.8:8080/isochrone?"
+  let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
@@ -611,7 +613,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     let medianValue = median(deltas);
     form.pop();
     deltas.shift();
-    for (let i = 0; i < deltas.length; i ++) {
+    for (let i = 0; i < deltas.length; i++) {
       if (deltas[i] > medianValue) {
         form.shift();
         deltas.shift();
@@ -622,7 +624,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     for (let i = deltas.length; i >= 0; i--) {
       let deltaOutOfRange: boolean = false;
       for (let j = 0; j < 10; j++) {
-        if (deltas[i-j] > medianValue) {
+        if (deltas[i - j] > medianValue) {
           deltaOutOfRange = true;
           break;
         }
@@ -637,7 +639,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     for (let i = 40; i < deltas.length; i++) {
       if (deltas[i] > maxDelta) {
         maxDelta = deltas[i];
-        breakupIndex = i+1;
+        breakupIndex = i + 1;
       }
     }
     // console.log(deltas);
