@@ -160,7 +160,8 @@ export function spectrum(): [Handsontable, Chart] {
         options: {
             elements: {
                 point:{
-                    radius: 3
+                    radius : 3,
+                    hitRadius : 20
                 }
             },
             plugins: {
