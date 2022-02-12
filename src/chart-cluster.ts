@@ -88,15 +88,21 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
     '<div class = "extra">\n' +
     '<label class="scaleSelection" id="standardViewLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
+    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
+      '<div class="radioText">Standard View</div>' +
+      '</label>\n' + '&nbsp;' +
     '<label class="scaleSelection" id="frameOnDataLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-    // '<button class = "graphControl" id="panLeft">◀</button>\n' +
-    // '<button class = "graphControl" id="panRight">▶</button>\n' +
+    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
+      '<div class="radioText">Frame on Data</div>' +
+      '</label>\n' + '&nbsp;' +
     '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+      '&nbsp;' +
     '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+      '&nbsp;' +
     '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+      '&nbsp;' +
     '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+    '<div style="padding: 0 6px 0 6px"></div>' +
     '</div>\n'
   )
 
@@ -129,6 +135,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const tableData = dummyData;
 
   //handel scaling options input
+  let standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
+  let frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
   let panLeft = document.getElementById("panLeft") as HTMLInputElement;
@@ -141,6 +149,11 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
+  standardViewLabel.onmouseover = ()=>{ labelOnHover(standardViewLabel)}
+  standardViewLabel.onmouseleave = ()=>{ labelOffHover(standardViewLabel)}
+  frameOnDataLabel.onmouseover = ()=>{ labelOnHover(frameOnDataLabel)}
+  frameOnDataLabel.onmouseleave = ()=>{ console.log("yeah"); labelOffHover(frameOnDataLabel)}
+
   let pan: number;
   panLeft.onmousedown = function() {
     pan = setInterval( () => {myChart.pan(-5)}, 20 )
@@ -182,9 +195,27 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     chartRescale(myChart, modelForm)
   }
 
+
   //Alter radio input background color between Carolina blue and white
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
+    let radioLabel: HTMLLabelElement = document.getElementById(radio.id + "Label") as HTMLLabelElement
+    radioLabel.style.backgroundColor = activate ? "#4B9CD3" : "white";
+    radioLabel.style.opacity = activate ? "1" : "0.7";
+  }
+
+  function labelOnHover(label: HTMLLabelElement) {
+    if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF") {
+      label.style.backgroundColor = "#E7E7E7";
+    }
+    label.style.opacity = "1";
+  }
+
+  function labelOffHover(label: HTMLLabelElement) {
+    if (label.style.backgroundColor === "rgb(231, 231, 231)") {
+      label.style.backgroundColor = "white";
+      label.style.opacity = "0.7";
+    }
+
   }
 
   //Unchecked and reset both radio buttons to white background
