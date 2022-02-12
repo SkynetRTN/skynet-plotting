@@ -284,3 +284,14 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     return piexif.insert(exifBytes, jpegData);
 }
 //make it work later
+const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+chartTypeForm.addEventListener("change" , function () {
+console.log("globlin");
+//destroy the chart
+ //testing a bunch of creating charts and destroying them to make the thing work
+ (document.getElementById("myChart")).remove();
+ (document.getElementById("myChart1")).remove();
+ (document.getElementById("myChart2")).remove();
+ (document.getElementById("myChart3")).remove();
+ (document.getElementById("myChart4")).remove();
+});
