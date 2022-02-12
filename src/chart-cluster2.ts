@@ -45,6 +45,7 @@ Chart.register(zoomPlugin);
 //const bajukabog4 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
 //var myChart = new Chart(bajukabog4, { type: 'bar', data: null, options: null });
 //myChart.destroy();
+
 export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   document
     .getElementById("input-div")
@@ -134,6 +135,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
         '<button id="zoomOut">&#10134;</button>\n' +
     '</div>\n'
     )
+
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
@@ -168,7 +170,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   );
 
   const tableData = dummyData;
-
+  
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
@@ -299,7 +301,9 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     })
   );
   // create chart
-  console.log('ayyo')
+  console.log('ayyo');
+
+
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
@@ -350,6 +354,9 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       ],
     },
     options: {
+      responsive: true,
+      //maintainAspectRatio: false,
+      aspectRatio: 0.75,
       hover: {
         mode: "nearest",
       },
@@ -384,14 +391,19 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           labels: {
             filter: function(item) {
               // Logic to remove a particular legend item goes here
-              return !item.text.includes('Model2');
+              //remove the legend item for the model2
+              const aff = !item.text.includes("Model");
+              const eff = !item.text.includes("Model2");
+              const off = !item.text.includes("Data");
+              return aff && eff && off;
             }
           }
         }
       }
     },
   });
-console.log('ayyo2')
+console.log('ayyo2');
+
   const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
     const myChart2 = new Chart(ctx2, {
@@ -442,6 +454,9 @@ console.log('ayyo2')
       ],
     },
     options: {
+      responsive: true,
+      //maintainAspectRatio: false,
+      aspectRatio: 0.75,
       hover: {
         mode: "nearest",
       },
@@ -550,7 +565,7 @@ console.log('ayyo4.2')
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x";
   myChart1.options.scales["y"].title.text = "y";
-  myChart2.options.plugins.title.text = "Title";
+  myChart2.options.plugins.title.text = "";
   myChart2.options.scales["x"].title.text = "x";
   myChart2.options.scales["y"].title.text = "y";
   console.log('bongus')
@@ -633,7 +648,7 @@ console.log('ayyo6.1')
     myChart1.data.datasets[2].label = "Data";
     myChart1.options.scales["x"].title.text = "x";
     myChart1.options.scales["y"].title.text = "y";
-    myChart2.options.plugins.title.text = "Title";
+    //myChart2.options.plugins.title.text = "Title";
     myChart2.data.datasets[2].label = "Data";
     myChart2.options.scales["x"].title.text = "x";
     myChart2.options.scales["y"].title.text = "y";

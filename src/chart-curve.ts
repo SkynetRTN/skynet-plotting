@@ -51,7 +51,7 @@ export function curve(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-
+    
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
         type: 'line',
@@ -184,7 +184,6 @@ export function curve(): [Handsontable, Chart] {
     //destroy the chart
      //testing a bunch of creating charts and destroying them to make the thing work
      myChart.destroy();
-     //(document.getElementById("myChart")).remove();
 });
     return [hot, myChart];
     

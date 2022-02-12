@@ -30,10 +30,8 @@ window.onload = function () {
     chartTypeForm.onchange = function () {
         chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
     };
-    //destroy the chart
-     //testing a bunch of creating charts and destroying them to make the thing work
-     //myChart1.destroy();
-     //myChart2.destroy();
+
+    
      
     
      
