@@ -616,9 +616,9 @@ let graphScale: { [key: string]: number }[] = [
  *  @param chart:   The Chartjs object to be updated.
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  // let url = "http://localhost:5000/isochrone?"
+  let url = "http://localhost:5000/isochrone?"
   // let url = "http://152.2.18.8:8080/isochrone?"
-  let url = "https://skynet.unc.edu/graph-api/isochrone?"
+  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
     + "&filters=[%22" + modelForm['blue'].value
@@ -628,9 +628,14 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
   function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
     let form: ScatterDataPoint[] = [] //the array containing all model points
     let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-    let breakupIndex: number = 0;
     let deltas: number[] = [NaN];
-    let maxDelta: number = 0;
+    let deltaXs: number [] =[NaN];
+    let deltaYs: number [] = [NaN];
+    let iBeg: number = 0;
+    let iEnd: number = 0;
+    let begN: number = 1;
+    let endN: number = 1;
+    let maxDeltaIndex: number = 0;
     for (let i = 0; i < dataArray.length; i++) {
       let x_i: number = dataArray[i][0];
       let y_i: number = dataArray[i][1];
@@ -638,48 +643,41 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
       scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
       form.push(row);
       if (i > 0) {
-        let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
-        deltas.push(delta);
+        let deltaX: number = Math.abs(x_i - dataArray[i - 1][0]);
+        let deltaY: number = Math.abs(y_i - dataArray[i - 1][1]);
+        deltaXs.push(deltaX);
+        deltaYs.push(deltaY);
       }
     }
-    let medianValue = median(deltas);
+    deltaXs.shift();
+    deltaYs.shift();
+    let xMedianValue: number = median(deltaXs);
+    let yMedianValue: number = median(deltaYs);
     form.pop();
+    //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+    // Call it iBeg. KEEP all points before iBeg.
+    for (let i = 0; i < deltaXs.length; i++) {
+      let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
+      if (delta < (2 ** 0.5) && begN > 0) {
+        begN --;
+        iBeg = i;
+      }
+      deltas.push(delta);
+    }
+    //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+    // Call it iEnd. REMOVE all points after iEnd.
     deltas.shift();
-    for (let i = 0; i < deltas.length; i++) {
-      if (deltas[i] > medianValue) {
-        form.shift();
-        deltas.shift();
-      } else {
-        break;
-      }
-    }
     for (let i = deltas.length; i >= 0; i--) {
-      let deltaOutOfRange: boolean = false;
-      for (let j = 0; j < 10; j++) {
-        if (deltas[i - j] > medianValue) {
-          deltaOutOfRange = true;
-          break;
-        }
+      if (deltas[i] < (2 ** 0.5) && endN > 0) {
+        endN --;
+        iEnd = i;
       }
-      if (deltaOutOfRange) {
-        form.pop();
-        deltas.pop();
-      } else {
+      if (endN == 0) {
         break;
       }
     }
-    for (let i = 40; i < deltas.length; i++) {
-      if (deltas[i] > maxDelta) {
-        maxDelta = deltas[i];
-        breakupIndex = i + 1;
-      }
-    }
-    // console.log(deltas);
-    // console.log(maxDelta + ' ' + breakupIndex);
-    if (maxDelta < 10 * medianValue) {
-      breakupIndex = 0;
-    }
-    return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
+    maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
+    return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex,iEnd), scaleLimits]
   }
   let requestFailed = true;
   httpGetAsync(url, (response: string) => {
@@ -804,7 +802,7 @@ function updateScatter(
   else{
     myChart.data.datasets[dataSetIndex].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
       modelForm["red"].value, modelForm["blue"].value)
-      console.log("YYYYYYYYYYYYYYYYYYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYYYYYYYYYYYYYYYY")
+      // console.log("YYYYYYYYYYYYYYYYYYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYYYYYYYYYYYYYYYY")
   }
 
   myChart.update()
