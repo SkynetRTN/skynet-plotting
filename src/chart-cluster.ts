@@ -152,7 +152,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   standardViewLabel.onmouseover = ()=>{ labelOnHover(standardViewLabel)}
   standardViewLabel.onmouseleave = ()=>{ labelOffHover(standardViewLabel)}
   frameOnDataLabel.onmouseover = ()=>{ labelOnHover(frameOnDataLabel)}
-  frameOnDataLabel.onmouseleave = ()=>{ console.log("yeah"); labelOffHover(frameOnDataLabel)}
+  frameOnDataLabel.onmouseleave = ()=>{labelOffHover(frameOnDataLabel)}
 
   let pan: number;
   panLeft.onmousedown = function() {
@@ -381,7 +381,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
-      console.log("Update Scatter")
+      // console.log("Update Scatter")
       updateScatter(hot, myChart, clusterForm, modelForm, 2)
     });
   }, 100);
