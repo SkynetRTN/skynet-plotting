@@ -393,9 +393,14 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
         },
         title: {
           display: true,
-          align: "start",
+          align: "end",
+          padding: {
+            top: 45,
+            bottom: 5,
+          }
         },
         legend: {
+          display: false,
           align: "end",
           labels: {
             filter: function(item) {
@@ -497,7 +502,7 @@ console.log('ayyo2');
           },
         },
         legend: {
-          align: "end",
+          align: "start",
           labels: {
             filter: function(item) {
               // Logic to remove a particular legend item goes here
