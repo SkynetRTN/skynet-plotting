@@ -18,6 +18,7 @@ import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, }
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {median} from "./my-math";
 import { ContextMenu } from "handsontable/plugins";
+import {chartRescale, updateScatter } from "./chart-cluster";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -225,8 +226,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     setRadioLabelColor(otherRadio, false)
 
     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale(myChart1, modelForm)
-    chartRescale2(myChart2, modelForm)
+    chartRescale([myChart1, myChart2], modelForm, [1,2])
   }
 
 //Alter radio input background color between Carolina blue and white
@@ -531,14 +531,7 @@ console.log('ayyo3')
     //console.log(tableData);
     updateTableHeight(hot);
     console.log('bongus')
-    updateScatter(
-      hot,
-      myChart1,
-      myChart2,
-      clusterForm,
-      modelForm,
-      2
-    );
+    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
     console.log('bongus')
   };
 console.log('bongus')
@@ -553,17 +546,17 @@ console.log('bongus')
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2) },
+    function () { updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]); },
     frameTime);
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart1, hot, () => {
-      updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2)
+      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
       });
     updateHRModel2(modelForm, myChart2, hot, () => {
-      updateScatter(hot, myChart1, myChart2, clusterForm, modelForm, 2)
+      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
       });
    }, 100);
 
@@ -821,14 +814,7 @@ console.log('ayyo4')
       hiddenColumns: { columns: hiddenColumns },
     }); //hide all but the first 3 columns
     updateTableHeight(table);
-    updateScatter(
-      table,
-      myChart1,
-      myChart2,
-      clusterForm,
-      modelForm,
-      2,
-    );
+        updateScatter(table, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
     document.getElementById("standardView").click();
   });
   }
@@ -836,18 +822,11 @@ console.log('ayyo4')
 }
 let graphScaleMode = "auto";
 let graphScale: { [key: string]: number }[] = [
-  {
-    minX: NaN,
-    maxX: NaN,
-    minY: NaN,
-    maxY: NaN,
-  },
-  {
-    minX: NaN,
-    maxX: NaN,
-    minY: NaN,
-    maxY: NaN,
-  },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
 ]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
@@ -929,7 +908,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     callback();
     if (graphScaleMode === "model") {
       graphScale[0] = modelFilter(dataTable)[2];
-    chartRescale(chart, modelForm);
+      chartRescale([chart], modelForm, [1])
   }
 });
 //console.log('ayyo5')
@@ -1033,7 +1012,7 @@ function updateHRModel2(modelForm: ModelForm, chart: Chart, hot: Handsontable, c
       callback();
       if (graphScaleMode === "model") {
         graphScale[0] = modelFilter(dataTable)[2];
-      chartRescale(chart, modelForm);
+      chartRescale([chart], modelForm, [1]);
     }
   });
   const reveal: string[] = [
@@ -1061,299 +1040,3 @@ function updateHRModel2(modelForm: ModelForm, chart: Chart, hot: Handsontable, c
     });
   }
 console.log('ayyo6')
-function updateScatter(
-  table: Handsontable,
-  myChart1: Chart,
-  myChart2: Chart,
-  clusterForm: ClusterForm,
-  modelForm: ModelForm,
-  dataSetIndex: number,
-) {
-  let err = parseFloat(clusterForm["err_num"].value);
-  let dist = parseFloat(clusterForm["d_num"].value);
-  let reddening = parseFloat(clusterForm["red_num"].value);
-
-  let chart1 = myChart1.data.datasets[dataSetIndex].data;
-  let chart2 = myChart2.data.datasets[dataSetIndex].data;
-  let tableData = table.getData();
-  let columns = table.getColHeader();
-  console.log('bongus')
-  //Identify the column the selected filter refers to
-  let blue = columns.indexOf(modelForm["blue"].value + " Mag");
-  let red = columns.indexOf(modelForm["red"].value + " Mag");
-  let lum = columns.indexOf(modelForm["lum"].value + " Mag");
-  let blue2 = columns.indexOf(modelForm["blue2"].value + " Mag");
-  let red2 = columns.indexOf(modelForm["red2"].value + " Mag");
-  let lum2 = columns.indexOf(modelForm["lum2"].value + " Mag");
-  console.log('bongus')
-  let A_v1 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["blue"].value]
-  );
-  console.log('bongus')
-  let A_v2 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["red"].value]
-  );
-  let A_v3 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["lum"].value]
-  );
-  console.log('bongus')
-  let A2_v1 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["blue2"].value]
-    );
-  let A2_v2 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["red2"].value]
-    );
-  let A2_v3 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["lum2"].value]
-    );
-
-    console.log('bongus')
-  let blueErr =
-    columns.indexOf(modelForm["blue"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
-  let redErr =
-    columns.indexOf(modelForm["red"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["red"].value + "err");
-  let lumErr =
-    columns.indexOf(modelForm["lum"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["lum"].value + "err");
-
-  let blue2Err =
-      columns.indexOf(modelForm["blue2"].value + "err") < 0
-        ? null
-        : columns.indexOf(modelForm["blue2"].value + "err"); //checks for supplied err data
-  let red2Err =
-      columns.indexOf(modelForm["red2"].value + "err") < 0
-        ? null
-        : columns.indexOf(modelForm["red2"].value + "err");
-  let lum2Err =
-      columns.indexOf(modelForm["lum2"].value + "err") < 0
-        ? null
-        : columns.indexOf(modelForm["lum2"].value + "err");
-        console.log('bongus')
-  let scaleLimits: { [key: string]: number } = {
-    minX: NaN,
-    minY: NaN,
-    maxX: NaN,
-    maxY: NaN,
-  };
-  console.log('bongus')
-  let start = 0;
-  for (let i = 0; i < tableData.length; i++) {
-    if (
-      typeof (tableData[i][blue]) != 'number' ||
-      typeof (tableData[i][red]) != 'number' ||
-      typeof (tableData[i][lum]) != 'number' ||
-      (blueErr != null && tableData[i][blueErr] >= err) ||
-      (redErr != null && tableData[i][redErr] >= err) ||
-      (lumErr != null && tableData[i][lumErr] >= err)
-    ) {
-      continue;
-    }
-    //red-blue,lum
-
-    let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
-    let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
-    chart1[start++] = {
-      x: x,
-      y: y
-    };
-    scaleLimits = pointMinMax(scaleLimits, x, y);
-  }
-  for (let i = 0; i < tableData.length; i++) {
-    if (
-      typeof (tableData[i][blue2]) != 'number' ||
-      typeof (tableData[i][red2]) != 'number' ||
-      typeof (tableData[i][lum2]) != 'number' ||
-      (blue2Err != null && tableData[i][blue2Err] >= err) ||
-      (red2Err != null && tableData[i][red2Err] >= err) ||
-      (lum2Err != null && tableData[i][lum2Err] >= err)
-    ) {
-      continue;
-    }
-    //red-blue,lum
-    console.log('bongus')
-    let x = tableData[i][blue2] - A2_v1 - (tableData[i][red2] - A2_v2);
-    let y = tableData[i][lum2] - A2_v3 - 5 * Math.log10(dist / 0.01);
-    chart2[start++] = {
-      x: x,
-      y: y
-    };
-    scaleLimits = pointMinMax(scaleLimits, x, y);
-  }
-  //removing both pop codes made good, check with others later
-  //while (chart1.length !== start) {
-    //chart1.pop();
-  //}
-  while (chart2.length !== start) {
-    chart2.pop();
-  }
-  if (graphScaleMode !== null) {
-    graphScale[1] = scaleLimits;
-    chartRescale(myChart1, modelForm);
-    chartRescale2(myChart2, modelForm);
-  }
-  console.log('bongus')
-  myChart1.update();
-  console.log('bongus')
-  //myChart2.update();
-  console.log('bongus')
-}
-
-
-// rescale scatter to contain all the data points
-export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
-
-  let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
-  let xBuffer: number = 0;
-  let yBuffer: number = 0;
-  for (let key in adjustScale) {
-    let frameOn: string = option === null ? graphScaleMode : (graphScaleMode = option);
-    let frameParam: { [key: string]: number[] } = { 'model': [0, 0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN] }
-
-    if (isNaN(frameParam[frameOn][0])) {
-      let magList: string[] = ['red', 'blue', 'bright'];
-      let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
-      let x: { [key: string]: number } = { 'red': 0, 'blue': 0, 'bright': 0 }
-      let magIndex: number[] = [0, 0, 0];
-      // console.log(filters)
-      for (let i = 0; i < magList.length; i++) {
-        x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
-        if ("UBVRI".includes(filters[i])) {
-          magIndex[i] = Number(0);
-        } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
-          magIndex[i] = Number(1);
-        } else if ("JHKs".includes(filters[i])) {
-          magIndex[i] = Number(2);
-        }
-      }
-
-      let mags: { [key: string]: Function[] } = filterMags()
-      let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-      let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
-      // console.log(magIndex)
-      adjustScale = {
-        'minX': color_blue - (color_red - color_blue) / 8,
-        'maxX': color_red + (color_red - color_blue) / 8,
-        'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
-        'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
-      };
-
-    } else {
-      if (key.includes('min')) {
-        adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key],
-          graphScale[frameParam[frameOn][1]][key])
-      } else {
-        adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key],
-          graphScale[frameParam[frameOn][1]][key])
-      }
-      xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
-      yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
-      let minbuffer = 0.1;
-      let maxbuffer = 1;
-      xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer) : minbuffer)
-      yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
-    }
-    if (isNaN(adjustScale[key])) {
-    }
-    adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
-  }
-
-  myChart.options.scales["y"].min = adjustScale["minY"] - yBuffer
-  myChart.options.scales["y"].max = adjustScale["maxY"] + yBuffer
-  myChart.options.scales["y"].reverse = true
-  //myChart.options.scales["y"].suggestedMin = 0
-
-  myChart.options.scales["x"].min = adjustScale["minX"] - xBuffer
-  myChart.options.scales["x"].max = adjustScale["maxX"] + xBuffer
-  myChart.options.scales["x"].type = "linear"
-  //myChart.options.scales["x"].position = "bottom"
-  //what is ^this^ for?
-
-  myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-    modelForm["red"].value, modelForm["blue"].value)
-  myChart.update()
-}
-export function chartRescale2(myChart: Chart, modelForm: ModelForm, option: string = null) {
-
-    let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
-    let xBuffer: number = 0;
-    let yBuffer: number = 0;
-    for (let key in adjustScale) {
-      let frameOn: string = option === null ? graphScaleMode : (graphScaleMode = option);
-      let frameParam: { [key: string]: number[] } = { 'model': [0, 0], 'data': [1, 1], 'both': [0, 1], 'auto': [NaN] }
-  
-      if (isNaN(frameParam[frameOn][0])) {
-        let magList: string[] = ['red2', 'blue2', 'bright'];
-        let filters: string[] = [modelForm['red2'].value, modelForm['blue2'].value, modelForm['lum2'].value];
-        let x: { [key: string]: number } = { 'red2': 0, 'blue2': 0, 'bright': 0 }
-        let magIndex: number[] = [0, 0, 0];
-        // console.log(filters)
-        for (let i = 0; i < magList.length; i++) {
-          x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
-          if ("UBVRI".includes(filters[i])) {
-            magIndex[i] = Number(0);
-          } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
-            magIndex[i] = Number(1);
-          } else if ("JHKs".includes(filters[i])) {
-            magIndex[i] = Number(2);
-          }
-        }
-  
-        let mags: { [key: string]: Function[] } = filterMags()
-        //console.log(mags)
-        //took 2 from filter id titles here, idk if it works like how I want it to
-        let color_red: number = mags['red'][magIndex[1]](x['blue2']) - mags['red'][magIndex[0]](x['red']);
-        let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
-        // console.log(magIndex)
-        adjustScale = {
-          'minX': color_blue - (color_red - color_blue) / 8,
-          'maxX': color_red + (color_red - color_blue) / 8,
-          'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
-          'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
-        };
-  
-      } else {
-        if (key.includes('min')) {
-          adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key],
-            graphScale[frameParam[frameOn][1]][key])
-        } else {
-          adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key],
-            graphScale[frameParam[frameOn][1]][key])
-        }
-        xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
-        yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
-        let minbuffer = 0.1;
-        let maxbuffer = 1;
-        xBuffer = (xBuffer > minbuffer ? (xBuffer < maxbuffer ? xBuffer : maxbuffer) : minbuffer)
-        yBuffer = (yBuffer > minbuffer ? (yBuffer < maxbuffer ? yBuffer : maxbuffer) : minbuffer)
-      }
-      if (isNaN(adjustScale[key])) {
-      }
-      adjustScale[key] = isNaN(adjustScale[key]) ? 0 : adjustScale[key]
-    }
-  
-    myChart.options.scales["y"].min = adjustScale["minY"] - yBuffer
-    myChart.options.scales["y"].max = adjustScale["maxY"] + yBuffer
-    myChart.options.scales["y"].reverse = true
-    //myChart.options.scales["y"].suggestedMin = 0
-  
-    myChart.options.scales["x"].min = adjustScale["minX"] - xBuffer
-    myChart.options.scales["x"].max = adjustScale["maxX"] + xBuffer
-    myChart.options.scales["x"].type = "linear"
-    //myChart.options.scales["x"].position = "bottom"
-    //what is ^this^ for?
-  
-    myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-      modelForm["red2"].value, modelForm["blue2"].value)
-    myChart.update()
-  }
