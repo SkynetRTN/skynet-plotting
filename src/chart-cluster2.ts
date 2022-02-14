@@ -135,6 +135,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
         '<button id="zoomOut">&#10134;</button>\n' +
     '</div>\n'
     )
+    //setup two charts
+    document.getElementById('myChart').remove();
+    document.getElementById('chart-div1').style.display = 'inline';
+    document.getElementById('chart-div2').style.display = 'inline';
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;

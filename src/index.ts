@@ -30,13 +30,6 @@ window.onload = function () {
     chartTypeForm.onchange = function () {
         chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
     };
-
-    
-     
-    
-     
-    
-
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
         Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
@@ -98,15 +91,25 @@ function chartType(chart: string) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
+    //reset myChart object
+    if (document.getElementById('myChart') != null) {
+        document.getElementById('myChart').remove();
+    }
     document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
-    document.getElementById('chart-div1').innerHTML =
-        '<canvas id="myChart1" width=300 height=200></canvas>'
-    document.getElementById('chart-div2').innerHTML =
-        '<canvas id="myChart2" width=300 height=200></canvas>'
-    document.getElementById('chart-div3').innerHTML =
-        '<canvas id="myChart3" width=300 height=200></canvas>'
-    document.getElementById('chart-div4').innerHTML =
-        '<canvas id="myChart4" width=300 height=200></canvas>'
+    //remove display of 4 charts
+    for (let i = 0; i < 5; i++) {
+        if (document.getElementById('chart-div'+i.toString()) != null) {
+            document.getElementById('chart-div'+i.toString()).style.display = 'none';
+        }
+    }
+    // document.getElementById('chart-div1').innerHTML =
+    //     '<canvas id="myChart1" width=300 height=200></canvas>'
+    // document.getElementById('chart-div2').innerHTML =
+    //     '<canvas id="myChart2" width=300 height=200></canvas>'
+    // document.getElementById('chart-div3').innerHTML =
+    //     '<canvas id="myChart3" width=300 height=200></canvas>'
+    // document.getElementById('chart-div4').innerHTML =
+    //     '<canvas id="myChart4" width=300 height=200></canvas>'
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
     document.getElementById('extra-options').style.display = 'none';
@@ -282,14 +285,14 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     return piexif.insert(exifBytes, jpegData);
 }
 //make it work later
-const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
-chartTypeForm.addEventListener("change" , function () {
-console.log("globlin");
-//destroy the chart
- //testing a bunch of creating charts and destroying them to make the thing work
- (document.getElementById("myChart")).remove();
- (document.getElementById("myChart1")).remove();
- (document.getElementById("myChart2")).remove();
- (document.getElementById("myChart3")).remove();
- (document.getElementById("myChart4")).remove();
-});
+// const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+// chartTypeForm.addEventListener("change" , function () {
+// console.log("globlin");
+// //destroy the chart
+//  //testing a bunch of creating charts and destroying them to make the thing work
+//  (document.getElementById("myChart")).remove();
+//  (document.getElementById("myChart1")).remove();
+//  (document.getElementById("myChart2")).remove();
+//  (document.getElementById("myChart3")).remove();
+//  (document.getElementById("myChart4")).remove();
+// });
