@@ -361,7 +361,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //update table height and scatter plotting
   const update = function () {
     updateTableHeight(hot);
-    updateScatter(hot, myChart, clusterForm, modelForm, 2);
+    updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
   };
 
   // link chart to table
@@ -375,14 +375,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, myChart, clusterForm, modelForm, 2) },
+    function () { updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]) },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
       // console.log("Update Scatter")
-      updateScatter(hot, myChart, clusterForm, modelForm, 2)
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
     });
   }, 100);
 
@@ -593,7 +593,7 @@ export function clusterFileUpload(
           hiddenColumns: { columns: hiddenColumns },
         }); //hide all but the first 3 columns
         updateTableHeight(table);
-        updateScatter(table, myChart, clusterForm, modelForm, 2);
+        updateScatter(table, [myChart], clusterForm, modelForm, [2], [1]);
         document.getElementById("standardView").click();
       });
   };
@@ -605,6 +605,9 @@ export function clusterFileUpload(
 
 let graphScaleMode = "auto";
 let graphScale: { [key: string]: number }[] = [
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
 ]
@@ -723,90 +726,91 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
 
 function updateScatter(
   table: Handsontable,
-  myChart: Chart,
+  myCharts: Chart[],
   clusterForm: ClusterForm,
   modelForm: ModelForm,
-  dataSetIndex: number,
+  dataSetIndex: number[],
+  scaleLimitIndex: number[],
 ) {
-  let err = parseFloat(clusterForm["err_num"].value);
-  let dist = parseFloat(clusterForm["d_num"].value);
-  let reddening = parseFloat(clusterForm["red_num"].value);
+  for (let c = 0; c < myCharts.length; c++) {
+    let myChart = myCharts[c];
+    let err = parseFloat(clusterForm["err_num"].value);
+    let dist = parseFloat(clusterForm["d_num"].value);
+    let reddening = parseFloat(clusterForm["red_num"].value);
 
-  let chart = myChart.data.datasets[dataSetIndex].data;
-  let tableData = table.getData();
-  let columns = table.getColHeader();
+    let chart = myChart.data.datasets[dataSetIndex[c]].data;
+    let tableData = table.getData();
+    let columns = table.getColHeader();
 
-  //Identify the column the selected filter refers to
-  let blue = columns.indexOf(modelForm["blue"].value + " Mag");
-  let red = columns.indexOf(modelForm["red"].value + " Mag");
-  let lum = columns.indexOf(modelForm["lum"].value + " Mag");
+    //Identify the column the selected filter refers to
+    let blue = columns.indexOf(modelForm["blue"].value + " Mag");
+    let red = columns.indexOf(modelForm["red"].value + " Mag");
+    let lum = columns.indexOf(modelForm["lum"].value + " Mag");
 
-  let A_v1 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["blue"].value]
-  );
-  let A_v2 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["red"].value]
-  );
-  let A_v3 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["lum"].value]
-  );
+    let A_v1 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["blue"].value]
+    );
+    let A_v2 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["red"].value]
+    );
+    let A_v3 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["lum"].value]
+    );
 
-  let blueErr =
-    columns.indexOf(modelForm["blue"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
-  let redErr =
-    columns.indexOf(modelForm["red"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["red"].value + "err");
-  let lumErr =
-    columns.indexOf(modelForm["lum"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["lum"].value + "err");
+    let blueErr =
+        columns.indexOf(modelForm["blue"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
+    let redErr =
+        columns.indexOf(modelForm["red"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["red"].value + "err");
+    let lumErr =
+        columns.indexOf(modelForm["lum"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["lum"].value + "err");
 
-  let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
+    let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
 
 
-  let start = 0;
-  for (let i = 0; i < tableData.length; i++) {
-    if (
-      typeof (tableData[i][blue]) != 'number' ||
-      typeof (tableData[i][red]) != 'number' ||
-      typeof (tableData[i][lum]) != 'number' ||
-      (blueErr != null && tableData[i][blueErr] >= err) ||
-      (redErr != null && tableData[i][redErr] >= err) ||
-      (lumErr != null && tableData[i][lumErr] >= err)
-    ) {
-      continue;
+    let start = 0;
+    for (let i = 0; i < tableData.length; i++) {
+      if (
+          typeof (tableData[i][blue]) != 'number' ||
+          typeof (tableData[i][red]) != 'number' ||
+          typeof (tableData[i][lum]) != 'number' ||
+          (blueErr != null && tableData[i][blueErr] >= err) ||
+          (redErr != null && tableData[i][redErr] >= err) ||
+          (lumErr != null && tableData[i][lumErr] >= err)
+      ) {
+        continue;
+      }
+      //red-blue,lum
+
+      let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
+      let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+      chart[start++] = {
+        x: x,
+        y: y
+      };
+      scaleLimits = pointMinMax(scaleLimits, x, y);
     }
-    //red-blue,lum
+    while (chart.length !== start) {
+      chart.pop();
+    }
+    if (graphScaleMode !== null) {
+      graphScale[scaleLimitIndex[c]] = scaleLimits;
+      chartRescale(myChart, modelForm);
+    } else {
+      myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
+          modelForm["red"].value, modelForm["blue"].value)
+    }
 
-    let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
-    let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
-    chart[start++] = {
-      x: x,
-      y: y
-    };
-    scaleLimits = pointMinMax(scaleLimits, x, y);
-  }
-  while (chart.length !== start) {
-    chart.pop();
-  }
-  if (graphScaleMode !== null) {
-    graphScale[1] = scaleLimits;
-    chartRescale(myChart, modelForm);
-  }
-  else{
-    myChart.data.datasets[dataSetIndex].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-      modelForm["red"].value, modelForm["blue"].value)
-      // console.log("YYYYYYYYYYYYYYYYYYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYYYYYYYYYYYYYYYY")
-  }
-
-  myChart.update()
-}
+    myChart.update()
+  }}
 
 // rescale scatter to contain all the data points
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
