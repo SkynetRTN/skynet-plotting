@@ -193,7 +193,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     setRadioLabelColor(otherRadio, false)
 
     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale([myChart], modelForm, [1]);
+    chartRescale([myChart], modelForm, [1], graphScaleMode, graphScale);
   }
 
   //Alter radio input background color between Carolina blue and white
@@ -382,7 +382,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, myChart, hot, () => {
+    updateHRModel(modelForm, hot, [myChart], [1], () => {
       // console.log("Update Scatter")
       updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
     });
@@ -391,7 +391,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   //initializing website
   update();
-  updateHRModel(modelForm, myChart, hot);
+  updateHRModel(modelForm, hot, [myChart], [1]);
   document.getElementById("standardView").click();
 
   myChart.options.plugins.title.text = "Title";
@@ -585,8 +585,7 @@ export function clusterFileUpload(
       tableData.push(row);
     });
 
-
-    updateHRModel(modelForm, myChart, table,
+    updateHRModel(modelForm, table, [myChart], [1],
       () => {
         table.updateSettings({
           data: tableData,
@@ -620,109 +619,122 @@ let graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  let url = "http://localhost:5000/isochrone?"
-  // let url = "http://152.2.18.8:8080/isochrone?"
-  // let url = "https://skynet.unc.edu/graph-api/isochrone?"
-    + "age=" + HRModelRounding(modelForm['age_num'].value)
-    + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
-    + "&filters=[%22" + modelForm['blue'].value
-    + "%22,%22" + modelForm['red'].value
-    + "%22,%22" + modelForm['lum'].value + "%22]"
+export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], scaleLimitIndex: number[], callback: Function = () => { }) {
+  for (let c = 0; c < charts.length; c++)
+  {
+    let chart = charts[c];
+    let blueKey = 'blue';
+    let redKey = 'red';
+    let lumKey = 'lum';
 
-  function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
-    let form: ScatterDataPoint[] = [] //the array containing all model points
-    let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-    let deltas: number[] = [NaN];
-    let deltaXs: number [] =[NaN];
-    let deltaYs: number [] = [NaN];
-    let iBeg: number = 0;
-    let iEnd: number = 0;
-    let begN: number = 1;
-    let endN: number = 1;
-    let maxDeltaIndex: number = 0;
-    for (let i = 0; i < dataArray.length; i++) {
-      let x_i: number = dataArray[i][0];
-      let y_i: number = dataArray[i][1];
-      let row: ScatterDataPoint = { x: x_i, y: y_i };
-      scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
-      form.push(row);
-      if (i > 0) {
-        let deltaX: number = Math.abs(x_i - dataArray[i - 1][0]);
-        let deltaY: number = Math.abs(y_i - dataArray[i - 1][1]);
-        deltaXs.push(deltaX);
-        deltaYs.push(deltaY);
-      }
+    if (c > 0) {
+      blueKey += (c+1).toString();
+      redKey += (c+1).toString();
+      lumKey += (c+1).toString();
     }
-    deltaXs.shift();
-    deltaYs.shift();
-    let xMedianValue: number = median(deltaXs);
-    let yMedianValue: number = median(deltaYs);
-    form.pop();
-    //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
-    // Call it iBeg. KEEP all points before iBeg.
-    for (let i = 0; i < deltaXs.length; i++) {
-      let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
-      if (delta < (2 ** 0.5) && begN > 0) {
-        begN --;
-        iBeg = i;
-      }
-      deltas.push(delta);
-    }
-    //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
-    // Call it iEnd. REMOVE all points after iEnd.
-    deltas.shift();
-    for (let i = deltas.length; i >= 0; i--) {
-      if (deltas[i] < (2 ** 0.5) && endN > 0) {
-        endN --;
-        iEnd = i;
-      }
-      if (endN == 0) {
-        break;
-      }
-    }
-    maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
-    return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex,iEnd), scaleLimits]
-  }
-  let requestFailed = true;
-  httpGetAsync(url, (response: string) => {
-    let dataTable: number[][] = JSON.parse(response);
-    chart.data.datasets[0].data = modelFilter(dataTable)[0];
-    chart.data.datasets[1].data = modelFilter(dataTable)[1];
-    chart.update("none");
-    callback(); //needs to be asyncronous
-    if (graphScaleMode === "model") {
-      graphScale[0] = modelFilter(dataTable)[2];
-      chartRescale([chart], modelForm, [1]);
-    }
-    requestFailed = false;
-  });
-  if(requestFailed)
-    callback();//We need this to run anyways if the request fails
-  const reveal: string[] = [
-    modelForm["red"].value,
-    modelForm["blue"].value,
-    modelForm["lum"].value,
-  ];
+    let url = "http://localhost:5000/isochrone?"
+        // let url = "http://152.2.18.8:8080/isochrone?"
+        // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+        + "age=" + HRModelRounding(modelForm['age_num'].value)
+        + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
+        + "&filters=[%22" + modelForm[blueKey].value
+        + "%22,%22" + modelForm[redKey].value
+        + "%22,%22" + modelForm[lumKey].value + "%22]"
 
-  let columns: string[] = hot.getColHeader() as string[];
-  let hidden: number[] = [];
-  for (const col in columns) {
-    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-    if (!reveal.includes(columns[col])) {
-      //if the column isn't selected in the drop down, hide it
-      hidden.push(parseFloat(col));
+    function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+      let form: ScatterDataPoint[] = [] //the array containing all model points
+      let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
+      let deltas: number[] = [NaN];
+      let deltaXs: number [] = [NaN];
+      let deltaYs: number [] = [NaN];
+      let iBeg: number = 0;
+      let iEnd: number = 0;
+      let begN: number = 1;
+      let endN: number = 1;
+      let maxDeltaIndex: number = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        let x_i: number = dataArray[i][0];
+        let y_i: number = dataArray[i][1];
+        let row: ScatterDataPoint = {x: x_i, y: y_i};
+        scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
+        form.push(row);
+        if (i > 0) {
+          let deltaX: number = Math.abs(x_i - dataArray[i - 1][0]);
+          let deltaY: number = Math.abs(y_i - dataArray[i - 1][1]);
+          deltaXs.push(deltaX);
+          deltaYs.push(deltaY);
+        }
+      }
+      deltaXs.shift();
+      deltaYs.shift();
+      let xMedianValue: number = median(deltaXs);
+      let yMedianValue: number = median(deltaYs);
+      form.pop();
+      //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+      // Call it iBeg. KEEP all points before iBeg.
+      for (let i = 0; i < deltaXs.length; i++) {
+        let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
+        if (delta < (2 ** 0.5) && begN > 0) {
+          begN--;
+          iBeg = i;
+        }
+        deltas.push(delta);
+      }
+      //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+      // Call it iEnd. REMOVE all points after iEnd.
+      deltas.shift();
+      for (let i = deltas.length; i >= 0; i--) {
+        if (deltas[i] < (2 ** 0.5) && endN > 0) {
+          endN--;
+          iEnd = i;
+        }
+        if (endN == 0) {
+          break;
+        }
+      }
+      maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
+      return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
     }
-  }
 
-  hot.updateSettings({
-    hiddenColumns: {
-      columns: hidden,
-      // copyPasteEnabled: false,
-      indicators: false,
-    },
-  });
-}
+    let requestFailed = true;
+    httpGetAsync(url, (response: string) => {
+      let dataTable: number[][] = JSON.parse(response);
+      chart.data.datasets[0].data = modelFilter(dataTable)[0];
+      chart.data.datasets[1].data = modelFilter(dataTable)[1];
+      chart.update("none");
+      callback(); //needs to be asyncronous
+      if (graphScaleMode === "model") {
+        graphScale[0] = modelFilter(dataTable)[2];
+        chartRescale([chart], modelForm, [scaleLimitIndex[c]], graphScaleMode, graphScale);
+      }
+      requestFailed = false;
+    });
+    if (requestFailed)
+      callback();//We need this to run anyways if the request fails
+    const reveal: string[] = [
+      modelForm[redKey].value,
+      modelForm[blueKey].value,
+      modelForm[lumKey].value,
+    ];
+
+    let columns: string[] = hot.getColHeader() as string[];
+    let hidden: number[] = [];
+    for (const col in columns) {
+      columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+      if (!reveal.includes(columns[col])) {
+        //if the column isn't selected in the drop down, hide it
+        hidden.push(parseFloat(col));
+      }
+    }
+
+    hot.updateSettings({
+      hiddenColumns: {
+        columns: hidden,
+        // copyPasteEnabled: false,
+        indicators: false,
+      },
+    });
+  }}
 
 
 export function updateScatter(
@@ -812,7 +824,7 @@ export function updateScatter(
     }
     if (graphScaleMode !== null) {
       graphScale[scaleLimitIndex[c]] = scaleLimits;
-      chartRescale([myChart], modelForm, [1]);
+      chartRescale([myChart], modelForm, [scaleLimitIndex[c]], graphScaleMode, graphScale);
     } else {
       myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
           modelForm[redKey].value, modelForm[blueKey].value)
@@ -822,7 +834,12 @@ export function updateScatter(
 
 
 // rescale scatter to contain all the data points
-export function chartRescale(myCharts: Chart[], modelForm: ModelForm, scaleLimitIndex: number[], option: string = null) {
+export function chartRescale(myCharts: Chart[],
+                             modelForm: ModelForm,
+                             scaleLimitIndex: number[],
+                             graphScaleMode: string,
+                             graphScale: { [key: string]: number }[],
+                             option: string = null) {
   for (let c = 0; c < myCharts.length; c++)
   {
     let myChart = myCharts[c];

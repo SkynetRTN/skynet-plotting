@@ -18,7 +18,7 @@ import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, }
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {median} from "./my-math";
 import { ContextMenu } from "handsontable/plugins";
-import {chartRescale, updateScatter } from "./chart-cluster";
+import {chartRescale, updateHRModel, updateScatter } from "./chart-cluster";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -26,26 +26,15 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
- //testing a bunch of creating charts and destroying them to make the thing work
-//const bajukabog = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
-//var myChart = new Chart(bajukabog, { type: 'bar', data: null, options: null });
-//myChart.destroy();
 
-//const bajukabog1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
-//var myChart = new Chart(bajukabog1, { type: 'bar', data: null, options: null });
-//myChart.destroy();
-
-//const bajukabog2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
-//var myChart = new Chart(bajukabog2, { type: 'bar', data: null, options: null });
-//myChart.destroy();
-
-//const bajukabog3 = (document.getElementById("myChart3") as HTMLCanvasElement).getContext('2d');
-//var myChart = new Chart(bajukabog3, { type: 'bar', data: null, options: null });
-//myChart.destroy();
-
-//const bajukabog4 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
-//var myChart = new Chart(bajukabog4, { type: 'bar', data: null, options: null });
-//myChart.destroy();
+let graphScaleMode = "auto";
+let graphScale: { [key: string]: number }[] = [
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+]
 
 export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   document
@@ -226,7 +215,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     setRadioLabelColor(otherRadio, false)
 
     graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale([myChart1, myChart2], modelForm, [1,2])
+    chartRescale([myChart1, myChart2], modelForm, [1,2], graphScaleMode, graphScale)
   }
 
 //Alter radio input background color between Carolina blue and white
@@ -547,10 +536,7 @@ console.log('bongus')
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, myChart1, hot, () => {
-      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
-      });
-    updateHRModel2(modelForm, myChart2, hot, () => {
+    updateHRModel(modelForm, hot, [myChart1, myChart2], [1, 2], () => {
       updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
       });
    }, 100);
@@ -561,8 +547,7 @@ console.log('ayyo4.1')
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
   console.log('bongus')
-  updateHRModel(modelForm, myChart1, hot);
-  updateHRModel2(modelForm, myChart2, hot);
+  updateHRModel(modelForm, hot, [myChart1, myChart2], [1, 2]);
   document.getElementById("standardView").click();
 console.log('ayyo4.2')
   myChart1.options.plugins.title.text = "Title";
@@ -800,7 +785,7 @@ console.log('ayyo4')
     //    console.log(tableData);
 
 
-    updateHRModel(modelForm, myChart1, table,
+    updateHRModel(modelForm, table, [myChart1, myChart2], [1, 2],
       () => {
     table.updateSettings({
       data: tableData,
@@ -815,223 +800,3 @@ console.log('ayyo4')
   }
   reader.readAsText(file);
 }
-let graphScaleMode = "auto";
-let graphScale: { [key: string]: number }[] = [
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-]
-/**
- *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
- *  request HR diagram model from server and plot on the graph.
- *  @param table:   A table used to determine the max and min value for the range
- *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
- *  @param chart:   The Chartjs object to be updated.
- */
-function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-  let url = "http://localhost:5000/isochrone?"
-    // let url = "https://skynet.unc.edu/graph-api/isochrone?"
-    + "age=" + HRModelRounding(modelForm['age_num'].value)
-    + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
-    + "&filters=[%22" + modelForm['blue'].value
-    + "%22,%22" + modelForm['red'].value
-    + "%22,%22" + modelForm['lum'].value + "%22]"
-
-    function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
-      let form: ScatterDataPoint[] = [] //the array containing all model points
-      let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-      let breakupIndex: number = 0;
-      let deltas: number[] = [NaN];
-      let maxDelta: number = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        let x_i: number = dataArray[i][0];
-        let y_i: number = dataArray[i][1];
-        let row: ScatterDataPoint = { x: x_i, y: y_i };
-        scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
-      form.push(row);
-      if (i > 0) {
-        let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
-        deltas.push(delta);
-      }
-    }
-    let medianValue = median(deltas);
-    form.pop();
-    deltas.shift();
-    for (let i = 0; i < deltas.length; i ++) {
-      if (deltas[i] > medianValue) {
-        form.shift();
-        deltas.shift();
-      } else {
-        break;
-      }
-    }
-    for (let i = deltas.length; i >= 0; i--) {
-      let deltaOutOfRange: boolean = false;
-      for (let j = 0; j < 10; j++) {
-        if (deltas[i-j] > medianValue) {
-          deltaOutOfRange = true;
-          break;
-        }
-      }
-      if (deltaOutOfRange) {
-        form.pop();
-        deltas.pop();
-      } else {
-        break;
-      }
-    }
-    for (let i = 40; i < deltas.length; i++) {
-      if (deltas[i] > maxDelta) {
-        maxDelta = deltas[i];
-        breakupIndex = i+1;
-      }
-    }
-    // console.log(deltas);
-    // console.log(maxDelta + ' ' + breakupIndex);
-    if (maxDelta < 10 * medianValue) {
-      breakupIndex = 0;
-    }
-    return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
-    }
-    httpGetAsync(url, (response: string) => {
-      let dataTable: number[][] = JSON.parse(response);
-      chart.data.datasets[0].data = modelFilter(dataTable)[0];
-      chart.data.datasets[1].data = modelFilter(dataTable)[1];
-    chart.update("none");
-    callback();
-    if (graphScaleMode === "model") {
-      graphScale[0] = modelFilter(dataTable)[2];
-      chartRescale([chart], modelForm, [1])
-  }
-});
-//console.log('ayyo5')
-const reveal: string[] = [
-  modelForm["red"].value,
-  modelForm["blue"].value,
-  modelForm["lum"].value,
-  modelForm["red2"].value,
-  modelForm["blue2"].value,
-  modelForm["lum2"].value,
-];
-
-let columns: string[] = hot.getColHeader() as string[];
-let hidden: number[] = [];
-for (const col in columns) {
-  columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-  if (!reveal.includes(columns[col])) {
-    //if the column isn't selected in the drop down, hide it
-    hidden.push(parseFloat(col));
-  }
-}
-
-hot.updateSettings({
-  hiddenColumns: {
-    columns: hidden,
-    // copyPasteEnabled: false,
-    indicators: false,
-  },
-});
-}
-function updateHRModel2(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
-    let url = "http://localhost:5000/isochrone?"
-      // let url = "https://skynet.unc.edu/graph-api/isochrone?"
-      + "age=" + HRModelRounding(modelForm['age_num'].value)
-      + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
-      + "&filters=[%22" + modelForm['blue2'].value
-      + "%22,%22" + modelForm['red2'].value
-      + "%22,%22" + modelForm['lum2'].value + "%22]"
-  
-      function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
-        let form: ScatterDataPoint[] = [] //the array containing all model points
-        let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-        let breakupIndex: number = 0;
-        let deltas: number[] = [NaN];
-        let maxDelta: number = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-          let x_i: number = dataArray[i][0];
-          let y_i: number = dataArray[i][1];
-          let row: ScatterDataPoint = { x: x_i, y: y_i };
-          scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
-        form.push(row);
-        if (i > 0) {
-          let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
-          deltas.push(delta);
-        }
-      }
-      let medianValue = median(deltas);
-      form.pop();
-      deltas.shift();
-      for (let i = 0; i < deltas.length; i ++) {
-        if (deltas[i] > medianValue) {
-          form.shift();
-          deltas.shift();
-        } else {
-          break;
-        }
-      }
-      for (let i = deltas.length; i >= 0; i--) {
-        let deltaOutOfRange: boolean = false;
-        for (let j = 0; j < 10; j++) {
-          if (deltas[i-j] > medianValue) {
-            deltaOutOfRange = true;
-            break;
-          }
-        }
-        if (deltaOutOfRange) {
-          form.pop();
-          deltas.pop();
-        } else {
-          break;
-        }
-      }
-      for (let i = 40; i < deltas.length; i++) {
-        if (deltas[i] > maxDelta) {
-          maxDelta = deltas[i];
-          breakupIndex = i+1;
-        }
-      }
-      // console.log(deltas);
-      // console.log(maxDelta + ' ' + breakupIndex);
-      if (maxDelta < 10 * medianValue) {
-        breakupIndex = 0;
-      }
-      return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
-      }
-      httpGetAsync(url, (response: string) => {
-        let dataTable: number[][] = JSON.parse(response);
-        chart.data.datasets[0].data = modelFilter(dataTable)[0];
-        chart.data.datasets[1].data = modelFilter(dataTable)[1];
-      chart.update("none");
-      callback();
-      if (graphScaleMode === "model") {
-        graphScale[0] = modelFilter(dataTable)[2];
-      chartRescale([chart], modelForm, [1]);
-    }
-  });
-  const reveal: string[] = [
-    modelForm["red"].value,
-    modelForm["blue"].value,
-    modelForm["lum"].value,
-  ];
-
-  let columns: string[] = hot.getColHeader() as string[];
-  let hidden: number[] = [];
-  for (const col in columns) {
-    columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
-    if (!reveal.includes(columns[col])) {
-      //if the column isn't selected in the drop down, hide it
-      hidden.push(parseFloat(col));
-    }
-  }
-
-  hot.updateSettings({
-    hiddenColumns: {
-      columns: hidden,
-      // copyPasteEnabled: false,
-      indicators: false,
-    },
-    });
-  }
-console.log('ayyo6')
