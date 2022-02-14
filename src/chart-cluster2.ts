@@ -313,10 +313,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       datasets: [
         {
           type: "line",
-          label: "Model",
+          label: "",
           data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
+          borderColor: colors["white"],
+          backgroundColor: colors["white"],
           borderWidth: 2,
           tension: 0.1,
           pointRadius: 0,
@@ -348,7 +348,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           showLine: false,
           pointRadius: 2,
           pointHoverRadius: 7,
-          immutableLabel: false,
+          immutableLabel: true,
           parsing: {}
         },
       ],
@@ -387,15 +387,20 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
             onZoom: () => { zoompanDeactivate() },
           },
         },
+        title: {
+          display: true,
+          align: "start",
+        },
         legend: {
+          align: "end",
           labels: {
             filter: function(item) {
               // Logic to remove a particular legend item goes here
               //remove the legend item for the model2
-              const aff = !item.text.includes("Model");
+              const aff = !item.text.includes("");
               const eff = !item.text.includes("Model2");
               const off = !item.text.includes("Data");
-              return aff && eff && off;
+              return eff && off;
             }
           }
         }
@@ -488,6 +493,7 @@ console.log('ayyo2');
           },
         },
         legend: {
+          align: "end",
           labels: {
             filter: function(item) {
               // Logic to remove a particular legend item goes here
