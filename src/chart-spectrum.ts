@@ -1,5 +1,6 @@
 'use strict';
 
+
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
@@ -7,6 +8,7 @@ import { tableCommonOptions, colors } from "./config"
 import { updateLabels, updateTableHeight } from "./util"
 import { round } from "./my-math"
 import { ChartConfiguration } from "chart.js";
+
 
 /**
  * 
@@ -24,7 +26,85 @@ export function spectrum(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>'
     );
+    document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+  '<div style="float: right;">\n' +
+//   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
+//   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
+
+    //   '<button class = "graphControl" id="panLeft">◀</button>\n' +
+    //   '<button class = "graphControl" id="panRight">▶</button>\n' +
+      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8676;</center></button>\n' +
+      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8677;</center></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&#10133;</center></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&#10134;</center></button>\n' +
+      '<button id="Reset">Reset</button>\n'+
+    //   '<button class = "scaleSelection" id="Reset"><center class = "ScaleControl">Reset</center></button>\n' +
+    //   '<button class="scaleSelection" id="ResetLabel">\n' +
+    //     '<input type="radio" class="scaleSelection" id="Reset" value="Reset" />&nbsp;Reset&nbsp;</label>\n' +
+  '</div>\n'
+    )
+
+    // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
+    let Reset = document.getElementById("Reset") as HTMLInputElement;
+    // console.log(Reset)
+    let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+    let panRight = document.getElementById("panRight") as HTMLInputElement;
+    let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+    let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
     
+    
+    let pan: number;
+    panLeft.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(5)}, 20 )
+    }
+    panLeft.onmouseup = panLeft.onmouseleave = function() {
+        clearInterval(pan);
+    }
+    panRight.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(-5)}, 20 )
+      }
+    panRight.onmouseup = panRight.onmouseleave = function() {
+        clearInterval(pan);
+    }
+
+    
+    Reset.onclick = function(){
+        myChart.options.scales = {
+            x: {
+                type: 'linear',
+                position: 'bottom'
+            }
+        }
+        myChart.update();
+    }
+    
+      //handel zoom/pan buttons
+    // let zoom: number;
+    // zoomIn.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.01)}, 200);;
+    // }
+    // zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+    //     clearInterval(zoom);
+    // }
+    // zoomOut.onmousedown = function() {
+    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.01)}, 200);;
+    // }
+    // zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+    //     clearInterval(zoom);
+    // }
+    
+    
+      
+
+
+
+
+
+
+
+
+
     const tableData = [];
     for (let i = 0; i < 200; i++) {
         let wl = i / 200 * 0.03 + 21.09;
@@ -46,9 +126,10 @@ export function spectrum(): [Handsontable, Chart] {
             { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
-    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d'); // the Curser
+    // curser options
     const chartOptions: ChartConfiguration = {
         type: 'line',
         data: {
@@ -59,23 +140,43 @@ export function spectrum(): [Handsontable, Chart] {
                     borderColor: colors['blue'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    tension: 0.1,
+                    tension: 0.01,
                     fill: false,
                     hidden: false,
+
                 }, {
                     label: 'Channel 2',
                     data: [],
                     borderColor: colors['red'],
                     backgroundColor: colors['white-0'],
                     borderWidth: 2,
-                    tension: 0.1,
+                    tension: 0.01,
                     fill: false,
                     hidden: true,
+
                 }
             ]
         },
         options: {
+            elements: {
+                point:{
+                    radius : 3,
+                    hitRadius : 20
+                }
+            },
             plugins: {
+                zoom: {
+                    pan: {
+                      enabled: true,
+                      mode: 'x',
+                    },
+                    zoom: {
+                      wheel: {
+                        enabled: true,
+                      },
+                      mode: 'x',
+                    },
+                  },
                 legend: {
                     labels: {
                         filter: function (legendItem) {
@@ -100,6 +201,7 @@ export function spectrum(): [Handsontable, Chart] {
             }
         }
     };
+
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
     const update = function () {
@@ -126,7 +228,7 @@ export function spectrum(): [Handsontable, Chart] {
         myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
-    
+
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
@@ -167,11 +269,29 @@ function updateSpectrum(table: Handsontable, myChart: Chart) {
         }
     }
 
+
+
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
+    myChart.options.scales = {
+        x: {
+            type: 'linear',
+            position: 'bottom'
+        }
+    }
+    // console.log('mark')
+    if (src1Data[0].x > 3000){
+        myChart.options.elements.point.radius = 0; // control the radius of the optical spectrum dots
+        myChart.data.datasets[0].borderWidth = 1;
+        myChart.data.datasets[1].borderWidth = 1;
+    }else{
+        myChart.options.elements.point.radius = 3;
+        myChart.data.datasets[0].borderWidth = 2;
+        myChart.data.datasets[1].borderWidth = 2;
+    }
+    myChart.update();
 
     const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
-    spectrumForm.elements["channel"].selectedIndex = 0;
     spectrumForm.onchange(null);
 
     myChart.update('none');
@@ -205,27 +325,81 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
     reader.onload = () => {
         let data = (reader.result as string).split("\n");
         data = data.filter(str => (str !== null && str !== undefined && str !== ""));
+        var theFrequencyInfoString = data.filter(str => str.slice(0,14)== '#      OBSFREQ')[0];
+        // console.log(theFrequencyInfoString);
+
         data = data.filter(str => (str[0] !== '#'));
-
+        var theFrequencyInfo = parseFloat(theFrequencyInfoString.slice(15, theFrequencyInfoString.length));
+        // console.log(theFrequencyInfo);
         const tableData = [];
-        for (let i = 0; i < data.length; i++) {
-            "Use regular expression `/\s+/` to handle more than one space"
-            let entry = data[i].trim().split(/\s+/);
+        var whetherObtical = 0;
+        if (300000000 <= theFrequencyInfo && theFrequencyInfo<= 800000000){
+            whetherObtical = 1
+        };
+        // console.log(whetherObtical);
+        if (! whetherObtical){
+            for (let i = 0; i < data.length; i++) {
+                "Use regular expression `/\s+/` to handle more than one space"
+                let entry = data[i].trim().split(/\s+/);
 
-            let wl = freqToWL(parseFloat(entry[0]));
-            let x = parseFloat(entry[1]);
-            let y = parseFloat(entry[2]);
-            if (isNaN(wl) || isNaN(x) || isNaN(y) || wl < 21.085 || wl > 21.125) {
-                continue;
+                let wl = freqToWL(parseFloat(entry[0]));
+                let x = parseFloat(entry[1]);
+                let y = parseFloat(entry[2]);
+                if (isNaN(wl) || isNaN(x) || wl < 21.085 || wl > 21.125) {
+                    continue;
+                }
+                if (isNaN(y)) {
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,  
+                    })
+                }else{
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,
+                        "y": y,  
+                    })
+                };
+
+        }}else{
+            for (let i = 0; i < data.length; i++) {
+                "Use regular expression `/\s+/` to handle more than one space"
+                let entry = data[i].trim().split(/\s+/);
+
+                let wl = parseFloat(entry[0]);
+                // console.log(wl)
+                let x = parseFloat(entry[1]);
+                // console.log(x)
+                let y = parseFloat(entry[2]);
+                // console.log(y)
+                if(isNaN(wl) || isNaN(x) || wl < 4966  || wl > 6545.6){
+                    continue;
+
+                }
+                if (isNaN(y)) {
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,  
+                    })
+                }else{
+                    tableData.push({
+                        "wl": wl,
+                        "x": x,
+                        "y": y,  
+                    })
+                };
             }
-            tableData.push({
-                "wl": wl,
-                "x": x,
-                "y": y,
-            });
-        }
-        tableData.sort((a, b) => a.wl - b.wl);
+        };
         
+        // console.log(tableData);
+        tableData.sort((a, b) => a.wl - b.wl);
+        // console.log(tableData);
+    
+
+        
+        tableData.sort((a, b) => a.wl - b.wl);
+
+
         const spectrumForm = document.getElementById("spectrum-form") as SpectrumForm;
         spectrumForm.elements['channel'].selectedIndex = 0;
 

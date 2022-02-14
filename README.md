@@ -15,6 +15,8 @@ $ npm run build
 ```
 which will place the bundled files in the `./dist` directory.
 
+To use the Cluster mode, check out [@finnsjames](https://github.com/finnsjames)'s [skynet-plotting-server](https://github.com/finnsjames/skynet-plotting-server).
+
 *Note: `npm start` is a shortcut for `npm run start`. Any `npm run <your-script-name>` command (like the two we used here) is defined in the `scripts` section of `package.json`. Take a look by yourself! In other words, these are not some magic commands that npm has built-in, but rather some convenient "scripts" that we have defined.*
 
 ## Description

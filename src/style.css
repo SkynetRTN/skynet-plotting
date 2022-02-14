@@ -159,6 +159,16 @@ button:hover {
     background-color: #E7E7E7;
 }
 
+button.graphControl {
+    width: 42px;
+    /* position: relative;
+    bottom: -0.13em; */
+}
+
+center.graphControl {
+    font-size: 27px;
+}
+
 input {
     float: right;
     width: 100%;
@@ -253,28 +263,22 @@ input[type=radio].scaleSelection {
     cursor: pointer;
     position: absolute;
     opacity: 0;
+    width: 0;
 }
 
 label.scaleSelection{
     border-radius: 10px;
     border: 2px solid #E7E7E7;
-    margin-bottom: 0.5em;
-    line-height: 2em;
-    padding-bottom: 0.13em;
-    padding-top: 0.1em;
+    line-height: 2.7em;
+    margin-bottom: 8px;
+    padding: 1px 6px 1px 6px;
     background-color: white;
     width:max-content;
-}
-label.scaleSelection:hover{
-    opacity: 1;
-    background-color: #E7E7E7; 
-}
-label.scaleSelection.left{
-    align-self: right;
-}
+    opacity: 0.7;
+    transition: .2s;
+    color: black;
+    display: flex;
 
-label.scaleSelection.right{
-    align-self: left;
 }
 
 h2.ie {
@@ -293,4 +297,18 @@ text.focus-prompt {
     display: none;
     margin-bottom: .3em;
     line-height: 2em;
+}
+
+.extra {
+    /* margin-top: -4.55px; */
+    /* margin: 0;
+    padding: 0; */
+    display: inline-flex;
+    float: right;
+}
+
+div.radioText {
+    position: relative;
+    height: 32px;
+    bottom: 15%;
 }

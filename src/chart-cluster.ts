@@ -16,7 +16,7 @@ import {
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {median} from "./my-math";
+import { median } from "./my-math";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -31,31 +31,31 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "beforeend",
       '<form title="Cluster Diagram" id="cluster-form">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
+      '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
+      '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Extinction in V (mag):</div>\n' +
+      '<div class="col-sm-6 des">Extinction in V (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
       "</div>\n" +
       "</form>\n" +
       '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
+      '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
+      '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
       '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
@@ -84,19 +84,26 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       "</div>\n" +
       "</form>\n"
     );
-    //make graph scaling options visible to users
-  document.getElementById("extra-options").style.display = "inline"
+  //make graph scaling options visible to users
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
-  '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
-  '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
-  '<label class="scaleSelection" id="frameOnDataLabel">\n' +
-  '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />&nbsp;Frame on Data&nbsp;</label>\n' +
-      '<button id="panLeft">◀</button>\n' +
-      '<button id="panRight">▶</button>\n' +
-      '<button id="zoomIn">➕</button>\n' +
-      '<button id="zoomOut">&#10134;</button>\n' +
-  '</div>\n'
+    '<div class = "extra">\n' +
+    '<label class="scaleSelection" id="standardViewLabel">\n' +
+    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
+      '<div class="radioText">Standard View</div>' +
+      '</label>\n' + '&nbsp;' +
+    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
+      '<div class="radioText">Frame on Data</div>' +
+      '</label>\n' + '&nbsp;' +
+    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+      '&nbsp;' +
+    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+      '&nbsp;' +
+    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+      '&nbsp;' +
+    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+    '<div style="padding: 0 6px 0 6px"></div>' +
+    '</div>\n'
   )
 
   //Declare UX forms. Seperate based on local and server side forms.
@@ -128,6 +135,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const tableData = dummyData;
 
   //handel scaling options input
+  let standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
+  let frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
   let panLeft = document.getElementById("panLeft") as HTMLInputElement;
@@ -140,32 +149,38 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   frameOnDataRadio.addEventListener("click", () => {
     radioOnclick(frameOnDataRadio, standardViewRadio)
   });
+  standardViewLabel.onmouseover = ()=>{ labelOnHover(standardViewLabel)}
+  standardViewLabel.onmouseleave = ()=>{ labelOffHover(standardViewLabel)}
+  frameOnDataLabel.onmouseover = ()=>{ labelOnHover(frameOnDataLabel)}
+  frameOnDataLabel.onmouseleave = ()=>{labelOffHover(frameOnDataLabel)}
+
   let pan: number;
   panLeft.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(5)}, 20 )
+    pan = setInterval( () => {myChart.pan(-5)}, 20 )
   }
-  panLeft.onmouseup = panLeft.onmouseleave = function() {
+  panLeft.onmouseup = panLeft.onmouseleave = function () {
     clearInterval(pan);
   }
   panRight.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(-5)}, 20 )
+    pan = setInterval( () => {myChart.pan(5)}, 20 )
   }
-  panRight.onmouseup = panRight.onmouseleave = function() {
+  panRight.onmouseup = panRight.onmouseleave = function () {
     clearInterval(pan);
   }
 
   //handel zoom/pan buttons
   let zoom: number;
-  zoomIn.onmousedown = function() {
-    zoom = setInterval( () => {myChart.zoom(1.03)} , 20);;
+
+  zoomIn.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
   }
-  zoomIn.onmouseup = zoomIn.onmouseleave = function() {
+  zoomIn.onmouseup = zoomIn.onmouseleave = function () {
     clearInterval(zoom);
   }
-  zoomOut.onmousedown = function() {
-    zoom = setInterval(()=>{myChart.zoom(0.97);}, 20);;
+  zoomOut.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
   }
-  zoomOut.onmouseup = zoomOut.onmouseleave = function() {
+  zoomOut.onmouseup = zoomOut.onmouseleave = function () {
     clearInterval(zoom);
   }
 
@@ -183,7 +198,24 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   //Alter radio input background color between Carolina blue and white
   function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
+    let radioLabel: HTMLLabelElement = document.getElementById(radio.id + "Label") as HTMLLabelElement
+    radioLabel.style.backgroundColor = activate ? "#4B9CD3" : "white";
+    radioLabel.style.opacity = activate ? "1" : "0.7";
+  }
+
+  function labelOnHover(label: HTMLLabelElement) {
+    if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF") {
+      label.style.backgroundColor = "#E7E7E7";
+    }
+    label.style.opacity = "1";
+  }
+
+  function labelOffHover(label: HTMLLabelElement) {
+    if (label.style.backgroundColor === "rgb(231, 231, 231)") {
+      label.style.backgroundColor = "white";
+      label.style.opacity = "0.7";
+    }
+
   }
 
   //Unchecked and reset both radio buttons to white background
@@ -306,7 +338,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
         // }
         legend: {
           labels: {
-            filter: function(item) {
+
+            filter: function (item) {
               // Logic to remove a particular legend item goes here
               return !item.text.includes('Model2');
             }
@@ -329,7 +362,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //update table height and scatter plotting
   const update = function () {
     updateTableHeight(hot);
-    updateScatter(hot, myChart, clusterForm, modelForm, 2);
+    updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
   };
 
   // link chart to table
@@ -343,13 +376,15 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, myChart, clusterForm, modelForm, 2) },
+
+    function () { updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]) },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
-      updateScatter(hot, myChart, clusterForm, modelForm, 2)
+      // console.log("Update Scatter")
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
     });
   }, 100);
 
@@ -560,7 +595,7 @@ export function clusterFileUpload(
           hiddenColumns: { columns: hiddenColumns },
         }); //hide all but the first 3 columns
         updateTableHeight(table);
-        updateScatter(table, myChart, clusterForm, modelForm, 2);
+        updateScatter(table, [myChart], clusterForm, modelForm, [2], [1]);
         document.getElementById("standardView").click();
       });
   };
@@ -574,6 +609,9 @@ let graphScaleMode = "auto";
 let graphScale: { [key: string]: number }[] = [
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
   { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
+  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
 ]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
@@ -584,6 +622,7 @@ let graphScale: { [key: string]: number }[] = [
  */
 function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, callback: Function = () => { }) {
   let url = "http://localhost:5000/isochrone?"
+  // let url = "http://152.2.18.8:8080/isochrone?"
   // let url = "https://skynet.unc.edu/graph-api/isochrone?"
     + "age=" + HRModelRounding(modelForm['age_num'].value)
     + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
@@ -594,9 +633,14 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
   function modelFilter(dataArray: number[][]): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
     let form: ScatterDataPoint[] = [] //the array containing all model points
     let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
-    let breakupIndex: number = 0;
     let deltas: number[] = [NaN];
-    let maxDelta: number = 0;
+    let deltaXs: number [] =[NaN];
+    let deltaYs: number [] = [NaN];
+    let iBeg: number = 0;
+    let iEnd: number = 0;
+    let begN: number = 1;
+    let endN: number = 1;
+    let maxDeltaIndex: number = 0;
     for (let i = 0; i < dataArray.length; i++) {
       let x_i: number = dataArray[i][0];
       let y_i: number = dataArray[i][1];
@@ -604,61 +648,57 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
       scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
       form.push(row);
       if (i > 0) {
-        let delta: number = ((x_i - dataArray[i - 1][0]) ** 2 + (y_i - dataArray[i - 1][1]) ** 2) ** 0.5;
-        deltas.push(delta);
+        let deltaX: number = Math.abs(x_i - dataArray[i - 1][0]);
+        let deltaY: number = Math.abs(y_i - dataArray[i - 1][1]);
+        deltaXs.push(deltaX);
+        deltaYs.push(deltaY);
       }
     }
-    let medianValue = median(deltas);
+    deltaXs.shift();
+    deltaYs.shift();
+    let xMedianValue: number = median(deltaXs);
+    let yMedianValue: number = median(deltaYs);
     form.pop();
+    //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+    // Call it iBeg. KEEP all points before iBeg.
+    for (let i = 0; i < deltaXs.length; i++) {
+      let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
+      if (delta < (2 ** 0.5) && begN > 0) {
+        begN --;
+        iBeg = i;
+      }
+      deltas.push(delta);
+    }
+    //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
+    // Call it iEnd. REMOVE all points after iEnd.
     deltas.shift();
-    for (let i = 0; i < deltas.length; i ++) {
-      if (deltas[i] > medianValue) {
-        form.shift();
-        deltas.shift();
-      } else {
-        break;
-      }
-    }
     for (let i = deltas.length; i >= 0; i--) {
-      let deltaOutOfRange: boolean = false;
-      for (let j = 0; j < 10; j++) {
-        if (deltas[i-j] > medianValue) {
-          deltaOutOfRange = true;
-          break;
-        }
+      if (deltas[i] < (2 ** 0.5) && endN > 0) {
+        endN --;
+        iEnd = i;
       }
-      if (deltaOutOfRange) {
-        form.pop();
-        deltas.pop();
-      } else {
+      if (endN == 0) {
         break;
       }
     }
-    for (let i = 40; i < deltas.length; i++) {
-      if (deltas[i] > maxDelta) {
-        maxDelta = deltas[i];
-        breakupIndex = i+1;
-      }
-    }
-    // console.log(deltas);
-    // console.log(maxDelta + ' ' + breakupIndex);
-    if (maxDelta < 10 * medianValue) {
-      breakupIndex = 0;
-    }
-    return [form.slice(0, breakupIndex), form.slice(breakupIndex), scaleLimits]
+    maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
+    return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex,iEnd), scaleLimits]
   }
-
+  let requestFailed = true;
   httpGetAsync(url, (response: string) => {
     let dataTable: number[][] = JSON.parse(response);
     chart.data.datasets[0].data = modelFilter(dataTable)[0];
     chart.data.datasets[1].data = modelFilter(dataTable)[1];
     chart.update("none");
-    callback();
+    callback(); //needs to be asyncronous
     if (graphScaleMode === "model") {
       graphScale[0] = modelFilter(dataTable)[2];
       chartRescale(chart, modelForm);
     }
+    requestFailed = false;
   });
+  if(requestFailed)
+    callback();//We need this to run anyways if the request fails
   const reveal: string[] = [
     modelForm["red"].value,
     modelForm["blue"].value,
@@ -687,84 +727,90 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
 
 function updateScatter(
   table: Handsontable,
-  myChart: Chart,
+  myCharts: Chart[],
   clusterForm: ClusterForm,
   modelForm: ModelForm,
-  dataSetIndex: number,
+  dataSetIndex: number[],
+  scaleLimitIndex: number[],
 ) {
-  let err = parseFloat(clusterForm["err_num"].value);
-  let dist = parseFloat(clusterForm["d_num"].value);
-  let reddening = parseFloat(clusterForm["red_num"].value);
+  for (let c = 0; c < myCharts.length; c++) {
+    let myChart = myCharts[c];
+    let err = parseFloat(clusterForm["err_num"].value);
+    let dist = parseFloat(clusterForm["d_num"].value);
+    let reddening = parseFloat(clusterForm["red_num"].value);
 
-  let chart = myChart.data.datasets[dataSetIndex].data;
-  let tableData = table.getData();
-  let columns = table.getColHeader();
+    let chart = myChart.data.datasets[dataSetIndex[c]].data;
+    let tableData = table.getData();
+    let columns = table.getColHeader();
 
-  //Identify the column the selected filter refers to
-  let blue = columns.indexOf(modelForm["blue"].value + " Mag");
-  let red = columns.indexOf(modelForm["red"].value + " Mag");
-  let lum = columns.indexOf(modelForm["lum"].value + " Mag");
+    //Identify the column the selected filter refers to
+    let blue = columns.indexOf(modelForm["blue"].value + " Mag");
+    let red = columns.indexOf(modelForm["red"].value + " Mag");
+    let lum = columns.indexOf(modelForm["lum"].value + " Mag");
 
-  let A_v1 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["blue"].value]
-  );
-  let A_v2 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["red"].value]
-  );
-  let A_v3 = calculateLambda(
-    reddening,
-    filterWavelength[modelForm["lum"].value]
-  );
+    let A_v1 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["blue"].value]
+    );
+    let A_v2 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["red"].value]
+    );
+    let A_v3 = calculateLambda(
+        reddening,
+        filterWavelength[modelForm["lum"].value]
+    );
 
-  let blueErr =
-    columns.indexOf(modelForm["blue"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
-  let redErr =
-    columns.indexOf(modelForm["red"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["red"].value + "err");
-  let lumErr =
-    columns.indexOf(modelForm["lum"].value + "err") < 0
-      ? null
-      : columns.indexOf(modelForm["lum"].value + "err");
+    let blueErr =
+        columns.indexOf(modelForm["blue"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["blue"].value + "err"); //checks for supplied err data
+    let redErr =
+        columns.indexOf(modelForm["red"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["red"].value + "err");
+    let lumErr =
+        columns.indexOf(modelForm["lum"].value + "err") < 0
+            ? null
+            : columns.indexOf(modelForm["lum"].value + "err");
 
-  let scaleLimits: { [key: string]: number } = { minX: NaN, minY: NaN, maxX: NaN, maxY: NaN, };
+    let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
 
+    let start = 0;
+    for (let i = 0; i < tableData.length; i++) {
+      if (
+          typeof (tableData[i][blue]) != 'number' ||
+          typeof (tableData[i][red]) != 'number' ||
+          typeof (tableData[i][lum]) != 'number' ||
+          (blueErr != null && tableData[i][blueErr] >= err) ||
+          (redErr != null && tableData[i][redErr] >= err) ||
+          (lumErr != null && tableData[i][lumErr] >= err)
+      ) {
+        continue;
+      }
+      //red-blue,lum
 
-  let start = 0;
-  for (let i = 0; i < tableData.length; i++) {
-    if (
-      typeof (tableData[i][blue]) != 'number' ||
-      typeof (tableData[i][red]) != 'number' ||
-      typeof (tableData[i][lum]) != 'number' ||
-      (blueErr != null && tableData[i][blueErr] >= err) ||
-      (redErr != null && tableData[i][redErr] >= err) ||
-      (lumErr != null && tableData[i][lumErr] >= err)
-    ) {
-      continue;
+      let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
+      let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+      chart[start++] = {
+        x: x,
+        y: y
+      };
+      scaleLimits = pointMinMax(scaleLimits, x, y);
     }
-    //red-blue,lum
+    while (chart.length !== start) {
+      chart.pop();
+    }
+    if (graphScaleMode !== null) {
+      graphScale[scaleLimitIndex[c]] = scaleLimits;
+      chartRescale(myChart, modelForm);
+    } else {
+      myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
+          modelForm["red"].value, modelForm["blue"].value)
+    }
+    myChart.update()
+  }}
 
-    let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
-    let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
-    chart[start++] = {
-      x: x,
-      y: y
-    };
-    scaleLimits = pointMinMax(scaleLimits, x, y);
-  }
-  while (chart.length !== start) {
-    chart.pop();
-  }
-  if (graphScaleMode !== null) {
-    graphScale[1] = scaleLimits;
-    chartRescale(myChart, modelForm);
-  }
-  myChart.update()
-}
 
 // rescale scatter to contain all the data points
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {

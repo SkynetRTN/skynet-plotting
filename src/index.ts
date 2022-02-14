@@ -112,7 +112,7 @@ function chartType(chart: string) {
     //     '<canvas id="myChart4" width=300 height=200></canvas>'
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
-    document.getElementById('extra-options').style.display = 'none';
+    // document.getElementById('extra-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
