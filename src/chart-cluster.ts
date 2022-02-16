@@ -114,23 +114,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(
-    clusterForm["red"], clusterForm["red_num"],
-    0,
-    3,
-    0.01,
-    0,
-    false,
-    true,
-    0,
-    100000000
-  );
-  linkInputs(modelForm["metal"], modelForm["metal_num"],
-    -3.4,
-    0.2,
-    0.01,
-    -3.4
-  );
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 3, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
 
   const tableData = dummyData;
 
@@ -375,7 +360,9 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]) },
+    function () {
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
+    },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
