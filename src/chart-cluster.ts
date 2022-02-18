@@ -41,7 +41,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
       '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
       "</div>\n" +
       '<div class="row">\n' +
-      '<div class="col-sm-6 des">Extinction in V (mag):</div>\n' +
+      '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
       '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
       '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
       "</div>\n" +
@@ -114,7 +114,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 3, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
 
   const tableData = dummyData;
@@ -361,7 +361,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
     function () {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
     },
     frameTime);
 
@@ -369,7 +369,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, myChart, hot, () => {
       // console.log("Update Scatter")
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1])
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
     });
   }, 100);
 
@@ -639,6 +639,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
         deltaYs.push(deltaY);
       }
     }
+    console.log(form);
     deltaXs.shift();
     deltaYs.shift();
     let xMedianValue: number = median(deltaXs);
@@ -723,7 +724,8 @@ function updateScatter(
     let myChart = myCharts[c];
     let err = parseFloat(clusterForm["err_num"].value);
     let dist = parseFloat(clusterForm["d_num"].value);
-    let reddening = parseFloat(clusterForm["red_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
 
     let chart = myChart.data.datasets[dataSetIndex[c]].data;
     let tableData = table.getData();
@@ -788,14 +790,12 @@ function updateScatter(
     while (chart.length !== start) {
       chart.pop();
     }
+    graphScale[scaleLimitIndex[c]] = scaleLimits;
+    myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
+        modelForm["red"].value, modelForm["blue"].value)
     if (graphScaleMode !== null) {
-      graphScale[scaleLimitIndex[c]] = scaleLimits;
       chartRescale(myChart, modelForm);
-    } else {
-      myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-          modelForm["red"].value, modelForm["blue"].value)
     }
-
     myChart.update()
   }}
 
