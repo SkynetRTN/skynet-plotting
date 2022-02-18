@@ -639,7 +639,7 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
         deltaYs.push(deltaY);
       }
     }
-    console.log(form);
+    // console.log(form);
     deltaXs.shift();
     deltaYs.shift();
     let xMedianValue: number = median(deltaXs);
@@ -670,21 +670,23 @@ function updateHRModel(modelForm: ModelForm, chart: Chart, hot: Handsontable, ca
     maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
     return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex,iEnd), scaleLimits]
   }
-  let requestFailed = true;
-  httpGetAsync(url, (response: string) => {
-    let dataTable: number[][] = JSON.parse(response);
-    chart.data.datasets[0].data = modelFilter(dataTable)[0];
-    chart.data.datasets[1].data = modelFilter(dataTable)[1];
-    chart.update("none");
-    callback(); //needs to be asyncronous
-    if (graphScaleMode === "model") {
-      graphScale[0] = modelFilter(dataTable)[2];
-      chartRescale(chart, modelForm);
-    }
-    requestFailed = false;
-  });
-  if(requestFailed)
-    callback();//We need this to run anyways if the request fails
+
+  httpGetAsync(url,
+      //handeling when http request is successfully received
+      (response: string) => {
+        let dataTable: number[][] = JSON.parse(response);
+        chart.data.datasets[0].data = modelFilter(dataTable)[0];
+        chart.data.datasets[1].data = modelFilter(dataTable)[1];
+        chart.update("none");
+        // console.log('callback')
+        callback(); //needs to be asyncronous
+      },
+      //still callback/rescale if http request failed
+      ()=>{
+        callback();
+      }
+  );
+
 
   const reveal: string[] = [
     modelForm["red"].value,
@@ -720,6 +722,8 @@ function updateScatter(
   dataSetIndex: number[],
   scaleLimitIndex: number[],
 ) {
+  // console.log('scatter')
+  console.trace()
   for (let c = 0; c < myCharts.length; c++) {
     let myChart = myCharts[c];
     let err = parseFloat(clusterForm["err_num"].value);
@@ -801,6 +805,7 @@ function updateScatter(
 
 // rescale scatter to contain all the data points
 export function chartRescale(myChart: Chart, modelForm: ModelForm, option: string = null) {
+  // console.log('rescale')
   let adjustScale: { [key: string]: number } = { minX: 0, minY: 0, maxX: 0, maxY: 0, };
   let xBuffer: number = 0;
   let yBuffer: number = 0;
