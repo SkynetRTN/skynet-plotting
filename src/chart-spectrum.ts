@@ -33,11 +33,12 @@ export function spectrum(): [Handsontable, Chart] {
 
     //   '<button class = "graphControl" id="panLeft">◀</button>\n' +
     //   '<button class = "graphControl" id="panRight">▶</button>\n' +
-      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8676;</center></button>\n' +
-      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8677;</center></button>\n' +
-      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&#10133;</center></button>\n' +
-      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&#10134;</center></button>\n' +
-      '<button id="Reset">Reset</button>\n'+
+      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+      '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
+    //   '<button type="button" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>\n'+
     //   '<button class = "scaleSelection" id="Reset"><center class = "ScaleControl">Reset</center></button>\n' +
     //   '<button class="scaleSelection" id="ResetLabel">\n' +
     //     '<input type="radio" class="scaleSelection" id="Reset" value="Reset" />&nbsp;Reset&nbsp;</label>\n' +
@@ -80,19 +81,19 @@ export function spectrum(): [Handsontable, Chart] {
     }
     
       //handel zoom/pan buttons
-    // let zoom: number;
-    // zoomIn.onmousedown = function() {
-    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()+0.01)}, 200);;
-    // }
-    // zoomIn.onmouseup = zoomIn.onmouseleave = function() {
-    //     clearInterval(zoom);
-    // }
-    // zoomOut.onmousedown = function() {
-    //     zoom = setInterval(()=>{myChart.zoom(myChart.getZoomLevel()-0.01)}, 200);;
-    // }
-    // zoomOut.onmouseup = zoomOut.onmouseleave = function() {
-    //     clearInterval(zoom);
-    // }
+      let zoom: number;
+      zoomIn.onmousedown = function () {
+        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
+      }
+      zoomIn.onmouseup = zoomIn.onmouseleave = function () {
+        clearInterval(zoom);
+      }
+      zoomOut.onmousedown = function () {
+        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
+      }
+      zoomOut.onmouseup = zoomOut.onmouseleave = function () {
+        clearInterval(zoom);
+      }
     
     
       

@@ -484,12 +484,16 @@ export function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y
 /**Get http request asynchronously
  * @param {string} theUrl -request ultra link
  * @param {function} callback -function to execute with http response
+ * @param {function} failedCallback -function to execute when http request failed
  */
-export function httpGetAsync(theUrl: string, callback: Function) {
+export function httpGetAsync(theUrl: string, callback: Function, failedCallback: Function=()=>{}) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+                callback(xmlHttp.responseText);
+        } else if (xmlHttp.status != 0) {
+                failedCallback();
+        }
     };
     xmlHttp.open("GET", theUrl, true); // true for asynchronous
     xmlHttp.send(null);

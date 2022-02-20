@@ -165,6 +165,12 @@ button.graphControl {
     bottom: -0.13em; */
 }
 
+button.graphControlAlt { 
+    position: relative; 
+    bottom: 0.25em; 
+}
+/* specificallly the graphControlAlt classes are for the "reset" button in the spectrum section. They control the font size and the position of the button*/
+
 center.graphControl {
     font-size: 27px;
 }

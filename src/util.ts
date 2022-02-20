@@ -80,6 +80,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
     log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
+    let debounceTime = 1000;
     if (!numOverride) {
         numMin = min;
         numMax = max;
@@ -97,10 +98,10 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = function () {
+        number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
-        };
+        }, debounceTime);
     } else {
         slider.min = Math.log(min * 0.999).toString();
         slider.max = Math.log(max * 1.001).toString();
@@ -116,11 +117,11 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
             */
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 2), min, max);
         };
-        number.oninput = function () {
+        number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
-        }
+        }, debounceTime)
     }
 }
 
