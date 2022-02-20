@@ -308,8 +308,8 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           type: "line",
           label: "",
           data: null, // will be generated later
-          borderColor: colors["white"],
-          backgroundColor: colors["white"],
+          borderColor: colors["black"],
+          backgroundColor: colors["black"],
           borderWidth: 2,
           tension: 0.1,
           pointRadius: 0,
