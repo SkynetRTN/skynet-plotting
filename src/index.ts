@@ -113,7 +113,7 @@ function chartType(chart: string) {
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
     //remove display of 2 axis labels
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
         if (document.getElementById('axis-label'+i.toString()) != null) {
             document.getElementById('axis-label'+i.toString()).style.display = 'none';
         }

@@ -916,7 +916,8 @@ export function gravity(): [Handsontable, Chart] {
   ];
 
   // create table
-  
+  document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label3').style.display = 'inline';
   const container = document.getElementById("table-div");
   const hot = new Handsontable(
     container,

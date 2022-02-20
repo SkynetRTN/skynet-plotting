@@ -31,7 +31,8 @@ export function dual(): [Handsontable, Chart] {
         { x1: '', y1: '', x2: 16, y2: Math.sqrt(1600) },
         { x1: '', y1: '', x2: 17, y2: Math.sqrt(1700) },
     ];
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
     const container = document.getElementById('table-div');
     const tableOptions: Handsontable.GridSettings = {
         data: tableData,

@@ -35,7 +35,8 @@ export function moon(): [Handsontable, Chart] {
         '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt_num" class="field"></div>\n' +
         '</div>\n' +
         '</form>\n');
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
     // Link each slider with corresponding text box
     const moonForm = document.getElementById("moon-form") as MoonForm;
     linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.01, 30, true);

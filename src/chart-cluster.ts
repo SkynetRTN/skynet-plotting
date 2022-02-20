@@ -105,7 +105,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     '<div style="padding: 0 6px 0 6px"></div>' +
     '</div>\n'
   )
-
+  document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label3').style.display = 'inline';
   //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;

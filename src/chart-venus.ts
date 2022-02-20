@@ -34,7 +34,8 @@ export function venus(): [Handsontable, Chart] {
     //     // console.log(geocentricData);
     //     myChart.update('none');
     // };
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
     const tableData = [
         { x: 15, y: 0.7 },
         { x: 30, y: 0.53 },

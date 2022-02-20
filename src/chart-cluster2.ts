@@ -129,6 +129,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     document.getElementById('myChart').remove();
     document.getElementById('chart-div1').style.display = 'inline';
     document.getElementById('chart-div2').style.display = 'inline';
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label2').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('axis-label4').style.display = 'inline';
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;

@@ -27,7 +27,8 @@ export function variable(): [Handsontable, Chart] {
         '<div id="fourier-div"></div>\n' +
         '<div id="period-folding-div"></div>\n'
     );
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
     const tableData = [];
     for (let i = 0; i < 14; i++) {
         tableData[i] = {
