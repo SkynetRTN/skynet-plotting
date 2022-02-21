@@ -50,9 +50,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
   let panLeft = document.getElementById("panLeft") as HTMLInputElement;
-  let panLeft2 = document.getElementById("panLeft") as HTMLInputElement;
   let panRight = document.getElementById("panRight") as HTMLInputElement;
-  let panRight2 = document.getElementById("panRight") as HTMLInputElement;
   let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
   let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
@@ -286,7 +284,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
             filter: function(item) {
               // Logic to remove a particular legend item goes here
               //remove the legend item for the model2
-              const aff = !item.text.includes("");
+              // const aff = !item.text.includes("");
               const eff = !item.text.includes("Model2");
               const off = !item.text.includes("Data");
               return eff && off;

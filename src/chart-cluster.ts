@@ -296,7 +296,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, hot, [myChart], () => {
-      // console.log("Update Scatter")
       updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
     });
   }, 100);
@@ -511,15 +510,10 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
   for (let c = 0; c < charts.length; c++)
   {
     let chart = charts[c];
-    let blueKey = 'blue';
-    let redKey = 'red';
-    let lumKey = 'lum';
+    let blueKey = modelFormKey(c, 'blue')
+    let redKey = modelFormKey(c, 'red')
+    let lumKey = modelFormKey(c, 'lum')
 
-    if (c > 0) {
-      blueKey += (c+1).toString();
-      redKey += (c+1).toString();
-      lumKey += (c+1).toString();
-    }
     let url = "http://localhost:5000/isochrone?" //local testing url
         // let url = "http://152.2.18.8:8080/isochrone?" //testing server url
         // let url = "https://skynet.unc.edu/graph-api/isochrone?" //production url
@@ -651,8 +645,6 @@ export function updateScatter(
     dataSetIndex: number[],
     graphMaxMin: graphScale,
 ) {
-  // console.log('scatter')
-  console.trace()
   for (let c = 0; c < myCharts.length; c++) {
     let myChart = myCharts[c];
     let err = parseFloat(clusterForm["err_num"].value);
@@ -664,14 +656,9 @@ export function updateScatter(
     let tableData = table.getData();
     let columns = table.getColHeader();
 
-    let blueKey = "blue";
-    let redKey = "red";
-    let lumKey = "lum";
-    if (c !== 0) {
-      blueKey = blueKey + (c+1).toString();
-      redKey = redKey + (c+1).toString();
-      lumKey = lumKey + (c+1).toString();
-    }
+    let blueKey = modelFormKey(c, 'blue')
+    let redKey = modelFormKey(c, 'red')
+    let lumKey = modelFormKey(c, 'lum')
 
     //Identify the column the selected filter refers to
     let blue = columns.indexOf(modelForm[blueKey].value + " Mag");
@@ -733,16 +720,13 @@ export function updateScatter(
     }
     graphMaxMin.updateDataLimit(c, scaleLimits);
     myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-        modelForm["red"].value, modelForm["blue"].value)
-    if (graphMaxMin.getMode() !== null) {
-      graphMaxMin.updateDataLimit(c, scaleLimits);
-      chartRescale([myChart], modelForm, graphMaxMin);
-    } else {
-      myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-          modelForm[redKey].value, modelForm[blueKey].value)
-    }
+        modelForm[redKey].value, modelForm[blueKey].value)
     myChart.update()
-  }}
+  }
+  if (graphMaxMin.getMode() !== null) {
+    chartRescale(myCharts, modelForm, graphMaxMin);
+  }
+}
 
 
 /**
@@ -767,7 +751,7 @@ export function chartRescale(myCharts: Chart[],
 
       if (frameOn === "auto") {
         let magList: string[] = ['red', 'blue', 'bright'];
-        let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
+        let filters: string[] = [modelForm[modelFormKey(c, 'red')].value, modelForm[modelFormKey(c, 'blue')].value, modelForm[modelFormKey(c, 'lum')].value];
         let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
         let magIndex: number[] = [0, 0, 0];
         for (let i = 0; i < magList.length; i++) {
@@ -792,7 +776,6 @@ export function chartRescale(myCharts: Chart[],
           'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
           'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
         };
-
       } else {
         if (frameOn === "both") {
           if (key.includes('min')) {
@@ -829,7 +812,7 @@ export function chartRescale(myCharts: Chart[],
     myChart.options.scales["x"].type = "linear"
 
     myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-        modelForm["red"].value, modelForm["blue"].value)
+        modelForm[modelFormKey(c, 'red')].value, modelForm[modelFormKey(c, 'blue')].value)
     myChart.update()
   }
 }
@@ -936,4 +919,8 @@ export function insertGraphControl(){
       '<div style="padding: 0 6px 0 6px"></div>' +
       '</div>\n'
   )
+}
+
+function modelFormKey(chartNum: number, color: string) {
+  return chartNum > 0 ? (color + (chartNum+1).toString()) : color
 }
