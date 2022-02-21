@@ -2,23 +2,14 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { ScatterDataPoint } from "chart.js";
 import {
-  calculateLambda,
   dummyData,
-  filterMags,
-  filterWavelength,
-  HRModelRounding,
   HRrainbow,
-  httpGetAsync,
-  pointMinMax
 } from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {median} from "./my-math";
-import { ContextMenu } from "handsontable/plugins";
-import {chartRescale, updateHRModel, updateScatter } from "./chart-cluster";
+import {chartRescale, insertClusterControls, insertGraphControl, updateHRModel, updateScatter } from "./chart-cluster";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -37,102 +28,10 @@ let graphScale: { [key: string]: number }[] = [
 ]
 
 export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
-  document
-    .getElementById("input-div")
-    .insertAdjacentHTML(
-      "beforeend",
-      '<form title="Cluster Diagram" id="cluster-form">\n' +
-      '<div class="row">\n' +
-      '<div class="col-sm-5 des">Max Error (mag):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-5 des">Distance (kpc):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-5 des">Extinction in V (mag):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-      "</div>\n" +
-      "</form>\n" +
-      '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
-      '<div class="row">\n' +
-      '<div class="col-sm-5 des">log(Age (yr)):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-5 des">Metallicity (solar):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-      '<div class="col-sm-3 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-4">Blue:</div>\n' +
-      '<div class="col-sm-4">Red:</div>\n' +
-      '<div class="col-sm-4">Luminosity:</div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
-      '<option value="B" title="B filter" selected>B</option></div>\n' +
-      '<option value="V" title="V filter">V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter" >I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="blue2" style="width: 100%;" title="Select Blue Color Filter">\n' +
-      '<option value="B" title="B filter" selected>B</option></div>\n' +
-      '<option value="V" title="V filter">V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="red2" style="width: 100%;" title="Red Color Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="lum2" style="width: 100%;" title="Select Luminosity Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter" >I</option></select></div>\n' +
-      "</div>\n" +
-      "</form>\n"
-    );
+    insertClusterControls(2);
     //make graph scaling options visible to users
     //document.getElementById("extra-options").style.display = "inline"
-    document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-    '<div class = "extra">\n' +
-    '<label class="scaleSelection" id="standardViewLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
-      '<div class="radioText">Standard View</div>' +
-      '</label>\n' + '&nbsp;' +
-    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
-      '<div class="radioText">Frame on Data</div>' +
-      '</label>\n' + '&nbsp;' +
-    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
-    '<div style="padding: 0 6px 0 6px"></div>' +
-    '</div>\n'
-  )
+    insertGraphControl();
     //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('chart-div1').style.display = 'inline';
@@ -565,7 +464,7 @@ console.log('bongus')
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart1, myChart2], [1, 2], () => {
+    updateHRModel(modelForm, hot, [myChart1, myChart2], () => {
       updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
       });
    }, 100);
@@ -814,7 +713,7 @@ console.log('ayyo4')
     //    console.log(tableData);
 
 
-    updateHRModel(modelForm, table, [myChart1, myChart2], [1, 2],
+    updateHRModel(modelForm, table, [myChart1, myChart2],
       () => {
     table.updateSettings({
       data: tableData,
