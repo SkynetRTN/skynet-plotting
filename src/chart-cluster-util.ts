@@ -555,3 +555,36 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
         return gradient;
     }
 }
+
+export class graphScale {
+        mode: string;
+        modelLimits: { [key: string]: number };
+        dataLimits: { [key: string]: number }[];
+
+        constructor(chartCount:number = 1) {
+                this.mode = "auto";
+                this.modelLimits = { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, };
+                for (let i = 0; i < chartCount; i++) {
+                        this.dataLimits.push({ minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, })
+                }
+        }
+
+        updateDataLimit(chartNum: number, coordinates: { [key: string]: number }) {
+                this.dataLimits[chartNum] = coordinates;
+        }
+        getDataLimit(chartNum: number) {
+                return this.dataLimits[chartNum]
+        }
+        updateModelLimits(coordinates: { [key: string]: number }) {
+                this.modelLimits = coordinates;
+        }
+        getModelLimit() {
+                return this.dataLimits;
+        }
+        getMode() {
+                return this.mode;
+        }
+        changeMode(newMode: string) {
+                this.mode = newMode;
+        }
+}
