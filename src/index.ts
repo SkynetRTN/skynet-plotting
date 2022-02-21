@@ -125,7 +125,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart, ModelForm, graphScale]
-    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm]
+    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm, graphScale]
 
     if (chart === 'curve') {
         objects = curve();
@@ -163,10 +163,9 @@ function chartType(chart: string) {
         }
     } else if (chart === 'cluster2') {
         cluster2_objects = cluster2();
-        objects = [cluster2_objects[0], cluster2_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            cluster2FileUpload(evt, objects[0], objects[1] as Chart<'line'>, objects[1] as Chart<'line'>);
+            cluster2FileUpload(evt, cluster2_objects[0], cluster2_objects[1] as Chart<'line'>, cluster2_objects[2] as Chart<'line'>, cluster2_objects[4])
         }
 
     } else if (chart === 'gravity') {

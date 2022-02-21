@@ -4,6 +4,7 @@ import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import {
   dummyData,
+  graphScale,
   HRrainbow,
 } from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
@@ -15,19 +16,9 @@ import {chartRescale, insertClusterControls, insertGraphControl, updateHRModel, 
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
- *  @returns {[Handsontable, Chart]}:
+ *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-
-let graphScaleMode = "auto";
-let graphScale: { [key: string]: number }[] = [
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-]
-
-export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
+export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] {
     insertClusterControls(2);
     //make graph scaling options visible to users
     //document.getElementById("extra-options").style.display = "inline"
@@ -45,37 +36,16 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"],
-    0,
-    1,
-    0.01,
-    1,
-    false,
-    true,
-    0,
-    100000000
-  );
+  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(
-    clusterForm["red"], clusterForm["red_num"],
-    0,
-    3,
-    0.01,
-    0,
-    false,
-    true,
-    0,
-    100000000
-  );
-  linkInputs(modelForm["metal"], modelForm["metal_num"],
-    -3.4,
-    0.2,
-    0.01,
-    -3.4
-  );
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 3, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
 
   const tableData = dummyData;
-  
+
+  //declare graphScale limits
+  let graphMinMax = new graphScale(2);
+
   //handel scaling options input
   let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
   let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
@@ -86,10 +56,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
   let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
-    radioOnclick(standardViewRadio, frameOnDataRadio);
+    radioOnclick(standardViewRadio, frameOnDataRadio, graphMinMax);
   });
   frameOnDataRadio.addEventListener("click", () => {
-    radioOnclick(frameOnDataRadio, standardViewRadio)
+    radioOnclick(frameOnDataRadio, standardViewRadio, graphMinMax)
   });
    let pan: number;
     let pan2: number;
@@ -131,14 +101,14 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
   }
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
-  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
+  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
     radioOnClicked.checked = true;
     setRadioLabelColor(radioOnClicked, true)
     otherRadio.checked = false;
     setRadioLabelColor(otherRadio, false)
 
-    graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale([myChart1, myChart2], modelForm, [1,2], graphScaleMode, graphScale)
+    graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
+    chartRescale([myChart1, myChart2], modelForm, graphMaxMin)
   }
 
 //Alter radio input background color between Carolina blue and white
@@ -146,8 +116,8 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
     document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
   }
 //remember you may have to change the dependencies here to work for the chart
-  function zoompanDeactivate(): any {
-    graphScaleMode = null
+  function zoompanDeactivate(graphMaxMin: graphScale): any {
+    graphMaxMin.updateMode(null);
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
     setRadioLabelColor(standardViewRadio, false)
@@ -293,14 +263,14 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate() },
+            onPan: () => { zoompanDeactivate(graphMinMax) },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate() },
+            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         title: {
@@ -328,7 +298,6 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm] {
       }
     },
   });
-console.log('ayyo2');
 
   const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
@@ -403,14 +372,14 @@ console.log('ayyo2');
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate() },
+            onPan: () => { zoompanDeactivate(graphMinMax) },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate() },
+            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         legend: {
@@ -443,7 +412,7 @@ console.log('ayyo3')
     //console.log(tableData);
     updateTableHeight(hot);
     console.log('bongus')
-    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
+    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax);
     console.log('bongus')
   };
 console.log('bongus')
@@ -458,14 +427,14 @@ console.log('bongus')
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]); },
+    function () { updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax); },
     frameTime);
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, hot, [myChart1, myChart2], () => {
-      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
+      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax);
       });
    }, 100);
 
@@ -475,7 +444,7 @@ console.log('ayyo4.1')
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
   console.log('bongus')
-  updateHRModel(modelForm, hot, [myChart1, myChart2], [1, 2]);
+  updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("standardView").click();
 console.log('ayyo4.2')
   myChart1.options.plugins.title.text = "Title";
@@ -513,7 +482,7 @@ console.log("glizzy");
  //(document.getElementById("myChart1")).remove();
  //(document.getElementById("myChart2")).remove();
 });
-  return [hot, myChart1, myChart2, modelForm];
+  return [hot, myChart1, myChart2, modelForm, graphMinMax];
   
 }
 console.log('bongus')
@@ -524,8 +493,9 @@ console.log('bongus')
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
  * @param {Chartjs} myChart
+ * @param {graphScale} graphMaxMin the graphScale object that includes chart bounding information
  */
-export function cluster2FileUpload(evt: Event, table: Handsontable, myChart1: Chart<'line'>, myChart2: Chart<"line">,) {
+export function cluster2FileUpload(evt: Event, table: Handsontable, myChart1: Chart<'line'>, myChart2: Chart<"line">, graphMaxMin: graphScale,) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
 
@@ -697,7 +667,6 @@ console.log('ayyo6.1')
     red2.value = filters[1];
     lum2.value = filters[1];
 
-console.log('ayyo4')
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
     datadict.forEach((src) => {
@@ -722,7 +691,7 @@ console.log('ayyo4')
       hiddenColumns: { columns: hiddenColumns },
     }); //hide all but the first 3 columns
     updateTableHeight(table);
-        updateScatter(table, [myChart1, myChart2], clusterForm, modelForm, [2, 2], [1, 2]);
+        updateScatter(table, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMaxMin);
     document.getElementById("standardView").click();
   });
   }

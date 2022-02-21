@@ -502,9 +502,10 @@ export function clusterFileUpload(
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
  *  request HR diagram model from server and plot on the graph.
- *  @param table:   A table used to determine the max and min value for the range
- *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
- *  @param chart:   The Chartjs object to be updated.
+ *  @param table:     A table used to determine the max and min value for the range
+ *  @param form:      A form containing the 5 parameters (age, metallicity, red, blue, and lum filter)
+ *  @param chart:     The Chartjs object to be updated.
+ *  @param callback:  callback function asynchronously execute stuff after model is updated
  */
 export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }) {
   for (let c = 0; c < charts.length; c++)
