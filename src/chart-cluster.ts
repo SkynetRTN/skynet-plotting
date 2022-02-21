@@ -25,86 +25,9 @@ Chart.register(zoomPlugin);
  *  @returns {[Handsontable, Chart]}:
  */
 export function cluster1(): [Handsontable, Chart, ModelForm] {
-  document
-    .getElementById("input-div")
-    .insertAdjacentHTML(
-      "beforeend",
-      '<form title="Cluster Diagram" id="cluster-form">\n' +
-      '<div class="row">\n' +
-      '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-      '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-      '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-      '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-      "</div>\n" +
-      "</form>\n" +
-      '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
-      '<div class="row">\n' +
-      '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-      '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
-      '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-      '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-4">Blue:</div>\n' +
-      '<div class="col-sm-4">Red:</div>\n' +
-      '<div class="col-sm-4">Luminosity:</div>\n' +
-      "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-4"><select name="blue" style="width: 100%;" title="Select Blue Color Filter">\n' +
-      '<option value="B" title="B filter" selected>B</option></div>\n' +
-      '<option value="V" title="V filter">V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="red" style="width: 100%;" title="Red Color Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter">I</option></select></div>\n' +
-      '<div class="col-sm-4"><select name="lum" style="width: 100%;" title="Select Luminosity Filter">\n' +
-      '<option value="B" title="B filter">B</option></div>\n' +
-      '<option value="V" title="V filter" selected>V</option></div>\n' +
-      '<option value="R" title="R filter">R</option></div>\n' +
-      '<option value="I" title="I filter" >I</option></select></div>\n' +
-      "</div>\n" +
-      "</form>\n"
-    );
+  insertClusterControls();
   //make graph scaling options visible to users
-  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-    '<div class = "extra">\n' +
-    '<label class="scaleSelection" id="standardViewLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
-      '<div class="radioText">Standard View</div>' +
-      '</label>\n' + '&nbsp;' +
-    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
-    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
-      '<div class="radioText">Frame on Data</div>' +
-      '</label>\n' + '&nbsp;' +
-    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
-      '&nbsp;' +
-    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
-    '<div style="padding: 0 6px 0 6px"></div>' +
-    '</div>\n'
-  )
+  insertGraphControl();
   document.getElementById('axis-label1').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
   //Declare UX forms. Seperate based on local and server side forms.
@@ -369,7 +292,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart], [1], () => {
+    updateHRModel(modelForm, hot, [myChart], () => {
       // console.log("Update Scatter")
       updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
     });
@@ -378,7 +301,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   //initializing website
   update();
-  updateHRModel(modelForm, hot, [myChart], [1]);
+  updateHRModel(modelForm, hot, [myChart]);
   document.getElementById("standardView").click();
 
   myChart.options.plugins.title.text = "Title";
@@ -499,24 +422,7 @@ export function clusterFileUpload(
     //Change filter options to match file
 
     //order filters by temperature
-    const knownFilters = [
-      "U",
-      "uprime",
-      "B",
-      "gprime",
-      "V",
-      "vprime",
-      "rprime",
-      "R",
-      "iprime",
-      "I",
-      "zprime",
-      "Y",
-      "J",
-      "H",
-      "Ks",
-      "K",
-    ];
+    const knownFilters = ["U", "uprime", "B", "gprime", "V", "vprime", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
     //if it ain't known ignore it
@@ -572,7 +478,7 @@ export function clusterFileUpload(
       tableData.push(row);
     });
 
-    updateHRModel(modelForm, table, [myChart], [1],
+    updateHRModel(modelForm, table, [myChart],
       () => {
         table.updateSettings({
           data: tableData,
@@ -606,7 +512,7 @@ let graphScale: { [key: string]: number }[] = [
  *  @param form:    A form containing the 5 parameters (age, metallicity, red, blue, and lum filter) 
  *  @param chart:   The Chartjs object to be updated.
  */
-export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], scaleLimitIndex: number[], callback: Function = () => { }) {
+export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }) {
   for (let c = 0; c < charts.length; c++)
   {
     let chart = charts[c];
@@ -619,9 +525,9 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       redKey += (c+1).toString();
       lumKey += (c+1).toString();
     }
-    let url = "http://localhost:5000/isochrone?"
-        // let url = "http://152.2.18.8:8080/isochrone?"
-        // let url = "https://skynet.unc.edu/graph-api/isochrone?"
+    let url = "http://localhost:5000/isochrone?" //local testing url
+        // let url = "http://152.2.18.8:8080/isochrone?" //testing server url
+        // let url = "https://skynet.unc.edu/graph-api/isochrone?" //production url
         + "age=" + HRModelRounding(modelForm['age_num'].value)
         + "&metallicity=" + HRModelRounding(modelForm['metal_num'].value)
         + "&filters=[%22" + modelForm[blueKey].value
@@ -634,11 +540,8 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       let deltas: number[] = [NaN];
       let deltaXs: number [] = [NaN];
       let deltaYs: number [] = [NaN];
-      let iBeg: number = 0;
-      let iEnd: number = 0;
-      let begN: number = 1;
-      let endN: number = 1;
       let maxDeltaIndex: number = 0;
+      let count: number[] = [0];
       for (let i = 0; i < dataArray.length; i++) {
         let x_i: number = dataArray[i][0];
         let y_i: number = dataArray[i][1];
@@ -661,43 +564,57 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       // Call it iBeg. KEEP all points before iBeg.
       for (let i = 0; i < deltaXs.length; i++) {
         let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
-        if (delta < (2 ** 0.5) && begN > 0) {
-          begN--;
-          iBeg = i;
+        if (delta < (2 ** 0.5)) {
+          count.push(count[i-1] - 1)
+        } else {
+          count.push(count[i-1] + 1)
         }
         deltas.push(delta);
       }
       //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
       // Call it iEnd. REMOVE all points after iEnd.
+      let iBeg: number = 0; //init iBeg to be 0
+      let iEnd: number = count.length - 2; //init iEnd as the last the last count
+      let min = 0;
+      let max = 0;
       deltas.shift();
-      for (let i = deltas.length; i >= 0; i--) {
-        if (deltas[i] < (2 ** 0.5) && endN > 0) {
-          endN--;
+      for (let i = 1; i < count.length; i++) {
+        let temp = count[i] - i/(count.length-2)*count[count.length-1]
+        if (temp < min) {
+          min = temp;
           iEnd = i;
-        }
-        if (endN == 0) {
-          break;
+        } else if (temp >= max) {
+          max = temp;
+          iBeg = i;
         }
       }
+
+      if (iBeg > iEnd) {
+        iBeg = 0;
+        max = 0;
+        for (let i = 1; i < count.length; i++) {
+          let temp = count[i] - i/(count.length-2)*count[count.length-1]
+          if (temp >= max) {
+            max = temp;
+            iBeg = i;
+          }
+        }
+      }
+
       maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
       return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
     }
 
-    let requestFailed = true;
-    httpGetAsync(url, (response: string) => {
-      let dataTable: number[][] = JSON.parse(response);
-      chart.data.datasets[0].data = modelFilter(dataTable)[0];
-      chart.data.datasets[1].data = modelFilter(dataTable)[1];
-      chart.update("none");
-      callback(); //needs to be asyncronous
-      if (graphScaleMode === "model") {
-        graphScale[0] = modelFilter(dataTable)[2];
-        chartRescale([chart], modelForm, [scaleLimitIndex[c]], graphScaleMode, graphScale);
-      }
-      requestFailed = false;
-    });
-    if (requestFailed)
-      callback();//We need this to run anyways if the request fails
+    httpGetAsync(url,
+        (response: string) => {
+          let dataTable: number[][] = JSON.parse(response);
+          chart.data.datasets[0].data = modelFilter(dataTable)[0];
+          chart.data.datasets[1].data = modelFilter(dataTable)[1];
+          chart.update("none");
+          callback()
+        },
+        ()=>{callback()},
+    );
     const reveal: string[] = [
       modelForm[redKey].value,
       modelForm[blueKey].value,
@@ -910,3 +827,99 @@ export function chartRescale(myCharts: Chart[],
         modelForm["red"].value, modelForm["blue"].value)
     myChart.update()
   }}
+
+export function insertClusterControls(chartCounts:number = 1) {
+  let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
+      '<div class="row">\n' +
+      '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+      "</div>\n" +
+      "</form>\n" +
+      '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
+      '<div class="row">\n' +
+      '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
+      '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+      '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
+      "</div>\n" +
+      '<div class="row">\n' +
+      '<div class="col-sm-4">Blue:</div>\n' +
+      '<div class="col-sm-4">Red:</div>\n' +
+      '<div class="col-sm-4">Luminosity:</div>\n' +
+      "</div>\n" +
+      '<div class="row">\n'
+
+    for (let i = 0; i < chartCounts; i++) {
+      let num = ""
+      if (i !== 0) {
+        num = (i+1).toString()
+      }
+      htmlContent += '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
+          '<option value="B" title="B filter" selected>B</option></div>\n' +
+          '<option value="V" title="V filter">V</option></div>\n' +
+          '<option value="R" title="R filter">R</option></div>\n' +
+          '<option value="I" title="I filter">I</option></select></div>\n' +
+          '<div class="col-sm-4"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
+          '<option value="B" title="B filter">B</option></div>\n' +
+          '<option value="V" title="V filter" selected>V</option></div>\n' +
+          '<option value="R" title="R filter">R</option></div>\n' +
+          '<option value="I" title="I filter">I</option></select></div>\n' +
+          '<div class="col-sm-4"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
+          '<option value="B" title="B filter">B</option></div>\n' +
+          '<option value="V" title="V filter" selected>V</option></div>\n' +
+          '<option value="R" title="R filter">R</option></div>\n' +
+          '<option value="I" title="I filter" >I</option></select></div>\n'
+    }
+
+
+      htmlContent += "</div>\n" + "</form>\n"
+
+
+  document
+      .getElementById("input-div")
+      .insertAdjacentHTML(
+          "beforeend",
+          htmlContent
+      );
+}
+
+export function insertGraphControl(){
+  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+      '<div class = "extra">\n' +
+      '<label class="scaleSelection" id="standardViewLabel">\n' +
+      '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
+      '<div class="radioText">Standard View</div>' +
+      '</label>\n' + '&nbsp;' +
+      '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+      '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
+      '<div class="radioText">Frame on Data</div>' +
+      '</label>\n' + '&nbsp;' +
+      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+      '&nbsp;' +
+      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+      '&nbsp;' +
+      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+      '&nbsp;' +
+      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+      '<div style="padding: 0 6px 0 6px"></div>' +
+      '</div>\n'
+  )
+}
