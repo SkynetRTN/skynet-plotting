@@ -187,8 +187,6 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     })
   );
   // create chart
-  console.log('ayyo');
-
 
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
@@ -402,27 +400,21 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
         modelForm["red"].value, modelForm["blue"].value)
       myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
             modelForm["red2"].value, modelForm["blue2"].value)
-      //console.log("bingus")
       myChart1.update()
       myChart2.update()
     }, 10)
   }
-console.log('ayyo3')
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    console.log('bongus')
     updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax);
-    console.log('bongus')
   };
-console.log('bongus')
   // link chart to table
   hot.updateSettings({
     afterChange: update,
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-  console.log('bongus')
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
@@ -440,20 +432,16 @@ console.log('bongus')
 
   //initializing website
 
-console.log('ayyo4.1')
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
-  console.log('bongus')
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("standardView").click();
-console.log('ayyo4.2')
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x";
   myChart1.options.scales["y"].title.text = "y";
   myChart2.options.plugins.title.text = "";
   myChart2.options.scales["x"].title.text = "x";
   myChart2.options.scales["y"].title.text = "y";
-  console.log('bongus')
   updateLabels(
     myChart1,
     document.getElementById("chart-info-form") as ChartInfoForm,
@@ -470,10 +458,8 @@ console.log('ayyo4.2')
     false,
     false
 );
-console.log('bongus')
 const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
 chartTypeForm.addEventListener("change" , function () {
-console.log("glizzy");
 //destroy the chart
  //testing a bunch of creating charts and destroying them to make the thing work
  myChart1.destroy();
@@ -485,7 +471,6 @@ console.log("glizzy");
   return [hot, myChart1, myChart2, modelForm, graphMinMax];
   
 }
-console.log('bongus')
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
  * and load related information into the table.
@@ -513,15 +498,12 @@ export function cluster2FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     alert("Please upload a CSV file.");
     return;
   }
-console.log('ayyo6.1')
   const reader = new FileReader();
   reader.onload = () => {
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     const modelForm = document.getElementById("model-form") as ModelForm;
-    // console.log(clusterForm.elements['d'].value);
     clusterForm["d"].value = Math.log(3).toString();
     clusterForm["err"].value = "1";
-    // console.log(clusterForm.elements['d'].value);
     clusterForm["err_num"].value = "1";
     modelForm["age"].value = "6.6";
     clusterForm["red"].value = "0";
@@ -679,7 +661,6 @@ console.log('ayyo6.1')
       }
       tableData.push(row);
     });
-    //    console.log(tableData);
 
 
     updateHRModel(modelForm, table, [myChart1, myChart2],
