@@ -157,12 +157,14 @@ function chartType(chart: string) {
         }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
+        objects = [cluster_objects[0], cluster_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, cluster_objects[0], cluster_objects[1] as Chart<'line'>, cluster_objects[3]);
         }
     } else if (chart === 'cluster2') {
         cluster2_objects = cluster2();
+        objects = [cluster2_objects[0], cluster2_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             cluster2FileUpload(evt, cluster2_objects[0], cluster2_objects[1] as Chart<'line'>, cluster2_objects[2] as Chart<'line'>, cluster2_objects[4])
