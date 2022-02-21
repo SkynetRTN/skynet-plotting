@@ -11,7 +11,8 @@ import {
   HRModelRounding,
   HRrainbow,
   httpGetAsync,
-  pointMinMax
+  pointMinMax,
+  graphScale
 } from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
@@ -22,9 +23,9 @@ import { median } from "./my-math";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
- *  @returns {[Handsontable, Chart]}:
+ *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster1(): [Handsontable, Chart, ModelForm] {
+export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
   insertClusterControls();
   //make graph scaling options visible to users
   insertGraphControl();
@@ -40,8 +41,11 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-
+  //default dummy data from util.ts
   const tableData = dummyData;
+
+  //declare graphScale limits
+  let graphMinMax = new graphScale();
 
   //handel scaling options input
   let standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
@@ -53,10 +57,10 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
   let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
   standardViewRadio.addEventListener("click", () => {
-    radioOnclick(standardViewRadio, frameOnDataRadio);
+    radioOnclick(standardViewRadio, frameOnDataRadio, graphMinMax);
   });
   frameOnDataRadio.addEventListener("click", () => {
-    radioOnclick(frameOnDataRadio, standardViewRadio)
+    radioOnclick(frameOnDataRadio, standardViewRadio, graphMinMax)
   });
   standardViewLabel.onmouseover = ()=>{ labelOnHover(standardViewLabel)}
   standardViewLabel.onmouseleave = ()=>{ labelOffHover(standardViewLabel)}
@@ -95,14 +99,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
 
   //only one option can be selected at one time. 
   //The selected option is highlighted by making the background Carolina blue
-  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement): any {
+  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
     radioOnClicked.checked = true;
     setRadioLabelColor(radioOnClicked, true)
     otherRadio.checked = false;
     setRadioLabelColor(otherRadio, false)
-
-    graphScaleMode = radioOnClicked.id === "standardView" ? "auto" : "data"
-    chartRescale([myChart], modelForm, [1], graphScaleMode, graphScale);
+    graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
+    chartRescale([myChart], modelForm, graphMaxMin);
   }
 
   //Alter radio input background color between Carolina blue and white
@@ -128,8 +131,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   }
 
   //Unchecked and reset both radio buttons to white background
-  function zoompanDeactivate(): any {
-    graphScaleMode = null
+  function zoompanDeactivate(graphMaxMin: graphScale): any {
+    graphMaxMin.updateMode(null);
     standardViewRadio.checked = false;
     frameOnDataRadio.checked = false;
     setRadioLabelColor(standardViewRadio, false)
@@ -232,14 +235,14 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate() },
+            onPan: () => { zoompanDeactivate(graphMinMax) },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate() },
+            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         // legend: {
@@ -271,7 +274,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   //update table height and scatter plotting
   const update = function () {
     updateTableHeight(hot);
-    updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
+    updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
   };
 
   // link chart to table
@@ -286,7 +289,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
     function () {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
     },
     frameTime);
 
@@ -294,7 +297,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, hot, [myChart], () => {
       // console.log("Update Scatter")
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], [1]);
+      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
     });
   }, 100);
 
@@ -316,7 +319,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
     false
   );
 
-  return [hot, myChart, modelForm];
+  return [hot, myChart, modelForm, graphMinMax];
 }
 
 /**
@@ -326,11 +329,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm] {
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
  * @param {Chartjs} myChart The chart to be plotted
+ * @param {graphScale} graphMaxMin the graphScale object that includes chart bounding information
  */
 export function clusterFileUpload(
   evt: Event,
   table: Handsontable,
   myChart: Chart<"line">,
+  graphMaxMin: graphScale,
 ) {
   // console.log("clusterFileUpload called");
   const file = (evt.target as HTMLInputElement).files[0];
@@ -487,24 +492,13 @@ export function clusterFileUpload(
           hiddenColumns: { columns: hiddenColumns },
         }); //hide all but the first 3 columns
         updateTableHeight(table);
-        updateScatter(table, [myChart], clusterForm, modelForm, [2], [1]);
+        updateScatter(table, [myChart], clusterForm, modelForm, [2], graphMaxMin);
         document.getElementById("standardView").click();
       });
   };
   reader.readAsText(file);
-  // chartRescale(myChart, modelForm, "auto")
-
 }
 
-
-let graphScaleMode = "auto";
-let graphScale: { [key: string]: number }[] = [
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-  { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, },
-]
 /**
  *  This function takes a form to obtain the 5 parameters (age, metallicity, red, blue, and lum filter)
  *  request HR diagram model from server and plot on the graph.
@@ -640,14 +634,21 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     });
   }}
 
-
+/**
+ *  This function updates scatter data and the boudning scale of the graph
+ *  @param table:         handsontable containing the data
+ *  @param myCharts:      array of chart.js objects, depends on how many you have
+ *  @param modelForm:     modelform that provides filter information
+ *  @param dataSetIndex:  the dataset index in chart declaration: order need to be consistent with myCharts param
+ *  @param graphMaxMin:   the graphScale object that contains chart bounding information
+ */
 export function updateScatter(
     table: Handsontable,
     myCharts: Chart[],
     clusterForm: ClusterForm,
     modelForm: ModelForm,
     dataSetIndex: number[],
-    scaleLimitIndex: number[],
+    graphMaxMin: graphScale,
 ) {
   // console.log('scatter')
   console.trace()
@@ -729,12 +730,12 @@ export function updateScatter(
     while (chart.length !== start) {
       chart.pop();
     }
-    graphScale[scaleLimitIndex[c]] = scaleLimits;
+    graphMaxMin.updateDataLimit(c, scaleLimits);
     myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
         modelForm["red"].value, modelForm["blue"].value)
-    if (graphScaleMode !== null) {
-      graphScale[scaleLimitIndex[c]] = scaleLimits;
-      chartRescale([myChart], modelForm, [scaleLimitIndex[c]], graphScaleMode, graphScale);
+    if (graphMaxMin.getMode() !== null) {
+      graphMaxMin.updateDataLimit(c, scaleLimits);
+      chartRescale([myChart], modelForm, graphMaxMin);
     } else {
       myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
           modelForm[redKey].value, modelForm[blueKey].value)
@@ -743,12 +744,16 @@ export function updateScatter(
   }}
 
 
-// rescale scatter to contain all the data points
+/**
+ *  This function rescale the chart
+ *  @param myCharts:    array of charts that need to be rescaled
+ *  @param modelForm:   modelform that provides filter information
+ *  @param graphMaxMin: the graphScale object
+ *  @param option: overwrite the existing zooming option
+ */
 export function chartRescale(myCharts: Chart[],
                              modelForm: ModelForm,
-                             scaleLimitIndex: number[],
-                             graphScaleMode: string,
-                             graphScale: { [key: string]: number }[],
+                             graphMaxMin: graphScale,
                              option: string = null) {
   for (let c = 0; c < myCharts.length; c++)
   {
@@ -757,14 +762,9 @@ export function chartRescale(myCharts: Chart[],
     let xBuffer: number = 0;
     let yBuffer: number = 0;
     for (let key in adjustScale) {
-      let frameOn: string = option === null ? graphScaleMode : (graphScaleMode = option);
-      let frameParam: { [key: string]: number[] } = {
-        'model': [0, 0],
-        'data': [scaleLimitIndex[c], scaleLimitIndex[c]],
-        'both': [0, scaleLimitIndex[c]],
-        'auto': [NaN]}
+      let frameOn: string = option === null ? graphMaxMin.getMode() : graphMaxMin.updateMode(option);
 
-      if (isNaN(frameParam[frameOn][0])) {
+      if (frameOn === "auto") {
         let magList: string[] = ['red', 'blue', 'bright'];
         let filters: string[] = [modelForm['red'].value, modelForm['blue'].value, modelForm['lum'].value];
         let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
@@ -793,13 +793,20 @@ export function chartRescale(myCharts: Chart[],
         };
 
       } else {
-        if (key.includes('min')) {
-          adjustScale[key] = Math.min(graphScale[frameParam[frameOn][0]][key],
-              graphScale[frameParam[frameOn][1]][key])
-        } else {
-          adjustScale[key] = Math.max(graphScale[frameParam[frameOn][0]][key],
-              graphScale[frameParam[frameOn][1]][key])
+        if (frameOn === "both") {
+          if (key.includes('min')) {
+            adjustScale[key] = Math.min(graphMaxMin.getDataLimit(c)[key],
+                graphMaxMin.getModelLimit()[key]);
+          } else {
+            adjustScale[key] = Math.max(graphMaxMin.getDataLimit(c)[key],
+                graphMaxMin.getModelLimit()[key]);
+          }
+        } else if (frameOn === "data") {
+          adjustScale[key] = graphMaxMin.getDataLimit(c)[key];
+        } else if (frameOn === "model") {
+          adjustScale[key] = graphMaxMin.getModelLimit()[key];
         }
+
         xBuffer = (adjustScale["maxX"] - adjustScale["minX"]) * 0.2;
         yBuffer = (adjustScale["maxY"] - adjustScale["minY"]) * 0.2;
         let minbuffer = 0.1;
@@ -815,19 +822,21 @@ export function chartRescale(myCharts: Chart[],
     myChart.options.scales["y"].min = adjustScale["minY"] - yBuffer
     myChart.options.scales["y"].max = adjustScale["maxY"] + yBuffer
     myChart.options.scales["y"].reverse = true
-    //myChart.options.scales["y"].suggestedMin = 0
 
     myChart.options.scales["x"].min = adjustScale["minX"] - xBuffer
     myChart.options.scales["x"].max = adjustScale["maxX"] + xBuffer
     myChart.options.scales["x"].type = "linear"
-    //myChart.options.scales["x"].position = "bottom"
-    //what is ^this^ for?
 
     myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
         modelForm["red"].value, modelForm["blue"].value)
     myChart.update()
-  }}
+  }
+}
 
+/**
+ *  This function insert the clusterform and modelform into the website
+ *  @param chartCounts: how many charts need to be controlled
+ */
 export function insertClusterControls(chartCounts:number = 1) {
   let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
       '<div class="row">\n' +
@@ -901,6 +910,10 @@ export function insertClusterControls(chartCounts:number = 1) {
       );
 }
 
+
+/**
+ *  This function insert graph control buttons into the HTML
+ */
 export function insertGraphControl(){
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
       '<div class = "extra">\n' +

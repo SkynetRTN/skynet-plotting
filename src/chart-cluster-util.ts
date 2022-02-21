@@ -557,13 +557,11 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
 }
 
 export class graphScale {
-        mode: string;
-        modelLimits: { [key: string]: number };
-        dataLimits: { [key: string]: number }[];
+        mode: string = "auto";
+        modelLimits: { [key: string]: number } = { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, };
+        dataLimits: { [key: string]: number }[] = [];
 
         constructor(chartCount:number = 1) {
-                this.mode = "auto";
-                this.modelLimits = { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, };
                 for (let i = 0; i < chartCount; i++) {
                         this.dataLimits.push({ minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, })
                 }
@@ -579,12 +577,13 @@ export class graphScale {
                 this.modelLimits = coordinates;
         }
         getModelLimit() {
-                return this.dataLimits;
+                return this.modelLimits;
         }
         getMode() {
                 return this.mode;
         }
-        changeMode(newMode: string) {
+        updateMode(newMode: string):string {
                 this.mode = newMode;
+                return newMode
         }
 }
