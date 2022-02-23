@@ -580,9 +580,9 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     let blueKey = modelFormKey(chartNum, 'blue')
     let redKey = modelFormKey(chartNum, 'red')
     let lumKey = modelFormKey(chartNum, 'lum')
-    return "http://localhost:5000/isochrone?" //local testing url
-        // let url = "http://152.2.18.8:8080/isochrone?" //testing server url
-        // let url = "https://skynet.unc.edu/graph-api/isochrone?" //production url
+    //return "http://localhost:5000/isochrone?" //local testing url
+    //return "http://152.2.18.8:8080/isochrone?" //testing server url
+    return "https://skynet.unc.edu/graph-api/isochrone?" //production url
         + "age=" + HRModelRounding(form['age_num'].value)
         + "&metallicity=" + HRModelRounding(form['metal_num'].value)
         + "&filters=[%22" + form[blueKey].value
