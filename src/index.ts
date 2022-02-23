@@ -250,12 +250,6 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartid: number 
                 myChart.data.datasets[i].label = labels[p++];
             }
         }
-    //work around for updating chart2 axis label in cluster2
-    } else if (chartid ===2) {
-        // @ts-ignore
-        (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x2Axis'].value;
-        // @ts-ignore
-        (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y2Axis'].value;
     }
 
     myChart.update('none');
