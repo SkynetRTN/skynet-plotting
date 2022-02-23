@@ -273,7 +273,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
         },
         title: {
           display: true,
-          align: "end",
+          align: "start",
           padding: {
             top: 45,
             bottom: 5,
@@ -380,8 +380,12 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
             onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
+        title: {
+          align: 'end',
+          color: 'white',
+        },
         legend: {
-          align: "start",
+          align: "end",
           labels: {
             filter: function(item) {
               // Logic to remove a particular legend item goes here
