@@ -640,7 +640,6 @@ export function updateScatter(
 ) {
   for (let c = 0; c < myCharts.length; c++) {
     if (specificChart < 0 || specificChart === c) {
-      console.log(specificChart + " " + c)
       let myChart = myCharts[c];
       let err = parseFloat(clusterForm["err_num"].value);
       let dist = parseFloat(clusterForm["d_num"].value);
@@ -752,7 +751,6 @@ export function chartRescale(myCharts: Chart[],
           modelForm[modelFormKey(adjustedC, 'red')].value,
           modelForm[modelFormKey(adjustedC, 'blue')].value,
           modelForm[modelFormKey(adjustedC, 'lum')].value];
-        console.log(filters);
         let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
         let magIndex: number[] = [0, 0, 0];
         for (let i = 0; i < magList.length; i++) {
