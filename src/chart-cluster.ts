@@ -532,7 +532,11 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     form.pop();
     //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
     // Call it iBeg. KEEP all points before iBeg.
-    for (let i = 0; i < deltaXs.length; i++) {
+    let N = deltaXs.length -3
+    let c1: number = 0;
+    let c2: number = 0;
+    let c3: number = 0;
+    for (let i = 0; i <= N; i++) {
       let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
       if (i > 0 && i < deltaXs.length -1 ) {
         if (delta < (2 ** 0.5)) {
@@ -541,18 +545,34 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
           count.push(count[i-1] + 1)
         }
       }
+      let sqaure: number = (i ** 2) - N*i
+      c1 += count[i] * sqaure;
+      c2 += i * sqaure;
+      c3 += sqaure ** 2;
       deltas.push(delta);
     }
+    let countN = count[count.length-1]
+    c2 *= countN/N;
+    let c = (c1 - c2) / c3
+    let b = countN/N - c*N
+
+    // let a: number = 0;
+    // let y: number[] = [0];
+    // for (let i = 1; i <= N; i++) {
+    //   y.push((a + b * i + c * i ** 2))
+    // }
+    // console.log(y)
+
     //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
     // Call it iEnd. REMOVE all points after iEnd.
-    let N = count.length - 2;
     let iBeg: number = 0; //init iBeg to be 0
     let iEnd: number = N; //init iEnd as the last the last count
     let min = 0;
     let max = 0;
     deltas.shift();
-    for (let i = 1; i < count.length; i++) {
+    for (let i = 1; i <= N; i++) {
       let temp = count[i] - i/N*count[N+1]
+      // let temp = b * i + c * (i ** 2);
       if (temp < min) {
         min = temp;
         iEnd = i;
@@ -564,25 +584,26 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     if (iBeg > iEnd) {
       iBeg = 0;
       max = 0;
-      for (let i = 1; i < count.length; i++) {
-        let temp = count[i] - i/(count.length-2)*count[count.length-1]
+      for (let i = 1; i < iEnd; i++) {
+        let temp = count[i] - i/(N)*count[count.length-1]
         if (temp >= max) {
           max = temp;
           iBeg = i;
         }
       }
     }
+    // console.log(count.length)
     maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
-    return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
+    return [form.slice(iBeg, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
   }
 
   function generateURL(form: ModelForm, chartNum: number) {
     let blueKey = modelFormKey(chartNum, 'blue')
     let redKey = modelFormKey(chartNum, 'red')
     let lumKey = modelFormKey(chartNum, 'lum')
-    //return "http://localhost:5000/isochrone?" //local testing url
+    return "http://localhost:5000/isochrone?" //local testing url
     //return "http://152.2.18.8:8080/isochrone?" //testing server url
-    return "https://skynet.unc.edu/graph-api/isochrone?" //production url
+    // return "https://skynet.unc.edu/graph-api/isochrone?" //production url
         + "age=" + HRModelRounding(form['age_num'].value)
         + "&metallicity=" + HRModelRounding(form['metal_num'].value)
         + "&filters=[%22" + form[blueKey].value
