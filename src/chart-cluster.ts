@@ -96,7 +96,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
     clearInterval(zoom);
   }
 
-  //only one option can be selected at one time. 
+  //only one option can be selected at one time.
   //The selected option is highlighted by making the background Carolina blue
   function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
     radioOnClicked.checked = true;
@@ -590,7 +590,6 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
           }
         }
       }
-
       maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
       return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
     }
@@ -598,8 +597,9 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     httpGetAsync(url,
         (response: string) => {
           let dataTable: number[][] = JSON.parse(response);
-          chart.data.datasets[0].data = modelFilter(dataTable)[0];
-          chart.data.datasets[1].data = modelFilter(dataTable)[1];
+          let filteredModel = modelFilter(dataTable);
+          chart.data.datasets[0].data = filteredModel[0];
+          chart.data.datasets[1].data = filteredModel[1];
           chart.update("none");
           callback()
         },
