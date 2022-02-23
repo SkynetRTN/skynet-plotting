@@ -423,9 +423,9 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart1, myChart2], () => {
-      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax);
-      });
+    updateHRModel(modelForm, hot, [myChart1, myChart2], (chartNum: number) => {
+      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, chartNum);}
+    );
    }, 100);
 
   //initializing website
