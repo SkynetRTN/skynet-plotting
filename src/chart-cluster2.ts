@@ -456,7 +456,8 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     false,
     false,
     false,
-    false
+    false,
+      2
 );
 const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
 chartTypeForm.addEventListener("change" , function () {

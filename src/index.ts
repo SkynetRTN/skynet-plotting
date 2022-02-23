@@ -103,14 +103,9 @@ function chartType(chart: string) {
             document.getElementById('chart-div'+i.toString()).style.display = 'none';
         }
     }
-    // document.getElementById('chart-div1').innerHTML =
-    //     '<canvas id="myChart1" width=300 height=200></canvas>'
-    // document.getElementById('chart-div2').innerHTML =
-    //     '<canvas id="myChart2" width=300 height=200></canvas>'
-    // document.getElementById('chart-div3').innerHTML =
-    //     '<canvas id="myChart3" width=300 height=200></canvas>'
-    // document.getElementById('chart-div4').innerHTML =
-    //     '<canvas id="myChart4" width=300 height=200></canvas>'
+    //expand the size of axisSet1 and hide axisSet2 for all interfaces
+    document.getElementById('axisSet1').className = 'col-sm-12';
+    document.getElementById('axisSet2').style.display = 'none';
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
     //remove display of 2 axis labels
@@ -196,6 +191,9 @@ function chartType(chart: string) {
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
         updateChartInfo(objects[1], chartInfoForm);
+        if (chart === 'cluster2') {
+            updateChartInfo(cluster2_objects[2], chartInfoForm, 2)
+        }
     };
     objects[1].update('none');
 
@@ -239,18 +237,27 @@ function setChartDefaults() {
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
  */
-function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
+function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartid: number = 1) {
     const elements = form.elements as ChartInfoFormElements;
-    myChart.options.plugins.title.text = elements['title'].value;
-    const labels = elements['data'].value.split(',').map((item: string) => item.trim());
-    let p = 0;
-    for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
-            myChart.data.datasets[i].label = labels[p++];
+    if (chartid === 1) {
+        (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['xAxis'].value;
+        (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['yAxis'].value;
+        myChart.options.plugins.title.text = elements['title'].value;
+        const labels = elements['data'].value.split(',').map((item: string) => item.trim());
+        let p = 0;
+        for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
+            if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
+                myChart.data.datasets[i].label = labels[p++];
+            }
         }
+    //work around for updating chart2 axis label in cluster2
+    } else if (chartid ===2) {
+        // @ts-ignore
+        (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x2Axis'].value;
+        // @ts-ignore
+        (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y2Axis'].value;
     }
-    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['xAxis'].value;
-    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['yAxis'].value;
+
     myChart.update('none');
 }
 
@@ -291,15 +298,3 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }
-//make it work later
-// const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
-// chartTypeForm.addEventListener("change" , function () {
-// console.log("globlin");
-// //destroy the chart
-//  //testing a bunch of creating charts and destroying them to make the thing work
-//  (document.getElementById("myChart")).remove();
-//  (document.getElementById("myChart1")).remove();
-//  (document.getElementById("myChart2")).remove();
-//  (document.getElementById("myChart3")).remove();
-//  (document.getElementById("myChart4")).remove();
-// });
