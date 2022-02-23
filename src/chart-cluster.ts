@@ -18,7 +18,6 @@ import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { median } from "./my-math";
-// import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
 /**
@@ -553,22 +552,25 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       // Call it iBeg. KEEP all points before iBeg.
       for (let i = 0; i < deltaXs.length; i++) {
         let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
-        if (delta < (2 ** 0.5)) {
-          count.push(count[i-1] - 1)
-        } else {
-          count.push(count[i-1] + 1)
+        if (i > 0 && i < deltaXs.length -1 ) {
+          if (delta < (2 ** 0.5)) {
+            count.push(count[i-1] - 1)
+          } else {
+            count.push(count[i-1] + 1)
+          }
         }
         deltas.push(delta);
       }
       //From the end of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
       // Call it iEnd. REMOVE all points after iEnd.
+      let N = count.length - 2;
       let iBeg: number = 0; //init iBeg to be 0
-      let iEnd: number = count.length - 2; //init iEnd as the last the last count
+      let iEnd: number = N; //init iEnd as the last the last count
       let min = 0;
       let max = 0;
       deltas.shift();
       for (let i = 1; i < count.length; i++) {
-        let temp = count[i] - i/(count.length-2)*count[count.length-1]
+        let temp = count[i] - i/N*count[N+1]
         if (temp < min) {
           min = temp;
           iEnd = i;
@@ -577,7 +579,6 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
           iBeg = i;
         }
       }
-
       if (iBeg > iEnd) {
         iBeg = 0;
         max = 0;
