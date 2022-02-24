@@ -42,7 +42,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 3, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
 
   const tableData = dummyData;
@@ -156,7 +156,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 0.75,
+      aspectRatio: 0.7275,
       hover: {
         mode: "nearest",
       },
@@ -189,8 +189,8 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           display: true,
           align: "start",
           padding: {
-            top: 45,
-            bottom: 5,
+            top: 10,
+            bottom: 14,
           }
         },
         legend: {
@@ -263,7 +263,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 0.75,
+      aspectRatio: 0.7275,
       hover: {
         mode: "nearest",
       },
@@ -293,8 +293,13 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           },
         },
         title: {
+          display: true,
           align: 'end',
           color: 'white',
+          padding: {
+            top: 10,
+            bottom: -14,
+          }
         },
         legend: {
           align: "end",
