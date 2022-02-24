@@ -602,6 +602,7 @@ export class ChartScaleControl {
         zoomIn: HTMLInputElement;
         zoomOut: HTMLInputElement;
         charts: Chart [];
+        chartCount: number;
         modelForm: ModelForm;
         chartScale: graphScale;
 
@@ -609,6 +610,7 @@ export class ChartScaleControl {
                 this.charts = charts;
                 this.modelForm = modelForm;
                 this.chartScale = chartScale;
+                this.chartCount = charts.length;
                 this.insertGraphControl();
                 this.standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
                 this.frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
@@ -642,36 +644,40 @@ export class ChartScaleControl {
         }
 
         private panAddEventListener(){
-                let pan: number
-                let mycharts = this.charts;
-                this.panLeft.onmousedown = function() {
-                        pan = setInterval( () => {mycharts[0].pan(-5)}, 20 )
-                }
-                this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
-                        clearInterval(pan);
-                }
-                this.panRight.onmousedown = function() {
-                        pan = setInterval( () => {mycharts[0].pan(5)}, 20 )
-                }
-                this.panRight.onmouseup = this.panRight.onmouseleave = function () {
-                        clearInterval(pan);
+                for (let i = 0; i < this.chartCount; i++) {
+                        let pan: number;
+                        let chart = this.charts[i];
+                        this.panLeft.onmousedown = function() {
+                                pan = setInterval( () => {chart.pan(-5)}, 20 );
+                        }
+                        this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
+                                clearInterval(pan);
+                        }
+                        this.panRight.onmousedown = function() {
+                                pan = setInterval( () => {chart.pan(5)}, 20 );
+                        }
+                        this.panRight.onmouseup = this.panRight.onmouseleave = function () {
+                                clearInterval(pan);
+                        }
                 }
         }
 
         private zoomAddEventListener(){
-                let zoom: number;
-                let mycharts = this.charts;
-                this.zoomIn.onmousedown = function () {
-                        zoom = setInterval(() => { mycharts[0].zoom(1.03) }, 20);;
-                }
-                this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
-                        clearInterval(zoom);
-                }
-                this.zoomOut.onmousedown = function () {
-                        zoom = setInterval(() => { mycharts[0].zoom(0.97); }, 20);;
-                }
-                this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
-                        clearInterval(zoom);
+                for (let i = 0; i < this.chartCount; i++) {
+                        let zoom: number;
+                        let chart= this.charts[i];
+                        this.zoomIn.onmousedown = function () {
+                                zoom = setInterval(() => { chart.zoom(1.03) }, 20);;
+                        }
+                        this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
+                                clearInterval(zoom);
+                        }
+                        this.zoomOut.onmousedown = function () {
+                                zoom = setInterval(() => { chart.zoom(0.97); }, 20);;
+                        }
+                        this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
+                                clearInterval(zoom);
+                        }
                 }
         }
 
@@ -715,11 +721,14 @@ export class ChartScaleControl {
                 this.frameOnDataRadio.checked = false;
                 this.setRadioLabelColor(this.standardViewRadio, false)
                 this.setRadioLabelColor(this.frameOnDataRadio, false)
-                setTimeout(function () {
-                        this.charts[0].data.datasets[2].backgroundColor = HRrainbow(this.charts[0],
-                            this.modelForm["red"].value, this.modelForm["blue"].value)
-                        this.charts[0].update()
-                }, 5)
+                for (let i = 0; i < this.chartCount; i++) {
+                        let chart = this.charts[i];
+                        setTimeout(function () {
+                                chart.data.datasets[2].backgroundColor = HRrainbow(chart,
+                                    this.modelForm["red"].value, this.modelForm["blue"].value)
+                                chart.update()
+                        }, 5)
+                }
         }
 
 
