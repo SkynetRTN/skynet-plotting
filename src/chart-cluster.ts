@@ -525,20 +525,18 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
         deltaYs.push(deltaY);
       }
     }
-    deltaXs.shift();
-    deltaYs.shift();
     let xMedianValue: number = median(deltaXs);
     let yMedianValue: number = median(deltaYs);
-    form.pop();
     //From the beginning of delta_i, find the nth = 1st i such that delta_i < sqrt(2).
     // Call it iBeg. KEEP all points before iBeg.
-    let N = deltaXs.length -3
+    let N = deltaXs.length
     let c1: number = 0;
     let c2: number = 0;
     let c3: number = 0;
-    for (let i = 0; i <= N; i++) {
-      let delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
-      if (i > 0 && i < deltaXs.length -1 ) {
+    for (let i = 0; i < N; i++) {
+      let delta = 0
+      if (i > 0) {
+        delta = ((deltaXs[i] / xMedianValue) ** 2 + (deltaYs[i] / yMedianValue) ** 2) ** 0.5
         if (delta < (2 ** 0.5)) {
           count.push(count[i-1] - 1)
         } else {
@@ -551,7 +549,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       c3 += sqaure ** 2;
       deltas.push(delta);
     }
-    let countN = count[count.length-1]
+    let countN = count[N-1]
     c2 *= countN/N;
     let c = (c1 - c2) / c3
     let b = countN/N - c*N
@@ -571,8 +569,8 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     let max = 0;
     deltas.shift();
     for (let i = 1; i <= N; i++) {
-      let temp = count[i] - i/N*count[N+1]
-      // let temp = b * i + c * (i ** 2);
+      // let temp = count[i] - i/N*count[N+1]
+      let temp = count[i] - (b * i + c * (i ** 2));
       if (temp < min) {
         min = temp;
         iEnd = i;
@@ -585,16 +583,15 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
       iBeg = 0;
       max = 0;
       for (let i = 1; i < iEnd; i++) {
-        let temp = count[i] - i/(N)*count[count.length-1]
+        let temp = count[i] - i/(N)*count[N-1]
         if (temp >= max) {
           max = temp;
           iBeg = i;
         }
       }
     }
-    // console.log(count.length)
-    maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg, iEnd))) + 1;
-    return [form.slice(iBeg, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
+    maxDeltaIndex = deltas.indexOf(Math.max.apply(null, deltas.slice(iBeg-1, iEnd+1)));
+    return [form.slice(0, maxDeltaIndex), form.slice(maxDeltaIndex, iEnd), scaleLimits]
   }
 
   function generateURL(form: ModelForm, chartNum: number) {
