@@ -3,6 +3,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import {
+  ChartScaleControl,
   dummyData,
   graphScale,
   HRrainbow,
@@ -10,7 +11,7 @@ import {
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {chartRescale, insertClusterControls, insertGraphControl, updateHRModel, updateScatter } from "./chart-cluster";
+import {insertClusterControls, updateHRModel, updateScatter } from "./chart-cluster";
 // import { rad } from "./my-math";
 
 Chart.register(zoomPlugin);
@@ -21,9 +22,8 @@ Chart.register(zoomPlugin);
 export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] {
     insertClusterControls(2);
     //make graph scaling options visible to users
-    //document.getElementById("extra-options").style.display = "inline"
-    insertGraphControl();
-    //setup two charts
+
+  //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('chart-div1').style.display = 'inline';
     document.getElementById('chart-div2').style.display = 'inline';
@@ -49,92 +49,6 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
 
   //declare graphScale limits
   let graphMinMax = new graphScale(2);
-
-  //handel scaling options input
-  let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
-  let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
-  let panLeft = document.getElementById("panLeft") as HTMLInputElement;
-  let panRight = document.getElementById("panRight") as HTMLInputElement;
-  let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
-  let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
-  standardViewRadio.addEventListener("click", () => {
-    radioOnclick(standardViewRadio, frameOnDataRadio, graphMinMax);
-  });
-  frameOnDataRadio.addEventListener("click", () => {
-    radioOnclick(frameOnDataRadio, standardViewRadio, graphMinMax)
-  });
-   let pan: number;
-    let pan2: number;
-   panLeft.onmousedown = function() {
-     pan = setInterval( () => {myChart1.pan(5)}, 20 );
-     pan2 = setInterval( () => {myChart2.pan(5)}, 20 );
-  }
-  panLeft.onmouseup = panLeft.onmouseleave = function() {
-    clearInterval(pan);
-    clearInterval(pan2);
-  }
-  panRight.onmousedown = function() {
-    pan = setInterval( () => {myChart1.pan(-5)}, 20 );
-    pan2 = setInterval( () => {myChart2.pan(-5)}, 20 );
-  }
-  panRight.onmouseup = panRight.onmouseleave = function() {
-    clearInterval(pan);
-    clearInterval(pan2);
-  }
-
-  //handel zoom/pan buttons
-  let zoom: number;
-  let zoom2: number;
-  zoomIn.onmousedown = function() {
-    zoom = setInterval( () => {myChart1.zoom(1.03)} , 20);;
-    zoom2 = setInterval( () => {myChart2.zoom(1.03)} , 20);;
-  }
-  zoomIn.onmouseup = zoomIn.onmouseleave = function() {
-    clearInterval(zoom);
-    clearInterval(zoom2);
-  }
-  zoomOut.onmousedown = function() {
-    zoom = setInterval(()=>{myChart1.zoom(0.97);}, 20);;
-    zoom2 = setInterval(()=>{myChart2.zoom(0.97);}, 20);;
-  }
-  zoomOut.onmouseup = zoomOut.onmouseleave = function() {
-    clearInterval(zoom);
-    clearInterval(zoom2);
-  }
-  //only one option can be selected at one time. 
-  //The selected option is highlighted by making the background Carolina blue
-  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
-    radioOnClicked.checked = true;
-    setRadioLabelColor(radioOnClicked, true)
-    otherRadio.checked = false;
-    setRadioLabelColor(otherRadio, false)
-
-    graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
-    chartRescale([myChart1, myChart2], modelForm, graphMaxMin)
-  }
-
-//Alter radio input background color between Carolina blue and white
-  function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    document.getElementById(radio.id + "Label").style.backgroundColor = activate ? "#4B9CD3" : "white"
-  }
-//remember you may have to change the dependencies here to work for the chart
-  function zoompanDeactivate(graphMaxMin: graphScale): any {
-    graphMaxMin.updateMode(null);
-    standardViewRadio.checked = false;
-    frameOnDataRadio.checked = false;
-    setRadioLabelColor(standardViewRadio, false)
-    setRadioLabelColor(frameOnDataRadio, false)
-    setTimeout(function () {
-      myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
-        modelForm["red"].value, modelForm["blue"].value)
-      myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
-        modelForm["red2"].value, modelForm["blue2"].value)
-      myChart2.update()
-      myChart1.update()
-    }, 5)
-
-  }
-
 
   // create table
   const container = document.getElementById("table-div");
@@ -263,14 +177,12 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate(graphMinMax) },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         title: {
@@ -301,7 +213,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
 
   const ctx2 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
-    const myChart2 = new Chart(ctx2, {
+  const myChart2 = new Chart(ctx2, {
         type: "line",
     data: {
       labels: ["Model", "Data"],
@@ -372,14 +284,12 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate(graphMinMax) },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         title: {
@@ -398,6 +308,15 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
       }
     },
   });
+
+  //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
+  let graphControl = new ChartScaleControl([myChart1, myChart2], modelForm, graphMinMax);
+  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate()};
+  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate()};
+  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate()};
+  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate()};
+
+
 
   //Adjust the gradient with the window size
   window.onresize = function () {
