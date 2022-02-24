@@ -16,6 +16,7 @@ import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1, clusterFileUpload } from './chart-cluster';
 import { cluster2, cluster2FileUpload } from './chart-cluster2';
+import { cluster4, cluster4FileUpload } from './chart-cluster4';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
@@ -121,6 +122,7 @@ function chartType(chart: string) {
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart, ModelForm, graphScale]
     let cluster2_objects: [Handsontable, Chart, Chart, ModelForm, graphScale]
+    let cluster4_objects: [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale]
 
     if (chart === 'curve') {
         objects = curve();
@@ -163,6 +165,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             cluster2FileUpload(evt, cluster2_objects[0], cluster2_objects[1] as Chart<'line'>, cluster2_objects[2] as Chart<'line'>, cluster2_objects[4])
+        }
+    } else if (chart === 'cluster4') {
+        cluster4_objects = cluster4();
+        objects = [cluster4_objects[0], cluster4_objects[1]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            cluster4FileUpload(evt, cluster4_objects[0], cluster4_objects[1] as Chart<'line'>, cluster4_objects[2] as Chart<'line'>, cluster4_objects[3] as Chart<'line'>, cluster4_objects[4] as Chart<'line'>, cluster4_objects[6]);
         }
 
     } else if (chart === 'gravity') {
