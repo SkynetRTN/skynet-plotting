@@ -443,38 +443,20 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("standardView").click();
   myChart1.options.plugins.title.text = "Title";
-  myChart1.options.scales["x"].title.text = "x";
-  myChart1.options.scales["y"].title.text = "y";
+  myChart1.options.scales["x"].title.text = "x1";
+  myChart1.options.scales["y"].title.text = "y1";
   myChart2.options.plugins.title.text = "";
-  myChart2.options.scales["x"].title.text = "x";
-  myChart2.options.scales["y"].title.text = "y";
-  updateLabels(
-    myChart1,
-    document.getElementById("chart-info-form") as ChartInfoForm,
-    false,
-    false,
-    false,
-    false
-  );
-  updateLabels(
-    myChart2,
-    document.getElementById("chart-info-form") as ChartInfoForm,
-    false,
-    false,
-    false,
-    false,
-      2
-);
-const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
-chartTypeForm.addEventListener("change" , function () {
-//destroy the chart
- //testing a bunch of creating charts and destroying them to make the thing work
- myChart1.destroy();
- myChart2.destroy();
-
- //(document.getElementById("myChart1")).remove();
- //(document.getElementById("myChart2")).remove();
-});
+  myChart2.options.scales["x"].title.text = "x2";
+  myChart2.options.scales["y"].title.text = "y2";
+  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm);
+  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 2);
+  const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+  chartTypeForm.addEventListener("change" , function () {
+    //destroy the chart
+    //testing a bunch of creating charts and destroying them to make the thing work
+    myChart1.destroy();
+    myChart2.destroy();
+  });
   return [hot, myChart1, myChart2, modelForm, graphMinMax];
   
 }
