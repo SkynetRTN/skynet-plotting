@@ -611,7 +611,7 @@ export class ChartScaleControl {
                 this.modelForm = modelForm;
                 this.chartScale = chartScale;
                 this.chartCount = charts.length;
-                this.insertGraphControl();
+                this.insertGraphControl(this.chartCount);
                 this.standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
                 this.frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
                 this.standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
@@ -778,10 +778,18 @@ export class ChartScaleControl {
         }
 
 
-        private insertGraphControl(){
-                document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-                    '<div class = "extra">\n' +
-                    '<label class="scaleSelection" id="standardViewLabel">\n' +
+        private insertGraphControl(chartCount: number = 1){
+                let html = '<div class = "extra" id = "scaleGraphNo">\n';
+
+                if (chartCount > 1) {
+                        html += '<select class = "graph"> '
+                        for (let i = 0; i < chartCount; i++) {
+                                html += '<option value = "' + (i+1).toString() + '">' + 'Chart ' + (i+1).toString() + '</option>'
+                        }
+                        html += '</select>'
+                }
+
+                html += '<label class="scaleSelection" id="standardViewLabel">\n' +
                     '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
                     '<div class="radioText">Standard View</div>' +
                     '</label>\n' + '&nbsp;' +
@@ -798,6 +806,6 @@ export class ChartScaleControl {
                     '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
                     '<div style="padding: 0 6px 0 6px"></div>' +
                     '</div>\n'
-                )
+                document.getElementById("extra-options").insertAdjacentHTML("beforeend", html)
         }
 }
