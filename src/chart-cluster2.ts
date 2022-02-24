@@ -311,10 +311,10 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
 
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart1, myChart2], modelForm, graphMinMax);
-  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate()};
-  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate()};
-  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate()};
-  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate()};
+  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)};
+  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
+  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
 
 
 

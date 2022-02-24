@@ -1,6 +1,6 @@
 import Chart from "chart.js/auto";
 import { Color } from "chart.js";
-import { chartRescale } from "./chart-cluster";
+import { chartRescale, modelFormKey } from "./chart-cluster";
 
 export const dummyData: { [key: string]: any}[] = [
         { B: 18.807516, Berr: 1.306704865, V: 18.19052002, Verr: 0.7973605, R: 18.11280155, Rerr: 0.723537231, I: 17.79363434, Ierr: 0.557995614 },
@@ -644,40 +644,86 @@ export class ChartScaleControl {
         }
 
         private panAddEventListener(){
+                let panLeftFunctions: Function[] = [];
+                let panRightFunctions: Function[] = [];
+                let pans: number[] =[];
+                let run = this.run;
+                let clear= this.clear;
                 for (let i = 0; i < this.chartCount; i++) {
-                        let pan: number;
                         let chart = this.charts[i];
-                        this.panLeft.onmousedown = function() {
-                                pan = setInterval( () => {chart.pan(-5)}, 20 );
-                        }
-                        this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
-                                clearInterval(pan);
-                        }
-                        this.panRight.onmousedown = function() {
-                                pan = setInterval( () => {chart.pan(5)}, 20 );
-                        }
-                        this.panRight.onmouseup = this.panRight.onmouseleave = function () {
-                                clearInterval(pan);
-                        }
+                        pans.push(0)
+                        panLeftFunctions.push(
+                            ()=>{
+                                    pans[i] =  setInterval( () => {chart.pan(-5)}, 20 );
+                            }
+                        )
+                        panRightFunctions.push(
+                            ()=>{
+                                    pans[i] =  setInterval( () => {chart.pan(5)}, 20 );
+                            }
+                        )
                 }
+                this.panLeft.onmousedown = function() {
+                        run(panLeftFunctions);
+                }
+                this.panRight.onmousedown = function() {
+                       run(panRightFunctions);
+                }
+                this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
+                        clear(pans);
+                        console.log('yes')
+                }
+                this.panRight.onmouseup = this.panRight.onmouseleave = function () {
+                        clear(pans);
+                }
+
+
         }
 
         private zoomAddEventListener(){
+                let zoomInFunctions: Function[] = [];
+                let zoomOutFunctions: Function[] = [];
+                let zooms: number[] =[];
+                let run = this.run;
+                let clear= this.clear;
                 for (let i = 0; i < this.chartCount; i++) {
-                        let zoom: number;
-                        let chart= this.charts[i];
-                        this.zoomIn.onmousedown = function () {
-                                zoom = setInterval(() => { chart.zoom(1.03) }, 20);;
-                        }
-                        this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
-                                clearInterval(zoom);
-                        }
-                        this.zoomOut.onmousedown = function () {
-                                zoom = setInterval(() => { chart.zoom(0.97); }, 20);;
-                        }
-                        this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
-                                clearInterval(zoom);
-                        }
+                        let chart = this.charts[i];
+                        zooms.push(0)
+                        zoomInFunctions.push(
+                            ()=>{
+                                    zooms[i] =  setInterval( () => {chart.zoom(1.03)}, 20 );
+                            }
+                        )
+                        zoomOutFunctions.push(
+                            ()=>{
+                                    zooms[i] =  setInterval( () => {chart.zoom(0.97)}, 20 );
+                            }
+                        )
+                }
+                this.zoomIn.onmousedown = function() {
+                        run(zoomInFunctions);
+                }
+                this.zoomOut.onmousedown = function() {
+                        run(zoomOutFunctions);
+                }
+                this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
+                        clear(zooms);
+                }
+                this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
+                        clear(zooms);
+                }
+        }
+
+        //zoom pan helper function: run an array of function one by one
+        run(funcs: Function[]) {
+                for (let i = 0; i < funcs.length; i++) {
+                        funcs[i]();
+                }
+        }
+        //zoom pan helper function: clear an array of interval one by one
+        clear(numbs: number[]) {
+                for (let i = 0; i < numbs.length; i++) {
+                        clearInterval(numbs[i])
                 }
         }
 
@@ -715,7 +761,7 @@ export class ChartScaleControl {
         }
 
         //Unchecked and reset both radio buttons to white background
-        zoompanDeactivate(): any {
+        zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
                 this.chartScale.updateMode(null);
                 this.standardViewRadio.checked = false;
                 this.frameOnDataRadio.checked = false;
@@ -725,7 +771,7 @@ export class ChartScaleControl {
                         let chart = this.charts[i];
                         setTimeout(function () {
                                 chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                                    this.modelForm["red"].value, this.modelForm["blue"].value)
+                                    modelForm[modelFormKey(chartNum, "red")].value, modelForm[modelFormKey(chartNum, "blue")].value)
                                 chart.update()
                         }, 5)
                 }
