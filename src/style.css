@@ -330,3 +330,11 @@ select.graph:hover {
     opacity: 1;
     background-color: #E7E7E7;
 }
+
+label.scaleSelection-graphSelection {
+    /*padding: 0px 6px 10px 6px;*/
+    height: 38px;
+    width: 42px;
+    margin-right: 3px;
+    background-color: white;
+}
