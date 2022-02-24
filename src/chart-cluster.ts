@@ -12,7 +12,8 @@ import {
   HRrainbow,
   httpGetAsync,
   pointMinMax,
-  graphScale
+  graphScale,
+  ChartScaleControl
 } from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
 import { changeOptions, linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
@@ -27,7 +28,6 @@ Chart.register(zoomPlugin);
 export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
   insertClusterControls();
   //make graph scaling options visible to users
-  insertGraphControl();
   document.getElementById('axis-label1').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
   //Declare UX forms. Seperate based on local and server side forms.
@@ -45,103 +45,6 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
 
   //declare graphScale limits
   let graphMinMax = new graphScale();
-
-  //handel scaling options input
-  let standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
-  let frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
-  let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
-  let frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
-  let panLeft = document.getElementById("panLeft") as HTMLInputElement;
-  let panRight = document.getElementById("panRight") as HTMLInputElement;
-  let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
-  let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
-  standardViewRadio.addEventListener("click", () => {
-    radioOnclick(standardViewRadio, frameOnDataRadio, graphMinMax);
-  });
-  frameOnDataRadio.addEventListener("click", () => {
-    radioOnclick(frameOnDataRadio, standardViewRadio, graphMinMax)
-  });
-  standardViewLabel.onmouseover = ()=>{ labelOnHover(standardViewLabel)}
-  standardViewLabel.onmouseleave = ()=>{ labelOffHover(standardViewLabel)}
-  frameOnDataLabel.onmouseover = ()=>{ labelOnHover(frameOnDataLabel)}
-  frameOnDataLabel.onmouseleave = ()=>{labelOffHover(frameOnDataLabel)}
-
-  let pan: number;
-  panLeft.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(-5)}, 20 )
-  }
-  panLeft.onmouseup = panLeft.onmouseleave = function () {
-    clearInterval(pan);
-  }
-  panRight.onmousedown = function() {
-    pan = setInterval( () => {myChart.pan(5)}, 20 )
-  }
-  panRight.onmouseup = panRight.onmouseleave = function () {
-    clearInterval(pan);
-  }
-
-  //handel zoom/pan buttons
-  let zoom: number;
-
-  zoomIn.onmousedown = function () {
-    zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
-  }
-  zoomIn.onmouseup = zoomIn.onmouseleave = function () {
-    clearInterval(zoom);
-  }
-  zoomOut.onmousedown = function () {
-    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
-  }
-  zoomOut.onmouseup = zoomOut.onmouseleave = function () {
-    clearInterval(zoom);
-  }
-
-  //only one option can be selected at one time.
-  //The selected option is highlighted by making the background Carolina blue
-  function radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
-    radioOnClicked.checked = true;
-    setRadioLabelColor(radioOnClicked, true)
-    otherRadio.checked = false;
-    setRadioLabelColor(otherRadio, false)
-    graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
-    chartRescale([myChart], modelForm, graphMaxMin);
-  }
-
-  //Alter radio input background color between Carolina blue and white
-  function setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
-    let radioLabel: HTMLLabelElement = document.getElementById(radio.id + "Label") as HTMLLabelElement
-    radioLabel.style.backgroundColor = activate ? "#4B9CD3" : "white";
-    radioLabel.style.opacity = activate ? "1" : "0.7";
-  }
-
-  function labelOnHover(label: HTMLLabelElement) {
-    if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF") {
-      label.style.backgroundColor = "#E7E7E7";
-    }
-    label.style.opacity = "1";
-  }
-
-  function labelOffHover(label: HTMLLabelElement) {
-    if (label.style.backgroundColor === "rgb(231, 231, 231)") {
-      label.style.backgroundColor = "white";
-      label.style.opacity = "0.7";
-    }
-
-  }
-
-  //Unchecked and reset both radio buttons to white background
-  function zoompanDeactivate(graphMaxMin: graphScale): any {
-    graphMaxMin.updateMode(null);
-    standardViewRadio.checked = false;
-    frameOnDataRadio.checked = false;
-    setRadioLabelColor(standardViewRadio, false)
-    setRadioLabelColor(frameOnDataRadio, false)
-    setTimeout(function () {
-      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-        modelForm["red"].value, modelForm["blue"].value)
-      myChart.update()
-    }, 5)
-  }
 
   // create table
   const container = document.getElementById("table-div");
@@ -234,14 +137,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { zoompanDeactivate(graphMinMax) },
+            onPan: () => { ChartScaleControl.zoompanDeactivate() },
           },
           zoom: {
             wheel: {
               enabled: true,
             },
             mode: 'x',
-            onZoom: () => { zoompanDeactivate(graphMinMax) },
           },
         },
         // legend: {
@@ -260,6 +162,10 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
     },
   });
 
+  //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
+  let graphControl = new ChartScaleControl([myChart], modelForm, graphMinMax);
+  myChart.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate()}
+  myChart.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate()}
 
   //Adjust the gradient with the window size
   window.onresize = function () {

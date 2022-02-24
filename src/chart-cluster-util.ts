@@ -1,5 +1,6 @@
 import Chart from "chart.js/auto";
 import { Color } from "chart.js";
+import { chartRescale } from "./chart-cluster";
 
 export const dummyData: { [key: string]: any}[] = [
         { B: 18.807516, Berr: 1.306704865, V: 18.19052002, Verr: 0.7973605, R: 18.11280155, Rerr: 0.723537231, I: 17.79363434, Ierr: 0.557995614 },
@@ -585,5 +586,163 @@ export class graphScale {
         updateMode(newMode: string):string {
                 this.mode = newMode;
                 return newMode
+        }
+}
+
+export class ChartScaleControl {
+        static zoompanDeactivate() {
+            throw new Error("Method not implemented.");
+        }
+        standardViewLabel: HTMLLabelElement;
+        frameOnDataLabel: HTMLLabelElement;
+        standardViewRadio: HTMLInputElement;
+        frameOnDataRadio: HTMLInputElement;
+        panLeft: HTMLInputElement;
+        panRight: HTMLInputElement;
+        zoomIn: HTMLInputElement;
+        zoomOut: HTMLInputElement;
+        charts: Chart [];
+        modelForm: ModelForm;
+        chartScale: graphScale;
+
+        constructor(charts: Chart [], modelForm: ModelForm, chartScale: graphScale) {
+                this.charts = charts;
+                this.modelForm = modelForm;
+                this.chartScale = chartScale;
+                this.insertGraphControl();
+                this.standardViewLabel = document.getElementById("standardViewLabel") as HTMLLabelElement;
+                this.frameOnDataLabel = document.getElementById("frameOnDataLabel") as HTMLLabelElement;
+                this.standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
+                this.frameOnDataRadio = document.getElementById("frameOnData") as HTMLInputElement;
+                this.panLeft = document.getElementById("panLeft") as HTMLInputElement;
+                this.panRight = document.getElementById("panRight") as HTMLInputElement;
+                this.zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+                this.zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
+                this.radioAddEventListener();
+                this.panAddEventListener();
+                this.zoomAddEventListener()
+
+        }
+
+        private radioAddEventListener(){
+                this.standardViewRadio.addEventListener("click", () => {
+                        this.radioOnclick(this.standardViewRadio, this.frameOnDataRadio, this.chartScale);
+                });
+                this.frameOnDataRadio.addEventListener("click", () => {
+                        this.radioOnclick(this.frameOnDataRadio, this.standardViewRadio, this.chartScale)
+                });
+                this.standardViewLabel.onmouseover = ()=>{
+                        this.labelOnHover(this.standardViewLabel)}
+                this.standardViewLabel.onmouseleave = ()=>{
+                        this.labelOffHover(this.standardViewLabel)}
+                this.frameOnDataLabel.onmouseover = ()=>{
+                        this.labelOnHover(this.frameOnDataLabel)}
+                this.frameOnDataLabel.onmouseleave = ()=>{this.labelOffHover(this.frameOnDataLabel)}
+        }
+
+        private panAddEventListener(){
+                let pan: number
+                let mycharts = this.charts;
+                this.panLeft.onmousedown = function() {
+                        pan = setInterval( () => {mycharts[0].pan(-5)}, 20 )
+                }
+                this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
+                        clearInterval(pan);
+                }
+                this.panRight.onmousedown = function() {
+                        pan = setInterval( () => {mycharts[0].pan(5)}, 20 )
+                }
+                this.panRight.onmouseup = this.panRight.onmouseleave = function () {
+                        clearInterval(pan);
+                }
+        }
+
+        private zoomAddEventListener(){
+                let zoom: number;
+                let mycharts = this.charts;
+                this.zoomIn.onmousedown = function () {
+                        zoom = setInterval(() => { mycharts[0].zoom(1.03) }, 20);;
+                }
+                this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
+                        clearInterval(zoom);
+                }
+                this.zoomOut.onmousedown = function () {
+                        zoom = setInterval(() => { mycharts[0].zoom(0.97); }, 20);;
+                }
+                this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
+                        clearInterval(zoom);
+                }
+        }
+
+        //only one option can be selected at one time.
+        //The selected option is highlighted by making the background Carolina blue
+        private radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
+                radioOnClicked.checked = true;
+                this.setRadioLabelColor(radioOnClicked, true)
+                otherRadio.checked = false;
+                this.setRadioLabelColor(otherRadio, false)
+                graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
+                chartRescale(this.charts, this.modelForm, this.chartScale);
+        }
+
+        //Alter radio input background color between Carolina blue and white
+        private setRadioLabelColor(radio: HTMLInputElement, activate: boolean) {
+                let radioLabel: HTMLLabelElement = document.getElementById(radio.id + "Label") as HTMLLabelElement
+                radioLabel.style.backgroundColor = activate ? "#4B9CD3" : "white";
+                radioLabel.style.opacity = activate ? "1" : "0.7";
+        }
+
+        private labelOnHover(label: HTMLLabelElement) {
+                if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF") {
+                        label.style.backgroundColor = "#E7E7E7";
+                }
+                label.style.opacity = "1";
+        }
+
+        private labelOffHover(label: HTMLLabelElement) {
+                if (label.style.backgroundColor === "rgb(231, 231, 231)") {
+                        label.style.backgroundColor = "white";
+                        label.style.opacity = "0.7";
+                }
+
+        }
+
+        //Unchecked and reset both radio buttons to white background
+        zoompanDeactivate(): any {
+                this.chartScale.updateMode(null);
+                this.standardViewRadio.checked = false;
+                this.frameOnDataRadio.checked = false;
+                this.setRadioLabelColor(this.standardViewRadio, false)
+                this.setRadioLabelColor(this.frameOnDataRadio, false)
+                setTimeout(function () {
+                        this.charts[0].data.datasets[2].backgroundColor = HRrainbow(this.charts[0],
+                            this.modelForm["red"].value, this.modelForm["blue"].value)
+                        this.charts[0].update()
+                }, 5)
+        }
+
+
+        private insertGraphControl(){
+                document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+                    '<div class = "extra">\n' +
+                    '<label class="scaleSelection" id="standardViewLabel">\n' +
+                    '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />' +
+                    '<div class="radioText">Standard View</div>' +
+                    '</label>\n' + '&nbsp;' +
+                    '<label class="scaleSelection" id="frameOnDataLabel">\n' +
+                    '<input type="radio" class="scaleSelection" id="frameOnData" value="Frame on Data" />'+
+                    '<div class="radioText">Frame on Data</div>' +
+                    '</label>\n' + '&nbsp;' +
+                    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+                    '&nbsp;' +
+                    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+                    '&nbsp;' +
+                    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+                    '&nbsp;' +
+                    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+                    '<div style="padding: 0 6px 0 6px"></div>' +
+                    '</div>\n'
+                )
         }
 }
