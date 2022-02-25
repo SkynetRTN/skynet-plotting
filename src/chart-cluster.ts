@@ -824,19 +824,19 @@ export function insertClusterControls(chartCounts:number = 1) {
       }
       //add a number that corresponds what graph each row of drop down boxes controls
       htmlContent += '<div class="col-sm-1"><class="title">' + order + ':</div>\n' +
-          '<div class="col-sm-3"><select name="blue' + num + '" style="width: 125%;" title="Select Blue Color Filter">\n' +
+          '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
           '<option value="B" title="B filter" selected>B</option></div>\n' +
           '<option value="V" title="V filter">V</option></div>\n' +
           '<option value="R" title="R filter">R</option></div>\n' +
           '<option value="I" title="I filter">I</option></select></div>\n' +
           '<div class="col-sm-1"></div>\n' +
-          '<div class="col-sm-3"><select name="red' + num + '" style="width: 125%;" title="Red Color Filter">\n' +
+          '<div class="col-sm-3"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
           '<option value="B" title="B filter">B</option></div>\n' +
           '<option value="V" title="V filter" selected>V</option></div>\n' +
           '<option value="R" title="R filter">R</option></div>\n' +
           '<option value="I" title="I filter">I</option></select></div>\n' +
           '<div class="col-sm-1"></div>\n' +
-          '<div class="col-sm-3"><select name="lum' + num + '" style="width: 125%;" title="Select Luminosity Filter">\n' +
+          '<div class="col-sm-3"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
           '<option value="B" title="B filter">B</option></div>\n' +
           '<option value="V" title="V filter" selected>V</option></div>\n' +
           '<option value="R" title="R filter">R</option></div>\n' +
