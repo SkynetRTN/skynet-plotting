@@ -20,13 +20,15 @@ Chart.register(zoomPlugin);
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
 export function cluster4(): [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale] {
-    insertClusterControls(2);
+    insertClusterControls(4);
     //make graph scaling options visible to users
 
   //setup four charts
     document.getElementById('myChart').remove();
     document.getElementById('chart-div1').style.display = 'inline';
     document.getElementById('chart-div2').style.display = 'inline';
+    document.getElementById('chart-div3').style.display = 'inline';
+    document.getElementById('chart-div4').style.display = 'inline';
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label2').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
@@ -659,6 +661,14 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     myChart2.data.datasets[2].label = "Data";
     myChart2.options.scales["x"].title.text = "x";
     myChart2.options.scales["y"].title.text = "y";
+    //myChart3.options.plugins.title.text = "Title";
+    myChart3.data.datasets[2].label = "Data";
+    myChart3.options.scales["x"].title.text = "x";
+    myChart3.options.scales["y"].title.text = "y";
+    //myChart4.options.plugins.title.text = "Title";
+    myChart4.data.datasets[2].label = "Data";
+    myChart4.options.scales["x"].title.text = "x";
+    myChart4.options.scales["y"].title.text = "y";
     updateLabels(
       myChart1,
       document.getElementById("chart-info-form") as ChartInfoForm,
@@ -675,6 +685,23 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
       false,
       false
     );
+    updateLabels(
+        myChart3,
+        document.getElementById("chart-info-form") as ChartInfoForm,
+        false,
+        false,
+        false,
+        false
+        );
+    updateLabels(
+        myChart4,
+        document.getElementById("chart-info-form") as ChartInfoForm,
+        false,
+        false,
+        false,
+        false
+        );
+
 
     const data: string[] = (reader.result as string)
       .split("\n")
@@ -717,6 +744,12 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     const blue2 = modelForm["blue2"];
     const red2 = modelForm["red2"];
     const lum2 = modelForm["lum2"];
+    const blue3 = modelForm["blue3"];
+    const red3 = modelForm["red3"];
+    const lum3 = modelForm["lum3"];
+    const blue4 = modelForm["blue4"];
+    const red4 = modelForm["red4"];
+    const lum4 = modelForm["lum4"];
 
     //Change filter options to match file
 
@@ -779,6 +812,12 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     changeOptions(blue2, optionList);
     changeOptions(red2, optionList);
     changeOptions(lum2, optionList);
+    changeOptions(blue3, optionList);
+    changeOptions(red3, optionList);
+    changeOptions(lum3, optionList);
+    changeOptions(blue4, optionList);
+    changeOptions(red4, optionList);
+    changeOptions(lum4, optionList);
 
 
     blue.value = filters[0];
@@ -787,6 +826,14 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     blue2.value = filters[0];
     red2.value = filters[1];
     lum2.value = filters[1];
+    blue3.value = filters[0];
+    red3.value = filters[1];
+    lum3.value = filters[1];
+    blue4.value = filters[0];
+    red4.value = filters[1];
+    lum4.value = filters[1];
+
+
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -802,7 +849,7 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
     });
 
 
-    updateHRModel(modelForm, table, [myChart1, myChart2],
+    updateHRModel(modelForm, table, [myChart1, myChart2, myChart3, myChart4],
       () => {
     table.updateSettings({
       data: tableData,
@@ -811,7 +858,7 @@ export function cluster4FileUpload(evt: Event, table: Handsontable, myChart1: Ch
       hiddenColumns: { columns: hiddenColumns },
     }); //hide all but the first 3 columns
     updateTableHeight(table);
-        updateScatter(table, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMaxMin);
+        updateScatter(table, [myChart1, myChart2, myChart3, myChart4], clusterForm, modelForm, [2, 2, 2, 2], graphMaxMin);
     document.getElementById("standardView").click();
   });
   }

@@ -203,6 +203,11 @@ function chartType(chart: string) {
         if (chart === 'cluster2') {
             updateChartInfo(cluster2_objects[2], chartInfoForm, 2)
         }
+        if (chart === 'cluster4') {
+            updateChartInfo(cluster4_objects[2], chartInfoForm, 2)
+            updateChartInfo(cluster4_objects[3], chartInfoForm, 3)
+            updateChartInfo(cluster4_objects[4], chartInfoForm, 4)
+        }
     };
     objects[1].update('none');
 

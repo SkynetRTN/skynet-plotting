@@ -67,6 +67,25 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
             // @ts-ignore
             form.elements['y2Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
         }
+        //insert back in whenj you make the silly code in index.html
+   //} else if (chartNum === 3) {
+     //   if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
+            // @ts-ignore
+       //     form.elements['x3Axis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+        //}
+        //if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
+            // @ts-ignore
+          //  form.elements['y3Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+        //}
+    //} else if (chartNum === 4) {
+      //  if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
+            // @ts-ignore
+        //    form.elements['x4Axis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+        //}
+        //if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
+            // @ts-ignore
+          //  form.elements['y4Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+        //}
     }
 
 
