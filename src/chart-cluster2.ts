@@ -156,7 +156,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 0.7275,
+      aspectRatio: 0.7290,
       hover: {
         mode: "nearest",
       },
@@ -189,7 +189,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           display: true,
           align: "start",
           padding: {
-            top: 10,
+            top: 10.025,
             bottom: 14,
           }
         },
@@ -263,7 +263,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 0.7275,
+      aspectRatio: 0.7290,
       hover: {
         mode: "nearest",
       },
@@ -297,7 +297,7 @@ export function cluster2(): [Handsontable, Chart, Chart, ModelForm, graphScale] 
           align: 'end',
           color: 'white',
           padding: {
-            top: 10,
+            top: 10.025,
             bottom: -14,
           }
         },
