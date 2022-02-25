@@ -62,9 +62,12 @@ interface VariableFourierForm extends HTMLFormElement {
 }
 interface VariablePeriodFoldingFormElements extends HTMLCollection {
     pf: HTMLInputElement,
+    period: HTMLInputElement,
+    period_num: HTMLInputElement,
 }
 interface VariablePeriodFoldingForm extends HTMLFormElement {
     elements: PeriodFoldingFormElements
+
 }
 
 interface SpectrumFormElements extends HTMLCollection {
@@ -99,7 +102,9 @@ interface FourierForm extends HTMLFormElement {
 }
 interface PeriodFoldingFormElements extends HTMLCollection {
     pf: HTMLInputElement,
-    bins: HTMLInputElement
+    bins: HTMLInputElement,
+    period: HTMLInputElement,
+    period_num: HTMLInputElement,
 }
 interface PeriodFoldingForm extends HTMLFormElement {
     elements: PeriodFoldingFormElements

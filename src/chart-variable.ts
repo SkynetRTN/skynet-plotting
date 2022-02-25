@@ -1,13 +1,14 @@
 'use strict';
 /*test*/ 
 import Chart from "chart.js/auto";
-import { ScatterDataPoint } from "chart.js";
+import { BarController, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { updateLabels, updateTableHeight, sanitizeTableData } from "./util"
+import { linkInputs, throttle, updateLabels, updateTableHeight, sanitizeTableData } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
+
 
 /**
  *  Returns generated table and chart for variable.
@@ -487,21 +488,37 @@ function lightCurve(myChart: Chart) {
 
     const pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
-        // '<div class="row">\n' +
-        // '<input class="field" type="number" step="0.0001" name="pf" title="Folding Period" value=0></input></div>\n' +
-        // '<input type="range" title="Error" name="err"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Folding Period:</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Period" name="Period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="Folding Period" class="field"></div>\n' +
-        '</div>\n' +
-        '</form>\n';
+        '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field"></div>\n' +
+        '</div>\n' ;
+    const periodForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
+    
+    console.log(periodForm)
+
+    // linkInputs(
+    //     periodForm["period"],
+    //     periodForm["period_num"],
+    //      0, 140, 0.01, 3
+    // );
+
+    
+    // const reader = new FileReader();
+    // reader.onload = () => {
+    //     const gravityForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
+
+    //     gravityForm["period"].value = Math.log(25).toString();
+
+    //     gravityForm["period_num"].value = "25";
+
+    //   }
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
     periodFoldingForm.oninput = function () {
-        let period = parseFloat(periodFoldingForm.pf.value);
+        let period = parseFloat(periodFoldingForm.period_num.value);
         if (period !== 0) {
             let datasets = myChart.data.datasets;
             let minMJD = myChart.data.minMJD;
@@ -524,7 +541,10 @@ function lightCurve(myChart: Chart) {
         updateChart(myChart, 4);
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
+
+    
 }
+
 
 /**
  * This function set up the chart by hiding all unnecessary datasets, and then adjust the chart scaling
