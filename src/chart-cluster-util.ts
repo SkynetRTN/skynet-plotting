@@ -627,7 +627,7 @@ export class ChartScaleControl {
                 this.panAddEventListener();
                 this.zoomAddEventListener();
 
-                if (this.chartCount > 0) {
+                if (this.chartCount > 1) {
                         this.frameChartAddEventListner();
                 }
         }
