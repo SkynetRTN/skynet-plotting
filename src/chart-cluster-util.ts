@@ -605,6 +605,8 @@ export class ChartScaleControl {
         chartCount: number;
         modelForm: ModelForm;
         chartScale: graphScale;
+        chartRadios: HTMLInputElement[] = [];
+        chartLabels: HTMLLabelElement[] = [];
 
         constructor(charts: Chart [], modelForm: ModelForm, chartScale: graphScale) {
                 this.charts = charts;
@@ -623,9 +625,34 @@ export class ChartScaleControl {
 
                 this.radioAddEventListener();
                 this.panAddEventListener();
-                this.zoomAddEventListener()
+                this.zoomAddEventListener();
 
+                if (this.chartCount > 0) {
+                        this.frameChartAddEventListner();
+                }
         }
+
+        private frameChartAddEventListner(){
+                for (let i = 0; i < this.chartCount; i++) {
+                        let label = document.getElementById("frameChart" + (i+1).toString()) as HTMLLabelElement
+                        this.chartLabels.push(label);
+                        this.chartRadios.push(document.getElementById("radioChart" + (i+1).toString()) as HTMLInputElement)
+                        label.onmouseover = ()=>{this.labelOnHover(label)};
+                        label.onmouseleave = ()=>{this.labelOffHover(label)};
+                        label.onclick = ()=>{
+                                for (let j = 0; j < this.chartCount; j ++) {
+                                        if (j !== i) {
+                                                this.chartRadios[j].checked = false;
+                                                this.setLabelColor(this.chartLabels[j], false)
+                                        } else {
+                                                this.chartRadios[j].checked = true;
+                                                this.setLabelColor(this.chartLabels[j], true)
+                                        }
+                                }
+                        };
+                }
+        }
+
 
         private radioAddEventListener(){
                 this.standardViewRadio.addEventListener("click", () => {
@@ -634,12 +661,9 @@ export class ChartScaleControl {
                 this.frameOnDataRadio.addEventListener("click", () => {
                         this.radioOnclick(this.frameOnDataRadio, this.standardViewRadio, this.chartScale)
                 });
-                this.standardViewLabel.onmouseover = ()=>{
-                        this.labelOnHover(this.standardViewLabel)}
-                this.standardViewLabel.onmouseleave = ()=>{
-                        this.labelOffHover(this.standardViewLabel)}
-                this.frameOnDataLabel.onmouseover = ()=>{
-                        this.labelOnHover(this.frameOnDataLabel)}
+                this.standardViewLabel.onmouseover = ()=>{this.labelOnHover(this.standardViewLabel)}
+                this.standardViewLabel.onmouseleave = ()=>{this.labelOffHover(this.standardViewLabel)}
+                this.frameOnDataLabel.onmouseover = ()=>{this.labelOnHover(this.frameOnDataLabel)}
                 this.frameOnDataLabel.onmouseleave = ()=>{this.labelOffHover(this.frameOnDataLabel)}
         }
 
@@ -671,7 +695,6 @@ export class ChartScaleControl {
                 }
                 this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
                         clear(pans);
-                        console.log('yes')
                 }
                 this.panRight.onmouseup = this.panRight.onmouseleave = function () {
                         clear(pans);
@@ -744,9 +767,14 @@ export class ChartScaleControl {
                 radioLabel.style.backgroundColor = activate ? "#4B9CD3" : "white";
                 radioLabel.style.opacity = activate ? "1" : "0.7";
         }
+        private setLabelColor(label: HTMLLabelElement, activate: boolean) {
+                label.style.backgroundColor = activate ? "#4B9CD3" : "white";
+                label.style.opacity = activate ? "1" : "0.7";
+        }
+
 
         private labelOnHover(label: HTMLLabelElement) {
-                if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF") {
+                if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF" || label.style.backgroundColor ==="") {
                         label.style.backgroundColor = "#E7E7E7";
                 }
                 label.style.opacity = "1";
@@ -782,11 +810,16 @@ export class ChartScaleControl {
                 let html = '<div class = "extra" id = "scaleGraphNo">\n';
 
                 if (chartCount > 1) {
-                        html += '<select class = "graph"> '
                         for (let i = 0; i < chartCount; i++) {
-                                html += '<option value = "' + (i+1).toString() + '">' + 'Chart ' + (i+1).toString() + '</option>'
+                                html +=
+                                    '<label class="scaleSelection scaleSelection-graphSelection" id="frameChart' + (i+1).toString() +  '">' +
+                                            '<input type="radio" class="scaleSelection" id="radioChart' + (i+1).toString() +
+                                            '" name="chartCount" value="' + (i+1).toString() + '"' +
+                                            (i === 0 ? 'checked' : '')  +
+                                            '><div style="position: relative; bottom: 4px; left:7.5px">'
+                                            +    (i+1).toString() +
+                                    '</div></label>\n'
                         }
-                        html += '</select>'
                 }
 
                 html += '<label class="scaleSelection" id="standardViewLabel">\n' +
