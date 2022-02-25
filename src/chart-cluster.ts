@@ -776,12 +776,7 @@ export function insertClusterControls(chartCounts:number = 1) {
       '<div class="row">\n' +
       '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
       "</div>\n" +
-      '<div class="row">\n' +
-      '<div class="col-sm-4">Blue:</div>\n' +
-      '<div class="col-sm-4">Red:</div>\n' +
-      '<div class="col-sm-4">Luminosity:</div>\n' +
-      "</div>\n" +
-      '<div class="row">\n'
+      '<div class="row">\n' 
     if (chartCounts === 1) {
       for (let i = 0; i < chartCounts; i++) {
         let num = ""
@@ -789,7 +784,13 @@ export function insertClusterControls(chartCounts:number = 1) {
           num = (i+1).toString()
         }
         //add a number that corresponds what graph each row of drop down boxes controls
-        htmlContent +='<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
+        htmlContent +=
+        '<div class="col-sm-4">Blue:</div>\n' +
+        '<div class="col-sm-4">Red:</div>\n' +
+        '<div class="col-sm-4">Luminosity:</div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
             '<option value="B" title="B filter" selected>B</option></div>\n' +
             '<option value="V" title="V filter">V</option></div>\n' +
             '<option value="R" title="R filter">R</option></div>\n' +
@@ -807,6 +808,14 @@ export function insertClusterControls(chartCounts:number = 1) {
       }
     }
     if (chartCounts > 1) {
+      htmlContent += '<div class="col-sm-1"></div>\n' +
+      '<div class="col-sm-3">Blue:</div>\n' +
+      '<div class="col-sm-1"></div>\n' +
+      '<div class="col-sm-3">Red:</div>\n' +
+      '<div class="col-sm-1"></div>\n' +
+      '<div class="col-sm-3">Luminosity:</div>\n' +
+      "</div>\n" +
+      '<div class="row">\n'
     for (let i = 0; i < chartCounts; i++) {
       let num = ""
       let order = (i+1).toString()
