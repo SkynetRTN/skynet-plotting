@@ -558,12 +558,13 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
 }
 
 export class graphScale {
-        mode: string = "auto";
+        mode: string[] = [];
         modelLimits: { [key: string]: number } = { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, };
         dataLimits: { [key: string]: number }[] = [];
 
         constructor(chartCount:number = 1) {
                 for (let i = 0; i < chartCount; i++) {
+                        this.mode.push('auto');
                         this.dataLimits.push({ minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, })
                 }
         }
@@ -580,11 +581,11 @@ export class graphScale {
         getModelLimit() {
                 return this.modelLimits;
         }
-        getMode() {
-                return this.mode;
+        getMode(chartNum: number) {
+                return this.mode[chartNum];
         }
-        updateMode(newMode: string):string {
-                this.mode = newMode;
+        updateMode(newMode: string, chartNum:number):string {
+                this.mode[chartNum] = newMode;
                 return newMode
         }
 }
@@ -607,6 +608,7 @@ export class ChartScaleControl {
         chartScale: graphScale;
         chartRadios: HTMLInputElement[] = [];
         chartLabels: HTMLLabelElement[] = [];
+        onControl: boolean[] = [];
 
         constructor(charts: Chart [], modelForm: ModelForm, chartScale: graphScale) {
                 this.charts = charts;
@@ -623,12 +625,14 @@ export class ChartScaleControl {
                 this.zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
                 this.zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
 
-                this.radioAddEventListener();
-                this.panAddEventListener();
-                this.zoomAddEventListener();
-
                 if (this.chartCount > 1) {
                         this.frameChartAddEventListner();
+                        this.chartLabels[0].click();
+                } else {
+                        this.onControl.push(true);
+                        this.radioAddEventListener();
+                        this.panAddEventListener();
+                        this.zoomAddEventListener();
                 }
         }
 
@@ -637,17 +641,30 @@ export class ChartScaleControl {
                         let label = document.getElementById("frameChart" + (i+1).toString()) as HTMLLabelElement
                         this.chartLabels.push(label);
                         this.chartRadios.push(document.getElementById("radioChart" + (i+1).toString()) as HTMLInputElement)
+                        this.onControl.push(false);
                         label.onmouseover = ()=>{this.labelOnHover(label)};
                         label.onmouseleave = ()=>{this.labelOffHover(label)};
                         label.onclick = ()=>{
                                 for (let j = 0; j < this.chartCount; j ++) {
                                         if (j !== i) {
+                                                this.onControl[j] = false
                                                 this.chartRadios[j].checked = false;
                                                 this.setLabelColor(this.chartLabels[j], false)
                                         } else {
+                                                this.onControl[j] = true
                                                 this.chartRadios[j].checked = true;
                                                 this.setLabelColor(this.chartLabels[j], true)
                                         }
+                                }
+                                this.radioAddEventListener();
+                                this.panAddEventListener();
+                                this.zoomAddEventListener();
+                                if (this.chartScale.getMode(i) === 'auto'){
+                                        this.standardViewLabel.click();
+                                } else if (this.chartScale.getMode(i) === 'data') {
+                                        this.frameOnDataLabel.click();
+                                } else {
+                                        this.zoompanDeactivate(this.modelForm, i);
                                 }
                         };
                 }
@@ -655,16 +672,26 @@ export class ChartScaleControl {
 
 
         private radioAddEventListener(){
-                this.standardViewRadio.addEventListener("click", () => {
-                        this.radioOnclick(this.standardViewRadio, this.frameOnDataRadio, this.chartScale);
-                });
-                this.frameOnDataRadio.addEventListener("click", () => {
-                        this.radioOnclick(this.frameOnDataRadio, this.standardViewRadio, this.chartScale)
-                });
-                this.standardViewLabel.onmouseover = ()=>{this.labelOnHover(this.standardViewLabel)}
-                this.standardViewLabel.onmouseleave = ()=>{this.labelOffHover(this.standardViewLabel)}
-                this.frameOnDataLabel.onmouseover = ()=>{this.labelOnHover(this.frameOnDataLabel)}
-                this.frameOnDataLabel.onmouseleave = ()=>{this.labelOffHover(this.frameOnDataLabel)}
+                let standardFuncs: Function[] = [];
+                let frameOnFuncs: Function[] = [];
+                let run = this.run;
+                for (let i = 0; i < this.chartCount; i++) {
+                        if (this.onControl[i]){
+                                standardFuncs.push(()=>{
+                                        this.radioOnclick(this.standardViewRadio, this.frameOnDataRadio, this.chartScale, i);
+                                });
+                                frameOnFuncs.push(()=>{
+                                        this.radioOnclick(this.frameOnDataRadio, this.standardViewRadio, this.chartScale, i);
+                                });
+                        }
+                }
+
+                this.standardViewLabel.onclick = ()=>{run(standardFuncs)};
+                this.frameOnDataLabel.onclick = ()=>{run(frameOnFuncs)};
+                this.standardViewLabel.onmouseover = ()=>{this.labelOnHover(this.standardViewLabel)};
+                this.standardViewLabel.onmouseleave = ()=>{this.labelOffHover(this.standardViewLabel)};
+                this.frameOnDataLabel.onmouseover = ()=>{this.labelOnHover(this.frameOnDataLabel)};
+                this.frameOnDataLabel.onmouseleave = ()=>{this.labelOffHover(this.frameOnDataLabel)};
         }
 
         private panAddEventListener(){
@@ -674,24 +701,30 @@ export class ChartScaleControl {
                 let run = this.run;
                 let clear= this.clear;
                 for (let i = 0; i < this.chartCount; i++) {
-                        let chart = this.charts[i];
-                        pans.push(0)
-                        panLeftFunctions.push(
-                            ()=>{
-                                    pans[i] =  setInterval( () => {chart.pan(-5)}, 20 );
-                            }
-                        )
-                        panRightFunctions.push(
-                            ()=>{
-                                    pans[i] =  setInterval( () => {chart.pan(5)}, 20 );
-                            }
-                        )
+                        if (this.onControl[i]) {
+                                let chart = this.charts[i];
+                                pans.push(0)
+                                panLeftFunctions.push(
+                                    () => {
+                                            pans[i] = setInterval(() => {
+                                                    chart.pan(-5)
+                                            }, 20);
+                                    }
+                                )
+                                panRightFunctions.push(
+                                    () => {
+                                            pans[i] = setInterval(() => {
+                                                    chart.pan(5)
+                                            }, 20);
+                                    }
+                                )
+                        }
                 }
                 this.panLeft.onmousedown = function() {
                         run(panLeftFunctions);
                 }
                 this.panRight.onmousedown = function() {
-                       run(panRightFunctions);
+                        run(panRightFunctions);
                 }
                 this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
                         clear(pans);
@@ -699,8 +732,6 @@ export class ChartScaleControl {
                 this.panRight.onmouseup = this.panRight.onmouseleave = function () {
                         clear(pans);
                 }
-
-
         }
 
         private zoomAddEventListener(){
@@ -710,18 +741,20 @@ export class ChartScaleControl {
                 let run = this.run;
                 let clear= this.clear;
                 for (let i = 0; i < this.chartCount; i++) {
-                        let chart = this.charts[i];
-                        zooms.push(0)
-                        zoomInFunctions.push(
-                            ()=>{
-                                    zooms[i] =  setInterval( () => {chart.zoom(1.03)}, 20 );
-                            }
-                        )
-                        zoomOutFunctions.push(
-                            ()=>{
-                                    zooms[i] =  setInterval( () => {chart.zoom(0.97)}, 20 );
-                            }
-                        )
+                        if (this.onControl[i]) {
+                                let chart = this.charts[i];
+                                zooms.push(0)
+                                zoomInFunctions.push(
+                                    ()=>{
+                                            zooms[i] =  setInterval( () => {chart.zoom(1.03)}, 20 );
+                                    }
+                                )
+                                zoomOutFunctions.push(
+                                    ()=>{
+                                            zooms[i] =  setInterval( () => {chart.zoom(0.97)}, 20 );
+                                    }
+                                )
+                        }
                 }
                 this.zoomIn.onmousedown = function() {
                         run(zoomInFunctions);
@@ -752,13 +785,13 @@ export class ChartScaleControl {
 
         //only one option can be selected at one time.
         //The selected option is highlighted by making the background Carolina blue
-        private radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale): any {
+        private radioOnclick(radioOnClicked: HTMLInputElement, otherRadio: HTMLInputElement, graphMaxMin: graphScale, chartNum: number): any {
                 radioOnClicked.checked = true;
                 this.setRadioLabelColor(radioOnClicked, true)
                 otherRadio.checked = false;
                 this.setRadioLabelColor(otherRadio, false)
-                graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data")
-                chartRescale(this.charts, this.modelForm, this.chartScale);
+                graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data", chartNum)
+                chartRescale([this.charts[chartNum]], this.modelForm, this.chartScale, null, [chartNum]);
         }
 
         //Alter radio input background color between Carolina blue and white
@@ -790,7 +823,7 @@ export class ChartScaleControl {
 
         //Unchecked and reset both radio buttons to white background
         zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
-                this.chartScale.updateMode(null);
+                this.chartScale.updateMode(null, chartNum);
                 this.standardViewRadio.checked = false;
                 this.frameOnDataRadio.checked = false;
                 this.setRadioLabelColor(this.standardViewRadio, false)

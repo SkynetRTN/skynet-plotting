@@ -639,7 +639,7 @@ export function updateScatter(
       graphMaxMin.updateDataLimit(c, scaleLimits);
       myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
           modelForm[redKey].value, modelForm[blueKey].value)
-      if (graphMaxMin.getMode() !== null) {
+      if (graphMaxMin.getMode(c) !== null) {
         chartRescale([myChart], modelForm, graphMaxMin,null, [c]);
       }
       myChart.update()
@@ -668,7 +668,7 @@ export function chartRescale(myCharts: Chart[],
     let yBuffer: number = 0;
     let adjustedC = scaleIndexOverride.length === 0? c : scaleIndexOverride[c];
     for (let key in adjustScale) {
-      let frameOn: string = option === null ? graphMaxMin.getMode() : graphMaxMin.updateMode(option);
+      let frameOn: string = option === null ? graphMaxMin.getMode(adjustedC) : graphMaxMin.updateMode(option, adjustedC);
       if (frameOn === "auto") {
         let magList: string[] = ['red', 'blue', 'bright'];
         let filters: string[] = [
