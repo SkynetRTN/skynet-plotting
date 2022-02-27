@@ -36,6 +36,8 @@ export function venus(): [Handsontable, Chart] {
     // };
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [
         { x: 15, y: 0.7 },
         { x: 30, y: 0.53 },

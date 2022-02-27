@@ -29,6 +29,8 @@ export function variable(): [Handsontable, Chart] {
     );
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [];
     for (let i = 0; i < 14; i++) {
         tableData[i] = {

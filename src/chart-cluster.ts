@@ -30,6 +30,8 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
   //make graph scaling options visible to users
   document.getElementById('axis-label1').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+  document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
