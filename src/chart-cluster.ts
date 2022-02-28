@@ -139,7 +139,6 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
           pan: {
             enabled: true,
             mode: 'x',
-            onPan: () => { ChartScaleControl.zoompanDeactivate() },
           },
           zoom: {
             wheel: {

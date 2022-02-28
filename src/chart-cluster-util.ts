@@ -826,13 +826,13 @@ export class ChartScaleControl {
                 this.chartScale.updateMode(null, chartNum);
                 this.standardViewRadio.checked = false;
                 this.frameOnDataRadio.checked = false;
-                this.setRadioLabelColor(this.standardViewRadio, false)
-                this.setRadioLabelColor(this.frameOnDataRadio, false)
+                this.setRadioLabelColor(this.standardViewRadio, false);
+                this.setRadioLabelColor(this.frameOnDataRadio, false);
                 for (let i = 0; i < this.chartCount; i++) {
                         let chart = this.charts[i];
                         setTimeout(function () {
                                 chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                                    modelForm[modelFormKey(chartNum, "red")].value, modelForm[modelFormKey(chartNum, "blue")].value)
+                                    modelForm[modelFormKey(i, "red")].value, modelForm[modelFormKey(i, "blue")].value)
                                 chart.update()
                         }, 5)
                 }
