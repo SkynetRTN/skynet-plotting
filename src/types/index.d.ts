@@ -2,7 +2,9 @@ interface ChartInfoFormElements extends HTMLCollection {
     title: HTMLInputElement,
     data: HTMLInputElement,
     xAxis: HTMLInputElement,
-    yAxis: HTMLInputElement
+    yAxis: HTMLInputElement,
+    x2Axis: HTMLInputElement,
+    y2Axis: HTMLInputElement
 }
 interface ChartInfoForm extends HTMLFormElement {
     elements: ChartInfoFormElements
@@ -129,7 +131,16 @@ interface ModelForm extends HTMLFormElement {
     metal_num: HTMLInputElement,
     red: HTMLInputElement,
     blue: HTMLInputElement,
-    lum: HTMLInputElement
+    lum: HTMLInputElement,
+    red2: HTMLInputElement,
+    blue2: HTMLInputElement,
+    lum2: HTMLInputElement,
+    red3: HTMLInputElement,
+    blue3: HTMLInputElement,
+    lum3: HTMLInputElement,
+    red4: HTMLInputElement,
+    blue4: HTMLInputElement,
+    lum4: HTMLInputElement,
 }
 
 interface GravityForm extends HTMLFormElement {

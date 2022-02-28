@@ -107,7 +107,10 @@ export function pulsar(): [Handsontable, Chart] {
   '<button id="saveSonification"/>Save Sonification</button>\n' +
   '</div>\n'
   )
-
+  document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [];
     for (let i = 0; i < 1000; i++) {
         tableData[i] = {

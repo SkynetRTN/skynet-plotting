@@ -22,6 +22,7 @@
             <option value="spectrum" title="spectrum">Spectrum</option>
             <option value="dual" title="Dual">Dual</option>
             <option value="cluster1" title="Cluster 1">Cluster 1</option>
+            <option value="cluster2" title="Cluster 2">Cluster 2</option>
             <option value="pulsar" title="Pulsar">Pulsar</option>
             <option value="gravity" title="Gravity">Gravity</option>
           </select>
@@ -32,6 +33,30 @@
       <div class="col-lg-8" id="chart-col">
         <div id="chart-div">
           <canvas id="myChart" width="300" height="200"></canvas>
+          <div class = "row">
+            <div class="col-lg-6">
+              <div id="chart-div1" style="display: none">
+                <canvas id="myChart1" width="428" height="200"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div id="chart-div2" style="display: none">
+                <canvas id="myChart2" width="428" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class = "row">
+            <div class="col-lg-6">
+              <div id="chart-div3" style="display: none">
+                <canvas id="myChart3" width="300" height="200"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div id="chart-div4" style="display: none">
+                <canvas id="myChart4" width="300" height="200"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
         <form id="chart-info-form" class="text">
           <div class="row">
@@ -47,12 +72,34 @@
             </div>
             <div class="col-sm-6">
               <div class="row">
-                <div class="col-sm-3 des">X Axis</div>
-                <div class="col-sm-9"><input type="text" title="X Axis" name="xAxis" value="x" class="field"></div>
-              </div>
-              <div class="row">
-                <div class="col-sm-3 des">Y Axis</div>
-                <div class="col-sm-9"><input type="text" title="Y Axis" name="yAxis" value="y" class="field"></div>
+                <div class="col-sm-12" id="axisSet1">
+                  <div id = "axis-label1">
+                    <div class="row">
+                      <div class="col-sm-4 des" id="xAxisPrompt">X Axis</div>
+                      <div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="x" class="field"></div>
+                    </div>
+                  </div>
+                  <div id = "axis-label3">
+                    <div class="row">
+                      <div class="col-sm-4 des" id="yAxisPrompt">Y Axis</div>
+                      <div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="y" class="field"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-6" id="axisSet2" style="display: none">
+                  <div id = "axis-label2">
+                    <div class="row">
+                      <div class="col-sm-4 des">X<sub>2</sub> Axis</div>
+                      <div class="col-sm-8"><input type="text" title="X2 Axis" name="x2Axis" value="x" class="field"></div>
+                    </div>
+                  </div>
+                  <div id = "axis-label4">
+                    <div class="row">
+                      <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
+                      <div class="col-sm-8"><input type="text" title="Y2 Axis" name="y2Axis" value="y" class="field"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

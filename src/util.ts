@@ -35,7 +35,7 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
  *  @param myChart:     The Chart object
  *  @param form:        The form to be updated.
  */
-export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false) {
+export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum:number = 0) {
     let labels = "";
     for (let i = 0; i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel) {
@@ -50,10 +50,17 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
     if (myChart.options.plugins.title.text) {
         form.elements['title'].value = myChart.options.plugins.title.text as string;
     }
-    if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
+
+    if (chartNum !== 0) {
+        let key = (chartNum + 1).toString();
+        let xKey = 'x' + key + 'Axis';
+        let yKey = 'y' + key + 'Axis';
+        // @ts-ignore
+        form.elements[xKey].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+        // @ts-ignore
+        form.elements[yKey].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+    } else {
         form.elements['xAxis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
-    }
-    if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
         form.elements['yAxis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
     }
 
@@ -80,6 +87,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
     log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
+    let debounceTime = 1000;
     if (!numOverride) {
         numMin = min;
         numMax = max;
@@ -97,10 +105,10 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = function () {
+        number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
-        };
+        }, debounceTime);
     } else {
         slider.min = Math.log(min * 0.999).toString();
         slider.max = Math.log(max * 1.001).toString();
@@ -116,11 +124,11 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
             */
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 2), min, max);
         };
-        number.oninput = function () {
+        number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
-        }
+        }, debounceTime)
     }
 }
 
