@@ -435,7 +435,8 @@ export function pulsar(): [Handsontable, Chart] {
     sonificationButton.onclick = function (){
         if(!playing){
             if(pulsarForm.elements["mode"].value === 'lc')
-                sonifiedChart = sonify(audioCtx,myChart,0,1);
+                sonifiedChart = sonify(audioCtx,myChart,0,1,false);
+                sonifiedChart.onended = function() {sonificationButton.click()};//stop playing
             if(pulsarForm.elements["mode"].value === 'pf')
                 sonifiedChart = sonify(audioCtx,myChart,4,5);
             sonifiedChart.start();
@@ -445,7 +446,6 @@ export function pulsar(): [Handsontable, Chart] {
         else{
             sonifiedChart.stop();
             audioCtx.suspend();
-            sonifiedChart = null;
             playing = false;
         }
     }
@@ -726,19 +726,19 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
  * @param ctx The audioContext
  * @param myChart The chart to be sonified.
  * @param dataSet1 The dataset to sonify as the first stereo channel.
-* @param dataSet2 The dataset to sonify as the second stereo channel.
+*  @param dataSet2 The dataset to sonify as the second stereo channel.
+ * @param loop Loop audio?
  */
-function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number){
+function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true){
 
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
     let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
-    let norm = 5 / myChart.scales.y.max; 
+    let norm = 40 / myChart.scales.y.max; 
 
     let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
 
     // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
     var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
-    console.log(ctx.sampleRate)
 
     let prev0 = 0;//data point with the greatest time value less than the current time
     let prev1 = 0;
@@ -758,12 +758,12 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
         }
 
         arrayBuffer.getChannelData(0)[i] = norm * linearInterpolation(channel0[prev0],channel0[next0],x0);
-        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 1 in the buffer
+        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.
-    const sonifiedChart = ctx.createBufferSource();
-    sonifiedChart.loop = true; //play on repeat
+    const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
+    sonifiedChart.loop = loop; //play on repeat?
     sonifiedChart.buffer = arrayBuffer
     // connect the AudioBufferSourceNode to the
     // destination so we can hear the sound
@@ -771,7 +771,7 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
     return sonifiedChart;
 }
 
-//accepts x values and returns a y value based on the points immediately before and after the given x value
+//accepts x values and returns a y value based on a line between the points immediately before and after the given x value
 function linearInterpolation(prev: ScatterDataPoint, next: ScatterDataPoint, x: number): number
 {
     let slope = (next.y-prev.y)/(next.x-prev.x)
