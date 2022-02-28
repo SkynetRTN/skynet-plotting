@@ -791,7 +791,7 @@ export class ChartScaleControl {
                 otherRadio.checked = false;
                 this.setRadioLabelColor(otherRadio, false)
                 graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data", chartNum)
-                chartRescale([this.charts[chartNum]], this.modelForm, this.chartScale, null, [chartNum]);
+                chartRescale(this.charts, this.modelForm, this.chartScale, null);
         }
 
         //Alter radio input background color between Carolina blue and white
@@ -823,11 +823,13 @@ export class ChartScaleControl {
 
         //Unchecked and reset both radio buttons to white background
         zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
-                this.chartScale.updateMode(null, chartNum);
-                this.standardViewRadio.checked = false;
-                this.frameOnDataRadio.checked = false;
-                this.setRadioLabelColor(this.standardViewRadio, false);
-                this.setRadioLabelColor(this.frameOnDataRadio, false);
+                if (this.onControl[chartNum]) {
+                        this.chartScale.updateMode(null, chartNum);
+                        this.standardViewRadio.checked = false;
+                        this.frameOnDataRadio.checked = false;
+                        this.setRadioLabelColor(this.standardViewRadio, false);
+                        this.setRadioLabelColor(this.frameOnDataRadio, false);
+                }
                 for (let i = 0; i < this.chartCount; i++) {
                         let chart = this.charts[i];
                         setTimeout(function () {
