@@ -35,7 +35,7 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
  *  @param myChart:     The Chart object
  *  @param form:        The form to be updated.
  */
-export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum: number = 1) {
+export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum:number = 0) {
     let labels = "";
     for (let i = 0; i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel) {
@@ -50,44 +50,19 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
     if (myChart.options.plugins.title.text) {
         form.elements['title'].value = myChart.options.plugins.title.text as string;
     }
-    if (chartNum === 1) {
-        if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
-            form.elements['xAxis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
-        }
-        if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
-            form.elements['yAxis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
-        }
-    //work around for cluster 2
-    } else if (chartNum === 2) {
-        if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-            form.elements['x2Axis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
-        }
-        if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-            form.elements['y2Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
-        }
-        //insert back in whenj you make the silly code in index.html
-   //} else if (chartNum === 3) {
-     //   if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-       //     form.elements['x3Axis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
-        //}
-        //if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-          //  form.elements['y3Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
-        //}
-    //} else if (chartNum === 4) {
-      //  if ((myChart.options.scales['x'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-        //    form.elements['x4Axis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
-        //}
-        //if ((myChart.options.scales['y'] as LinearScaleOptions).title.text) {
-            // @ts-ignore
-          //  form.elements['y4Axis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
-        //}
-    }
 
+    if (chartNum !== 0) {
+        let key = (chartNum + 1).toString();
+        let xKey = 'x' + key + 'Axis';
+        let yKey = 'y' + key + 'Axis';
+        // @ts-ignore
+        form.elements[xKey].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+        // @ts-ignore
+        form.elements[yKey].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+    } else {
+        form.elements['xAxis'].value = (myChart.options.scales['x'] as LinearScaleOptions).title.text as string;
+        form.elements['yAxis'].value = (myChart.options.scales['y'] as LinearScaleOptions).title.text as string;
+    }
 
     form.elements['data'].disabled = immData;
     form.elements['title'].disabled = immTitle;

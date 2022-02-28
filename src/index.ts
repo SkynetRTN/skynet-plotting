@@ -15,7 +15,7 @@ import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1, clusterFileUpload } from './chart-cluster';
-import { cluster2, cluster2FileUpload } from './chart-cluster2';
+import { cluster2 } from './chart-cluster2';
 import { cluster4, cluster4FileUpload } from './chart-cluster4';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
@@ -120,8 +120,7 @@ function chartType(chart: string) {
     document.getElementById('add-row-button').hidden = false;
 
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart, ModelForm, graphScale]
-    let cluster2_objects: [Handsontable, Chart, Chart, ModelForm, graphScale]
+    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
     let cluster4_objects: [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale]
 
     if (chart === 'curve') {
@@ -154,17 +153,17 @@ function chartType(chart: string) {
         }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
-        objects = [cluster_objects[0], cluster_objects[1]]
+        objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1] as Chart<'line'>, cluster_objects[3]);
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
         }
     } else if (chart === 'cluster2') {
-        cluster2_objects = cluster2();
-        objects = [cluster2_objects[0], cluster2_objects[1]]
+        cluster_objects = cluster2();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            cluster2FileUpload(evt, cluster2_objects[0], cluster2_objects[1] as Chart<'line'>, cluster2_objects[2] as Chart<'line'>, cluster2_objects[4])
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
         }
     } else if (chart === 'cluster4') {
         cluster4_objects = cluster4();
@@ -199,14 +198,16 @@ function chartType(chart: string) {
 
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
-        updateChartInfo(objects[1], chartInfoForm);
         if (chart === 'cluster2') {
-            updateChartInfo(cluster2_objects[2], chartInfoForm, 2)
+            updateChartInfo(cluster_objects[1][0], chartInfoForm)
+            updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
         }
         if (chart === 'cluster4') {
-            updateChartInfo(cluster4_objects[2], chartInfoForm, 2)
-            updateChartInfo(cluster4_objects[3], chartInfoForm, 3)
-            updateChartInfo(cluster4_objects[4], chartInfoForm, 4)
+            updateChartInfo(cluster4_objects[2], chartInfoForm)
+            updateChartInfo(cluster4_objects[3], chartInfoForm)
+            updateChartInfo(cluster4_objects[4], chartInfoForm)
+        } else {
+            updateChartInfo(objects[1], chartInfoForm);
         }
     };
     objects[1].update('none');
@@ -251,27 +252,21 @@ function setChartDefaults() {
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
  */
-function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartid: number = 1) {
+function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
-    if (chartid === 1) {
-        (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['xAxis'].value;
-        (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['yAxis'].value;
-        myChart.options.plugins.title.text = elements['title'].value;
-        const labels = elements['data'].value.split(',').map((item: string) => item.trim());
-        let p = 0;
-        for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
-            if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
-                myChart.data.datasets[i].label = labels[p++];
-            }
+    let key:string = chartNum === 0 ? "" : (chartNum+1).toString();
+    // @ts-ignore
+    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x'+key+'Axis'].value;
+    // @ts-ignore
+    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y'+key+'Axis'].value;
+    myChart.options.plugins.title.text = elements['title'].value;
+    const labels = elements['data'].value.split(',').map((item: string) => item.trim());
+    let p = 0;
+    for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
+        if (!myChart.data.datasets[i].hidden && !myChart.data.datasets[i].immutableLabel) {
+            myChart.data.datasets[i].label = labels[p++];
         }
-    //work around for updating chart2 axis label in cluster2
-    } else if (chartid ===2) {
-        // @ts-ignore
-        (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x2Axis'].value;
-        // @ts-ignore
-        (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y2Axis'].value;
     }
-
     myChart.update('none');
 }
 

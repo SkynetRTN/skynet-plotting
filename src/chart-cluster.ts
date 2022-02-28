@@ -25,7 +25,7 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
+export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   insertClusterControls();
   //make graph scaling options visible to users
   document.getElementById('axis-label1').style.display = 'inline';
@@ -225,7 +225,7 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
     false
   );
 
-  return [hot, myChart, modelForm, graphMinMax];
+  return [hot, [myChart], modelForm, graphMinMax];
 }
 
 /**
@@ -234,13 +234,13 @@ export function cluster1(): [Handsontable, Chart, ModelForm, graphScale] {
  * DATA FLOW: file -> table
  * @param {Event} evt The uploadig event
  * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart The chart to be plotted
+ * @param {Chartjs} myCharts The chart to be plotted
  * @param {graphScale} graphMaxMin the graphScale object that includes chart bounding information
  */
 export function clusterFileUpload(
   evt: Event,
   table: Handsontable,
-  myChart: Chart<"line">,
+  myCharts: Chart[],
   graphMaxMin: graphScale,
 ) {
   // console.log("clusterFileUpload called");
@@ -277,21 +277,9 @@ export function clusterFileUpload(
     modelForm["age_num"].value = "6.6";
     clusterForm["red_num"].value = "0";
     modelForm["metal_num"].value = "-3.4";
-    myChart.options.plugins.title.text = "Title";
-    myChart.data.datasets[2].label = "Data";
-    myChart.options.scales["x"].title.text = "x";
-    myChart.options.scales["y"].title.text = "y";
-    updateLabels(
-      myChart,
-      document.getElementById("chart-info-form") as ChartInfoForm,
-      false,
-      false,
-      false,
-      false
-    );
     const data: string[] = (reader.result as string)
-      .split("\n")
-      .filter((str) => str !== null && str !== undefined && str !== "");
+        .split("\n")
+        .filter((str) => str !== null && str !== undefined && str !== "");
     const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
     let filters: string[] = [];
     data.splice(0, 1);
@@ -324,11 +312,9 @@ export function clusterFileUpload(
       }
     }
 
-    const blue = modelForm["blue"];
-    const red = modelForm["red"];
-    const lum = modelForm["lum"];
-
-    //Change filter options to match file
+    let blue = modelForm[modelFormKey(0, 'blue')];
+    let red = modelForm[modelFormKey(0, 'red')];
+    let lum = modelForm[modelFormKey(0, 'lum')];
 
     //order filters by temperature
     const knownFilters = ["U", "uprime", "B", "gprime", "V", "vprime", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
@@ -354,25 +340,15 @@ export function clusterFileUpload(
       columns.push({
         data: filters[i],
         type: "numeric",
-        numericFormat: { pattern: { mantissa: 2 } },
+        numericFormat: {pattern: {mantissa: 2}},
       });
       columns.push({
         data: filters[i] + "err",
         type: "numeric",
-        numericFormat: { pattern: { mantissa: 2 } },
+        numericFormat: {pattern: {mantissa: 2}},
       });
     }
     hiddenColumns = hiddenColumns.filter((c) => [0, 2].indexOf(c) < 0); //get rid of the columns we want revealed
-    //Change the options in the drop downs to the file's filters
-    //blue and lum are most blue by default, red is set to most red
-    changeOptions(blue, optionList);
-    changeOptions(red, optionList);
-    //red.value = red.options[red.options.length-1].value;
-    changeOptions(lum, optionList);
-
-    blue.value = filters[0];
-    red.value = filters[1];
-    lum.value = filters[1];
 
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -381,24 +357,49 @@ export function clusterFileUpload(
       for (let filterIndex in filters) {
         row[filters[filterIndex]] = src.get(filters[filterIndex]);
         row[filters[filterIndex] + "err"] = src.get(
-          filters[filterIndex] + "err"
+            filters[filterIndex] + "err"
         );
       }
       tableData.push(row);
     });
+    for (let c = 0; c < myCharts.length; c++) {
+      let myChart = myCharts[c] as Chart<'line'>;
+      myChart.options.plugins.title.text = "Title";
+      myChart.data.datasets[2].label = "Data";
+      myChart.options.scales['x'].title.text = ('x' + (c+1).toString());
+      myChart.options.scales['y'].title.text = ('y' + (c+1).toString());
+      updateLabels(myChart, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, c);
 
-    updateHRModel(modelForm, table, [myChart],
-      () => {
-        table.updateSettings({
-          data: tableData,
-          colHeaders: headers,
-          columns: columns,
-          hiddenColumns: { columns: hiddenColumns },
-        }); //hide all but the first 3 columns
-        updateTableHeight(table);
-        updateScatter(table, [myChart], clusterForm, modelForm, [2], graphMaxMin);
-        document.getElementById("standardView").click();
-      });
+      //Change filter options to match file
+      blue = modelForm[modelFormKey(c, 'blue')];
+      red = modelForm[modelFormKey(c, 'red')];
+      lum = modelForm[modelFormKey(c, 'lum')];
+
+      //Change the options in the drop downs to the file's filters
+      //blue and lum are most blue by default, red is set to most red
+      changeOptions(blue, optionList);
+      changeOptions(red, optionList);
+      //red.value = red.options[red.options.length-1].value;
+      changeOptions(lum, optionList);
+
+      blue.value = filters[0];
+      red.value = filters[1];
+      lum.value = filters[1];
+
+      updateHRModel(modelForm, table, [myChart],
+          () => {
+            table.updateSettings({
+              data: tableData,
+              colHeaders: headers,
+              columns: columns,
+              hiddenColumns: {columns: hiddenColumns},
+            }); //hide all but the first 3 columns
+            updateTableHeight(table);
+            graphMaxMin.updateMode('auto', c);
+            updateScatter(table, [myChart], clusterForm, modelForm, [2], graphMaxMin);
+            document.getElementById("standardView").click();
+          });
+    }
   };
   reader.readAsText(file);
 }

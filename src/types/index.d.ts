@@ -2,7 +2,9 @@ interface ChartInfoFormElements extends HTMLCollection {
     title: HTMLInputElement,
     data: HTMLInputElement,
     xAxis: HTMLInputElement,
-    yAxis: HTMLInputElement
+    yAxis: HTMLInputElement,
+    x2Axis: HTMLInputElement,
+    y2Axis: HTMLInputElement
 }
 interface ChartInfoForm extends HTMLFormElement {
     elements: ChartInfoFormElements
