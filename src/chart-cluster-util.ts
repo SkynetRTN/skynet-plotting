@@ -823,7 +823,6 @@ export class ChartScaleControl {
         }
 
         private recoloring() {
-                console.trace()
                 for (let i = 0; i < this.chartCount; i++) {
                         let chart = this.charts[i];
                         chart.data.datasets[2].backgroundColor = HRrainbow(chart,
