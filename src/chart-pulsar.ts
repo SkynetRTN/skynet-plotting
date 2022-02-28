@@ -430,20 +430,22 @@ export function pulsar(): [Handsontable, Chart] {
     updatePulsar(myChart);
     updateTableHeight(hot);
 
-
+    var sonifiedChart: AudioBufferSourceNode;
     var playing: boolean = false;
     sonificationButton.onclick = function (){
         if(!playing){
             if(pulsarForm.elements["mode"].value === 'lc')
-                sonify(audioCtx,myChart,0,1);
+                sonifiedChart = sonify(audioCtx,myChart,0,1);
             if(pulsarForm.elements["mode"].value === 'pf')
-                sonify(audioCtx,myChart,4,5);
-
-            audioCtx.resume()
+                sonifiedChart = sonify(audioCtx,myChart,4,5);
+            sonifiedChart.start();
+            audioCtx.resume();
             playing = true;
         }
         else{
-            audioCtx.suspend()
+            sonifiedChart.stop();
+            audioCtx.suspend();
+            sonifiedChart = null;
             playing = false;
         }
     }
@@ -730,7 +732,7 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
 
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
     let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
-    let norm = 2 / myChart.scales.y.max; 
+    let norm = 5 / myChart.scales.y.max; 
 
     let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
 
@@ -766,7 +768,7 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
     // connect the AudioBufferSourceNode to the
     // destination so we can hear the sound
     sonifiedChart.connect(ctx.destination);
-    sonifiedChart.start()
+    return sonifiedChart;
 }
 
 //accepts x values and returns a y value based on the points immediately before and after the given x value
