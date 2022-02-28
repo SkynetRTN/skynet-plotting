@@ -695,9 +695,11 @@ export function chartRescale(myCharts: Chart[],
         let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
         let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
 
+        let minX = color_blue - (color_red - color_blue) / 8;
+        let maxX = color_red + (color_red - color_blue) / 8;
         adjustScale = {
-          'minX': color_blue - (color_red - color_blue) / 8,
-          'maxX': color_red + (color_red - color_blue) / 8,
+          'minX': minX <= maxX ? minX : maxX,
+          'maxX': maxX >= minX ? maxX: minX,
           'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
           'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
         };
