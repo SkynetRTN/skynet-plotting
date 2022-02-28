@@ -248,6 +248,10 @@ export function pulsar(): [Handsontable, Chart] {
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
+    //Audio Context
+    const audioCtx = new AudioContext();
+    audioCtx.suspend();
+
     const update = function () {
         updatePulsar(myChart);
         updateTableHeight(hot);
@@ -263,6 +267,7 @@ export function pulsar(): [Handsontable, Chart] {
     const fourierForm = document.getElementById('fourier-form') as FourierForm;
     const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
     const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
+    const sonificationButton = document.getElementById("sonify") as HTMLInputElement;
 
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value as PulsarMode;
@@ -424,6 +429,24 @@ export function pulsar(): [Handsontable, Chart] {
 
     updatePulsar(myChart);
     updateTableHeight(hot);
+
+
+    var playing: boolean = false;
+    sonificationButton.onclick = function (){
+        if(!playing){
+            if(pulsarForm.elements["mode"].value === 'lc')
+                sonify(audioCtx,myChart,0,1);
+            if(pulsarForm.elements["mode"].value === 'pf')
+                sonify(audioCtx,myChart,4,5);
+
+            audioCtx.resume()
+            playing = true;
+        }
+        else{
+            audioCtx.suspend()
+            playing = false;
+        }
+    }
 
     return [hot, myChart];
 }
@@ -695,3 +718,81 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
     }
     return pfData;
 }
+
+/**
+ * This function serves as a switch for the visibility of the control div's for the different modes.
+ * @param ctx The audioContext
+ * @param myChart The chart to be sonified.
+ * @param dataSet1 The dataset to sonify as the first stereo channel.
+* @param dataSet2 The dataset to sonify as the second stereo channel.
+ */
+function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number){
+
+    let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
+    let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
+    let norm = 2 / myChart.scales.y.max; 
+
+    let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+
+    // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
+    var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
+    console.log(ctx.sampleRate)
+
+    let prev0 = 0;//data point with the greatest time value less than the current time
+    let prev1 = 0;
+    let next0 = 1//next data point
+    let next1 = 1;
+
+    for (var i = 0; i < arrayBuffer.length; i++) {
+        let x0 = channel0[0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
+        let x1 = channel0[0].x + i/ctx.sampleRate;
+        if(x0 > channel0[next0].x){
+            ++next0;
+            ++prev0;
+        }
+        if(x1 > channel1[next1].x){
+            ++next1;
+            ++prev1;
+        }
+
+        arrayBuffer.getChannelData(0)[i] = norm * linearInterpolation(channel0[prev0],channel0[next0],x0);
+        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 1 in the buffer
+    }
+    
+    // Get an AudioBufferSourceNode to play our buffer.
+    const sonifiedChart = ctx.createBufferSource();
+    sonifiedChart.loop = true; //play on repeat
+    sonifiedChart.buffer = arrayBuffer
+    // connect the AudioBufferSourceNode to the
+    // destination so we can hear the sound
+    sonifiedChart.connect(ctx.destination);
+    sonifiedChart.start()
+}
+
+//accepts x values and returns a y value based on the points immediately before and after the given x value
+function linearInterpolation(prev: ScatterDataPoint, next: ScatterDataPoint, x: number): number
+{
+    let slope = (next.y-prev.y)/(next.x-prev.x)
+    let y = slope*(x-prev.x) + prev.y
+    return y;
+}
+/*
+function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number): AudioBuffer{
+
+    var myArrayBuffer = ctx.createBuffer(2, ctx.sampleRate * 3, ctx.sampleRate);
+
+    // Fill the buffer with white noise;
+    //just random values between -1.0 and 1.0
+    for (var channel = 0; channel < myArrayBuffer.numberOfChannels; channel++) {
+        // This gives us the actual ArrayBuffer that contains the data
+        var nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (var i = 0; i < myArrayBuffer.length; i++) {
+                // Math.random() is in [0; 1.0]
+                // audio needs to be in [-1.0; 1.0]
+                nowBuffering[i] = Math.random() * 2 - 1;
+            }
+    }
+
+    return myArrayBuffer
+}
+*/
