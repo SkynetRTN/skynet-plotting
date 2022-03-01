@@ -338,3 +338,17 @@ label.scaleSelection-graphSelection {
     margin-right: 3px;
     background-color: white;
 }
+
+.clusterCharts {
+    display: none;
+    position: relative;
+}
+
+.chartTag {
+    position: absolute;
+    bottom: 40px;
+    left: 90px;
+    z-index: -1;
+    font-size: 100px;
+    color: gray;
+}

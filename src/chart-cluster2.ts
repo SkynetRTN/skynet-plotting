@@ -25,8 +25,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   //setup two charts
     document.getElementById('myChart').remove();
-    document.getElementById('chart-div1').style.display = 'inline';
-    document.getElementById('chart-div2').style.display = 'inline';
+    document.getElementById('chart-div1').style.display = 'block';
+    document.getElementById('chart-div2').style.display = 'block';
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label2').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
