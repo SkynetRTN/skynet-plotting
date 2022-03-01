@@ -823,11 +823,21 @@ export function insertClusterControls(chartCounts:number = 1) {
     for (let i = 0; i < chartCounts; i++) {
       let num = ""
       let order = (i+1).toString()
+      let logo = ""
+      if (order === "1") {
+        logo = "①"
+      } else if (order === "2") {
+        logo = "②"
+      } else if (order === "3") {
+        logo = "③"
+      } else if (order === "4") {
+        logo = "④"
+      }
       if (i !== 0) {
         num = (i+1).toString()
       }
       //add a number that corresponds what graph each row of drop down boxes controls
-      htmlContent += '<div class="col-sm-1"><class="title">' + order + ':</div>\n' +
+      htmlContent += '<div class="col-sm-1"><class="title">' + logo + ':</div>\n' +
           '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
           '<option value="B" title="B filter" selected>B</option></div>\n' +
           '<option value="V" title="V filter">V</option></div>\n' +
