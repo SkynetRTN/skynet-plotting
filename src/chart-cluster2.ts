@@ -367,6 +367,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
+  document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x1";

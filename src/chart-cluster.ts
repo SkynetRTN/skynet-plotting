@@ -210,6 +210,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   //initializing website
   update();
   updateHRModel(modelForm, hot, [myChart]);
+  document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
 
   myChart.options.plugins.title.text = "Title";
