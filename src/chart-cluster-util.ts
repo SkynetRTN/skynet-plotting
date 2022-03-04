@@ -833,8 +833,8 @@ export class ChartScaleControl {
 
         //Unchecked and reset both radio buttons to white background
         zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
+                this.chartScale.updateMode(null, chartNum);
                 if (this.onControl[chartNum]) {
-                        this.chartScale.updateMode(null, chartNum);
                         this.standardViewRadio.checked = false;
                         this.frameOnDataRadio.checked = false;
                         this.setRadioLabelColor(this.standardViewRadio, false);
