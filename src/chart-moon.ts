@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLine, updateLabels, updateTableHeight, linkInputs, throttle } from "./util"
-import { round, sqr, rad } from "./my-math"
+import {sqr, rad } from "./my-math"
 
 /**
  *  This function is for the moon of a planet.
