@@ -2,17 +2,14 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import {
-  ChartScaleControl,
-  dummyData,
-  graphScale,
-  HRrainbow,
-} from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
-import { linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
+import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {insertClusterControls, updateHRModel, updateScatter } from "./chart-cluster";
-// import { rad } from "./my-math";
+import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
+import { insertClusterControls } from "./chart-cluster-utils/chart-cluster-interface";
+import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import { HRrainbow } from "./chart-cluster-util";
+import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
 Chart.register(zoomPlugin);
 /**
