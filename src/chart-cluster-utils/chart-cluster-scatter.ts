@@ -518,7 +518,7 @@ export class ChartScaleControl {
  *  @param graphMaxMin: the graphScale object
  *  @param option: overwrite the existing zooming option
  */
-export function chartRescale(myCharts: Chart[],
+function chartRescale(myCharts: Chart[],
                              modelForm: ModelForm,
                              graphMaxMin: graphScale,
                              option: string = null,

@@ -163,7 +163,7 @@ function generateURL(form: ModelForm, chartNum: number) {
  * @param number number to be rounded
  * @constructor
  */
-export function HRModelRounding(number: number | string) {
+function HRModelRounding(number: number | string) {
     return (Math.round(Number(number) * 20) / 20).toFixed(2)
 }
 
