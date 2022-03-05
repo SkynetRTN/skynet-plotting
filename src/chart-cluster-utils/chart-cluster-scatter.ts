@@ -24,8 +24,7 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,
-) {
+    specificChart: number = -1,) {
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
