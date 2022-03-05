@@ -5,7 +5,7 @@
 
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
-import { modelFormKey } from "../chart-cluster-util";
+import { modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";

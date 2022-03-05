@@ -8,7 +8,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls } from "./chart-cluster-utils/chart-cluster-interface";
 import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
-import { HRrainbow } from "./chart-cluster-util";
+import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
 Chart.register(zoomPlugin);

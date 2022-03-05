@@ -5,7 +5,7 @@
 
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
-import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "../chart-cluster-util";
+import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
 
 

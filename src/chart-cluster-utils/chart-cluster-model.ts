@@ -5,7 +5,7 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
-import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "../chart-cluster-util";
+import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-cluster-util";
 import { median } from "../my-math";
 
 
