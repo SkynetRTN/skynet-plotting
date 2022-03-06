@@ -128,7 +128,10 @@ export function spectrum(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d'); // the Curser
     // curser options
     const chartOptions: ChartConfiguration = {

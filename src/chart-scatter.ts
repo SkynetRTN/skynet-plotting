@@ -50,7 +50,10 @@ export function scatter(): [Handsontable, Chart] {
             { data: 'di', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     };
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
 
     const chartOptions: ChartConfiguration = {
