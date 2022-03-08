@@ -430,7 +430,7 @@ export function pulsar(): [Handsontable, Chart] {
     updatePulsar(myChart);
     updateTableHeight(hot);
 
-    var sonifiedChart: AudioBufferSourceNode;
+    var sonifiedChart = new AudioBufferSourceNode(audioCtx);
     var playing: boolean = false;
     sonificationButton.onclick = function (){
         if(!playing){
@@ -438,7 +438,8 @@ export function pulsar(): [Handsontable, Chart] {
                 sonifiedChart = sonify(audioCtx,myChart,0,1,false);
                 sonifiedChart.onended = function() {sonificationButton.click()};//stop playing
             if(pulsarForm.elements["mode"].value === 'pf')
-                sonifiedChart = sonify(audioCtx,myChart,4,5);
+                sonifiedChart = sonify(audioCtx,myChart,4,5,true);
+
             sonifiedChart.start();
             audioCtx.resume();
             playing = true;
@@ -731,9 +732,11 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
  */
 function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true){
 
+    let SonifyFreq = 432*2*Math.PI; //528 HZ tone
+
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
     let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
-    let norm = 40 / myChart.scales.y.max; 
+    let norm = 10 / myChart.scales.y.max; 
 
     let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
 
@@ -757,8 +760,8 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
             ++prev1;
         }
 
-        arrayBuffer.getChannelData(0)[i] = norm * linearInterpolation(channel0[prev0],channel0[next0],x0);
-        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
+        arrayBuffer.getChannelData(0)[i] = Math.sin(SonifyFreq*x0) * norm * linearInterpolation(channel0[prev0],channel0[next0],x0);
+        arrayBuffer.getChannelData(1)[i] = Math.sin(SonifyFreq*x0) * norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.
