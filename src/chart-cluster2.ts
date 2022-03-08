@@ -2,17 +2,14 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import {
-  ChartScaleControl,
-  dummyData,
-  graphScale,
-  HRrainbow,
-} from "./chart-cluster-util";
 import { colors, tableCommonOptions } from "./config";
-import { linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
+import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {insertClusterControls, updateHRModel, updateScatter } from "./chart-cluster";
-// import { rad } from "./my-math";
+import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
+import { insertClusterControls } from "./chart-cluster-utils/chart-cluster-interface";
+import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
+import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
 Chart.register(zoomPlugin);
 /**
@@ -294,10 +291,12 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
         },
         title: {
           display: true,
-          align: 'end',
+          align: 'start',
           color: 'white',
+          font: {
+            size: 1},
           padding: {
-            top: 10.025,
+            top: 25.50,
             bottom: -14,
           }
         },
@@ -365,15 +364,15 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
    //figure out why this update is breaking the code and it does not break the code in the other one
   update();
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
+  document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x1";
   myChart1.options.scales["y"].title.text = "y1";
-  myChart2.options.plugins.title.text = "";
   myChart2.options.scales["x"].title.text = "x2";
   myChart2.options.scales["y"].title.text = "y2";
-  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm);
-  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
+  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
+  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart

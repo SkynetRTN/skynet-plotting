@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLine, updateLabels, updateTableHeight, linkInputs, throttle } from "./util"
-import { round, sqr, rad } from "./my-math"
+import {sqr, rad } from "./my-math"
 
 /**
  *  This function is for the moon of a planet.
@@ -152,7 +152,7 @@ function updateFormula(table: ScatterDataPoint[], form: MoonForm, chart: Chart) 
     for (let i = 0; i < table.length; i++) {
         const x = table[i]['x'];
         const y = table[i]['y'];
-        if (isNaN(x) || isNaN(y)) {
+        if (isNaN(x) || isNaN(y) || x === null || y === null) {
             continue;
         }
         if (isNaN(max) || x > max) {
@@ -232,7 +232,6 @@ function generateMoonData(): ScatterDataPoint[] {
                 * (1 + Math.random() * 0.05),
         }
     }
-
-    console.log('Cheat code:', round(a, 2), round(p, 2), round(phase, 0), round(tilt, 0));
+    // console.log('Cheat code:', round(a, 2), round(p, 2), round(phase, 0), round(tilt, 0));
     return returnData;
 }

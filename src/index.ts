@@ -14,7 +14,7 @@ import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster1, clusterFileUpload } from './chart-cluster';
+import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
 import { cluster4, cluster4FileUpload } from './chart-cluster4';
 import { round } from './my-math';
@@ -22,7 +22,8 @@ import { gravity, gravityFileUpload } from './chart-gravity';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { graphScale } from './chart-cluster-util';
+import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
+import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 
 /**
  *  Initializing the page when the website loads
