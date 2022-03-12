@@ -6,8 +6,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLabels, updateTableHeight, sanitizeTableData } from "./util"
-import { round, lombScargle, floatMod } from "./my-math"
-import { PulsarMode } from "./types/chart.js";
+import { round } from "./my-math"
 
 /**
  *  Returns generated table and chart for variable.
@@ -16,16 +15,8 @@ import { PulsarMode } from "./types/chart.js";
 export function transient(): [Handsontable, Chart] {
     // console.log("root func called");
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
-        '<div class="flex-container">\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
-        '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
-        '<div class="flex-item-grow0"><label><input type="radio" class="table" name="mode" value="pf" disabled><span>Period Folding</span></label></div>\n' +
-        '</div>\n' +
-        '</form>\n' +
-        '<div id="light-curve-div"></div>\n' +
-        '<div id="fourier-div"></div>\n' +
-        '<div id="period-folding-div"></div>\n'
+        '<form title="Variable" id="variable-form" style="padding-bottom: 1em"></form>\n' +
+        '<div id="light-curve-div"></div>\n'
     );
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
@@ -58,12 +49,6 @@ export function transient(): [Handsontable, Chart] {
         data: {
             maxMJD: Number.NEGATIVE_INFINITY,
             minMJD: Number.POSITIVE_INFINITY,
-            modeLabels: {
-                lc: { t: 'Title', x: 'x', y: 'y' },
-                ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
-                pf: { t: 'Title', x: 'x', y: 'y' },
-                lastMode: 'lc'
-            },
             datasets: [
                 {
                     label: 'Source 1',
@@ -87,24 +72,6 @@ export function transient(): [Handsontable, Chart] {
                     label: 'Light Curve',
                     data: [],
                     backgroundColor: colors['purple'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    // immutableLabel: true,
-                    hidden: true,
-                }, {
-                    label: 'Fourier',
-                    data: [],
-                    backgroundColor: colors['bright'],
-                    pointRadius: 3,
-                    pointHoverRadius: 6,
-                    pointBorderWidth: 0,
-                    // immutableLabel: true,
-                    hidden: true,
-                }, {
-                    label: 'Period Folding',
-                    data: [],
-                    backgroundColor: colors['orange'],
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
@@ -155,31 +122,10 @@ export function transient(): [Handsontable, Chart] {
 
     const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.onchange = function () {
-        const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
-        if (mode === "lc") {
-            showDiv("light-curve-div");
-            const lightCurveForm = document.getElementById("light-curve-form");
-            lightCurveForm.oninput(null);
-        } else if (mode === "ft") {
-            showDiv("fourier-div");
-            const fourierForm = document.getElementById("fourier-form");
-            fourierForm.oninput(null);
-        } else {
-            showDiv("period-folding-div");
-            const periodFoldingForm = document.getElementById("period-folding-form");
-            periodFoldingForm.oninput(null);
-        }
 
-        myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
-            t: myChart.options.plugins.title.text as string,
-            x: myChart.options.scales['x'].title.text as string,
-            y: myChart.options.scales['y'].title.text as string
-        }
-        myChart.data.modeLabels.lastMode = mode;
+        const lightCurveForm = document.getElementById("light-curve-form");
+        lightCurveForm.oninput(null);
 
-        myChart.options.plugins.title.text = myChart.data.modeLabels[mode].t;
-        myChart.options.scales['x'].title.text = myChart.data.modeLabels[mode].x;
-        myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update('none');
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
@@ -288,17 +234,6 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Ch
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
 
-        const variableForm = document.getElementById("variable-form") as VariableForm;
-        variableForm.mode[1].disabled = true;
-        variableForm.mode[2].disabled = true;
-
-        myChart.data.modeLabels = {
-            lc: { t: 'Title', x: 'x', y: 'y' },
-            ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
-            pf: { t: 'Title', x: 'x', y: 'y' },
-            lastMode: 'lc'
-        };
-
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
@@ -381,7 +316,6 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     updateChart(myChart, 0, 1);
 
     const variableForm = document.getElementById("variable-form") as VariableForm;
-    variableForm.mode.value = "lc";
     variableForm.onchange(null);
 }
 
@@ -415,14 +349,11 @@ function lightCurve(myChart: Chart) {
         '</div>\n' +
         '</form>\n';
     document.getElementById('light-curve-div').innerHTML = lcHTML;
-    const variableForm = document.getElementById('variable-form') as VariableForm;
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
     lightCurveForm.oninput = function () {
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
-            variableForm.mode[1].disabled = true;
-            variableForm.mode[2].disabled = true;
         } else {
             const datasets = myChart.data.datasets;
             let srcData: ScatterDataPoint[];
@@ -442,89 +373,13 @@ function lightCurve(myChart: Chart) {
                     "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
                 });
             }
-            variableForm.mode[1].disabled = false;
-            variableForm.mode[2].disabled = false;
 
             myChart.data.datasets[2].data = lcData;
-
-            const numOfDatasets = myChart.data.datasets.length;
-
-            for (let i = 2; i < numOfDatasets; i++) {
-                myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
-            }
+            myChart.data.datasets[2].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
 
             updateChart(myChart, 2);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
         }
-    }
-
-    const fHTML =
-        '<form title="Fourier" id="fourier-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-7">Start Period (days): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="start" title="Start Period" value=0.1></input></div>\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-7">Stop Period (days): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="stop" title="Stop Period" value=1></input></div>\n' +
-        '</div>\n' +
-        '</form>\n';
-
-    document.getElementById("fourier-div").innerHTML = fHTML;
-    const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
-    fourierForm.oninput = function () {
-        let start = parseFloat(fourierForm.start.value);
-        let stop = parseFloat(fourierForm.stop.value);
-        if (start > stop) {
-            // alert("Please make sure the stop value is greater than the start value.");
-            return;
-        }
-        let fData = [];
-
-        let lcData = myChart.data.datasets[2].data as ScatterDataPoint[];
-        let tArray = lcData.map((entry: ScatterDataPoint) => entry.x);
-        let yArray = lcData.map((entry: ScatterDataPoint) => entry.y);
-
-        fData = lombScargle(tArray, yArray, start, stop, 2000);
-
-        myChart.data.datasets[3].data = fData;
-
-        updateChart(myChart, 3);
-    }
-
-    const pfHTML =
-        '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period (days): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Folding Period" value=0></input></div>\n' +
-        '</div>\n' +
-        '</form>\n';
-
-    document.getElementById("period-folding-div").innerHTML = pfHTML;
-    const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-    periodFoldingForm.oninput = function () {
-        let period = parseFloat(periodFoldingForm.pf.value);
-        if (period !== 0) {
-            let datasets = myChart.data.datasets;
-            let minMJD = myChart.data.minMJD;
-            let pfData = [];
-            for (let i = 0; i < datasets[2].data.length; i++) {
-                pfData.push({
-                    "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
-                    "y": (datasets[2].data[i] as ScatterDataPoint).y,
-                });
-                pfData.push({
-                    "x": pfData[pfData.length - 1].x + period,
-                    "y": pfData[pfData.length - 1].y,
-                })
-            }
-            myChart.data.datasets[4].data = pfData;
-        } else {
-            myChart.data.datasets[4].data = myChart.data.datasets[2].data;
-        }
-
-        updateChart(myChart, 4);
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
     }
 }
 
@@ -537,38 +392,15 @@ function lightCurve(myChart: Chart) {
 function updateChart(myChart: Chart, ...dataIndices: number[]) {
     // console.log("updateChart called");
     const numOfDatasets = myChart.data.datasets.length;
-    
+
     for (let i = 0; i < numOfDatasets; i++) {
         myChart.data.datasets[i].hidden = true;
     }
-    // Reversing y-axis for lc and pf, since a lower value for star magnitude means it's brighter.
+    // Reversing y-axis for lc, since a lower value for star magnitude means it's brighter.
     myChart.options.scales['y'].reverse = true;
 
     for (const dataIndex of dataIndices) {
         myChart.data.datasets[dataIndex].hidden = false;
-        if (dataIndex === 3) {
-            // Normal y-axis for fourier transform.
-            myChart.options.scales['y'].reverse = false;
-        }
     }
     myChart.update('none');
-}
-
-/**
- * This function serves as a switch for the visibility of the control div's for the different modes.
- * @param id The name of the div to be displayed.
- */
-function showDiv(id: string) {
-    document.getElementById("light-curve-div").hidden = true;
-    document.getElementById("fourier-div").hidden = true;
-    document.getElementById("period-folding-div").hidden = true;
-
-    document.getElementById("table-div").hidden = true;
-    document.getElementById("add-row-button").hidden = true;
-
-    document.getElementById(id).hidden = false;
-    if (id === "light-curve-div") {
-        document.getElementById("table-div").hidden = false;
-        document.getElementById("add-row-button").hidden = false;
-    }
 }
