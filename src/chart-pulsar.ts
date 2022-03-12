@@ -4,10 +4,13 @@ import Chart from "chart.js/auto";
 import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
+import { saveAs } from 'file-saver';
+
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight, formatTime, getDateString } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
+import { build } from "vite";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -104,7 +107,7 @@ export function pulsar(): [Handsontable, Chart] {
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
   '<button id="sonify"/>Sonify</button>\n' +
-  '<button id="saveSonification"/>Save Sonification</button>\n' +
+  '<button id="saveSonification";/>Save Sonification</button>\n' +
   '</div>\n'
   )
   document.getElementById('axis-label1').style.display = 'inline';
@@ -250,7 +253,7 @@ export function pulsar(): [Handsontable, Chart] {
 
     //Audio Context
     const audioCtx = new AudioContext();
-    audioCtx.suspend();
+    //audioCtx.suspend();
 
     const update = function () {
         updatePulsar(myChart);
@@ -268,6 +271,7 @@ export function pulsar(): [Handsontable, Chart] {
     const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
     const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
     const sonificationButton = document.getElementById("sonify") as HTMLInputElement;
+    const saveSonify = document.getElementById("saveSonification") as HTMLInputElement;
 
     pulsarForm.onchange = function () {
         let mode = pulsarForm.elements["mode"].value as PulsarMode;
@@ -431,23 +435,41 @@ export function pulsar(): [Handsontable, Chart] {
     updateTableHeight(hot);
 
     var sonifiedChart = new AudioBufferSourceNode(audioCtx);
-    var playing: boolean = false;
-    sonificationButton.onclick = function (){
-        if(!playing){
-            if(pulsarForm.elements["mode"].value === 'lc')
-                sonifiedChart = sonify(audioCtx,myChart,0,1,false);
-                sonifiedChart.onended = function() {sonificationButton.click()};//stop playing
-            if(pulsarForm.elements["mode"].value === 'pf')
-                sonifiedChart = sonify(audioCtx,myChart,4,5,true);
-
-            sonifiedChart.start();
-            audioCtx.resume();
-            playing = true;
+    function play(){
+        //audioCtx.resume();
+        sonificationButton.onclick = pause;
+        if(pulsarForm.elements["mode"].value === 'lc')
+        {
+            sonifiedChart = sonify(audioCtx,myChart,0,1,false);
+            sonifiedChart.onended = pause; //bad, must change
         }
-        else{
-            sonifiedChart.stop();
-            audioCtx.suspend();
-            playing = false;
+        if(pulsarForm.elements["mode"].value === 'pf')
+            sonifiedChart = sonify(audioCtx,myChart,4,5,true);
+        sonificationButton.innerHTML = "Stop";
+        sonifiedChart.start();
+    }
+    function pause(){
+        sonificationButton.onclick = play;
+        sonifiedChart.stop();
+        //audioCtx.suspend();
+        sonificationButton.innerHTML = "Sonify";
+    }
+
+    sonificationButton.onclick = play;
+    saveSonify.onclick = function (){
+        if(pulsarForm.elements["mode"].value === 'lc')
+        {
+            if(!sonifiedChart.buffer)
+                sonifiedChart = sonify(audioCtx,myChart,0,1,false)
+            downloadBuffer(sonifiedChart.buffer)
+        }
+
+        
+        if(pulsarForm.elements["mode"].value === 'pf')
+        {
+            if(!sonifiedChart.buffer)
+                sonifiedChart = sonify(audioCtx,myChart,4,5,true)
+            downloadBuffer(sonifiedChart.buffer, 60)
         }
     }
 
@@ -723,7 +745,7 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
 }
 
 /**
- * This function serves as a switch for the visibility of the control div's for the different modes.
+ * This function creates an audioBuffer using data from the chart
  * @param ctx The audioContext
  * @param myChart The chart to be sonified.
  * @param dataSet1 The dataset to sonify as the first stereo channel.
@@ -732,11 +754,11 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
  */
 function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true){
 
-    let SonifyFreq = 432*2*Math.PI; //528 HZ tone
+    const SonifyFreq = 310*2*Math.PI; //432 HZ tone
 
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
     let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
-    let norm = 10 / myChart.scales.y.max; 
+    let norm = 1 / myChart.scales.y.max; //I don't know what this factor is, but it make it more louder
 
     let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
 
@@ -760,8 +782,8 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
             ++prev1;
         }
 
-        arrayBuffer.getChannelData(0)[i] = Math.sin(SonifyFreq*x0) * norm * linearInterpolation(channel0[prev0],channel0[next0],x0);
-        arrayBuffer.getChannelData(1)[i] = Math.sin(SonifyFreq*x0) * norm * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
+        arrayBuffer.getChannelData(0)[i] = norm*(Math.random() *2 -1) * linearInterpolation(channel0[prev0],channel0[next0],x0); // Left Channel
+        arrayBuffer.getChannelData(1)[i] = norm*(Math.random() *2 -1) * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.
@@ -780,6 +802,86 @@ function linearInterpolation(prev: ScatterDataPoint, next: ScatterDataPoint, x: 
     let slope = (next.y-prev.y)/(next.x-prev.x)
     let y = slope*(x-prev.x) + prev.y
     return y;
+}
+
+/**
+ * This function converts an icky Buffer [ :( ] into an epic blob in the stylings of a .wav [ :D ]
+ * @param buf The audioBuffer to make into a file.
+ * @param time Desired time length of the file in seconds. Loops the buffer if greater than the buffer time.
+ */
+function bufferToWav(buf: AudioBuffer, time: number)
+{   
+    var numOfChan = buf.numberOfChannels,
+        numOfSamples = Math.round(time * buf.sampleRate),
+        length = numOfSamples * numOfChan * 4 + 44//add room for metadata
+    length = length > 2147483648? 2147483648 : length; //cuts back if the length is beyond 2GB (Hopefully )
+    
+    var buffer = new ArrayBuffer(length),
+        view = new DataView(buffer), //Where we put a da data
+        channels = [], 
+        sample,
+        i,
+        offset = 0,
+        pos = 0;
+
+    // write WAVE header
+	setUint32(0x46464952);                         //"RIFF"
+	setUint32(length - 8);                         //The length of the rest of the file
+	setUint32(0x45564157);                         //"WAVE"
+
+	setUint32(0x20746d66);                         //"fmt " chunk
+	setUint32(16);                                 //subchunk size = 16
+	setUint16(1);                                  //PCM (uncompressed)
+	setUint16(numOfChan);                          //What it says on the tin
+	setUint32(buf.sampleRate);                     
+	setUint32(buf.sampleRate * 4 * numOfChan);     //byte rate
+	setUint16(numOfChan * 4);                      //block-align
+	setUint16(32);                                 //32-bit
+
+	setUint32(0x61746164);                         //"DATA" - chunk
+	setUint32(length - pos - 4);                   //chunk length
+
+    // write interleaved data
+    for(i = 0; i < numOfChan; i++)
+        channels.push(buf.getChannelData(i));
+    
+    while(pos < length) {
+        for(i = 0; i < numOfChan; i++) {             // interleave channels
+            sample = Math.max(-1, Math.min(1, channels[i][offset])); // clip invalid values
+            sample *= ((1<<31)-1); // scale to 32-bit signed int
+            setUint32(sample);
+        }
+
+        offset++                                     // next source sample
+        if (offset >= buf.length)
+            offset = 0;//loop back to buffer start
+            
+    }
+
+    return new Blob([buffer], {type: "audio/wav"});
+
+    function setUint16(data: any) {
+        view.setUint16(pos, data, true);
+        pos += 2;
+      }
+    
+    function setUint32(data: any) {
+        view.setUint32(pos, data, true);
+        pos += 4;
+    }
+}
+
+/**
+ * This function converts an icky Buffer [ :( ] into an epic blob in the stylings of a .wav [ :D ]
+ * @param buf The audioBuffer to make into a file.
+ * @param time Time length of the file in seconds. Defaults to the length of the buffer.
+ */
+function downloadBuffer(buf: AudioBuffer, time?: number)
+{
+    if(!time)
+        time = buf.length / buf.sampleRate; //default to buffer length
+
+    saveAs(bufferToWav(buf,time), 'sonification-' + formatTime(getDateString()) + '.wav');
 }
 /*
 function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number): AudioBuffer{
