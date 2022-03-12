@@ -446,6 +446,8 @@ export function pulsar(): [Handsontable, Chart] {
         if(pulsarForm.elements["mode"].value === 'pf')
             sonifiedChart = sonify(audioCtx,myChart,4,5,true);
         sonificationButton.innerHTML = "Stop";
+        sonificationButton.style.backgroundColor = colors["red"];
+        sonificationButton.style.color = "white";
         sonifiedChart.start();
     }
     function pause(){
@@ -453,6 +455,8 @@ export function pulsar(): [Handsontable, Chart] {
         sonifiedChart.stop();
         //audioCtx.suspend();
         sonificationButton.innerHTML = "Sonify";
+        sonificationButton.style.backgroundColor = ''
+        sonificationButton.style.color = "black";
     }
 
     sonificationButton.onclick = play;
@@ -753,8 +757,6 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
  * @param loop Loop audio?
  */
 function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true){
-
-    const SonifyFreq = 310*2*Math.PI; //432 HZ tone
 
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
     let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
