@@ -9,6 +9,7 @@ import { modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
+import { sortStarDuplicates, starData } from "./chart-gaia-util";
 
 
 /**
@@ -66,12 +67,16 @@ export function clusterFileUpload(
         const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
         let filters: string[] = [];
         data.splice(0, 1);
+        let stars =[]
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
             let items = row.trim().split(",");
             let src = items[1];
             let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
-            let mag = parseFloat((items.length >= 24 && items[23] != '') ? items[23] : items[12]);//if no calibrated mag, return mag
+            //let stars = stars.push(new starData(parseFloat(items[1]), parseFloat(items[5]), parseFloat(items[6])))
+            //sortStarDuplicates(stars)
+            //console.log(sortStarDuplicates(stars))
+            let mag = parseFloat(items[23]);//if no calibrated mag, return mag
             // let mag = parseFloat(items[12]);
             let err = parseFloat(items[13]);
             if (!datadict.has(src)) {
