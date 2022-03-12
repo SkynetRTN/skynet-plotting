@@ -1,5 +1,5 @@
 "use strict";
-
+import { sortStarDuplicates, sortStarid, starData } from "./chart-cluster-utils/chart-gaia-util";
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors, tableCommonOptions } from "./config";
@@ -59,7 +59,6 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
       hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
     })
   );
-
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
@@ -215,7 +214,8 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     false,
     false
   );
-
+    let dataArray = [5,4,7,9,5,2,56,9,0]
+  console.log(sortStarDuplicates(dataArray))
   return [hot, [myChart], modelForm, graphMinMax];
 }
 
