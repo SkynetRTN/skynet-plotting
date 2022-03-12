@@ -347,7 +347,9 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < 5; i++) {
+    const numOfDatasets = myChart.data.datasets.length;
+
+    for (let i = 0; i < numOfDatasets; i++) {
         myChart.data.datasets[i].data = [];
     }
 
@@ -445,7 +447,9 @@ function lightCurve(myChart: Chart) {
 
             myChart.data.datasets[2].data = lcData;
 
-            for (let i = 2; i < 5; i++) {
+            const numOfDatasets = myChart.data.datasets.length;
+
+            for (let i = 2; i < numOfDatasets; i++) {
                 myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
             }
 
@@ -532,7 +536,9 @@ function lightCurve(myChart: Chart) {
  */
 function updateChart(myChart: Chart, ...dataIndices: number[]) {
     // console.log("updateChart called");
-    for (let i = 0; i < 5; i++) {
+    const numOfDatasets = myChart.data.datasets.length;
+    
+    for (let i = 0; i < numOfDatasets; i++) {
         myChart.data.datasets[i].hidden = true;
     }
     // Reversing y-axis for lc and pf, since a lower value for star magnitude means it's brighter.
