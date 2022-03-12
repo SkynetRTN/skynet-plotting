@@ -24,6 +24,7 @@ import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/au
 import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
+import { transient, transientFileUpload } from './chart-transient';
 
 /**
  *  Initializing the page when the website loads
@@ -179,6 +180,12 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }
+    } else if (chart === 'transient') {
+        objects = transient();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            transientFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     }
     updateTableHeight(objects[0]);
