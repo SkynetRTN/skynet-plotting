@@ -3,12 +3,27 @@ export class starData{
     ra: number
     dec: number
     radius: number
-    constructor(id: string, ra: number, dec: number){
+    distance: number
+    motion: number []
+    constructor(id: string, ra: number, dec: number, distance: number, motion: number[]){
         this.id = id
         this.ra = ra
         this.dec = dec
+        this.distance = distance
+        this.motion = motion
     }
 }
+export class gaiaData{
+    id: string
+    distance: number
+    motion: number[]
+    constructor(id: string, distance: number, motion: number[]){
+        this.id = id
+        this.distance = distance
+        this.motion = motion
+    }
+}
+
 export function sortStarid(chunk1: starData[], chunk2: starData[]){
     let dataArray = []
     while (chunk1.length && chunk2.length) {
@@ -47,5 +62,26 @@ export function sortStarDuplicates(dataArray: starData[]): starData[]{
     }
     return uniqueStars
 }
-//when the database returns the star ranges and id's, export a function that matches them back to the magnitude and filter data
-//export function matchStarData(stars: starData[], data: Map<string, Map<string, number>>){ 
+
+export function maxMinRaDec(dataArray: starData[]){
+    let maxRa = dataArray[0].ra
+    let minRa = dataArray[0].ra
+    let maxDec = dataArray[0].dec
+    let minDec = dataArray[0].dec
+    for (let i = 1; i < dataArray.length; i++){
+        if (dataArray[i].ra > maxRa){
+            maxRa = dataArray[i].ra
+        }
+        if (dataArray[i].ra < minRa){
+            minRa = dataArray[i].ra
+        }
+        if (dataArray[i].dec > maxDec){
+            maxDec = dataArray[i].dec
+        }
+        if (dataArray[i].dec < minDec){
+            minDec = dataArray[i].dec
+        }
+    }
+    return [maxRa, minRa, maxDec, minDec]
+}
+

@@ -7,6 +7,7 @@ import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
+import { sortStarDuplicates, starData, sortStarid, gaiaData } from "./chart-gaia-util";
 
 
 /**
@@ -34,10 +35,37 @@ export function updateScatter(
             let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
             let range = parseFloat(clusterForm["range_num"].value);
 
+            
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
             let columns = table.getColHeader();
+            let stars: starData[] = [];
+            let gaia: gaiaData[] = [];
+            //make a variable that reperesents the number of star id values in the table
+            //for all points in starData
+            //if table is longer than 400
 
+            if (tableData.length > 400) {
+            
+            for (let i = 0; i < chart.length; i++) {
+                //match id values in starData to id values in acceptableStars
+                let idNaked = stars[i].id;
+                let idGaia = gaia[i].id;
+                //if id numbers mathc, then assign the proper motion and distance data to the starData
+                if (idNaked === idGaia) {
+                    stars[i].distance = gaia[i].distance;
+                    stars[i].motion = gaia[i].motion;
+                }
+                //if the new star distance is not within the range, then remove it from the table data
+                if (stars[i].distance > dist+(dist*(range/100)) || stars[i].distance < dist-(dist*(range/100))) {
+                    tableData.splice(i, 1);
+                    chart.splice(i, 1);
+                    i--;
+                }
+                
+        }
+        }
+                
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
             let lumKey = modelFormKey(c, 'lum')

@@ -9,7 +9,7 @@ import { modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
-import { sortStarDuplicates, starData } from "./chart-gaia-util";
+import { sortStarDuplicates, starData, sortStarid, maxMinRaDec, gaiaData } from "./chart-gaia-util";
 
 
 /**
@@ -73,8 +73,8 @@ export function clusterFileUpload(
             let items = row.trim().split(",");
             let src = items[1];
             let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
-            stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6])))
-            let mag = parseFloat(items[23]);//if no calibrated mag, return mag
+            stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6]), null, null));
+            let mag = parseFloat(items[23]);
             // let mag = parseFloat(items[12]);
             let err = parseFloat(items[13]);
             if (!datadict.has(src)) {
@@ -90,7 +90,9 @@ export function clusterFileUpload(
 
         }
         sortStarDuplicates(stars)
+        maxMinRaDec(stars)
         console.log(sortStarDuplicates(stars))
+        console.log(maxMinRaDec(stars))
         //add null values for sources that didn't show up under each filter
         for (const src of datadict.keys()) {
             for (const f of filters) {

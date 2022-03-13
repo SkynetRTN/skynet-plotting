@@ -16,7 +16,6 @@ import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
-import { cluster4 } from './chart-cluster4';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
@@ -179,13 +178,7 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
         }
-    } else if (chart === 'cluster4') {
-        cluster_objects = cluster4();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
+
 
     } else if (chart === 'gravity') {
         objects = gravity();
