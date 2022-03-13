@@ -214,8 +214,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     false,
     false
   );
-    let dataArray = [5,4,7,9,5,2,56,9,0]
-  console.log(sortStarDuplicates(dataArray))
+  
   return [hot, [myChart], modelForm, graphMinMax];
 }
 

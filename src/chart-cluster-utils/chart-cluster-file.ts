@@ -67,15 +67,13 @@ export function clusterFileUpload(
         const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
         let filters: string[] = [];
         data.splice(0, 1);
-        let stars =[]
+        let stars: starData[] =[]
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
             let items = row.trim().split(",");
             let src = items[1];
             let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
-            //let stars = stars.push(new starData(parseFloat(items[1]), parseFloat(items[5]), parseFloat(items[6])))
-            //sortStarDuplicates(stars)
-            //console.log(sortStarDuplicates(stars))
+            stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6])))
             let mag = parseFloat(items[23]);//if no calibrated mag, return mag
             // let mag = parseFloat(items[12]);
             let err = parseFloat(items[13]);
@@ -89,7 +87,10 @@ export function clusterFileUpload(
                     filters.push(filter);
                 }
             }
+
         }
+        sortStarDuplicates(stars)
+        console.log(sortStarDuplicates(stars))
         //add null values for sources that didn't show up under each filter
         for (const src of datadict.keys()) {
             for (const f of filters) {
