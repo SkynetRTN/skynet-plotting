@@ -50,8 +50,8 @@ export function clusterFileUpload(
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
         const modelForm = document.getElementById("model-form") as ModelForm;
         clusterForm["d"].value = Math.log(3).toString();
-        clusterForm["err"].value = "1";
-        clusterForm["err"].value = "1";
+        //clusterForm["err"].value = "1";
+        //clusterForm["err"].value = "1";
         //clusterForm["err_num"].value = "1";
         modelForm["age"].value = "6.6";
         clusterForm["red"].value = "0";
@@ -106,7 +106,7 @@ export function clusterFileUpload(
         let lum = modelForm[modelFormKey(0, 'lum')];
 
         //order filters by temperature
-        const knownFilters = ["U", "uprime", "B", "gprime", "V", "vprime", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
+        const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
         //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
         filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
         //if it ain't known ignore it
