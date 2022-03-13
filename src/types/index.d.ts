@@ -117,9 +117,11 @@ interface PolarizationForm extends HTMLFormElement {
 
 interface ClusterForm extends HTMLFormElement {
     d: HTMLInputElement,
+    range: HTMLInputElement,
     err: HTMLInputElement,
     red: HTMLInputElement,
     d_num: HTMLInputElement,
+    range_num: HTMLInputElement,
     err_num: HTMLInputElement,
     red_num: HTMLInputElement,
 }

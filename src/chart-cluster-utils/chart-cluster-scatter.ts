@@ -28,7 +28,7 @@ export function updateScatter(
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            let err = parseFloat(clusterForm["err_num"].value);
+            let err = 1;
             let dist = parseFloat(clusterForm["d_num"].value);
             //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
             let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;

@@ -52,11 +52,11 @@ export function clusterFileUpload(
         clusterForm["d"].value = Math.log(3).toString();
         clusterForm["err"].value = "1";
         clusterForm["err"].value = "1";
-        clusterForm["err_num"].value = "1";
+        //clusterForm["err_num"].value = "1";
         modelForm["age"].value = "6.6";
         clusterForm["red"].value = "0";
         modelForm["metal"].value = "-3.4";
-        clusterForm["err_num"].value = "1";
+        //clusterForm["err_num"].value = "1";
         clusterForm["d_num"].value = "3";
         modelForm["age_num"].value = "6.6";
         clusterForm["red_num"].value = "0";
