@@ -8,9 +8,11 @@ import { saveAs } from 'file-saver';
 
 import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight, formatTime, getDateString } from "./util"
-import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod } from "./my-math"
+import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 import { build } from "vite";
+import { stringify } from "handsontable/helpers";
+import { selectElementIfAllowed } from "handsontable/helpers/dom";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -104,15 +106,15 @@ export function pulsar(): [Handsontable, Chart] {
         '</form>\n'
     );
     //create sonification options
-  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
-  '<button id="sonify"/>Sonify</button>\n' +
-  '<button id="saveSonification";/>Save Sonification</button>\n' +
-  '</div>\n'
-  )
-  document.getElementById('axis-label1').style.display = 'inline';
-  document.getElementById('axis-label3').style.display = 'inline';
-  document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+        '<div style="float: right;">\n' +
+        '<button id="sonify"/>Sonify</button>\n' +
+        '<button id="saveSonification";/>Save Sonification</button>\n' +
+        '</div>\n'
+    );
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [];
     for (let i = 0; i < 1000; i++) {
@@ -386,7 +388,7 @@ export function pulsar(): [Handsontable, Chart] {
 
 
     const periodFoldingOninput = function () {
-        this.pf.value = clamp(this.pf.value, 0, NaN);
+        this.pf.value = clamp(this.pf.value,0, NaN);
         this.bins.value = clamp(this.bins.value, 0, 10000);
 
         let period = parseFloat(this.pf.value);
@@ -435,16 +437,19 @@ export function pulsar(): [Handsontable, Chart] {
     updateTableHeight(hot);
 
     var sonifiedChart = new AudioBufferSourceNode(audioCtx);
+    var volume = new GainNode(audioCtx, {gain: 1});
+    volume.connect(audioCtx.destination);
+
     function play(){
         //audioCtx.resume();
         sonificationButton.onclick = pause;
         if(pulsarForm.elements["mode"].value === 'lc')
         {
-            sonifiedChart = sonify(audioCtx,myChart,0,1,false);
+            sonifiedChart = sonify(audioCtx,myChart,0,1,volume);
             sonifiedChart.onended = pause; //bad, must change
         }
         if(pulsarForm.elements["mode"].value === 'pf')
-            sonifiedChart = sonify(audioCtx,myChart,4,5,true);
+            sonifiedChart = sonify(audioCtx,myChart,5,6,volume,true);
         sonificationButton.innerHTML = "Stop";
         sonificationButton.style.backgroundColor = colors["red"];
         sonificationButton.style.color = "white";
@@ -464,7 +469,7 @@ export function pulsar(): [Handsontable, Chart] {
         if(pulsarForm.elements["mode"].value === 'lc')
         {
             if(!sonifiedChart.buffer)
-                sonifiedChart = sonify(audioCtx,myChart,0,1,false)
+                sonifiedChart = sonify(audioCtx,myChart,0,1,volume)
             downloadBuffer(sonifiedChart.buffer)
         }
 
@@ -472,7 +477,7 @@ export function pulsar(): [Handsontable, Chart] {
         if(pulsarForm.elements["mode"].value === 'pf')
         {
             if(!sonifiedChart.buffer)
-                sonifiedChart = sonify(audioCtx,myChart,4,5,true)
+                sonifiedChart = sonify(audioCtx,myChart,4,5,volume,true)
             downloadBuffer(sonifiedChart.buffer, 60)
         }
     }
@@ -496,7 +501,19 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
     if (file === undefined) {
         return;
     }
-    if (!file.name.match(".*\.txt")) {
+
+
+    var type = "";
+
+    if (file.name.match(".*\.txt")) {
+        type = "standard"
+    }
+    else if(file.name.match(".*\.bestprof"))
+    {
+        type = "pressto"
+    }
+    else
+    {
         console.log("Uploaded file type is: ", file.type);
         console.log("Uploaded file name is: ", file.name);
         alert("Please upload a txt file.");
@@ -505,39 +522,77 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
     const reader = new FileReader();
     reader.onload = () => {
-        let data: string[] = (reader.result as string).split("\n");
-        data = data.filter(str => (str !== null && str !== undefined && str !== ""));
-        data = data.filter(str => (str[0] !== '#'));
+        var data: string[] = (reader.result as string).split("\n");
 
-        //turn each string into an array of numbers
-        let rows: number[][] | string[][] = data.map(val => val.trim().split(/\ +/));
+        if(type === "standard"){
 
-        rows = rows.map(row => row.map(str => parseFloat(str)));
-        rows = rows.filter(row => (row[9] !== 0));
-        rows = rows.map(row => [row[0], row[5], row[6]]) as number[][];
+            data = data.filter(str => (str !== null && str !== undefined && str !== ""));
+            data = data.filter(str => (str[0] !== '#'));
 
-        const tableData = [];
-        for (let row of rows) {
-            if (isNaN(row[0])) {
-                continue;
+            //turn each string into an array of numbers
+            let rows: number[][] | string[][] = data.map(val => val.trim().split(/\ +/));
+
+            rows = rows.map(row => row.map(str => parseFloat(str)));
+            rows = rows.filter(row => (row[9] !== 0));
+            rows = rows.map(row => [row[0], row[5], row[6]]) as number[][];
+
+            const tableData = [];
+            for (let row of rows) {
+                if (isNaN(row[0])) {
+                    continue;
+                }
+                tableData.push({
+                    'time': row[0],
+                    'chn1': row[1],
+                    'chn2': row[2]
+                });
             }
-            tableData.push({
-                'time': row[0],
-                'chn1': row[1],
-                'chn2': row[2]
-            });
+            tableData.sort((a, b) => a.time - b.time);
+            table.updateSettings({ data: tableData });
+
+            let ts = rows.map(row => row[0]).filter(num => !isNaN(num));
+            let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+
+            const fourierForm = document.getElementById('fourier-form') as FourierForm;
+            fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
+            fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+
+            switchMode(myChart, 'lc', true);
         }
-        tableData.sort((a, b) => a.time - b.time);
-        table.updateSettings({ data: tableData });
 
-        let ts = rows.map(row => row[0]).filter(num => !isNaN(num));
-        let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
+        //PRESSTO files
+        if(type === "pressto")
+        {
+            let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
+            let fluxstr: string[] = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.slice(6).trim());
+            let fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])))
+            let sampleRat = period/fluxes.length;
 
-        const fourierForm = document.getElementById('fourier-form') as FourierForm;
-        fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
-        fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+            var max = fluxes[0];
+            console.log(max)
+            for(let f = 0; f < fluxes.length; f++)
+            {
+                if(max < fluxes[f])
+                    max = fluxes[f];
+            }
+            let med = median(fluxes);
+            console.log([med,max])
 
-        switchMode(myChart, 'lc', true);
+            const chartData = [];
+            for (let i = 0; i < 2*fluxes.length; i++) {
+                let flux = fluxes[i%fluxes.length];
+                if (isNaN(flux)) {
+                    continue;
+                }
+                chartData.push({
+                    'x': sampleRat * i,
+                    'y': (flux-med)/(max-med),
+                });
+            }
+
+            presstoMode(myChart,chartData,period)
+
+        }
     }
     reader.readAsText(file);
 }
@@ -581,6 +636,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
         myChart.data.datasets[i].hidden = true;
     }
     let modified = myChart.data.modified;
+
     if (mode === 'lc' || reset) {
         if (pulsarForm.mode.value !== 'lc') {
             pulsarForm.mode[0].checked = true;
@@ -609,7 +665,8 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
 
         document.getElementById("extra-options").style.display = 'none';
 
-    } else {
+    } 
+    else {
         if (modified.periodFoldingChanged) {
             modified.periodFoldingChanged = false;
             periodFoldingForm.oninput(null);
@@ -621,7 +678,6 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
 
         document.getElementById("extra-options").style.display = 'block';
     }
-    myChart.update('none');
 
     if (reset) {
         lightCurveForm.dt.value = 3;
@@ -635,6 +691,14 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
 
         periodFoldingForm.pf.value = 0;
         periodFoldingForm.bins.value = 100;
+
+        periodFoldingForm.elements["pf"].disabled      = false;
+        periodFoldingForm.elements["bins"].disabled    = false;
+        polarizationForm.elements["diff"].disabled     = false;
+        polarizationForm.elements["eq"].disabled       = false;
+        polarizationForm.elements["eq_num"].disabled   = false;
+        pulsarForm.mode[0].disabled                    = false;
+        pulsarForm.mode[1].disabled                    = false;
 
         polarizationForm.eq.value = 0;
         polarizationForm.eq_num.value = 1;
@@ -748,6 +812,62 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
     return pfData;
 }
 
+function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: number)
+{
+    for(let i = 0; i < myChart.data.datasets.length; i++)
+    {
+        myChart.data.datasets[i].hidden = true;
+        myChart.data.datasets[i].data = [];
+    }
+    
+    myChart.data.datasets[5].hidden = false;
+    myChart.data.datasets[5].data = data;
+    myChart.data.datasets[5].label = "Channel 1 + Channel 2";
+    myChart.data.datasets[6].data = data;
+
+    let periodForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
+    let polForm    = document.getElementById("polarization-form") as PolarizationForm;
+    let modeForm   = document.getElementById('pulsar-form') as PulsarForm;
+
+    periodForm.elements["pf"].value       = period.toString();
+    periodForm.elements["bins"].value     = (data.length/2).toString();
+    modeForm.mode.value                   = 'pf';
+    polForm.elements["eq_num"].value      = '1';
+    polForm.elements["eq"].value          = '0';
+    periodForm.elements["pf"].disabled    = true;
+    periodForm.elements["bins"].disabled  = true;
+    polForm.elements["diff"].disabled     = true;
+    polForm.elements["eq"].disabled       = true;
+    polForm.elements["eq_num"].disabled   = true;
+    modeForm.mode[0].disabled             = true;
+    modeForm.mode[1].disabled             = true;
+
+    myChart.data.modeLabels = {
+        lc: { t: 'Title', x: 'x', y: 'y' },
+        ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+        pf: { t: 'Title', x: 'x', y: 'y' },
+        lastMode: 'pf'
+    };
+
+    myChart.options.plugins.title.text = 'Title';
+    myChart.options.scales['x'].title.text = 'x';
+    myChart.options.scales['y'].title.text = 'y';
+
+    updateLabels(myChart,document.getElementById('chart-info-form') as ChartInfoForm, true);
+
+    showDiv("period-folding-div");
+    document.getElementById("extra-options").style.display = 'block';
+
+
+    myChart.update()
+
+}
+
+/*************************************
+ * SONIFICATION
+ ************************************/
+
+//May want to add a mono mode. I hate how this function looks but it works
 /**
  * This function creates an audioBuffer using data from the chart
  * @param ctx The audioContext
@@ -756,36 +876,53 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
 *  @param dataSet2 The dataset to sonify as the second stereo channel.
  * @param loop Loop audio?
  */
-function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true){
+function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number, destination?: AudioNode, loop: boolean = true){
 
-    let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[];
-    let channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[];
-    let norm = 1 / myChart.scales.y.max; //I don't know what this factor is, but it make it more louder
+    let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[],
+        channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[],
+        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+    
+    if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
+    {
+        var first1: ScatterDataPoint = {y:0,x:0};
+        first1.y = channel0[0].y;
+        var first2: ScatterDataPoint = {y:0,x:0};
+        first2.y = channel1[0].y
 
-    let time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+        first1.x = channel0[channel0.length-1].x + time/channel0.length;
+        first2.x = channel0[channel0.length-1].x + time/channel0.length;
+
+        console.log(first1)
+        console.log(myChart.data.datasets[dataSet1].data[0])
+        channel0 = channel0.concat(first1);
+        channel1 = channel1.concat(first2);
+        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+    }
+
+    let norm = 1 / myChart.scales.y.max;
 
     // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
     var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
 
     let prev0 = 0;//data point with the greatest time value less than the current time
     let prev1 = 0;
-    let next0 = 1//next data point
+    let next0 = 1;//next data point
     let next1 = 1;
 
     for (var i = 0; i < arrayBuffer.length; i++) {
         let x0 = channel0[0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
         let x1 = channel0[0].x + i/ctx.sampleRate;
         if(x0 > channel0[next0].x){
-            ++next0;
-            ++prev0;
+            prev0 = next0;
+            next0++;
         }
         if(x1 > channel1[next1].x){
-            ++next1;
-            ++prev1;
+            prev1 = next1
+            next1++;
         }
 
-        arrayBuffer.getChannelData(0)[i] = norm*(Math.random() *2 -1) * linearInterpolation(channel0[prev0],channel0[next0],x0); // Left Channel
-        arrayBuffer.getChannelData(1)[i] = norm*(Math.random() *2 -1) * linearInterpolation(channel1[prev1],channel1[next1],x1);//multiply by norm: the maximum y value is 10 in the buffer
+        arrayBuffer.getChannelData(0)[i] = norm * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*Math.random()-1); // Left Channel
+        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*Math.random()-1);  //multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.
@@ -794,6 +931,9 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
     sonifiedChart.buffer = arrayBuffer
     // connect the AudioBufferSourceNode to the
     // destination so we can hear the sound
+    if(destination)
+        sonifiedChart.connect(destination);
+    else
     sonifiedChart.connect(ctx.destination);
     return sonifiedChart;
 }
@@ -874,7 +1014,7 @@ function bufferToWav(buf: AudioBuffer, time: number)
 }
 
 /**
- * This function converts an icky Buffer [ :( ] into an epic blob in the stylings of a .wav [ :D ]
+ * This function downloads a buffer as a .wav
  * @param buf The audioBuffer to make into a file.
  * @param time Time length of the file in seconds. Defaults to the length of the buffer.
  */
@@ -885,23 +1025,3 @@ function downloadBuffer(buf: AudioBuffer, time?: number)
 
     saveAs(bufferToWav(buf,time), 'sonification-' + formatTime(getDateString()) + '.wav');
 }
-/*
-function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: number): AudioBuffer{
-
-    var myArrayBuffer = ctx.createBuffer(2, ctx.sampleRate * 3, ctx.sampleRate);
-
-    // Fill the buffer with white noise;
-    //just random values between -1.0 and 1.0
-    for (var channel = 0; channel < myArrayBuffer.numberOfChannels; channel++) {
-        // This gives us the actual ArrayBuffer that contains the data
-        var nowBuffering = myArrayBuffer.getChannelData(channel);
-        for (var i = 0; i < myArrayBuffer.length; i++) {
-                // Math.random() is in [0; 1.0]
-                // audio needs to be in [-1.0; 1.0]
-                nowBuffering[i] = Math.random() * 2 - 1;
-            }
-    }
-
-    return myArrayBuffer
-}
-*/
