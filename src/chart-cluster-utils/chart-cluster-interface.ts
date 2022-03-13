@@ -10,14 +10,14 @@
 export function insertClusterControls(chartCounts:number = 1) {
     let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-6 des">Max Error (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
         '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">± Range (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Range" name="range"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Range" name="range_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
