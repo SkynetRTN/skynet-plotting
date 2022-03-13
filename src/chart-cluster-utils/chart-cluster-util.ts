@@ -73,6 +73,21 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     xmlHttp.open("GET", theUrl, true); // true for asynchronous
     xmlHttp.send(null);
 }
+//create and export a function that uses the http push to send the data to the server
+export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function=()=>{}) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            callback(xmlHttp.responseText);
+        } else if (xmlHttp.status != 0) {
+            failedCallback();
+        }
+    };
+    xmlHttp.open("POST", theUrl, true); // true for asynchronous
+    xmlHttp.setRequestHeader("Content-Type", "application/json");
+    xmlHttp.send(JSON.stringify(data));
+}
+
 
 export function modelFormKey(chartNum: number, color: string) {
         return chartNum > 0 ? (color + (chartNum+1).toString()) : color

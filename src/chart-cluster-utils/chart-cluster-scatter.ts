@@ -32,6 +32,7 @@ export function updateScatter(
             let dist = parseFloat(clusterForm["d_num"].value);
             //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
             let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+            let range = parseFloat(clusterForm["range_num"].value);
 
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();

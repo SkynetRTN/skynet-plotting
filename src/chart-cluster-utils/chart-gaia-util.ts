@@ -47,3 +47,6 @@ export function sortStarDuplicates(dataArray: starData[]): starData[]{
     }
     return uniqueStars
 }
+//when the database returns the star ranges and id's, export a function that matches them back to the magnitude and filter data
+export function matchStarData(stars: starData[], data: Map<string, Map<string, number>>){ 
+    
