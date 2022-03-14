@@ -292,7 +292,7 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
 
         myChart.data.modeLabels = {
             lc: { t: 'Title', x: 'x', y: 'y' },
-            ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+            ft: { t: 'Periodog ram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
@@ -494,31 +494,57 @@ function lightCurve(myChart: Chart) {
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field"></div>\n' +
         '</div>\n' ;
-    const periodForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-    
-    console.log(periodForm)
 
-    // linkInputs(
-    //     periodForm["period"],
-    //     periodForm["period_num"],
-    //      0, 140, 0.01, 3
-    // );
-
-    
-    // const reader = new FileReader();
-    // reader.onload = () => {
-    //     const gravityForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-
-    //     gravityForm["period"].value = Math.log(25).toString();
-
-    //     gravityForm["period_num"].value = "25";
-
-    //   }
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
+
+    console.log(myChart.data.datasets[2].data.length)
+    let whetherLinked = 0
+    // linkInputs(
+    //     periodFoldingForm["period"],
+    //     periodFoldingForm["period_num"],
+    //     0, 140, 0.01, 140
+    // );
+    // const variableForm = document.getElementById("variable-form");
+    console.log(lightCurveForm)
+    lightCurveForm.onchange = function () {
+        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+        console.log('changed');
+        console.log(range);
+        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
+        if (currentPosition > range){
+            currentPosition = range
+        }   // check to let the slider stay where it is      
+        linkInputs(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+                0, range, 0.01, currentPosition
+        );
+        
+    }
+    console.log(periodFoldingForm)
     periodFoldingForm.oninput = function () {
+        // console.log(myChart.data.datasets[2].data)
         let period = parseFloat(periodFoldingForm.period_num.value);
+        
+        // console.log(range)
+        if (whetherLinked == 0){
+            let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+            let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+            let range = Math.abs(start-end);
+            linkInputs(
+                periodFoldingForm["period"],
+                periodFoldingForm["period_num"],
+                0, range, 0.01, range
+            );
+
+            whetherLinked = whetherLinked + 1
+        }
+        //initiation
+
         if (period !== 0) {
             let datasets = myChart.data.datasets;
             let minMJD = myChart.data.minMJD;
@@ -534,6 +560,7 @@ function lightCurve(myChart: Chart) {
                 })
             }
             myChart.data.datasets[4].data = pfData;
+            // console.log(myChart.data.datasets[4].data)
         } else {
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
         }
