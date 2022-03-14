@@ -9,7 +9,7 @@ import { modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
-import { sortStarDuplicates, starData, sortStarid, maxMinRaDec, gaiaData } from "./chart-gaia-util";
+import { sortStarDuplicates, starData, sortStarid, maxMinRaDec, gaiaData } from "./chart-cluster-gaia";
 
 
 /**

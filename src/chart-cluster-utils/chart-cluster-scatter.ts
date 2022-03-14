@@ -7,7 +7,7 @@ import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
-import { sortStarDuplicates, starData, sortStarid, gaiaData } from "./chart-gaia-util";
+import { sortStarDuplicates, starData, sortStarid, gaiaData } from "./chart-cluster-gaia";
 
 
 /**
