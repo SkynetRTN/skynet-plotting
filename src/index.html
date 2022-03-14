@@ -23,6 +23,7 @@
             <option value="dual" title="Dual">Dual</option>
             <option value="cluster1" title="Cluster 1">Cluster 1</option>
             <option value="cluster2" title="Cluster 2">Cluster 2</option>
+            <option value="cluster3" title="Cluster 3">Cluster 3</option>
             <option value="pulsar" title="Pulsar">Pulsar</option>
             <option value="gravity" title="Gravity">Gravity</option>
           </select>
@@ -37,13 +38,13 @@
             <div class="col-lg-6">
               <div id="chart-div1" class="clusterCharts">
                 <canvas id="myChart1" width="428" height="200"></canvas>
-                <div class="chartTag">①</div>
+                <div class="chartTag" id = "chartTag1">①</div>
               </div>
             </div>
             <div class="col-lg-6">
               <div id="chart-div2" class="clusterCharts">
                 <canvas id="myChart2" width="428" height="200"></canvas>
-                <div class="chartTag">②</div>
+                <div class="chartTag" id = "chartTag2">②</div>
               </div>
             </div>
           </div>
@@ -51,11 +52,13 @@
             <div class="col-lg-6">
               <div id="chart-div3" class="clusterCharts">
                 <canvas id="myChart3" width="300" height="200"></canvas>
+                <div class="chartTag" id = "chartTag3">①</div>
               </div>
             </div>
             <div class="col-lg-6">
               <div id="chart-div4" class="clusterCharts">
                 <canvas id="myChart4" width="300" height="200"></canvas>
+                <div class="chartTag" id = chartTag4>②</div>
               </div>
             </div>
           </div>
@@ -99,6 +102,22 @@
                     <div class="row">
                       <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
                       <div class="col-sm-8"><input type="text" title="Y2 Axis" name="y2Axis" value="y" class="field"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="col-sm-6" id="axisSet3" style="display: none">
+                  <div id = "axis-label5">
+                    <div class="row">
+                      <div class="col-sm-4 des">
+                      <div class="col-sm-8"><input type="text" title="MotionX Axis" name="MotionXaxis" value="x" class="field"></div>
+                    </div>
+                  </div>
+                  <div id = "axis-label6">
+                    <div class="row">
+                      <div class="col-sm-4 des">
+                      <div class="col-sm-8"><input type="text" title="MotionY Axis" name="MotionYaxis" value="y" class="field"></div>
+                      </div>
                     </div>
                   </div>
                 </div>

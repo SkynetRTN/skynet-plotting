@@ -16,6 +16,7 @@ import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
+import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
@@ -134,7 +135,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
-    let cluster4_objects: [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale]
+
 
     if (chart === 'curve') {
         objects = curve();
@@ -180,7 +181,15 @@ function chartType(chart: string) {
         }
 
 
-    } else if (chart === 'gravity') {
+    } else if (chart === 'cluster3') {
+        cluster_objects = cluster3();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+        }
+
+    }else if (chart === 'gravity') {
         objects = gravity();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
@@ -205,14 +214,10 @@ function chartType(chart: string) {
 
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
-        if (chart === 'cluster2') {
+        if (chart === 'cluster2' || chart === 'cluster3') {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
-        }
-        if (chart === 'cluster4') {
-            updateChartInfo(cluster4_objects[2], chartInfoForm)
-            updateChartInfo(cluster4_objects[3], chartInfoForm)
-            updateChartInfo(cluster4_objects[4], chartInfoForm)
+        
         } else {
             updateChartInfo(objects[1], chartInfoForm);
         }

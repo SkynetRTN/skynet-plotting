@@ -15,7 +15,9 @@ export function insertClusterControls(chartCounts:number = 1) {
         '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
-        '<div class="col-sm-6 des">± Range (%):</div>\n' +
+        //add a checkbox that disables the corresponding slider
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
+        '<div class = "col-sm-5 des">±Range (kpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Range" name="range"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Range" name="range_num" class="field"></div>\n' +
         "</div>\n" +
@@ -128,6 +130,40 @@ export function insertClusterControls(chartCounts:number = 1) {
             htmlContent
         );
 }
+export function clusterProSliders(clusterPro: true = true) {
+    if (clusterPro === true) {
+    let htmlContent = "" 
+    htmlContent += '<div class="row" style = "padding-top: 10.5px">\n'
+    htmlContent += '<div class = "col-sm-6 des">Motion in RA (mas/yr):</div>\n' +
+                   '<div class="col-sm-4 range"><input type="range" title="ramotion" name="ramotion"></div>\n' +
+                   '<div class="col-sm-2 text"><input type="number" title="Range" name="ramotion_num" class="field"></div>\n' +
+                     '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
+                   '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
+                   '<div class="col-sm-4 range"><input type="range" title="rarange" name="rarange"></div>\n' +
+                   '<div class="col-sm-2 text"><input type="number" title="rarange" name="rarange_num" class="field"></div>\n' +
+                     '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class = "col-sm-6 des">Motion in Dec (mas/yr):</div>\n' +
+                     '<div class="col-sm-4 range"><input type="range" title="decmotion" name="decmotion"></div>\n' +
+                        '<div class="col-sm-2 text"><input type="number" title="decmotion" name="decmotion_num" class="field"></div>\n' +
+                        '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
+                     '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
+                        '<div class="col-sm-4 range"><input type="range" title="decrange" name="decrange"></div>\n' +
+                        '<div class="col-sm-2 text"><input type="number" title="decrange" name="decrange_num" class="field"></div>\n' +
+                        '</div>\n'
+    htmlContent += '</div>\n'
+    htmlContent += '</div>\n'
+    document
+        .getElementById("chart-div1")
+        .insertAdjacentHTML(
+            "beforeend",
+            htmlContent
+        );
+}}
 
 /**
  * Insert graph control and on-control buttons into html code
