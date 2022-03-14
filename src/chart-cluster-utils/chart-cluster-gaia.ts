@@ -19,20 +19,25 @@ export class gaiaData{
     motion: number []
 }
 
-export function sortStarid(chunk1: starData[], chunk2: starData[]){
-    let dataArray = []
-    while (chunk1.length && chunk2.length) {
-        // Pick the smaller among the smallest element of left and right sub arrays 
-        if (chunk1[0].id < chunk2[0].id) {
-            dataArray.push(chunk1.shift())  
-        } else {
-            dataArray.push(chunk2.shift()) 
+export function sortStar(dataArray: starData[]): starData[][]{
+    let sortedStars = mergeSortStar(dataArray);
+    //delete the duplicates
+    let uniqueStars = []
+    let lastStar = sortedStars[0]
+    let minMax: number[] = [lastStar.ra, lastStar.ra, lastStar.dec, lastStar.dec]
+    uniqueStars.push(lastStar)
+    for (let i = 1; i < sortedStars.length; i++){
+        if (sortedStars[i].id !== lastStar.id){
+            lastStar = sortedStars[i]
+            uniqueStars.push(lastStar)
+            minMax = maxMinRaDec(lastStar, minMax)
         }
-
     }
-    return[...dataArray, ...chunk1, ...chunk2]
+    return [sortedStars, uniqueStars]
 }
-export function sortStarDuplicates(dataArray: starData[]): starData[]{
+
+
+function mergeSortStar(dataArray: starData[]): starData[]{
     //merge sort all the stars by their id
     //let idArray = starData.map(star => star.id)
     //break the array into chunks of size 2
@@ -44,38 +49,39 @@ export function sortStarDuplicates(dataArray: starData[]): starData[]{
 
     let dataArrayLeft = dataArray.slice(0, half)
     let dataArrayRight = dataArray.slice(half, dataArray.length)
-    let sortedStars = sortStarid(sortStarDuplicates(dataArrayLeft), sortStarDuplicates(dataArrayRight))
-    //delete the duplicates
-    let uniqueStars = []
-    let lastStar = sortedStars[0]
-    uniqueStars.push(lastStar)
-    for (let i = 1; i < sortedStars.length; i++){
-        if (sortedStars[i].id !== lastStar.id){
-            uniqueStars.push(sortedStars[i])
-            lastStar = sortedStars[i]
-        }
-    }
-    return uniqueStars
+    return mergeStarid(mergeSortStar(dataArrayLeft), mergeSortStar(dataArrayRight))
 }
 
-export function maxMinRaDec(dataArray: starData[]){
-    let maxRa = dataArray[0].ra
-    let minRa = dataArray[0].ra
-    let maxDec = dataArray[0].dec
-    let minDec = dataArray[0].dec
-    for (let i = 1; i < dataArray.length; i++){
-        if (dataArray[i].ra > maxRa){
-            maxRa = dataArray[i].ra
+function mergeStarid(chunk1: starData[], chunk2: starData[]){
+    let dataArray = []
+    while (chunk1.length && chunk2.length) {
+        // Pick the smaller among the smallest element of left and right sub arrays
+        if (chunk1[0].id < chunk2[0].id) {
+            dataArray.push(chunk1.shift())
+        } else {
+            dataArray.push(chunk2.shift())
         }
-        if (dataArray[i].ra < minRa){
-            minRa = dataArray[i].ra
-        }
-        if (dataArray[i].dec > maxDec){
-            maxDec = dataArray[i].dec
-        }
-        if (dataArray[i].dec < minDec){
-            minDec = dataArray[i].dec
-        }
+
+    }
+    return[...dataArray, ...chunk1, ...chunk2]
+}
+
+function maxMinRaDec(star: starData, minMax: number[]){
+    let maxRa = minMax[0]
+    let minRa = minMax[1]
+    let maxDec = minMax[2]
+    let minDec = minMax[3]
+    if (star.ra > maxRa){
+        maxRa = star.ra
+    }
+    if (star.ra < minRa){
+        minRa = star.ra
+    }
+    if (star.dec > maxDec){
+        maxDec = star.dec
+    }
+    if (star.dec < minDec){
+        minDec = star.dec
     }
     return [maxRa, minRa, maxDec, minDec]
 }
