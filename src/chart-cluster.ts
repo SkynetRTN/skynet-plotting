@@ -1,5 +1,4 @@
 "use strict";
-import { sortStarDuplicates, sortStarid, starData } from "./chart-cluster-utils/chart-gaia-util";
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors, tableCommonOptions } from "./config";

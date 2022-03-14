@@ -55,7 +55,9 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     let columns: string[] = hot.getColHeader() as string[];
     let hidden: number[] = [];
     for (const col in columns) {
-        columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        if (columns[col].includes('Mag')){
+            columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        }
         if (!reveal.includes(columns[col])) {
             //if the column isn't selected in the drop down, hide it
             hidden.push(parseFloat(col));
