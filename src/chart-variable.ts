@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { throttle, updateLabels, updateTableHeight, sanitizeTableData } from "./util"
+import { throttle, updateLabels, updateTableHeight, sanitizeTableData, linkInputs } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
@@ -567,10 +567,12 @@ function lightCurve(myChart: Chart) {
         } else {
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
         }
+
     periodFoldingForm.oninput = throttle(function () {
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
     }, 100);
 
+    }
 }
 
 
