@@ -9,8 +9,6 @@ import { modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
-import { sortStarDuplicates, starData, sortStarid, maxMinRaDec, gaiaData } from "./chart-gaia-util";
-
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -67,8 +65,18 @@ export function clusterFileUpload(
         const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
         let filters: string[] = [];
         //let stars: starData[] =[];
-        data.splice(0, 1);
 
+        // find value index in database
+        let keys = (data.splice(0, 1) as string[])[0].split(',');
+        let wantedKeys: string[] = ['id', 'filter', 'calibrated_mag\\r', 'mag', 'mag_error', 'ra_hours', 'dec_degs']
+        let keyIndex: {[key: string]: number}  = {'id': NaN, 'filter': NaN, 'calibrated_mag\\r': 23, 'mag': NaN, 'mag_error': NaN, 'ra_hours': NaN, 'dec_degs': NaN}
+
+        for (let i = 0; i < wantedKeys.length; i++) {
+            let key: string = wantedKeys[i]
+            let index: number = keys.findIndex(x => x === key)
+            if (isNaN(keyIndex[key]))
+                keyIndex[key] = index
+        }
         //store these in the table
 
         //request server to get the data
@@ -76,34 +84,29 @@ export function clusterFileUpload(
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
             let items = row.trim().split(",");
-            let src = items[1];
-            let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
-            //stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6]), null, null));
-            let ra = parseFloat(items[5]);
-            let dec = parseFloat(items[6]);
-            let mag = parseFloat(items[23]);
-            // let mag = parseFloat(items[12]);
-            let err = parseFloat(items[13]);
+            let src = items[keyIndex['id']]
             if (!datadict.has(src)) {
                 datadict.set(src, new Map<string, number>());
             }
-            if (items[12] !== "") {
-                datadict.get(src).set(filter, isNaN(mag) ? null : mag);
+            let filter = items[keyIndex['filter']];
+            let calibratedMag = parseFloat(items[keyIndex['calibrated_mag\\r']]);
+            let err = parseFloat(items[keyIndex['mag_error']]);
+            let ra = parseFloat(items[keyIndex['ra_hours']])*24;
+            let dec = parseFloat(items[keyIndex['dec_degs']]);
+            if (items[keyIndex['mag']] !== "") {
+                datadict.get(src).set(filter, isNaN(calibratedMag) ? null : calibratedMag);
                 datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
                 datadict.get(src).set(filter + "ra", isNaN(ra) ? null : ra);
                 datadict.get(src).set(filter + "dec", isNaN(dec) ? null : dec);
+                datadict.get(src).set(filter + "dist", null)
+                datadict.get(src).set(filter + "pmra", null)
+                datadict.get(src).set(filter + "pmdec", null)
                 if (!filters.includes(filter)) {
                     filters.push(filter);
                 }
             }
-
         }
-        
-        //sortStarDuplicates(stars);
-        //maxMinRaDec(stars);
 
-        //console.log(sortStarDuplicates(stars))
-        //console.log(maxMinRaDec(stars))
         //add null values for sources that didn't show up under each filter
         for (const src of datadict.keys()) {
             for (const f of filters) {
@@ -112,9 +115,18 @@ export function clusterFileUpload(
                     datadict.get(src).set(f + "err", null);
                     datadict.get(src).set(f + "ra", null);
                     datadict.get(src).set(f + "dec", null);
+                    datadict.get(src).set(f + "dist", null)
+                    datadict.get(src).set(f + "pmra", null)
+                    datadict.get(src).set(f + "pmdec", null)
                 }
             }
         }
+
+        //sortStarDuplicates(stars);
+        //maxMinRaDec(stars);
+
+        //console.log(sortStarDuplicates(stars))
+        //console.log(maxMinRaDec(stars))
 
         let blue = modelForm[modelFormKey(0, 'blue')];
         let red = modelForm[modelFormKey(0, 'red')];
@@ -137,12 +149,17 @@ export function clusterFileUpload(
                 title: filters[i] + " Mag",
                 text: filters[i],
             });
-            hiddenColumns[i] = i;
-            hiddenColumns[i + filters.length] = i + filters.length; //we have to double up the length for the error data
+            for (let j = 0; j < 7; j++) {
+                //we have to multiply up the length for the error and gaia data
+                hiddenColumns[i + j * filters.length] = i + j * filters.length;
+            }
             headers.push(filters[i] + " Mag"); //every other column is err
-            headers.push(filters[i] + "err");
-            headers.push(filters[i] + "ra");
-            headers.push(filters[i] + "dec");
+            headers.push(filters[i] + " err");
+            headers.push(filters[i] + " ra");
+            headers.push(filters[i] + " dec");
+            headers.push(filters[i] + " dist");
+            headers.push(filters[i] + " pmra");
+            headers.push(filters[i] + " pmdec");
             columns.push({
                 data: filters[i],
                 type: "numeric",
@@ -163,10 +180,26 @@ export function clusterFileUpload(
                 type: "numeric",
                 numericFormat: {pattern: {mantissa: 2}},
             });
+            columns.push({
+                data: filters[i] + "dist",
+                type: "numeric",
+                numericFormat: {pattern: {mantissa: 2}},
+            });
+            columns.push({
+                data: filters[i] + "pmra",
+                type: "numeric",
+                numericFormat: {pattern: {mantissa: 2}},
+            });
+            columns.push({
+                data: filters[i] + "pmdec",
+                type: "numeric",
+                numericFormat: {pattern: {mantissa: 2}},
+            });
         }
-        
-        hiddenColumns = hiddenColumns.filter((c) => [0, 4].indexOf(c) < 0); //get rid of the columns we want revealed
-
+        console.log(hiddenColumns)
+        hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
+        console.log(headers)
+        console.log(hiddenColumns)
         //convrt datadict from dictionary to nested number array tableData
         const tableData: { [key: string]: number }[] = [];
         datadict.forEach((src) => {
@@ -176,6 +209,9 @@ export function clusterFileUpload(
                 row[filters[filterIndex] + "err"] = src.get(filters[filterIndex] + "err");
                 row[filters[filterIndex] + "ra"] = src.get(filters[filterIndex] + "ra");
                 row[filters[filterIndex] + "dec"] = src.get(filters[filterIndex] + "dec");
+                row[filters[filterIndex] + "dist"] = src.get(filters[filterIndex] + "dist");
+                row[filters[filterIndex] + "pmra"] = src.get(filters[filterIndex] + "pmra");
+                row[filters[filterIndex] + "pmdec"] = src.get(filters[filterIndex] + "pmdec");
             }
            
             tableData.push(row);
