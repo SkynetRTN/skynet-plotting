@@ -6,6 +6,7 @@
 import { Chart, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-cluster-util";
+import { median } from "../my-math";
 
 
 /**
@@ -73,9 +74,9 @@ function generateURL(form: ModelForm, chartNum: number) {
     let blueKey = modelFormKey(chartNum, 'blue')
     let redKey = modelFormKey(chartNum, 'red')
     let lumKey = modelFormKey(chartNum, 'lum')
-    return "http://localhost:5000/isochrone?" //local testing url
+    // return "http://localhost:5000/isochrone?" //local testing url
     // return "http://152.2.18.8:8080/isochrone?" //testing server url
-    // return "http://192.168.128.196:8080/isochrone?" //GBO temp testing server url
+    return "http://192.168.128.196:8080/isochrone?" //GBO temp testing server url
     // return "https://skynet.unc.edu/graph-api/isochrone?" //production url
         + "age=" + HRModelRounding(form['age_num'].value)
         + "&metallicity=" + HRModelRounding(form['metal_num'].value)
