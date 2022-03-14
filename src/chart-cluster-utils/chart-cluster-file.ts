@@ -66,14 +66,21 @@ export function clusterFileUpload(
             .filter((str) => str !== null && str !== undefined && str !== "");
         const datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
         let filters: string[] = [];
+        //let stars: starData[] =[];
         data.splice(0, 1);
-        let stars: starData[] =[]
+
+        //store these in the table
+
+        //request server to get the data
+        // put everythin in callback
         //fills the dictionary datadict with objects for each source, having attributes of each filter magnitude
         for (const row of data) {
             let items = row.trim().split(",");
             let src = items[1];
             let filter = items[10] === "K" ? "Ks" : items[10];//interpret K as Ks
-            stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6]), null, null));
+            //stars.push(new starData(items[1], parseFloat(items[5]), parseFloat(items[6]), null, null));
+            let ra = parseFloat(items[5]);
+            let dec = parseFloat(items[6]);
             let mag = parseFloat(items[23]);
             // let mag = parseFloat(items[12]);
             let err = parseFloat(items[13]);
@@ -83,22 +90,28 @@ export function clusterFileUpload(
             if (items[12] !== "") {
                 datadict.get(src).set(filter, isNaN(mag) ? null : mag);
                 datadict.get(src).set(filter + "err", isNaN(err) ? 0 : err);
+                datadict.get(src).set(filter + "ra", isNaN(ra) ? null : ra);
+                datadict.get(src).set(filter + "dec", isNaN(dec) ? null : dec);
                 if (!filters.includes(filter)) {
                     filters.push(filter);
                 }
             }
 
         }
-        sortStarDuplicates(stars)
-        maxMinRaDec(stars)
-        console.log(sortStarDuplicates(stars))
-        console.log(maxMinRaDec(stars))
+        
+        //sortStarDuplicates(stars);
+        //maxMinRaDec(stars);
+
+        //console.log(sortStarDuplicates(stars))
+        //console.log(maxMinRaDec(stars))
         //add null values for sources that didn't show up under each filter
         for (const src of datadict.keys()) {
             for (const f of filters) {
                 if (!datadict.get(src).has(f)) {
                     datadict.get(src).set(f, null);
                     datadict.get(src).set(f + "err", null);
+                    datadict.get(src).set(f + "ra", null);
+                    datadict.get(src).set(f + "dec", null);
                 }
             }
         }
@@ -128,6 +141,8 @@ export function clusterFileUpload(
             hiddenColumns[i + filters.length] = i + filters.length; //we have to double up the length for the error data
             headers.push(filters[i] + " Mag"); //every other column is err
             headers.push(filters[i] + "err");
+            headers.push(filters[i] + "ra");
+            headers.push(filters[i] + "dec");
             columns.push({
                 data: filters[i],
                 type: "numeric",
@@ -138,8 +153,19 @@ export function clusterFileUpload(
                 type: "numeric",
                 numericFormat: {pattern: {mantissa: 2}},
             });
+            columns.push({
+                data: filters[i] + "ra",
+                type: "numeric",
+                numericFormat: {pattern: {mantissa: 2}},
+            });
+            columns.push({
+                data: filters[i] + "dec",
+                type: "numeric",
+                numericFormat: {pattern: {mantissa: 2}},
+            });
         }
-        hiddenColumns = hiddenColumns.filter((c) => [0, 2].indexOf(c) < 0); //get rid of the columns we want revealed
+        
+        hiddenColumns = hiddenColumns.filter((c) => [0, 4].indexOf(c) < 0); //get rid of the columns we want revealed
 
         //convrt datadict from dictionary to nested number array tableData
         const tableData: { [key: string]: number }[] = [];
@@ -147,10 +173,11 @@ export function clusterFileUpload(
             const row: { [key: string]: number } = {};
             for (let filterIndex in filters) {
                 row[filters[filterIndex]] = src.get(filters[filterIndex]);
-                row[filters[filterIndex] + "err"] = src.get(
-                    filters[filterIndex] + "err"
-                );
+                row[filters[filterIndex] + "err"] = src.get(filters[filterIndex] + "err");
+                row[filters[filterIndex] + "ra"] = src.get(filters[filterIndex] + "ra");
+                row[filters[filterIndex] + "dec"] = src.get(filters[filterIndex] + "dec");
             }
+           
             tableData.push(row);
         });
         for (let c = 0; c < myCharts.length; c++) {

@@ -16,12 +16,7 @@ export class starData{
 export class gaiaData{
     id: string
     distance: number
-    motion: number[]
-    constructor(id: string, distance: number, motion: number[]){
-        this.id = id
-        this.distance = distance
-        this.motion = motion
-    }
+    motion: number []
 }
 
 export function sortStarid(chunk1: starData[], chunk2: starData[]){
@@ -84,4 +79,4 @@ export function maxMinRaDec(dataArray: starData[]){
     }
     return [maxRa, minRa, maxDec, minDec]
 }
-
+//export function starDistnaceMotionArray()

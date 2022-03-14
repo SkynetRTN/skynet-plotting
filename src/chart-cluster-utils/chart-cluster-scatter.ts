@@ -39,7 +39,16 @@ export function updateScatter(
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
             let columns = table.getColHeader();
-            let stars: starData[] = [];
+            //make a variable that stores all the id values, ra's, and dec's from the table
+            let id = [];
+            let ra = [];
+            let dec = [];
+            for (let i = 0; i < tableData.length; i++) {
+                id.push(tableData[i][columns.indexOf("id")]);
+                ra.push(tableData[i][columns.indexOf("ra")]);
+                dec.push(tableData[i][columns.indexOf("dec")]);
+            }
+            let stars = new starData(id, ra, dec, null, null);
             let gaia: gaiaData[] = [];
             //make a variable that reperesents the number of star id values in the table
             //for all points in starData
