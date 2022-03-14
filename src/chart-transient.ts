@@ -1,7 +1,8 @@
 'use strict';
 
 import Chart from "chart.js/auto";
-import { ScatterDataPoint } from "chart.js";
+import { CategoryScale, LinearScale, ScatterDataPoint } from "chart.js";
+import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
@@ -13,76 +14,71 @@ import { round } from "./my-math"
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
 export function transient(): [Handsontable, Chart] {
-    // console.log("root func called");
+
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable" id="variable-form" style="padding-bottom: 1em"></form>\n' +
         '<div id="light-curve-div"></div>\n'
     );
+
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
+
+    // initialize table with random data
     const tableData = [];
-    for (let i = 0; i < 14; i++) {
+    const numOfRndmValues = 14; // arbitrary
+    const randomFilters = ['B', 'V', 'R', 'I'];
+
+    for (let i = 0; i < numOfRndmValues; i++) {
         tableData[i] = {
             'jd': i * 10 + Math.random() * 10 - 5,
-            'src1': Math.random() * 20,
-            'src2': Math.random() * 20,
+            'magnitude': Math.random() * 20,
+            'filter': randomFilters[Math.floor(Math.random() * 4)] ,
         };
     }
+    // initialize 'data' element text 
+    populateDataElement(randomFilters, document.getElementById('chart-info-form') as ChartInfoForm);
 
     const container = document.getElementById('table-div');
     const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Julian Date', 'Source1', 'Source2'],
+        colHeaders: ['Julian Date', 'Magnitude', 'Filter'],
         maxCols: 3,
         columns: [
             { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'src1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'src2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'magnitude', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'filter', type: 'text' },
         ],
     }));
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    // register controller in chart.js and ensure the defaults are set
+    Chart.register(ScatterWithErrorBarsController, PointWithErrorBar, LinearScale, CategoryScale);
+
     const myChart = new Chart(ctx, {
         type: 'scatter',
+        //type: ScatterWithErrorBarsController.id,
         data: {
             maxMJD: Number.NEGATIVE_INFINITY,
             minMJD: Number.POSITIVE_INFINITY,
+            labels: [],
             datasets: [
                 {
-                    label: 'Source 1',
+                    label: 'Source',
                     data: [],
-                    backgroundColor: colors['blue'],
+                    backgroundColor: '',
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     pointBorderWidth: 2,
-                    // immutableLabel: true,
                     hidden: false,
-                }, {
-                    label: 'Source 2',
-                    data: [],
-                    backgroundColor: colors['red'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    // immutableLabel: true,
-                    hidden: false,
-                }, {
-                    label: 'Light Curve',
-                    data: [],
-                    backgroundColor: colors['purple'],
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointBorderWidth: 2,
-                    // immutableLabel: true,
-                    hidden: true,
                 }
             ]
         },
         options: {
             plugins: {
                 legend: {
+                    display: false,
                     labels: {
                         filter: function (legendItem) {
                             return !legendItem.hidden;
@@ -101,7 +97,7 @@ export function transient(): [Handsontable, Chart] {
             scales: {
                 x: {
                     type: 'linear',
-                    position: 'bottom'
+                    position: 'bottom',
                 }
             }
         }
@@ -121,13 +117,16 @@ export function transient(): [Handsontable, Chart] {
     lightCurve(myChart);
 
     const variableForm = document.getElementById("variable-form") as VariableForm;
+
     variableForm.onchange = function () {
 
         const lightCurveForm = document.getElementById("light-curve-form");
         lightCurveForm.oninput(null);
 
         myChart.update('none');
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+        // shiftFilterMagnitudes();
+
+        //updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
         updateTableHeight(hot);
     }
@@ -135,13 +134,14 @@ export function transient(): [Handsontable, Chart] {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+    //updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     updateVariable(hot, myChart);
     updateTableHeight(hot);
 
     return [hot, myChart];
 }
+
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -152,92 +152,95 @@ export function transient(): [Handsontable, Chart] {
  * @param myChart
  */
 export function transientFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
-    // console.log("transientFileUpload called");
+    // no file
     let file = (evt.target as HTMLInputElement).files[0];
     if (file === undefined) {
         return;
     }
 
-    // File type validation
-    if (!file.type.match("(text/csv|application/vnd.ms-excel)") &&
-        !file.name.match(".*\.csv")) {
-        console.log("Uploaded file type is: ", file.type);
-        console.log("Uploaded file name is: ", file.name);
-        alert("Please upload a CSV file.");
-        return;
+    // file exists - is it .csv?
+    if (!file.type.match("(text/csv|application/vnd.ms-excel)")) {
+        if (!file.name.match(".*\.csv")) {
+            console.log("Uploaded file type is: ", file.type);
+            console.log("Uploaded file name is: ", file.name);
+            alert("Please upload a CSV file.");
+
+            return;
+        }
     }
 
     let reader = new FileReader();
     reader.onload = () => {
-        let data = (reader.result as string).split("\n").filter(str => (str !== null && str !== undefined && str !== ""));
+        let data = (reader.result as string).split("\n")
+            .filter(str => (str !== null && str !== undefined && str !== ""));
 
-        // Need to trim because of weired end-of-line issues (potentially a Windows problem).
+        // remove zeroth column (col[0] = file_id as of Mar 2022)
         let columns = data[0].trim().split(",");
         data.splice(0, 1);
 
-        let id_col = columns.indexOf("id");
-        let mjd_col = columns.indexOf("mjd");
-        let mag_col = columns.indexOf("mag");
+        // column indices of interest
+        let sourceIdIdx = columns.indexOf('id');
+        let mJDateIdx = columns.indexOf('mjd');
+        let filterIdx = columns.indexOf('filter');
+        let magIdx = columns.indexOf('mag');
+        let cMagIdx = columns.indexOf('calibrated_mag');
+        //let magErrorIdx = columns.indexOf('mag_error');
+        //let cZeroPointIdx = columns.indexOf('calibrated_zero_point');
 
-        let srcs = new Map();
+        // creates a map where each src item has an array [mjd, magnitude, filter]
+        let sources = new Map(); // only using one source depsite plural
+
         for (const row of data) {
             let items = row.trim().split(',');
-            if (!srcs.has(items[id_col])) {
-                srcs.set(items[id_col], []);
+
+            // create key for each new source
+            if (!sources.has(items[sourceIdIdx])) {
+                sources.set(items[sourceIdIdx], []);
             }
-            srcs.get(items[id_col]).push([
-                parseFloat(items[mjd_col]),
-                parseFloat(items[mag_col])
-            ]);
+
+            // populate source data if calibrated mag data exists
+            if (items[cMagIdx] !== "") {
+                sources.get(items[sourceIdIdx]).push([
+                    parseFloat(items[mJDateIdx]),
+                    parseFloat(items[magIdx]),
+                    items[(filterIdx)]
+                ]);
+            }
         }
 
-        const itr = srcs.keys();
-        let src1 = itr.next().value;
-        let src2 = itr.next().value;
-        if (!src1 || !src2) {
-            alert("Less than two sources are detected in the uploaded file.");
+        const itr = sources.keys();
+        let sourceData = itr.next().value;
+        // if we want more sources in future, use itr.next().value again
+
+        if (!sourceData) {
+            alert('No sources detected in file!');
             return;
         }
 
-        let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
-        let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
+        // remove NaNs and sort ascending
+        let data1 = sources.get(sourceData)
+            .filter((val: number[]) => !isNaN(val[0]))
+                .sort((a: number[], b: number[]) => a[0] - b[0]);
 
-        let left = 0;
-        let right = 0;
         const tableData: any[] = [];
-
-        while (left < data1.length && right < data2.length) {
-            if (data1[left][0] === data2[right][0]) {
-                pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1]);
-                left++;
-                right++;
-            } else if (data1[left][0] < data2[right][0]) {
-                pushTableData(tableData, data1[left][0], data1[left][1], NaN);
-                left++;
-            } else {
-                pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
-                right++;
-            }
-        }
-        while (left < data1.length) {
-            pushTableData(tableData, data1[left][0], data1[left][1], NaN);
-            left++;
-        }
-        while (right < data2.length) {
-            pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
-            right++;
+        // push data to the table to be displayed
+        for (let i = 0; i < data1.length; i++) {
+            pushTableData(tableData, data1[i][0], data1[i][1], data1[i][2]);
         }
 
         table.updateSettings({
-            colHeaders: ['Julian Date', src1, src2],
+            colHeaders: ['Julian Date', 'Magnitude', 'Filter'],
         })
-        myChart.data.datasets[0].label = src1;
-        myChart.data.datasets[1].label = src2;
 
+        myChart.data.datasets[0].label = sourceData;
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+
+        const filterList = ['B', 'V', 'R', 'I']; // hard-coded
+        populateDataElement(filterList, document.getElementById('chart-info-form') as ChartInfoForm);
+
+        //updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
         lightCurve(myChart);
 
@@ -249,25 +252,27 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Ch
     reader.readAsText(file);
 }
 
+
 /**
  * This function checks the potential entry to the tableData. If jd is not NaN,
  * the entry will be pushed to tableData with `NaN` turned to `null`.
  * @param {List} tableData tableData list to be updated
- * @param {number} jd Julian date of the row.
- * @param {number} src1 Magnitude of source 1
- * @param {number} src2 Magnitude of source 2
+ * @param {number} jd Julian date of the row
+ * @param {number} mag Magnitude of source
+ * @param {string} filter Filter used for exposure
  */
-function pushTableData(tableData: any[], jd: number, src1: number, src2: number) {
+function pushTableData(tableData: any[], jd: number, mag: number, filter: string) {
     if (isNaN(jd)) {
         // Ignore entries with invalid timestamp.
         return;
     }
     tableData.push({
         'jd': jd,
-        'src1': isNaN(src1) ? null : src1,
-        'src2': isNaN(src2) ? null : src2
+        'magnitude': isNaN(mag) ? null : mag,
+        'filter': filter
     });
 }
+
 
 /**
  * This function is called when the values in table is changed (either by manual input or by file upload).
@@ -277,7 +282,6 @@ function pushTableData(tableData: any[], jd: number, src1: number, src2: number)
  * @param myChart The chart object
  */
 function updateVariable(table: Handsontable, myChart: Chart) {
-    // console.log("updateVariable called");
 
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
@@ -288,36 +292,110 @@ function updateVariable(table: Handsontable, myChart: Chart) {
         myChart.data.datasets[i].data = [];
     }
 
-    const tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
-    let src1Data = [];
-    let src2Data = [];
+    // can't pass filter col ([2]) to sanitize since is string
+    const tableData = sanitizeTableData(table.getData(), [0, 1]);
+    let sourceData = [];
 
+    // hard-coded to be consistnent and intuitive
+    let colorMap = new Map<string, string>([
+        ['U', '#8601AF'],
+        ['B', '#0247FE'],
+        ['V', '#66B032'],
+        ['R', '#FE2712'],
+        ['I', '#4424D6'],
+        ['Y', '#347C98'],
+        ['J', '#66B032'],
+        ['H', '#FC600A'],
+        ['K', '#FE2712'],
+        ['uprime', '#4424D6'],
+        ['gprime', '#347C98'],
+        ['rprime', '#FC600A'],
+        ['iprime', '#8601AF'],
+        ['zprime', '#0247FE'],
+    ]); // colors hand picked by Dan himself!
+
+    let pointColors = [];
     for (let i = 0; i < tableData.length; i++) {
-        let jd = tableData[i][0];
-        let src1 = tableData[i][1];
-        let src2 = tableData[i][2];
+        let julianDate = tableData[i][0];
+        let magnitude = tableData[i][1];
+        
+        // Each point is a different color depending on filter
+        if (colorMap.has(tableData[i][2])) {
+            pointColors.push(colorMap.get(tableData[i][2]));
+        } else {
+            pointColors.push('black');
+        }
 
-        myChart.data.minMJD = Math.min(myChart.data.minMJD, jd);
-        myChart.data.maxMJD = Math.min(myChart.data.maxMJD, jd);
+        myChart.data.minMJD = Math.min(myChart.data.minMJD, julianDate);
+        myChart.data.maxMJD = Math.min(myChart.data.maxMJD, julianDate);
 
-        src1Data.push({
-            "x": jd,
-            "y": src1,
-        })
-        src2Data.push({
-            "x": jd,
-            "y": src2,
-        })
+        sourceData.push({
+            //'label': 'new label',
+            'x': julianDate,
+            'y': magnitude,
+            //'yMin': magnitude,
+            //'yMax': magnitude,
+        });
     }
 
-    myChart.data.datasets[0].data = src1Data;
-    myChart.data.datasets[1].data = src2Data;
+    //console.log(sourceData);
+    myChart.data.datasets[0].data = sourceData;
+    myChart.data.datasets[0].backgroundColor = pointColors;
+    myChart.data.labels = pointColors;
 
-    updateChart(myChart, 0, 1);
+    // accounts for reverse magnitude scale
+    myChart.options.scales['y'].reverse = true;
 
     const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.onchange(null);
 }
+
+
+/**
+ * Takes an array of values and populates
+ * the 'Data' element in index.html.
+ * @param array array of strings containing form text
+ * @param form form containing the element to be populated
+ */
+const populateDataElement = (array: Array<string>, form: ChartInfoForm,) => {
+    let labels = "";
+    for (let i = 0; i < array.length; i++) {
+        if (true) {
+            if (labels !== '') {
+                labels += ', ';
+            }
+            labels += array[i];
+            labels += '+0';
+        }
+    }
+    form.elements['data'].value = labels;
+    shiftFilterMagnitudes(form);
+}
+
+
+/**
+ * 
+ * @param myChart 
+ * 
+ */
+const shiftFilterMagnitudes = (form: ChartInfoForm) => {
+    console.log(form.elements['data'].value);
+    
+    const elementStringArray = form.elements['data'].value.split(',');
+    console.log(elementStringArray);
+
+    for (let str of elementStringArray) {
+        str.trim(); // remove leading/trailing whitespaces
+        //console.log(str.search('B'));
+        if (str.search('B') !== -1) { // if str has any filter from full list in it - enter here
+            console.log(str); 
+            // split again at + sign to get [filter, shift-value]
+            // update chart to shift all filter mags by shift-value
+            // need to update Magnitude table as well? probably not
+        }
+    }
+}
+
 
 /**
  * This function is called whenever the data sources change (i.e. the values in the table change). 
@@ -326,21 +404,28 @@ function updateVariable(table: Handsontable, myChart: Chart) {
  * @param myChart The chart object
  */
 function lightCurve(myChart: Chart) {
-    // console.log("lightCurve called");
-    let lcHTML =
+    // this will be replaced with generic value once I have better understanding of project
+    const numOfLabels = 1; 
+
+    // dropdown Input Option
+    let HTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Select Variable Star: </div>\n' +
         '<div class="col-sm-5"><select name="source" style="width: 100%;" title="Select Source">\n' +
         '<option value="none" title="None" selected>None</option>\n';
-    for (let i = 0; i < 2; i++) {
+
+    // add options to variable star dropdown
+    for (let i = 0; i < numOfLabels; i++) {
         let label = myChart.data.datasets[i].label;
-        lcHTML +=
+        HTML +=
             '<option value="' + label +
             '"title="' + label +
             '">' + label + '</option>\n';
     }
-    lcHTML +=
+
+    // dropdown input option
+    HTML +=
         '</select></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
@@ -348,59 +433,13 @@ function lightCurve(myChart: Chart) {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="mag" title="Magnitude" value=0></input></div>\n' +
         '</div>\n' +
         '</form>\n';
-    document.getElementById('light-curve-div').innerHTML = lcHTML;
+
+    document.getElementById('light-curve-div').innerHTML = HTML;
+
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
+
+    // occurs when a dropdown is updated
     lightCurveForm.oninput = function () {
-        if (lightCurveForm.source.value === "none") {
-            updateChart(myChart, 0, 1);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
-        } else {
-            const datasets = myChart.data.datasets;
-            let srcData: ScatterDataPoint[];
-            let refData: ScatterDataPoint[];
-            if (lightCurveForm.source.value === datasets[0].label) {
-                srcData = datasets[0].data as ScatterDataPoint[];
-                refData = datasets[1].data as ScatterDataPoint[];
-            } else {
-                srcData = datasets[1].data as ScatterDataPoint[];
-                refData = datasets[0].data as ScatterDataPoint[];
-            }
-            const lcData = [];
-            const len = Math.min(datasets[0].data.length, datasets[1].data.length);
-            for (let i = 0; i < len; i++) {
-                lcData.push({
-                    "x": srcData[i]["x"],
-                    "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
-                });
-            }
-
-            myChart.data.datasets[2].data = lcData;
-            myChart.data.datasets[2].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
-
-            updateChart(myChart, 2);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
-        }
+        // do something when inputs are updated
     }
-}
-
-/**
- * This function set up the chart by hiding all unnecessary datasets, and then adjust the chart scaling
- * to fit the data to be displayed.
- * @param {Chart} myChart 
- * @param {Number[]} dataIndex 
- */
-function updateChart(myChart: Chart, ...dataIndices: number[]) {
-    // console.log("updateChart called");
-    const numOfDatasets = myChart.data.datasets.length;
-
-    for (let i = 0; i < numOfDatasets; i++) {
-        myChart.data.datasets[i].hidden = true;
-    }
-    // Reversing y-axis for lc, since a lower value for star magnitude means it's brighter.
-    myChart.options.scales['y'].reverse = true;
-
-    for (const dataIndex of dataIndices) {
-        myChart.data.datasets[dataIndex].hidden = false;
-    }
-    myChart.update('none');
 }
