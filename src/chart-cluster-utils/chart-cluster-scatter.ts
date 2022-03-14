@@ -48,12 +48,13 @@ export function updateScatter(
                 ra.push(tableData[i][columns.indexOf("ra")]);
                 dec.push(tableData[i][columns.indexOf("dec")]);
             }
-            let stars = new starData(id, ra, dec, null, null);
+            let starOld = new starData(id, ra, dec, null, null);
             let gaia: gaiaData[] = [];
             //make a variable that reperesents the number of star id values in the table
             //for all points in starData
             //if table is longer than 400
-
+            // after establishing the variable starsOld, make new variable stars new that is:
+            //sortStarDuplicates(starsOld);
             if (tableData.length > 400) {
             
             for (let i = 0; i < chart.length; i++) {
