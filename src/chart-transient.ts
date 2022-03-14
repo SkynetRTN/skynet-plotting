@@ -1,7 +1,7 @@
 'use strict';
 
 import Chart from "chart.js/auto";
-import { CategoryScale, LinearScale, ScatterDataPoint } from "chart.js";
+import { CategoryScale, LinearScale, registerables, ScatterDataPoint } from "chart.js";
 import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
 import Handsontable from "handsontable";
 
@@ -34,7 +34,7 @@ export function transient(): [Handsontable, Chart] {
         tableData[i] = {
             'jd': i * 10 + Math.random() * 10 - 5,
             'magnitude': Math.random() * 20,
-            'filter': randomFilters[Math.floor(Math.random() * 4)] ,
+            'filter': randomFilters[Math.floor(Math.random() * 4)],
         };
     }
     // initialize 'data' element text 
@@ -54,7 +54,7 @@ export function transient(): [Handsontable, Chart] {
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     // register controller in chart.js and ensure the defaults are set
-    Chart.register(ScatterWithErrorBarsController, PointWithErrorBar, LinearScale, CategoryScale);
+    Chart.register(ScatterWithErrorBarsController, PointWithErrorBar, LinearScale, CategoryScale, ...registerables);
 
     const myChart = new Chart(ctx, {
         type: 'scatter',
@@ -220,7 +220,7 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Ch
         // remove NaNs and sort ascending
         let data1 = sources.get(sourceData)
             .filter((val: number[]) => !isNaN(val[0]))
-                .sort((a: number[], b: number[]) => a[0] - b[0]);
+            .sort((a: number[], b: number[]) => a[0] - b[0]);
 
         const tableData: any[] = [];
         // push data to the table to be displayed
@@ -318,7 +318,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     for (let i = 0; i < tableData.length; i++) {
         let julianDate = tableData[i][0];
         let magnitude = tableData[i][1];
-        
+
         // Each point is a different color depending on filter
         if (colorMap.has(tableData[i][2])) {
             pointColors.push(colorMap.get(tableData[i][2]));
@@ -380,7 +380,7 @@ const populateDataElement = (array: Array<string>, form: ChartInfoForm,) => {
  */
 const shiftFilterMagnitudes = (form: ChartInfoForm) => {
     console.log(form.elements['data'].value);
-    
+
     const elementStringArray = form.elements['data'].value.split(',');
     console.log(elementStringArray);
 
@@ -388,7 +388,7 @@ const shiftFilterMagnitudes = (form: ChartInfoForm) => {
         str.trim(); // remove leading/trailing whitespaces
         //console.log(str.search('B'));
         if (str.search('B') !== -1) { // if str has any filter from full list in it - enter here
-            console.log(str); 
+            console.log(str);
             // split again at + sign to get [filter, shift-value]
             // update chart to shift all filter mags by shift-value
             // need to update Magnitude table as well? probably not
@@ -405,7 +405,7 @@ const shiftFilterMagnitudes = (form: ChartInfoForm) => {
  */
 function lightCurve(myChart: Chart) {
     // this will be replaced with generic value once I have better understanding of project
-    const numOfLabels = 1; 
+    const numOfLabels = 1;
 
     // dropdown Input Option
     let HTML =
