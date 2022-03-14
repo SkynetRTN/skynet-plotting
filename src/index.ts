@@ -14,12 +14,16 @@ import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster1, clusterFileUpload } from './chart-cluster';
+import { cluster1 } from './chart-cluster';
+import { cluster2 } from './chart-cluster2';
+import { cluster4, cluster4FileUpload } from './chart-cluster4';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
+import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
+import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 
 /**
  *  Initializing the page when the website loads
@@ -29,7 +33,6 @@ window.onload = function () {
     chartTypeForm.onchange = function () {
         chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
     };
-
     // Adding 'toBlob' function to Microsoft Edge. Required for downloading.
     if (!HTMLCanvasElement.prototype.toBlob) {
         Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
@@ -78,6 +81,7 @@ window.onload = function () {
 
     setChartDefaults();
     chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
+
 };
 
 /**
@@ -90,16 +94,35 @@ function chartType(chart: string) {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
-    document.getElementById('chart-div').innerHTML =
-        '<canvas id="myChart" width=300 height=200></canvas>\n';
+    //reset myChart object
+    if (document.getElementById('myChart') != null) {
+        document.getElementById('myChart').remove();
+    }
+    document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
+    //remove display of 4 charts
+    for (let i = 0; i < 5; i++) {
+        if (document.getElementById('chart-div'+i.toString()) != null) {
+            document.getElementById('chart-div'+i.toString()).style.display = 'none';
+        }
+    }
+    //expand the size of axisSet1 and hide axisSet2 for all interfaces
+    document.getElementById('axisSet1').className = 'col-sm-12';
+    document.getElementById('axisSet2').style.display = 'none';
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
+    //remove display of 2 axis labels
+    for (let i = 0; i < 5; i++) {
+        if (document.getElementById('axis-label'+i.toString()) != null) {
+            document.getElementById('axis-label'+i.toString()).style.display = 'none';
+        }
+    }
     // document.getElementById('extra-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart, ModelForm]
+    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    let cluster4_objects: [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale]
 
     if (chart === 'curve') {
         objects = curve();
@@ -131,10 +154,24 @@ function chartType(chart: string) {
         }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
-        objects = [cluster_objects[0], cluster_objects[1]]
+        objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+        }
+    } else if (chart === 'cluster2') {
+        cluster_objects = cluster2();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+        }
+    } else if (chart === 'cluster4') {
+        cluster4_objects = cluster4();
+        objects = [cluster4_objects[0], cluster4_objects[1]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            cluster4FileUpload(evt, cluster4_objects[0], cluster4_objects[1] as Chart<'line'>, cluster4_objects[2] as Chart<'line'>, cluster4_objects[3] as Chart<'line'>, cluster4_objects[4] as Chart<'line'>, cluster4_objects[6]);
         }
 
     } else if (chart === 'gravity') {
@@ -162,7 +199,17 @@ function chartType(chart: string) {
 
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
-        updateChartInfo(objects[1], chartInfoForm);
+        if (chart === 'cluster2') {
+            updateChartInfo(cluster_objects[1][0], chartInfoForm)
+            updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
+        }
+        if (chart === 'cluster4') {
+            updateChartInfo(cluster4_objects[2], chartInfoForm)
+            updateChartInfo(cluster4_objects[3], chartInfoForm)
+            updateChartInfo(cluster4_objects[4], chartInfoForm)
+        } else {
+            updateChartInfo(objects[1], chartInfoForm);
+        }
     };
     objects[1].update('none');
 
@@ -206,8 +253,13 @@ function setChartDefaults() {
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
  */
-function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
+function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
+    let key:string = chartNum === 0 ? "" : (chartNum+1).toString();
+    // @ts-ignore
+    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x'+key+'Axis'].value;
+    // @ts-ignore
+    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y'+key+'Axis'].value;
     myChart.options.plugins.title.text = elements['title'].value;
     const labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
@@ -216,8 +268,6 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['xAxis'].value;
-    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['yAxis'].value;
     myChart.update('none');
 }
 

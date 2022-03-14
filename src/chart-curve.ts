@@ -39,7 +39,10 @@ export function curve(): [Handsontable, Chart] {
         { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
         { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
     ];
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const container = document.getElementById('table-div');
     const tableOptions: Handsontable.GridSettings = {
         data: tableData,
@@ -51,7 +54,7 @@ export function curve(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-
+    
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
         type: 'line',
@@ -126,7 +129,6 @@ export function curve(): [Handsontable, Chart] {
     };
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
-
     const lineForm = document.getElementById('line-form') as LineForm;
 
     let lines = 1;
@@ -179,6 +181,12 @@ export function curve(): [Handsontable, Chart] {
     });
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
-
+    const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+    chartTypeForm.addEventListener("change" , function () {
+    //destroy the chart
+     //testing a bunch of creating charts and destroying them to make the thing work
+     myChart.destroy();
+});
     return [hot, myChart];
+    
 }

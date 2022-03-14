@@ -277,7 +277,7 @@ label.scaleSelection{
     border: 2px solid #E7E7E7;
     line-height: 2.7em;
     margin-bottom: 8px;
-    padding: 1px 6px 1px 6px;
+    padding: 0px 6px 1px 6px;
     background-color: white;
     width:max-content;
     opacity: 0.7;
@@ -317,4 +317,38 @@ div.radioText {
     position: relative;
     height: 32px;
     bottom: 15%;
+}
+
+select.graph {
+    height: 38px;
+    background-color: white;
+    margin-right: 3px;
+    opacity: 0.7;
+}
+
+select.graph:hover {
+    opacity: 1;
+    background-color: #E7E7E7;
+}
+
+label.scaleSelection-graphSelection {
+    /*padding: 0px 6px 10px 6px;*/
+    height: 38px;
+    width: 42px;
+    margin-right: 3px;
+    background-color: white;
+}
+
+.clusterCharts {
+    display: none;
+    position: relative;
+}
+
+.chartTag {
+    position: absolute;
+    bottom: 40px;
+    left: 90px;
+    z-index: -1;
+    font-size: 60px;
+    color: gray;
 }

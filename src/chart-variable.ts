@@ -1,11 +1,11 @@
 'use strict';
 /*test*/ 
 import Chart from "chart.js/auto";
-import { BarController, ScatterDataPoint } from "chart.js";
+import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { linkInputs, throttle, updateLabels, updateTableHeight, sanitizeTableData } from "./util"
+import { throttle, updateLabels, updateTableHeight, sanitizeTableData } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
@@ -28,7 +28,10 @@ export function variable(): [Handsontable, Chart] {
         '<div id="fourier-div"></div>\n' +
         '<div id="period-folding-div"></div>\n'
     );
-
+    document.getElementById('axis-label1').style.display = 'inline';
+    document.getElementById('axis-label3').style.display = 'inline';
+    document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+    document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [];
     for (let i = 0; i < 14; i++) {
         tableData[i] = {
@@ -564,12 +567,47 @@ function lightCurve(myChart: Chart) {
         } else {
             myChart.data.datasets[4].data = myChart.data.datasets[2].data;
         }
+    periodFoldingForm.oninput = throttle(function () {
+        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
+    }, 100);
 
-        updateChart(myChart, 4);
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+}
+
+
+/**
+ * This function updates the datapoints on the period folding chart based on the entry in the period folding
+ * form. 
+ * @param {Chart} myChart 
+ * @param {Number} dataIndex The period used to fold the data.
+ */
+function updatePeriodFolding(myChart: Chart, period: number) {
+    let datasets = myChart.data.datasets;
+    let minMJD = myChart.data.minMJD;
+    let pfData = [];
+    if (period !== 0) {
+        for (let i = 0; i < datasets[2].data.length; i++) {
+            pfData.push({
+                "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
+                "y": (datasets[2].data[i] as ScatterDataPoint).y,
+            });
+            pfData.push({
+                "x": pfData[pfData.length - 1].x + period,
+                "y": pfData[pfData.length - 1].y,
+            })
+        }
+        myChart.data.datasets[4].data = pfData;
+    } else {
+        for (let i = 0; i < datasets[2].data.length; i++) {
+            pfData.push({
+                "x": 0, 
+                "y": (datasets[2].data[i] as ScatterDataPoint).y
+            })
+        }
+        myChart.data.datasets[4].data = pfData;
     }
 
-    
+    updateChart(myChart, 4);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 }
 
 
