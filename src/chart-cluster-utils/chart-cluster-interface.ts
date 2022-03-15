@@ -98,7 +98,7 @@ export function insertClusterControls(chartCounts:number = 1) {
                 num = (i+1).toString()
             }
             //add a number that corresponds what graph each row of drop down boxes controls
-            htmlContent += '<div class="col-sm-1"><class="title">' + logo + ':</div>\n' +
+            htmlContent += '<div class="col-sm-1" style="font-size: 20px;">' + logo + '</div>\n' +
                 '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
