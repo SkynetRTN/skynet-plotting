@@ -233,3 +233,42 @@ export function rangeCheckControl(clusterChart = true){
         });
     }
 }
+
+export function clusterProCheckControl (proChart = true){
+    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
+        (document.getElementById("rarangeCheck") as HTMLInputElement).checked = false;
+        (document.getElementById("decrangeCheck") as HTMLInputElement).checked = false;
+        clusterProForm["rarange"].disabled = true;
+        clusterProForm["rarange_num"].disabled = true;
+        clusterProForm["decrange"].disabled = true;
+        clusterProForm["decrange_num"].disabled = true;
+        const rarangeCheckbox = (document.getElementById("rarangeCheck") as HTMLInputElement);
+        const decrangeCheckbox = (document.getElementById("decrangeCheck") as HTMLInputElement);
+        rarangeCheckbox.addEventListener("change", () => {
+            let rangeSlider = clusterProForm["rarange"]
+            let rangeNum = clusterProForm["rarange_num"]
+            if (rarangeCheckbox.checked) {
+              rangeSlider.disabled = false;
+              rangeNum.disabled = false;
+              rangeSlider.style.opacity = "1";
+            } else {
+              rangeSlider.disabled = true;
+              rangeNum.disabled = true;
+              rangeSlider.style.opacity = "0.4";
+            }
+          });
+            decrangeCheckbox.addEventListener("change", () => {
+            let rangeSlider = clusterProForm["decrange"]
+            let rangeNum = clusterProForm["decrange_num"]
+            if (decrangeCheckbox.checked) {
+              rangeSlider.disabled = false;
+              rangeNum.disabled = false;
+              rangeSlider.style.opacity = "1";
+            } else {
+              rangeSlider.disabled = true;
+              rangeNum.disabled = true;
+              rangeSlider.style.opacity = "0.4";
+            }
+          }
+        );
+}

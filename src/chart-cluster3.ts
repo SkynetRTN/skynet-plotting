@@ -7,7 +7,7 @@ import { colors, tableCommonOptions } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
 import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -59,6 +59,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
 
   rangeCheckControl(true);
+  clusterProCheckControl(true);
 
   const tableData = dummyData;
 
