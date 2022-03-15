@@ -66,7 +66,7 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
                 callback(xmlHttp.responseText);
-        } else if (xmlHttp.status != 0) {
+        } else {
                 failedCallback();
         }
     };
@@ -74,12 +74,12 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     xmlHttp.send(null);
 }
 //create and export a function that uses the http push to send the data to the server
-export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function=()=>{}) {
+export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
             callback(xmlHttp.responseText);
-        } else if (xmlHttp.status != 0) {
+        } else {
             failedCallback();
         }
     };
@@ -113,7 +113,7 @@ export function modelFormKeys(chartNum: number, form: ModelForm) {
  */
 export function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
     let newLimits = scaleLimits;
-    if (isNaN(newLimits["minX"])) {
+    if (isNaN(newLimits["minX"])||isNaN(newLimits["maxX"])||isNaN(newLimits["minY"])||isNaN(newLimits["maxY"])) {
         newLimits["minX"] = x;
         newLimits["maxX"] = x;
         newLimits["minY"] = y;
