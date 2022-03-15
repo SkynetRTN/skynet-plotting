@@ -128,6 +128,11 @@ export function updateScatter(
 
                 let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
                 let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
                 chart[start++] = {
                     x: x,
                     y: y
