@@ -49,7 +49,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   const modelForm = document.getElementById("model-form") as ModelForm;
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["range"], clusterForm["range_num"], 0, 100, 0.01, 100, false, false);
+  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
@@ -389,7 +389,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
         title: {
           display: false
           },
+        legend: {
+          display: false,
+
         },
+      }
       }
     },
   );
