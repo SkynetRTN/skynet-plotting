@@ -171,7 +171,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.141,
+      aspectRatio: 1.140,
       hover: {
         mode: "nearest",
       },
@@ -204,8 +204,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           display: true,
           align: "start",
           padding: {
-            top: 10.025,
-            bottom: 14,
+            top: 6.025,
+            bottom: 5,
           }
         },
         legend: {
@@ -225,6 +225,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
       }
     },
   });
+  //make a function that disables the distrange slider if the distrangeCheckbox is not checked
+  const distrangeCheckbox = document.getElementById("distrangeCheckbox");
+  let distrangeSlider = document.getElementById("distrange");
+  let distrangeNum = document.getElementById("distrange_num");
+  
 
   const ctx2 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
 
@@ -278,7 +283,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.141,
+      aspectRatio: 1.140,
       hover: {
         mode: "nearest",
       },
@@ -314,8 +319,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           font: {
             size: 1},
           padding: {
-            top: 25.50,
-            bottom: -14,
+            top: -12.50,
+            bottom: 10,
           }
         },
         legend: {
