@@ -77,9 +77,9 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
 export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+        if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != ""){
             callback(xmlHttp.responseText);
-        } else {
+        } else if (xmlHttp.status != 200 && xmlHttp.response != "") {
             failedCallback();
         }
     };

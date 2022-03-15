@@ -98,11 +98,13 @@ export function clusterFileUpload(
         httpPostAsync(url, cleanedup[1],
             (result: string)=>{
                 let gaia = JSON.parse(result)
-                if (gaia !== []){
+                if (gaia !== [] && result !== "{\"error\": \"Input invalid type\"}"){
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
                 } else {
+                    console.log('yi')
                     let [dict, filters] = generateDatadict(sortedData)
+                    console.log(dict)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
                 }
             },
@@ -116,6 +118,7 @@ export function clusterFileUpload(
 }
 
 function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<string, Map<string, number>>, modelForm: ModelForm, clusterForm: ClusterForm, filters: string[], graphMaxMin: graphScale) {
+    console.trace()
     let blue = modelForm[modelFormKey(0, 'blue')];
     let red = modelForm[modelFormKey(0, 'red')];
     let lum = modelForm[modelFormKey(0, 'lum')];

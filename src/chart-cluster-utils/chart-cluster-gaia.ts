@@ -92,7 +92,6 @@ function maxMinRaDec(star: starData, minMax: number[]){
 }
 
 function getClusterCenter(minMax: number[], stars: any[]){
-    console.log(minMax)
     let maxRa = minMax[0];
     let minRa = minMax[1];
     let maxDec = minMax[2];
