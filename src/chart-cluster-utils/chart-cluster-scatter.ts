@@ -90,8 +90,8 @@ export function updateScatter(
                 ) {
                     continue;
                 }
-                let distance = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")]
-                if (isRange && distance && (distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))){
+                let distance: number = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")];
+                if (isRange && (!distance || (distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100))))){
                     continue;
                 }
                 //red-blue,lum

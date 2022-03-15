@@ -47,6 +47,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                 callback(c);
             },
             () => {
+                chart.update("none");
                 callback(c);
             },
         );
