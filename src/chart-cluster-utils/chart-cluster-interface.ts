@@ -16,7 +16,7 @@ export function insertClusterControls(chartCounts:number = 1) {
         "</div>\n" +
         '<div class="row">\n' +
         //add a checkbox that disables the corresponding slider
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value=0></input></div>\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" value="0" id="distrangeCheck"></input></div>\n' +
         '<div class = "col-sm-5 des">±Range (%):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
@@ -141,7 +141,7 @@ export function clusterProSliders(clusterPro: true = true) {
                    '<div class="col-sm-2 text"><input type="number" title="Ra" name="ramotion_num" class="field"></div>\n' +
                      '</div>\n'
     htmlContent += '<div class="row">\n'
-    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="rarangeCheck" value="0" id="rarangeCheck"></input></div>\n' +
                    '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
                    '<div class="col-sm-4 range"><input type="range" title="rarange" name="rarange"></div>\n' +
                    '<div class="col-sm-2 text"><input type="number" title="rarange" name="rarange_num" class="field"></div>\n' +
@@ -152,7 +152,7 @@ export function clusterProSliders(clusterPro: true = true) {
                         '<div class="col-sm-2 text"><input type="number" title="decmotion" name="decmotion_num" class="field"></div>\n' +
                         '</div>\n'
     htmlContent += '<div class="row">\n'
-    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="decrangeCheck" value="0" id="decrangeCheck"></input></div>\n' +
                      '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
                         '<div class="col-sm-4 range"><input type="range" title="decrange" name="decrange"></div>\n' +
                         '<div class="col-sm-2 text"><input type="number" title="decrange" name="decrange_num" class="field"></div>\n' +
