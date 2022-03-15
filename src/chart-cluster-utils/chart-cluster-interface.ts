@@ -207,3 +207,29 @@ export function insertGraphControl(chartCount: number = 1){
         '</div>\n'
     document.getElementById("extra-options").insertAdjacentHTML("beforeend", html)
 }
+export function rangeCheckControl(clusterChart = true){
+    if (clusterChart === true) {
+        const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+        (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false;
+        clusterForm["distrange"].disabled = true;
+        clusterForm["distrange_num"].disabled = true;
+        const distrangeCheckbox = (document.getElementById("distrangeCheck") as HTMLInputElement);   
+        //clusterForm["distrange"].disabled = true;
+        //clusterForm["distrange_num"].disabled = true;
+        //clusterForm["distrange"].disabled = false;
+        //clusterForm["distrange_num"].disabled = false;;
+        distrangeCheckbox.addEventListener("change", () => {
+          let rangeSlider = clusterForm["distrange"]
+          let rangeNum = clusterForm["distrange_num"]
+          if (distrangeCheckbox.checked) {
+            rangeSlider.disabled = false;
+            rangeNum.disabled = false;
+            rangeSlider.style.opacity = "1";
+          } else {
+            rangeSlider.disabled = true;
+            rangeNum.disabled = true;
+            rangeSlider.style.opacity = "0.4";
+          }
+        });
+    }
+}
