@@ -98,7 +98,7 @@ export function clusterFileUpload(
         httpPostAsync(url, cleanedup[1],
             (result: string)=>{
                 let gaia = JSON.parse(result)
-                if (gaia === []){
+                if (gaia !== []){
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
                 } else {

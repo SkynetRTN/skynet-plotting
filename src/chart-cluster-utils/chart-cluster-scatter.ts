@@ -30,7 +30,7 @@ export function updateScatter(
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            let err = 1;
+            // let err = 1;
             let dist = parseFloat(clusterForm["d_num"].value);
             //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
             let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
@@ -63,18 +63,18 @@ export function updateScatter(
                 filterWavelength[modelForm[lumKey].value]
             );
 
-            let blueErr =
-                columns.indexOf(modelForm[blueKey].value + "err") < 0
-                    ? null
-                    : columns.indexOf(modelForm[blueKey].value + "err"); //checks for supplied err data
-            let redErr =
-                columns.indexOf(modelForm[redKey].value + "err") < 0
-                    ? null
-                    : columns.indexOf(modelForm[redKey].value + "err");
-            let lumErr =
-                columns.indexOf(modelForm[lumKey].value + "err") < 0
-                    ? null
-                    : columns.indexOf(modelForm[lumKey].value + "err");
+            // let blueErr =
+            //     columns.indexOf(modelForm[blueKey].value + "err") < 0
+            //         ? null
+            //         : columns.indexOf(modelForm[blueKey].value + "err"); //checks for supplied err data
+            // let redErr =
+            //     columns.indexOf(modelForm[redKey].value + "err") < 0
+            //         ? null
+            //         : columns.indexOf(modelForm[redKey].value + "err");
+            // let lumErr =
+            //     columns.indexOf(modelForm[lumKey].value + "err") < 0
+            //         ? null
+            //         : columns.indexOf(modelForm[lumKey].value + "err");
 
             let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
 
@@ -83,15 +83,16 @@ export function updateScatter(
                 if (
                     typeof (tableData[i][blue]) != 'number' ||
                     typeof (tableData[i][red]) != 'number' ||
-                    typeof (tableData[i][lum]) != 'number' ||
-                    (blueErr != null && tableData[i][blueErr] >= err) ||
-                    (redErr != null && tableData[i][redErr] >= err) ||
-                    (lumErr != null && tableData[i][lumErr] >= err)
+                    typeof (tableData[i][lum]) != 'number'
+                    // || (blueErr != null && tableData[i][blueErr] >= err) ||
+                    // (redErr != null && tableData[i][redErr] >= err) ||
+                    // (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
                     continue;
                 }
                 let distance: number = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")];
-                if (isRange && (!distance || (distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100))))){
+                let isDistNotValid = isNaN(distance) || distance === null
+                if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
                     continue;
                 }
                 //red-blue,lum
