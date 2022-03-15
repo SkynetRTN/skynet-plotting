@@ -119,6 +119,7 @@ export function updateScatter(
             if (graphMaxMin.getMode(c) !== null) {
                 chartRescale([myChart], modelForm, graphMaxMin,null, [c]);
             }
+            console.log(tableData);
             myChart.update()
         }
     }
