@@ -1,7 +1,7 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import { sortStarDuplicates, sortStarid, starData } from "./chart-cluster-utils/chart-gaia-util";
+import {  starData } from "./chart-cluster-utils/chart-cluster-gaia";
 import Handsontable from "handsontable";
 import { colors, tableCommonOptions } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
@@ -47,11 +47,18 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
+    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["range"], clusterForm["range_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], 0, 100, 0.01, 50, false, false);  
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], 0, 100, 0.01, 50, false, false);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
+
+
 
   const tableData = dummyData;
 
@@ -362,7 +369,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
         },
         y: {
           //label: 'V',
-          reverse: true,
+          reverse: false,
           suggestedMin: 0,
         },
       },
@@ -382,13 +389,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
         title: {
           display: false
           },
-        legend: {
-            display: false,
-        },
         },
       }
     },
   );
+  //change the default font size of myChart2
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart3, myChart4], modelForm, graphMinMax);
   myChart3.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)};
@@ -442,13 +447,15 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   updateHRModel(modelForm, hot, [myChart3, myChart4]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
+  myChart2.options.scales["x"].title.text = "Motion in RA (mas/yr)";
+  myChart2.options.scales["y"].title.text = "Motion in Dec (mas/yr)";
   myChart3.options.plugins.title.text = "Title";
   myChart3.options.scales["x"].title.text = "x1";
   myChart3.options.scales["y"].title.text = "y1";
   myChart4.options.scales["x"].title.text = "x2";
   myChart4.options.scales["y"].title.text = "y2";
   updateLabels(myChart3, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
-  updateLabels(myChart4, document.getElementById("chart-info-form") as ChartInfoForm);
+  updateLabels(myChart4, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart

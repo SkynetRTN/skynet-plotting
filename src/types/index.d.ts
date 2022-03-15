@@ -144,6 +144,16 @@ interface ModelForm extends HTMLFormElement {
     blue4: HTMLInputElement,
     lum4: HTMLInputElement,
 }
+interface ClusterProForm extends HTMLFormElement {
+    ramotion: HTMLInputElement,
+    ramotion_num: HTMLInputElement,
+    rarange: HTMLInputElement,
+    rarange_num: HTMLInputElement,
+    decmotion: HTMLInputElement,
+    decmotion_num: HTMLInputElement,
+    decrange: HTMLInputElement,
+    decrange_num: HTMLInputElement,
+}
 
 interface GravityForm extends HTMLFormElement {
     mass: HTMLInputElement,

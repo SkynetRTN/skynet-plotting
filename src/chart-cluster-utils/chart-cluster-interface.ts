@@ -16,8 +16,8 @@ export function insertClusterControls(chartCounts:number = 1) {
         "</div>\n" +
         '<div class="row">\n' +
         //add a checkbox that disables the corresponding slider
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
-        '<div class = "col-sm-5 des">±Range (kpc):</div>\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range"></input></div>\n' +
+        '<div class = "col-sm-5 des">±Range (%):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Range" name="range"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Range" name="range_num" class="field"></div>\n' +
         "</div>\n" +
@@ -133,10 +133,12 @@ export function insertClusterControls(chartCounts:number = 1) {
 export function clusterProSliders(clusterPro: true = true) {
     if (clusterPro === true) {
     let htmlContent = "" 
+    htmlContent += '<form id="clusterProForm" class="form-inline">\n' +
+                   '</div>\n'
     htmlContent += '<div class="row" style = "padding-top: 10.5px">\n'
     htmlContent += '<div class = "col-sm-6 des">Motion in RA (mas/yr):</div>\n' +
                    '<div class="col-sm-4 range"><input type="range" title="ramotion" name="ramotion"></div>\n' +
-                   '<div class="col-sm-2 text"><input type="number" title="Range" name="ramotion_num" class="field"></div>\n' +
+                   '<div class="col-sm-2 text"><input type="number" title="Ra" name="ramotion_num" class="field"></div>\n' +
                      '</div>\n'
     htmlContent += '<div class="row">\n'
     htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="range" value="0"></input></div>\n' +
