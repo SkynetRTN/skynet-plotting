@@ -66,7 +66,7 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
                 callback(xmlHttp.responseText);
-        } else {
+        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == ""){
                 failedCallback();
         }
     };
@@ -79,7 +79,7 @@ export function httpPostAsync(theUrl: string, data: any, callback: Function, fai
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
         if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != ""){
             callback(xmlHttp.responseText);
-        } else if (xmlHttp.status != 200 && xmlHttp.response != "") {
+        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
             failedCallback();
         }
     };

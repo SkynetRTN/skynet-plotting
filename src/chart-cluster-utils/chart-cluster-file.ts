@@ -119,7 +119,6 @@ export function clusterFileUpload(
 }
 
 function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<string, Map<string, number>>, modelForm: ModelForm, clusterForm: ClusterForm, filters: string[], graphMaxMin: graphScale) {
-    console.trace()
     let blue = modelForm[modelFormKey(0, 'blue')];
     let red = modelForm[modelFormKey(0, 'red')];
     let lum = modelForm[modelFormKey(0, 'lum')];
