@@ -55,10 +55,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
   
   //when table data changes, change the maxes and mins of the sliders and number boxes
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], 0, 100, 0.01, 50, false, false);  
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], 0, 100, 0.01, 50, false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
+  //linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], 0, 100, 0.01, 50, false, false);  
+  //linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
+  //linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], 0, 100, 0.01, 50, false, false);
+  //linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
 
   rangeCheckControl(true);
   clusterProCheckControl();
@@ -429,7 +429,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   let lumKey = modelFormKey(3, 'lum')
     //find max and min values of ra and dec
     let maxRa = Math.max(...tableData.map(row => row[columns.indexOf(modelForm[blueKey].value + " ra")]));
-    let minRa = Math.min(...tableData.map(row => row[columns.indexOf(modelForm[blueKey].value + " ra")]));
+    let minRa = Math.min(...tableData.map(row=> row[columns.indexOf(modelForm[blueKey].value + " ra")]));
     let maxDec = Math.max(...tableData.map(row => row[columns.indexOf(modelForm[blueKey].value + " dec")]));
     let minDec = Math.min(...tableData.map(row => row[columns.indexOf(modelForm[blueKey].value + " dec")]));
   //change the default font size of myChart2
