@@ -9,7 +9,7 @@ export class starData{
     dec: number
     radius: number
     distance: number
-    motion: number []
+    motion: number[]
     constructor(id: string, filter: string, err: number, filteredMag: number, mag: string, ra: number, dec: number, distance: number, motion: number[]){
         this.id = id;
         this.filter = filter;

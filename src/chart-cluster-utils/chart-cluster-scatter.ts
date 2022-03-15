@@ -24,7 +24,8 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,) {
+    specificChart: number = -1,
+    isRange = true) {
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
@@ -32,48 +33,12 @@ export function updateScatter(
             let dist = parseFloat(clusterForm["d_num"].value);
             //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
             let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
-            // let range = parseFloat(clusterForm["range_num"].value);
+            let range = parseFloat(clusterForm["distrange_num"].value);
 
             
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
             let columns = table.getColHeader();
-            //make a variable that stores all the id values, ra's, and dec's from the table
-            let id = [];
-            let ra = [];
-            let dec = [];
-            for (let i = 0; i < tableData.length; i++) {
-                id.push(tableData[i][columns.indexOf("id")]);
-                ra.push(tableData[i][columns.indexOf("ra")]);
-                dec.push(tableData[i][columns.indexOf("dec")]);
-            }
-            // let starOld = new starData(id, ra, dec, null, null);
-            // let gaia: gaiaData[] = [];
-            //make a variable that reperesents the number of star id values in the table
-            //for all points in starData
-            //if table is longer than 400
-            // after establishing the variable starsOld, make new variable stars new that is:
-            //sortStarDuplicates(starsOld);
-        //     if (tableData.length > 400) {
-        //
-        //     // for (let i = 0; i < chart.length; i++) {
-        //     //     //match id values in starData to id values in acceptableStars
-        //     //     let idNaked = stars[i].id;
-        //     //     let idGaia = gaia[i].id;
-        //     //     //if id numbers mathc, then assign the proper motion and distance data to the starData
-        //     //     if (idNaked === idGaia) {
-        //     //         stars[i].distance = gaia[i].distance;
-        //     //         stars[i].motion = gaia[i].motion;
-        //     //     }
-        //     //     //if the new star distance is not within the range, then remove it from the table data
-        //     //     if (stars[i].distance > dist+(dist*(range/100)) || stars[i].distance < dist-(dist*(range/100))) {
-        //     //         tableData.splice(i, 1);
-        //     //         chart.splice(i, 1);
-        //     //         i--;
-        //     //     }
-        //     //
-        //     // }
-        // }
                 
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
@@ -122,6 +87,10 @@ export function updateScatter(
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
+                    continue;
+                }
+                let distance = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")]
+                if (isRange && distance && (distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))){
                     continue;
                 }
                 //red-blue,lum

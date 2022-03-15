@@ -107,8 +107,9 @@ export function clusterFileUpload(
                 try {
                     // @ts-ignore
                     if (sortedData[data_i]['id'] === gaia[gaia_i]['id']) {
-                        // @ts-ignore
-                        sortedData[data_i]['motion'] = gaia[gaia_i]['pm']
+                        sortedData[data_i]['distance'] = gaia[gaia_i]['range']
+                        sortedData[data_i]['motion'][0] = gaia[gaia_i]['pm']['ra']
+                        sortedData[data_i]['motion'][1] = gaia[gaia_i]['pm']['dec']
                         let star = sortedData[data_i]
                         let src = star['id']
                         let filter = star['filter']
@@ -121,8 +122,8 @@ export function clusterFileUpload(
                             datadict.get(src).set(filter + "ra", isNaN(star['ra']) ? null : star['ra']);
                             datadict.get(src).set(filter + "dec", isNaN(star['dec']) ? null : star['dec']);
                             datadict.get(src).set(filter + "dist", null === (star['distance']) ? null : star['distance'])
-                            datadict.get(src).set(filter + "pmra", null === (star['motion'][0]) ? null : star['motion'][0])
-                            datadict.get(src).set(filter + "pmdec", null === (star['motion'][1]) ? null : star['motion'][1])
+                            datadict.get(src).set(filter + "pmra", null === (star['motion'][0]) ? null : star['motion'][1])
+                            datadict.get(src).set(filter + "pmdec", null === (star['motion'][0]) ? null : star['motion'][1])
                             if (!filters.includes(filter)) {
                                 filters.push(filter);
                             }
