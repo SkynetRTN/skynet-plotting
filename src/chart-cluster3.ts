@@ -395,27 +395,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           suggestedMin: 0,
         },
       },
-      plugins: {
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x',
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-            },
-            mode: 'x',
-          },
-        },
-        title: {
-          display: false
-          },
-        legend: {
-          display: false,
-
-        },
-      }
       }
     },
   );
