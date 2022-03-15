@@ -16,7 +16,7 @@ export function insertClusterControls(chartCounts:number = 1) {
         "</div>\n" +
         '<div class="row">\n' +
         //add a checkbox that disables the corresponding slider
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" value="0" id="distrangeCheck"></input></div>\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" id="distrangeCheck"></input></div>\n' +
         '<div class = "col-sm-5 des">±Range (%):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +

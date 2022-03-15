@@ -201,6 +201,8 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   updateHRModel(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
+  (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
+
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
