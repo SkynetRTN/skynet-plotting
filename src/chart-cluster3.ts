@@ -226,9 +226,23 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     },
   });
   //make a function that disables the distrange slider if the distrangeCheckbox is not checked
-  const distrangeCheckbox = document.getElementById("distrangeCheckbox");
-  let distrangeSlider = document.getElementById("distrange");
-  let distrangeNum = document.getElementById("distrange_num");
+  const distrangeCheckbox = (document.getElementById("distrangeCheck") as HTMLInputElement);   
+  //clusterForm["distrange"].disabled = true;
+  //clusterForm["distrange_num"].disabled = true;
+  //clusterForm["distrange"].disabled = false;
+  //clusterForm["distrange_num"].disabled = false;;
+  distrangeCheckbox.addEventListener("change", () => {
+    if (distrangeCheckbox.checked) {
+      clusterForm["distrange"].disabled = false;
+      clusterForm["distrange_num"].disabled = false;
+
+    } else {
+      clusterForm["distrange"].disabled = true;
+      clusterForm["distrange_num"].disabled = true;
+    }
+  });
+  
+
   
 
   const ctx2 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
