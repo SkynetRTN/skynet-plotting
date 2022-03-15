@@ -7,7 +7,7 @@ import { colors, tableCommonOptions } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
 import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -58,7 +58,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], 0, 100, 0.01, 50, false, false);
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
 
-
+  rangeCheckControl(true);
+  clusterProCheckControl(true);
 
   const tableData = dummyData;
 
@@ -226,21 +227,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     },
   });
   //make a function that disables the distrange slider if the distrangeCheckbox is not checked
-  const distrangeCheckbox = (document.getElementById("distrangeCheck") as HTMLInputElement);   
-  //clusterForm["distrange"].disabled = true;
-  //clusterForm["distrange_num"].disabled = true;
-  //clusterForm["distrange"].disabled = false;
-  //clusterForm["distrange_num"].disabled = false;;
-  distrangeCheckbox.addEventListener("change", () => {
-    if (distrangeCheckbox.checked) {
-      clusterForm["distrange"].disabled = false;
-      clusterForm["distrange_num"].disabled = false;
 
-    } else {
-      clusterForm["distrange"].disabled = true;
-      clusterForm["distrange_num"].disabled = true;
-    }
-  });
   
 
   
