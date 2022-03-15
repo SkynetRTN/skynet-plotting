@@ -24,8 +24,9 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,
-    isRange = true) {
+    specificChart: number = -1,) {
+
+    let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
