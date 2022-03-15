@@ -10,6 +10,7 @@ import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
+import { rangeCheckControl } from "./chart-cluster-interface";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -60,6 +61,8 @@ export function clusterFileUpload(
         modelForm["age_num"].value = "6.6";
         clusterForm["red_num"].value = "0";
         modelForm["metal_num"].value = "-3.4";
+        rangeCheckControl()
+
         const data: string[] = (reader.result as string)
             .split("\n")
             .filter((str) => str !== null && str !== undefined && str !== "");
@@ -102,9 +105,7 @@ export function clusterFileUpload(
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
                 } else {
-                    console.log('yi')
                     let [dict, filters] = generateDatadict(sortedData)
-                    console.log(dict)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
                 }
             },

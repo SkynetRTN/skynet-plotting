@@ -229,12 +229,14 @@ export function rangeCheckControl(clusterChart = true){
             rangeSlider.disabled = true;
             rangeNum.disabled = true;
             rangeSlider.style.opacity = "0.4";
+            clusterForm["distrange"].value = "100";
+            clusterForm["distrange_num"].value = "100";
           }
         });
     }
 }
 
-export function clusterProCheckControl (proChart = true){
+export function clusterProCheckControl (){
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
         (document.getElementById("rarangeCheck") as HTMLInputElement).checked = false;
         (document.getElementById("decrangeCheck") as HTMLInputElement).checked = false;
