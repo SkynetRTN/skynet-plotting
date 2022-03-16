@@ -197,11 +197,12 @@ function chartType(chart: string) {
 
 
     } else if (chart === 'cluster3') {
-        cluster_objects = cluster3();
+        let result = cluster3()
+        cluster_objects = [result[0], result[1], result[2], result[3]];
         objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1].slice(0,1), cluster_objects[3]);
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
         }
 
     }else if (chart === 'gravity') {

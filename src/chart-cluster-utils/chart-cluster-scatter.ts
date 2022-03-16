@@ -711,7 +711,7 @@ export function updateClusterProScatter(
             let columns = table.getColHeader();
                 
             let blueKey = modelFormKey(c, 'blue')
-            let redKey = modelFormKey(c, 'red')
+            // let redKey = modelFormKey(c, 'red')
             //let lumKey = modelFormKey(c, 'lum')
 
             //Identify the column the selected filter refers to
@@ -732,7 +732,6 @@ export function updateClusterProScatter(
                 //testing purposes'
                 //let x = tableData[i][blue] - (tableData[i][red]);
                 //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
-    
 
                 chart[start++] = {
                     x: x,

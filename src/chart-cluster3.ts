@@ -17,7 +17,7 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
+export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
     insertClusterControls(2);
     clusterProSliders(true);
     //make graph scaling options visible to users
@@ -156,8 +156,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           display: true,
           align: "start",
           padding: {
-            top: 6.025,
-            bottom: 5,
+            top: 0,
+            bottom: 10,
           }
         },
         legend: {
@@ -469,7 +469,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   //choose the greatest absolute value of the dec motion values
   let maxDecMotion = Math.max(Math.abs(maxDec), Math.abs(minDec));
   
-  updateClusterProScatter(hot, [myChart2], clusterProForm, modelForm, [2,2])
+  updateClusterProScatter(hot, [myChart2], clusterProForm, modelForm, [2])
   //log the proper motion values to the console
   myChart2.update();
   //let bluera = columns.indexOf(modelForm[blueKey].value + " ramotion");
@@ -561,6 +561,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     myChart4.destroy();
   });
   //console log tabledata
-  return [hot, [myChart3, myChart4, myChart2], modelForm, graphMinMax];
+  return [hot, [myChart3, myChart4, myChart2], modelForm, graphMinMax, clusterProForm];
   
 }

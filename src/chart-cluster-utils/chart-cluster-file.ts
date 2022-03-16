@@ -8,7 +8,7 @@ import Handsontable from "handsontable";
 import {httpPostAsync, modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
-import { graphScale, updateScatter } from "./chart-cluster-scatter";
+import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
 import { rangeCheckControl } from "./chart-cluster-interface";
 
@@ -26,6 +26,8 @@ export function clusterFileUpload(
     table: Handsontable,
     myCharts: Chart[],
     graphMaxMin: graphScale,
+    isCluster3: boolean =false,
+    proForm: ClusterProForm = null,
 ) {
     // console.log("clusterFileUpload called");
     const file = (evt.target as HTMLInputElement).files[0];
@@ -103,22 +105,32 @@ export function clusterFileUpload(
                 let gaia = JSON.parse(result)
                 if (gaia !== [] && result !== "{\"error\": \"Input invalid type\"}"){
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
                 } else {
                     let [dict, filters] = generateDatadict(sortedData)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
                 }
             },
             ()=>{
                 let [dict, filters] = generateDatadict(sortedData)
-                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin)
+                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
             }
         )
     };
     reader.readAsText(file);
 }
 
-function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<string, Map<string, number>>, modelForm: ModelForm, clusterForm: ClusterForm, filters: string[], graphMaxMin: graphScale) {
+function updateCharts(
+    myCharts: Chart[],
+    table: Handsontable,
+    datadict: Map<string, Map<string, number>>,
+    modelForm: ModelForm,
+    clusterForm: ClusterForm,
+    filters: string[],
+    graphMaxMin: graphScale,
+    isCluster3: boolean,
+    proForm: ClusterProForm
+    ) {
     let blue = modelForm[modelFormKey(0, 'blue')];
     let red = modelForm[modelFormKey(0, 'red')];
     let lum = modelForm[modelFormKey(0, 'lum')];
@@ -206,8 +218,8 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
 
         tableData.push(row);
     });
-
-    for (let c = 0; c < myCharts.length; c++) {
+    let chartLength = isCluster3? myCharts.length-1: myCharts.length;
+    for (let c = 0; c < chartLength; c++) {
         let myChart = myCharts[c] as Chart<'line'>;
         myChart.options.plugins.title.text = "Title";
         myChart.data.datasets[2].label = "Data";
@@ -231,9 +243,10 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
         red.value = filters[1];
         lum.value = filters[1];
     }
-    updateHRModel(modelForm, table, myCharts,
+    let queryCharts = isCluster3? myCharts.slice(0,2) : myCharts
+    updateHRModel(modelForm, table, queryCharts,
         (c: number) => {
-            if (c === myCharts.length-1){
+            if (c === chartLength-1){
                 table.updateSettings({
                     data: tableData,
                     colHeaders: headers,
@@ -241,10 +254,14 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
                     hiddenColumns: {columns: hiddenColumns},
                 }); //hide all but the first 3 columns
                 updateTableHeight(table);
-                for (let i = 0; i < myCharts.length; i++) {
+                for (let i = 0; i < chartLength; i++) {
                     graphMaxMin.updateMode('auto', i);
                     updateScatter(table, [myCharts[i]], clusterForm, modelForm, [2], graphMaxMin);
                     myCharts[i].update()
+                }
+                if (isCluster3){
+                    updateClusterProScatter(table, [myCharts[myCharts.length-1]], proForm, modelForm, [2]);
+                    myCharts[myCharts.length-1].update();
                 }
                 document.getElementById("standardView").click();
             }
@@ -275,8 +292,8 @@ function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, M
                     datadict.get(src).set(filter + "ra", isNaN(star['ra']) ? null : star['ra']);
                     datadict.get(src).set(filter + "dec", isNaN(star['dec']) ? null : star['dec']);
                     datadict.get(src).set(filter + "dist", null === (star['distance']) ? null : star['distance'])
-                    datadict.get(src).set(filter + "pmra", null === (star['motion'][0]) ? null : star['motion'][1])
-                    datadict.get(src).set(filter + "pmdec", null === (star['motion'][0]) ? null : star['motion'][1])
+                    datadict.get(src).set(filter + "pmra", null === (star['motion'][0]) ? null : star['motion'][0])
+                    datadict.get(src).set(filter + "pmdec", null === (star['motion'][1]) ? null : star['motion'][1])
                     if (!filters.includes(filter)) {
                         filters.push(filter);
                     }
