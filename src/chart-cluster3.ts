@@ -1,7 +1,6 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import {  starData } from "./chart-cluster-utils/chart-cluster-gaia";
 import Handsontable from "handsontable";
 import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
@@ -432,8 +431,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   let tableData2 = hot.getData();
   let columns = hot.getColHeader();
   let blueKey = modelFormKey(1, 'blue')
-  let redKey = modelFormKey(3, 'red')
-  let lumKey = modelFormKey(3, 'lum')
+  // let redKey = modelFormKey(3, 'red')
+  // let lumKey = modelFormKey(3, 'lum')
     //find max and min values of ra and dec
     // might need to remove all all zero ra and dec values from the table at some point
 
@@ -553,6 +552,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   updateLabels(myChart3, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
   updateLabels(myChart4, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
+  document.getElementById('rarangeCheck').click()
+  document.getElementById('rarangeCheck').click()
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart
     //testing a bunch of creating charts and destroying them to make the thing work
