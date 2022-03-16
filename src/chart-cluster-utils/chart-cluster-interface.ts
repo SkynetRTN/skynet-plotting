@@ -223,8 +223,8 @@ export function rangeCheckControl(clusterChart = true){
             rangeSlider.disabled = true;
             rangeNum.disabled = true;
             rangeSlider.style.opacity = "0.4";
-            clusterForm["distrange"].value = "100";
-            clusterForm["distrange_num"].value = "100";
+            // clusterForm["distrange"].value = "100";
+            // clusterForm["distrange_num"].value = "100";
           }
         });
     }
