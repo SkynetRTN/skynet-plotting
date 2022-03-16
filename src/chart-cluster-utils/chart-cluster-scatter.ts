@@ -660,3 +660,60 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
     return Number(A_v) * (a + b / R_v);
 }
+export function updateClusterProScatter(
+    table: Handsontable,
+    myCharts: Chart[],
+    clusterProForm: ClusterProForm,
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    specificChart: number = -1,) {
+
+    
+    for (let c = 0; c < myCharts.length; c++) {
+        if (specificChart < 0 || specificChart === c) {
+            let myChart = myCharts[c];
+            //let raRange = parseFloat(clusterProForm["rarange_num"].value);
+            //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+            //let decRange = parseFloat(clusterProForm["decrange_num"].value);
+
+            
+            let chart = myChart.data.datasets[dataSetIndex[c]].data;
+            let tableData = table.getData();
+            let columns = table.getColHeader();
+                
+            let blueKey = modelFormKey(c, 'blue')
+            let redKey = modelFormKey(c, 'red')
+            //let lumKey = modelFormKey(c, 'lum')
+
+            //Identify the column the selected filter refers to
+            let bluera = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            //let redra = columns.indexOf(modelForm[redKey].value + " ramotion");
+            //let lumra = columns.indexOf(modelForm[lumKey].value + " ramotion");
+            //let bluedec = columns.indexOf(modelForm[blueKey].value + " decmotion");
+            let reddec = columns.indexOf(modelForm[redKey].value + " pmdec");
+            //let lumdec = columns.indexOf(modelForm[lumKey].value + " decmotion");
+
+
+            let start = 0;
+            for (let i = 0; i < tableData.length; i++) {
+                //red-blue,lum
+
+                let x = tableData[i][bluera];
+                let y = tableData[i][reddec];
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
+                chart[start++] = {
+                    x: x,
+                    y: y
+                };
+            }
+            while (chart.length !== start) {
+                chart.pop();
+            myChart.update()
+        }
+    }
+}
+}

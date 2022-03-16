@@ -6,7 +6,7 @@ import Handsontable from "handsontable";
 import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
+import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
@@ -323,6 +323,20 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           immutableLabel: true,
           parsing: {}
         },
+        {
+          type: "scatter",
+          label: "properMotionRaDec",
+          data: [{ x: 0, y: 0 }],
+          backgroundColor: colors["gray"],
+          borderColor: colors["black"],
+          borderWidth: 0.2,
+          fill: false,
+          showLine: false,
+          pointRadius: 2,
+          pointHoverRadius: 7,
+          immutableLabel: true,
+          parsing: {}
+        },
       ],
     },
     options: {
@@ -379,10 +393,12 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     //find max and min values of ra and dec
     // might need to remove all all zero ra and dec values from the table at some point
 
-    let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " ra")]));
-    let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " ra")]));
-    let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " dec")]));
-    let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " dec")]));
+    let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+    let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+    let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+    let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+
+    //pull the proper motion ra and dec values from the table
   //change the default font size of myChart2
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart3, myChart4], modelForm, graphMinMax);
@@ -398,11 +414,16 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec}, {x: ramotion_num, y: minDec}];
     myChart2.update();
   }
+  updateClusterProScatter(hot, [myChart2], clusterProForm, modelForm, [2,2])
+  myChart2.update();
+  //let bluera = columns.indexOf(modelForm[blueKey].value + " ramotion");
+
+  //console.log(columns.indexOf(modelForm[redKey].value + " decmotion"))
   // set the max and min values of the axes on myChart2
-  //myChart2.options.scales.x.ticks.min = minRa;
-  //myChart2.options.scales.x.ticks.max = maxRa;
-  //myChart2.options.scales.y.ticks.min = minDec;
-  //myChart2.options.scales.y.ticks.max = maxDec;
+  myChart2.options.scales.x.min = minRa;
+  myChart2.options.scales.x.max = maxRa;
+  myChart2.options.scales.y.min = minDec;
+  myChart2.options.scales.y.max = maxDec;
   console.log(minRa, maxRa, minDec, maxDec);
   linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.00001, 50, false, false);  
   linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
