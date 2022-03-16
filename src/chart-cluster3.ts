@@ -480,9 +480,9 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.scales.x.max = maxRa;
   myChart2.options.scales.y.min = minDec;
   myChart2.options.scales.y.max = maxDec;
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, ((maxRa+minRa)/2), false, false);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, ((maxRa-minRa)), false, false);
   linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, maxRaMotion, 0.01, maxRaMotion, false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, ((maxDec+minDec)/2), false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, ((maxDec-minDec)), false, false);
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, maxDecMotion, 0.01, maxDecMotion, false, false);
   updateChart2(ramotion_num, decmotion_num, rarange_num, decrange_num, maxRa, minRa, maxDec, minDec);
 
