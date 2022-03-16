@@ -463,6 +463,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     let rarange_num = parseFloat(clusterProForm["rarange_num"].value);
   let decrange_num = parseFloat(clusterProForm["decrange_num"].value);
   updateChart2(ramotion_num, decmotion_num, rarange_num, decrange_num, maxRa, minRa, maxDec, minDec);
+    updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   });
 
 
@@ -481,7 +482,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax);
+    updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   };
   // link chart to table
   hot.updateSettings({
@@ -493,14 +494,14 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax); },
+    function () { updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);},
     frameTime);
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, hot, [myChart3, myChart4], (chartNum: number) => {
-      updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, chartNum);}
+      updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);}
     );
    }, 100);
 
