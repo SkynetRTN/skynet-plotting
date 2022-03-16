@@ -133,6 +133,8 @@ function chartType(chart: string) {
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
+    document.getElementById('chart-div').style.cursor = "auto"
+
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
 
