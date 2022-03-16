@@ -1,7 +1,49 @@
 /**
  * The dummy data for cluster interfaces. Too long and too annoying therefore a seperate file is created.
  */
-export const dummyData: { [key: string]: any}[] = [
+
+import Handsontable from "handsontable";
+import { tableCommonOptions } from "../config";
+
+export function defaultTable(container: HTMLElement){
+    return new Handsontable(
+        container,
+        Object.assign({}, tableCommonOptions, {
+            data: dummyData,
+            colHeaders: ["B Mag", "B err", "B ra", "B dec", "B dist", "B pmra", "B pmdec", "V Mag", "V err", "V ra", "V dec", "V dist", "V pmra", "V pmdec", "R Mag", "R err", "R ra", "R dec", "R dist", "R pmra", "R pmdec"],
+            columns: [
+                { data: "B", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Berr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Bra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Bdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Bdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Bpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Bpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "V", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Verr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Vra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Vdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Vdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Vpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Vpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "R", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rerr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+                { data: "Rpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+            ],
+            hiddenColumns: { columns: [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20] },
+        }))
+    }
+
+
+
+
+
+// The dummy data is here
+let dummyData: { [key: string]: any}[] = [
     {	B:	19.42658523	, 	Berr:	1.629076772	, 	Bra:	3.198413825	, 	Bdec:	-55.12435233	, 	Bdist:	2.190285156	, 	Bpmra:	7.048799767	, 	Bpmdec:	-4.865271201	, 	V:	18.29627978	, 	Verr:	0.796979179	, 	Vra:	3.198413825	, 	Vdec:	-55.12435233	, 	Vdist:	2.190285156	, 	Vpmra:	7.048799767	, 	Vpmdec:	-4.865271201	, 	R:	" "	, 	Rerr:	" "	, 	Rra:	3.198413825	, 	Rdec:	-55.12435233	, 	Rdist:	4.878593246	, 	Rpmra:	1.667396426	, 	Rpmdec:	-2.034978723	},
     {	B:	18.6486357	, 	Berr:	1.079906008	, 	Bra:	3.204381251	, 	Bdec:	-55.12306894	, 	Bdist:	0.496582818	, 	Bpmra:	13.36600459	, 	Bpmdec:	15.20752725	, 	V:	17.24740621	, 	Verr:	0.367705728	, 	Vra:	3.204381251	, 	Vdec:	-55.12306894	, 	Vdist:	0.496582818	, 	Vpmra:	13.36600459	, 	Vpmdec:	15.20752725	, 	R:	15.92894333	, 	Rerr:	0.117661219	, 	Rra:	3.204381251	, 	Rdec:	-55.12306894	, 	Rdist:	2.190285156	, 	Rpmra:	7.048799767	, 	Rpmdec:	-4.865271201	},
     {	B:	18.91120319	, 	Berr:	1.282024508	, 	Bra:	3.206949776	, 	Bdec:	-55.12327511	, 	Bdist:	0.6185812202	, 	Bpmra:	2.827325377	, 	Bpmdec:	-9.820585506	, 	V:	18.70761685	, 	Verr:	1.027098699	, 	Vra:	3.206949776	, 	Vdec:	-55.12327511	, 	Vdist:	0.6185812202	, 	Vpmra:	2.827325377	, 	Vpmdec:	-9.820585506	, 	R:	19.06460675	, 	Rerr:	1.220782916	, 	Rra:	3.206949776	, 	Rdec:	-55.12327511	, 	Rdist:	0.496582818	, 	Rpmra:	13.36600459	, 	Rpmdec:	15.20752725	},

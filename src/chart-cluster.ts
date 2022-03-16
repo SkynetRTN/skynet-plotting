@@ -1,12 +1,12 @@
 "use strict";
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { colors, tableCommonOptions } from "./config";
+import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
-import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
@@ -32,46 +32,14 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-  //default dummy data from util.ts
-  const tableData = dummyData;
-  console.log(tableData);
 
   //declare graphScale limits
   let graphMinMax = new graphScale();
 
   // create table
   const container = document.getElementById("table-div");
-  const hot = new Handsontable(
-    container,
-    Object.assign({}, tableCommonOptions, {
-      data: tableData,
-      colHeaders: ["B Mag", "Berr", "Bra", "Bdec", "Bdist", "Bpmra", "Bpmdec", "V Mag", "Verr", "Vra", "Vdec", "Vdist", "Vpmra", "Vpmdec", "R Mag", "Rerr", "Rra", "Rdec", "Rdist", "Rpmra", "Rpmdec"],
-      columns: [
-        { data: "B", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Berr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Bra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Bdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Bdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Bpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Bpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "V", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Verr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Vra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Vdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Vdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Vpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Vpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "R", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rerr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-      ],
-      hiddenColumns: { columns: [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20] },
-    })
-  );
+  const hot = defaultTable(container)
+
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
