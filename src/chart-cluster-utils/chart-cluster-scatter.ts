@@ -24,18 +24,33 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,) {
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm = null,) {
 
     let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+    let err = 1;
+    let dist = parseFloat(clusterForm["d_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+    let range = parseFloat(clusterForm["distrange_num"].value);
+    let isRaRange =  null;
+    let isDecRange =  null;
+    let raMotion = null;
+    let raRange = null;
+    let decMotion = null;
+    let decRange = null;
+    if (clusterProForm !== null){
+        isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked
+        isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked
+        raMotion = parseFloat(clusterProForm['ramotion_num'].value);
+        raRange = parseFloat(clusterProForm['rarange_num'].value);
+        decMotion = parseFloat(clusterProForm['decmotion_num'].value);
+        decRange = parseFloat(clusterProForm['decrange_num'].value);
+    }
+
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            let err = 1;
-            let dist = parseFloat(clusterForm["d_num"].value);
-            //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
-            let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
-            let range = parseFloat(clusterForm["distrange_num"].value);
-
             
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
@@ -95,6 +110,20 @@ export function updateScatter(
                 if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
                     continue;
                 }
+                if (clusterProForm !== null) {
+                    if (isRaRange) {
+                        let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
+                        if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
+                            continue;
+                    }
+                    if (isDecRange) {
+                        let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
+                        if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
+                            continue;
+                    }
+                }
+
+
                 //red-blue,lum
 
                 let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
