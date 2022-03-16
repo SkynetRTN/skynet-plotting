@@ -686,20 +686,20 @@ export function updateClusterProScatter(
             //let lumKey = modelFormKey(c, 'lum')
 
             //Identify the column the selected filter refers to
-            let bluera = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
             //let redra = columns.indexOf(modelForm[redKey].value + " ramotion");
             //let lumra = columns.indexOf(modelForm[lumKey].value + " ramotion");
             //let bluedec = columns.indexOf(modelForm[blueKey].value + " decmotion");
-            let reddec = columns.indexOf(modelForm[redKey].value + " pmdec");
+            let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
             //let lumdec = columns.indexOf(modelForm[lumKey].value + " decmotion");
 
-
+            
             let start = 0;
             for (let i = 0; i < tableData.length; i++) {
                 //red-blue,lum
 
                 let x = tableData[i][bluera];
-                let y = tableData[i][reddec];
+                let y = tableData[i][bluedec];
                 //testing purposes'
                 //let x = tableData[i][blue] - (tableData[i][red]);
                 //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
@@ -710,6 +710,7 @@ export function updateClusterProScatter(
                     y: y
                 };
             }
+            console.log(chart)
             while (chart.length !== start) {
                 chart.pop();
             myChart.update()
