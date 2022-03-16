@@ -354,8 +354,8 @@ label.scaleSelection-graphSelection {
 
 .chartTag {
     position: absolute;
-    bottom: 40px;
-    left: 90px;
+    bottom: 48px;
+    left: 75px;
     z-index: -1;
     font-size: 60px;
     color: gray;

@@ -142,8 +142,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           display: true,
           align: "start",
           padding: {
-            top: 10.025,
-            bottom: 14,
+            top: 10,
+            bottom: 18,
           }
         },
         legend: {

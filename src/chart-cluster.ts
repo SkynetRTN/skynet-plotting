@@ -134,6 +134,9 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     },
   });
 
+  //customize cursor icon
+  document.getElementById('chart-div').style.cursor = "move"
+
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart], modelForm, graphMinMax);
   myChart.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)}
