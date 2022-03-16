@@ -10,7 +10,7 @@ import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
-import { rangeCheckControl } from "./chart-cluster-interface";
+import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -64,6 +64,8 @@ export function clusterFileUpload(
         clusterForm["red_num"].value = "0";
         modelForm["metal_num"].value = "-3.4";
         rangeCheckControl()
+        if (isCluster3)
+            clusterProCheckControl ()
 
         const data: string[] = (reader.result as string)
             .split("\n")
