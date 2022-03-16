@@ -281,7 +281,7 @@ function setChartDefaults() {
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
-    let key:string = chartNum === 0 ? "" : (chartNum+1).toString();
+    let key:string = chartNum === 0 ? "" : (chartNum).toString();
     // @ts-ignore
     (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x'+key+'Axis'].value;
     // @ts-ignore

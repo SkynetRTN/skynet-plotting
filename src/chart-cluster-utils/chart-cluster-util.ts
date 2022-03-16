@@ -45,11 +45,11 @@ export const filterWavelength: { [key: string]: number } = {
     V: 0.54,
     R: 0.647,
     I: 0.7865,
-    uprime: 0.354,
-    gprime: 0.475,
-    rprime: 0.622,
-    iprime: 0.763,
-    zprime: 0.905,
+    "u\'": 0.354,
+    "g\'": 0.475,
+    "r\'": 0.622,
+    "i\'": 0.763,
+    "z\'": 0.905,
     J: 1.25,
     H: 1.65,
     K: 2.15,
@@ -187,7 +187,7 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
     for (let i = 0; i < filters.length; i++) {
         if ("UBVRI".includes(filters[i])) {
             magIndex[i] = Number(0);
-        } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+        } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
             magIndex[i] = Number(1);
         } else if ("JHKs".includes(filters[i])) {
             magIndex[i] = Number(2);

@@ -330,8 +330,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   myChart1.options.scales["y"].title.text = "y1";
   myChart2.options.scales["x"].title.text = "x2";
   myChart2.options.scales["y"].title.text = "y2";
-  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
-  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm);
+  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
+  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart
