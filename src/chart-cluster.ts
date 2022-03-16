@@ -34,6 +34,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
   //default dummy data from util.ts
   const tableData = dummyData;
+  console.log(tableData);
 
   //declare graphScale limits
   let graphMinMax = new graphScale();
@@ -44,18 +45,31 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["B Mag", "Berr", "V Mag", "Verr", "R Mag", "Rerr", "I Mag", "Ierr"], // need to change to filter1, filter2
+      colHeaders: ["B Mag", "Berr", "Bra", "Bdec", "Bdist", "Bpmra", "Bpmdec", "V Mag", "Verr", "Vra", "Vdec", "Vdist", "Vpmra", "Vpmdec", "R Mag", "Rerr", "Rra", "Rdec", "Rdist", "Rpmra", "Rpmdec"],
       columns: [
         { data: "B", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
         { data: "Berr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Bra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Bdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Bdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Bpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Bpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
         { data: "V", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
         { data: "Verr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Vra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Vdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Vdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Vpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Vpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
         { data: "R", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
         { data: "Rerr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "I", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Ierr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rdist", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
+        { data: "Rpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
       ],
-      hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
+      hiddenColumns: { columns: [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20] },
     })
   );
   // create chart
