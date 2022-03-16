@@ -3,12 +3,12 @@
 import Chart from "chart.js/auto";
 import {  starData } from "./chart-cluster-utils/chart-cluster-gaia";
 import Handsontable from "handsontable";
-import { colors, tableCommonOptions } from "./config";
+import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
-import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
@@ -55,7 +55,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
   
   //when table data changes, change the maxes and mins of the sliders and number boxes
-  //linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], 0, 100, 0.01, 50, false, false);  
+  //linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], 0, 100, 0.01, 50, false, false);
   //linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
   //linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], 0, 100, 0.01, 50, false, false);
   //linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
@@ -63,65 +63,14 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   rangeCheckControl(true);
   clusterProCheckControl();
 
-  const tableData = dummyData;
-
   //declare graphScale limits
   let graphMinMax = new graphScale(3);
 
   // create table
   const container = document.getElementById("table-div");
-  const hot = new Handsontable(
-    container,
-    Object.assign({}, tableCommonOptions, {
-      data: tableData,
-      colHeaders: ["B Mag", "Berr", "V Mag", "Verr", "R Mag", "Rerr", "I Mag", "Ierr"], // need to change to filter1, filter2
-      columns: [
-        {
-          data: "B",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Berr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "V",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Verr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "R",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Rerr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "I",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Ierr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-      ],
-      hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
-    })
-  );
-  // create chart
+  const hot = defaultTable(container)
 
+  // create chart
   const ctx1 = (document.getElementById("myChart3") as HTMLCanvasElement).getContext('2d');
 
   const myChart3 = new Chart(ctx1, {
@@ -395,6 +344,27 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           suggestedMin: 0,
         },
       },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            mode: 'x',
+          },
+        },
+        title: {
+          display: false
+          },
+        legend: {
+          display: false,
+
+        },
+      }
       }
     },
   );
