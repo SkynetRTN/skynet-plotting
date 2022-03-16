@@ -25,10 +25,9 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-    //remove chartTag from 'mychart1' and 'mychart2'
-    document.getElementById('chartTag1').remove();
-    document.getElementById('chartTag2').remove();
-    //document.getElementById('myChart1').remove();
+  //remove chartTag from 'mychart1' and 'mychart2'
+    document.getElementById('chartTag1').style.display = "None";
+    document.getElementById('chartTag2').style.display = "None";
     document.getElementById('chart-div1').style.display = 'block';
     document.getElementById('chart-div2').style.display = 'block';
     document.getElementById('chart-div3').style.display = 'block';
@@ -43,7 +42,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
     document.getElementById('axisSet1').className = 'col-sm-6';
     document.getElementById('axisSet2').style.display = 'inline';
-
+    document.getElementById("clusterProForm").style.cursor= "auto";
+    document.getElementById("myChart2").style.cursor= "auto";
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
@@ -359,18 +359,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
         },
       },
       plugins: {
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: 'x',
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-            },
-            mode: 'x',
-          },
-        },
         title: {
           display: false
           },
