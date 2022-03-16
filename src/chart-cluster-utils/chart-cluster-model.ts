@@ -16,7 +16,7 @@ import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-c
  *  @param chart:     The Chartjs object to be updated.
  *  @param callback:  callback function asynchronously execute stuff after model is updated
  */
-export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }) {
+export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
     function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
         let form: ScatterDataPoint[] = [] //the array containing all model points
         let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
@@ -43,12 +43,14 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                 let filteredModel = modelFilter(dataTable, json['iSkip'])
                 chart.data.datasets[0].data = filteredModel[0];
                 chart.data.datasets[1].data = filteredModel[1];
-                chart.update("none");
                 callback(c);
+                if (!isChart)
+                    chart.update("none");
             },
             () => {
-                chart.update("none");
                 callback(c);
+                if (!isChart)
+                    chart.update("none");
             },
         );
     }

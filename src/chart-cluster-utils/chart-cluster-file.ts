@@ -229,8 +229,10 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
         blue.value = filters[0];
         red.value = filters[1];
         lum.value = filters[1];
-        updateHRModel(modelForm, table, [myChart],
-            () => {
+    }
+    updateHRModel(modelForm, table, myCharts,
+        (c: number) => {
+            if (c === myCharts.length-1){
                 table.updateSettings({
                     data: tableData,
                     colHeaders: headers,
@@ -238,11 +240,14 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
                     hiddenColumns: {columns: hiddenColumns},
                 }); //hide all but the first 3 columns
                 updateTableHeight(table);
-                graphMaxMin.updateMode('auto', c);
-                updateScatter(table, [myChart], clusterForm, modelForm, [2], graphMaxMin);
+                for (let i = 0; i < myCharts.length; i++) {
+                    graphMaxMin.updateMode('auto', i);
+                    updateScatter(table, [myCharts[i]], clusterForm, modelForm, [2], graphMaxMin);
+                    myCharts[i].update()
+                }
                 document.getElementById("standardView").click();
-            });
-    }
+            }
+        }, true);
 }
 
 function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, Map<string, number>>, string[]]{
