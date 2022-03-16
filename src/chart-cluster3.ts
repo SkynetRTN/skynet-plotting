@@ -456,12 +456,12 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   let rarange_num = parseFloat(clusterProForm["rarange_num"].value);
   let decrange_num = parseFloat(clusterProForm["decrange_num"].value);
   function updateChart2(ramotion_num: number, decmotion_num: number, rarange_num: number, decrange_num: number, maxRa: number, minRa: number, maxDec: number, minDec: number) {
-    myChart2.data.datasets[0].data = [{x: maxRa, y: decmotion_num}, {x: minRa, y: decmotion_num}];
-    myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec}, {x: ramotion_num, y: minDec}];
-    myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec}, {x: ramotion_num-rarange_num, y: minDec}];
-    myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec}, {x: ramotion_num+rarange_num, y: minDec}];
-    myChart2.data.datasets[5].data = [{x: maxRa, y: decmotion_num-decrange_num}, {x: minRa, y: decmotion_num-decrange_num}];
-    myChart2.data.datasets[6].data = [{x: maxRa, y: decmotion_num+decrange_num}, {x: minRa, y: decmotion_num+decrange_num}];
+    myChart2.data.datasets[0].data = [{x: maxRa+100, y: decmotion_num}, {x: minRa-100, y: decmotion_num}];
+    myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+100}, {x: ramotion_num, y: minDec-100}];
+    myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+100}, {x: ramotion_num-rarange_num, y: minDec-100}];
+    myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+100}, {x: ramotion_num+rarange_num, y: minDec-100}];
+    myChart2.data.datasets[5].data = [{x: maxRa+100, y: decmotion_num-decrange_num}, {x: minRa-100, y: decmotion_num-decrange_num}];
+    myChart2.data.datasets[6].data = [{x: maxRa+100, y: decmotion_num+decrange_num}, {x: minRa-100, y: decmotion_num+decrange_num}];
     myChart2.update();
   }
   //choose the greatest absolute value of the ra motion values
