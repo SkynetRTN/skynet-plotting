@@ -201,7 +201,7 @@ function chartType(chart: string) {
         objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1].slice(0,1), cluster_objects[3]);
         }
 
     }else if (chart === 'gravity') {

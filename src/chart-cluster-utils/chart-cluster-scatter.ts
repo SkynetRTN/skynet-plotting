@@ -739,7 +739,6 @@ export function updateClusterProScatter(
                     y: y
                 };
             }
-            console.log(chart)
             while (chart.length !== start) {
                 chart.pop();
             myChart.update()
