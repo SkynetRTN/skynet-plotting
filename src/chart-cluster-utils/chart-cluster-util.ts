@@ -6,6 +6,12 @@
 import { Chart, Color } from "chart.js";
 
 
+export const baseUrl:string = "http://localhost:5000"//local testing url
+// "http://152.2.18.8:8080" //testing server url
+// "http://192.168.128.196:8080" //GBO temp testing server url
+// export const baseUrl:string = "https://skynet.unc.edu/graph-api" //production url
+
+
 /**
  * This function returns a paired key-value of filters corresponding to the function needed to claculate magnitude.
  * Used for data coloring and chart scaling.

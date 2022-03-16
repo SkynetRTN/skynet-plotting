@@ -8,7 +8,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
-import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
+import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
 Chart.register(zoomPlugin);
@@ -425,23 +425,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
       }
     },
   );
-  function modelFormKey(chartNum: number, color: string) {
-    return chartNum > 0 ? (color + (chartNum+1).toString()) : color
-}
-  let tableData2 = hot.getData();
-  let columns = hot.getColHeader();
-  let blueKey = modelFormKey(1, 'blue')
-  // let redKey = modelFormKey(3, 'red')
-  // let lumKey = modelFormKey(3, 'lum')
-    //find max and min values of ra and dec
-    // might need to remove all all zero ra and dec values from the table at some point
 
-    let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
-    let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
-    let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
-    let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
-
-    //pull the proper motion ra and dec values from the table
+  //pull the proper motion ra and dec values from the table
   //change the default font size of myChart2
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart3, myChart4], modelForm, graphMinMax);
@@ -449,42 +434,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart3.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart4.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart4.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-  //function that updates myChart2 with the numbers from ramotion_num and decmotion_num
-  let ramotion_num = parseFloat(clusterProForm["ramotion_num"].value);
-  let decmotion_num = parseFloat(clusterProForm["decmotion_num"].value);
-  let rarange_num = parseFloat(clusterProForm["rarange_num"].value);
-  let decrange_num = parseFloat(clusterProForm["decrange_num"].value);
-  function updateChart2(ramotion_num: number, decmotion_num: number, rarange_num: number, decrange_num: number, maxRa: number, minRa: number, maxDec: number, minDec: number) {
-    myChart2.data.datasets[0].data = [{x: maxRa+100, y: decmotion_num}, {x: minRa-100, y: decmotion_num}];
-    myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+100}, {x: ramotion_num, y: minDec-100}];
-    myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+100}, {x: ramotion_num-rarange_num, y: minDec-100}];
-    myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+100}, {x: ramotion_num+rarange_num, y: minDec-100}];
-    myChart2.data.datasets[5].data = [{x: maxRa+100, y: decmotion_num-decrange_num}, {x: minRa-100, y: decmotion_num-decrange_num}];
-    myChart2.data.datasets[6].data = [{x: maxRa+100, y: decmotion_num+decrange_num}, {x: minRa-100, y: decmotion_num+decrange_num}];
-    myChart2.update();
-  }
-  //choose the greatest absolute value of the ra motion values
-  let maxRaMotion = Math.max(Math.abs(maxRa), Math.abs(minRa));
-  //choose the greatest absolute value of the dec motion values
-  let maxDecMotion = Math.max(Math.abs(maxDec), Math.abs(minDec));
-  
-  updateClusterProScatter(hot, [myChart2], clusterProForm, modelForm, [2])
-  //log the proper motion values to the console
-  myChart2.update();
-  //let bluera = columns.indexOf(modelForm[blueKey].value + " ramotion");
-
-  //console.log(columns.indexOf(modelForm[redKey].value + " decmotion"))
-  // set the max and min values of the axes on myChart2
-  myChart2.options.scales.x.min = minRa;
-  myChart2.options.scales.x.max = maxRa;
-  myChart2.options.scales.y.min = minDec;
-  myChart2.options.scales.y.max = maxDec;
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, ((maxRa+minRa)/2), false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (maxRa-minRa), 0.01, (maxRa-minRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, ((maxDec+minDec)/2), false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (maxDec-minDec), 0.01, (maxDec-minDec), false, false);
-  updateChart2(ramotion_num, decmotion_num, rarange_num, decrange_num, maxRa, minRa, maxDec, minDec);
-
 
 
   //Adjust the gradient with the window size
@@ -519,11 +468,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
 
   //update the graph continuoustly when the values in the form change
   clusterProForm.oninput = throttle( ()=>{
-    let decmotion_num = parseFloat(clusterProForm["decmotion_num"].value);
-    let ramotion_num = parseFloat(clusterProForm["ramotion_num"].value);
-    let rarange_num = parseFloat(clusterProForm["rarange_num"].value);
-    let decrange_num = parseFloat(clusterProForm["decrange_num"].value);
-    updateChart2(ramotion_num, decmotion_num, rarange_num, decrange_num, maxRa, minRa, maxDec, minDec);
+    updateChart2(myChart2, clusterProForm, minmax)
     updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   }, frameTime)
 
@@ -536,9 +481,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
    }, 100);
 
   //initializing website
-
-   //figure out why this update is breaking the code and it does not break the code in the other one
   update();
+  let minmax = proFormMinmax(hot, modelForm)
   updateHRModel(modelForm, hot, [myChart3, myChart4]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
@@ -549,6 +493,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart3.options.scales["y"].title.text = "y1";
   myChart4.options.scales["x"].title.text = "x2";
   myChart4.options.scales["y"].title.text = "y2";
+  updateProForm(minmax, clusterProForm)
+  updateProChartScale(myChart2, minmax)
+  updateClusterProScatter(hot, [myChart2], modelForm, [2])
+  updateChart2(myChart2, clusterProForm, minmax)
   updateLabels(myChart3, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
   updateLabels(myChart4, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
@@ -564,4 +512,51 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   //console log tabledata
   return [hot, [myChart3, myChart4, myChart2], modelForm, graphMinMax, clusterProForm];
   
+}
+
+export function updateProForm(minmax: number[], clusterProForm: ClusterProForm ) {
+  let maxRa = minmax[0]
+  let minRa = minmax[1]
+  let maxDec = minmax[2]
+  let minDec = minmax[3]
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, ((maxRa+minRa)/2), false, false);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (maxRa-minRa), 0.01, (maxRa-minRa), false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, ((maxDec+minDec)/2), false, false);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (maxDec-minDec), 0.01, (maxDec-minDec), false, false);
+}
+
+export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
+  let tableData2 = hot.getData();
+  let columns = hot.getColHeader();
+  let blueKey = modelFormKey(1, 'blue')
+  let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+  let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+  let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+  let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+  return [maxRa, minRa, maxDec, minDec]
+}
+
+export function updateProChartScale(myChart2: Chart, minmax: number[]){
+  myChart2.options.scales.x.min = minmax[1];
+  myChart2.options.scales.x.max = minmax[0];
+  myChart2.options.scales.y.min = minmax[3];
+  myChart2.options.scales.y.max = minmax[2];
+}
+
+export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
+  let ramotion_num = parseFloat(clusterProForm["ramotion_num"].value);
+  let decmotion_num = parseFloat(clusterProForm["decmotion_num"].value);
+  let rarange_num = parseFloat(clusterProForm["rarange_num"].value);
+  let decrange_num = parseFloat(clusterProForm["decrange_num"].value);
+  let maxRa = minmax[0]
+  let minRa = minmax[1]
+  let maxDec = minmax[2]
+  let minDec = minmax[3]
+  myChart2.data.datasets[0].data = [{x: maxRa+100, y: decmotion_num}, {x: minRa-100, y: decmotion_num}];
+  myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+100}, {x: ramotion_num, y: minDec-100}];
+  myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+100}, {x: ramotion_num-rarange_num, y: minDec-100}];
+  myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+100}, {x: ramotion_num+rarange_num, y: minDec-100}];
+  myChart2.data.datasets[5].data = [{x: maxRa+100, y: decmotion_num-decrange_num}, {x: minRa-100, y: decmotion_num-decrange_num}];
+  myChart2.data.datasets[6].data = [{x: maxRa+100, y: decmotion_num+decrange_num}, {x: minRa-100, y: decmotion_num+decrange_num}];
+  myChart2.update();
 }

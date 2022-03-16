@@ -5,12 +5,13 @@
 
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
-import {httpPostAsync, modelFormKey } from "./chart-cluster-util";
+import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
 import {changeOptions, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
 import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
+import { updateProForm, proFormMinmax, updateChart2, updateProChartScale } from "../chart-cluster3";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -64,6 +65,7 @@ export function clusterFileUpload(
         clusterForm["red_num"].value = "0";
         modelForm["metal_num"].value = "-3.4";
         rangeCheckControl()
+        let proMinMax: number[] = null;
         if (isCluster3)
             clusterProCheckControl ()
 
@@ -100,22 +102,22 @@ export function clusterFileUpload(
             stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
         }
         let cleanedup = sortStar(stars)
-        let url: string = "http://localhost:5000/gaia"
+        let url: string = baseUrl + "/gaia"
         let sortedData = cleanedup[0]
         httpPostAsync(url, cleanedup[1],
             (result: string)=>{
                 let gaia = JSON.parse(result)
                 if (gaia !== [] && result !== "{\"error\": \"Input invalid type\"}"){
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
                 } else {
                     let [dict, filters] = generateDatadict(sortedData)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
                 }
             },
             ()=>{
                 let [dict, filters] = generateDatadict(sortedData)
-                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm)
+                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
             }
         )
     };
@@ -131,7 +133,8 @@ function updateCharts(
     filters: string[],
     graphMaxMin: graphScale,
     isCluster3: boolean,
-    proForm: ClusterProForm
+    proForm: ClusterProForm,
+    proMinMax: number[],
     ) {
     let blue = modelForm[modelFormKey(0, 'blue')];
     let red = modelForm[modelFormKey(0, 'red')];
@@ -262,13 +265,20 @@ function updateCharts(
                     myCharts[i].update()
                 }
                 if (isCluster3){
-                    updateClusterProScatter(table, [myCharts[myCharts.length-1]], proForm, modelForm, [2]);
-                    myCharts[myCharts.length-1].update();
+                    proMinMax = proFormMinmax(table, modelForm)
+                    updateProForm(proMinMax, proForm)
+                    updateProChartScale(myCharts[2], proMinMax)
+                    let chart = myCharts[myCharts.length-1];
+                    updateClusterProScatter(table, [myCharts[myCharts.length-1]], modelForm, [2]);
+                    updateChart2(chart, proForm, proMinMax)
+                    chart.update();
                 }
                 document.getElementById("standardView").click();
             }
         }, true);
 }
+
+
 
 function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, Map<string, number>>, string[]]{
     let gaia_i = 0;

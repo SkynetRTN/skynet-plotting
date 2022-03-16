@@ -692,7 +692,6 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 export function updateClusterProScatter(
     table: Handsontable,
     myCharts: Chart[],
-    clusterProForm: ClusterProForm,
     modelForm: ModelForm,
     dataSetIndex: number[],
     specificChart: number = -1,) {
