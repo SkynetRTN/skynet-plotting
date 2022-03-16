@@ -341,10 +341,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           type: "line",
           label: "rarangeleft",
           data: [{ x: 0, y: 0 }],
-          backgroundColor: colors["black"],
-          borderColor: colors["black"],
+          backgroundColor: colors["gray"],
+          borderColor: colors["gray"],
           borderWidth: 1,
-          fill: false,
+          fill: 'origin',
           showLine: true,
           pointRadius: 2,
           pointHoverRadius: 7,
@@ -355,12 +355,40 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
           type: "line",
           label: "rarangeright",
           data: [{ x: 0, y: 0 }],
-          backgroundColor: colors["black"],
-          borderColor: colors["black"],
+          backgroundColor: colors["gray"],
+          borderColor: colors["gray"],
           borderWidth: 1,
           fill: false,
           showLine: true,
           pointRadius: 2,
+          pointHoverRadius: 7,
+          immutableLabel: true,
+          parsing: {}
+        },
+        {
+          type: "line",
+          label: "decrangetop",
+          data: [{ x: 0, y: 0 }],
+          backgroundColor: colors["gray"],
+          borderColor: colors["gray"],
+          borderWidth: 1,
+          fill: 'start',
+          showLine: true,
+          pointRadius: 2,
+          pointHoverRadius: 7,
+          immutableLabel: true,
+          parsing: {}
+        },
+        {
+          type: "line",
+          label: "decrangebottom",
+          data: [{ x: 0, y: 0 }],
+          backgroundColor: colors["gray"],
+          borderColor: colors["gray"],
+          borderWidth: 1,
+          fill: 'end',
+          showLine: true,
+          pointRadius: 2, 
           pointHoverRadius: 7,
           immutableLabel: true,
           parsing: {}
@@ -432,6 +460,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
     myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec}, {x: ramotion_num, y: minDec}];
     myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec}, {x: ramotion_num-rarange_num, y: minDec}];
     myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec}, {x: ramotion_num+rarange_num, y: minDec}];
+    myChart2.data.datasets[5].data = [{x: maxRa, y: decmotion_num-decrange_num}, {x: minRa, y: decmotion_num-decrange_num}];
+    myChart2.data.datasets[6].data = [{x: maxRa, y: decmotion_num+decrange_num}, {x: minRa, y: decmotion_num+decrange_num}];
     myChart2.update();
   }
   //choose the greatest absolute value of the ra motion values
