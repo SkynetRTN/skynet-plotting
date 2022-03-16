@@ -124,69 +124,71 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
     let lum = modelForm[modelFormKey(0, 'lum')];
 
     //order filters by temperature
-    const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
+    // const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
+    const knownFilters = ["U", "u\'", "B", "g\'", "V", "r\'", "R", "i\'", "I", "z\'", "Y", "J", "H", "Ks", "K",];
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
     //if it ain't known ignore it
-
     const optionList = [];
     const headers: any[] = [];
     const columns: any[] = [];
     let hiddenColumns: any[] = [];
     for (let i = 0; i < filters.length; i++) {
         //makes a list of options for each filter
+        let filter_i = filters[i] //.replace('prime', '\'');
         optionList.push({
-            value: filters[i],
-            title: filters[i] + " Mag",
-            text: filters[i],
+            value: filter_i,
+            title: filter_i + " Mag",
+            text: filter_i,
         });
         for (let j = 0; j < 7; j++) {
             //we have to multiply up the length for the error and gaia data
             hiddenColumns[i + j * filters.length] = i + j * filters.length;
         }
-        headers.push(filters[i] + " Mag"); //every other column is err
-        headers.push(filters[i] + " err");
-        headers.push(filters[i] + " ra");
-        headers.push(filters[i] + " dec");
-        headers.push(filters[i] + " dist");
-        headers.push(filters[i] + " pmra");
-        headers.push(filters[i] + " pmdec");
+        headers.push(filter_i + " Mag"); //every other column is err
+        headers.push(filter_i + " err");
+        headers.push(filter_i + " ra");
+        headers.push(filter_i + " dec");
+        headers.push(filter_i + " dist");
+        headers.push(filter_i + " pmra");
+        headers.push(filter_i + " pmdec");
         columns.push({
-            data: filters[i],
+            data: filter_i,
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "err",
+            data: filter_i + "err",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "ra",
+            data: filter_i + "ra",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "dec",
+            data: filter_i + "dec",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "dist",
+            data: filter_i + "dist",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "pmra",
+            data: filter_i + "pmra",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
         columns.push({
-            data: filters[i] + "pmdec",
+            data: filter_i + "pmdec",
             type: "numeric",
             numericFormat: {pattern: {mantissa: 2}},
         });
     }
+    // filters = newFilter;
     hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
@@ -204,7 +206,6 @@ function updateCharts(myCharts: Chart[], table: Handsontable, datadict: Map<stri
 
         tableData.push(row);
     });
-
 
     for (let c = 0; c < myCharts.length; c++) {
         let myChart = myCharts[c] as Chart<'line'>;
@@ -264,7 +265,7 @@ function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, M
                 sortedData[data_i]['motion'][1] = gaia[gaia_i]['pm']['dec']
                 let star = sortedData[data_i]
                 let src = star['id']
-                let filter = star['filter']
+                let filter = star['filter'].replace('prime', '\'')
                 if (!datadict.has(src)) {
                     datadict.set(src, new Map<string, number>());
                 }
@@ -312,7 +313,7 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
     for (let i = 0; i < sortedData.length; i ++) {
         let star = sortedData[i]
         let src = star['id']
-        let filter = star['filter']
+        let filter = star['filter'].replace('prime', '\'')
         if (!datadict.has(src)) {
             datadict.set(src, new Map<string, number>());
         }

@@ -558,7 +558,7 @@ function chartRescale(myCharts: Chart[],
                     x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
                     if ("UBVRI".includes(filters[i])) {
                         magIndex[i] = Number(0);
-                    } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+                    } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
                         magIndex[i] = Number(1);
                     } else if ("JHKs".includes(filters[i])) {
                         magIndex[i] = Number(2);

@@ -84,9 +84,9 @@ function generateURL(form: ModelForm, chartNum: number) {
     // return "https://skynet.unc.edu/graph-api/isochrone?" //production url
         + "age=" + HRModelRounding(form['age_num'].value)
         + "&metallicity=" + HRModelRounding(form['metal_num'].value)
-        + "&filters=[%22" + form[blueKey].value
-        + "%22,%22" + form[redKey].value
-        + "%22,%22" + form[lumKey].value + "%22]"
+        + "&filters=[%22" + form[blueKey].value.replace('\'', 'prime')
+        + "%22,%22" + form[redKey].value.replace('\'', 'prime')
+        + "%22,%22" + form[lumKey].value.replace('\'', 'prime') + "%22]"
 }
 
 
