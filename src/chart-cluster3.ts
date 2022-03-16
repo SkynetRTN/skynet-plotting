@@ -377,6 +377,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   let redKey = modelFormKey(3, 'red')
   let lumKey = modelFormKey(3, 'lum')
     //find max and min values of ra and dec
+    // might need to remove all all zero ra and dec values from the table at some point
+
     let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " ra")]));
     let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " ra")]));
     let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " dec")]));
@@ -392,14 +394,19 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   let ramotion_num = parseFloat(clusterProForm["ramotion_num"].value);
   let decmotion_num = parseFloat(clusterProForm["decmotion_num"].value);
   function updateChart2(ramotion_num: number, decmotion_num: number, maxRa: number, minRa: number, maxDec: number, minDec: number) {
-    myChart2.data.datasets[0].data = [{x: maxDec, y: decmotion_num}, {x: -minDec, y: decmotion_num}];
-    myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxRa}, {x: ramotion_num, y: -minRa}];
+    myChart2.data.datasets[0].data = [{x: maxRa, y: decmotion_num}, {x: minRa, y: decmotion_num}];
+    myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec}, {x: ramotion_num, y: minDec}];
     myChart2.update();
   }
+  // set the max and min values of the axes on myChart2
+  //myChart2.options.scales.x.ticks.min = minRa;
+  //myChart2.options.scales.x.ticks.max = maxRa;
+  //myChart2.options.scales.y.ticks.min = minDec;
+  //myChart2.options.scales.y.ticks.max = maxDec;
   console.log(minRa, maxRa, minDec, maxDec);
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, 50, false, false);  
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.00001, 50, false, false);  
   linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, 100, 0.01, 100, false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, 50, false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.00001, 50, false, false);
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, 100, 0.01, 100, false, false);
   updateChart2(ramotion_num, decmotion_num, maxRa, minRa, maxDec, minDec);
   //update the graph continuoustly when the values in the form change
