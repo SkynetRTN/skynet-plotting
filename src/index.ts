@@ -113,11 +113,24 @@ function chartType(chart: string) {
     }
     document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
     //remove display of 4 charts
-    for (let i = 0; i < 5; i++) {
-        if (document.getElementById('chart-div'+i.toString()) != null) {
-            document.getElementById('chart-div'+i.toString()).style.display = 'none';
+    for (let i = 1; i < 5; i++) {
+        let chartId: string = 'myChart'+i.toString()
+        let divId: string = 'chart-div'+i.toString()
+        if (document.getElementById(divId) != null) {
+            if (document.getElementById(chartId) != null) {
+                document.getElementById(chartId).remove();
+            }
+            if (i=== 1 || i ===2)
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
+            else
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
+            document.getElementById(divId).style.display = 'none';
         }
     }
+
+    if (document.getElementById('clusterProForm') != null)
+        document.getElementById('clusterProForm').remove()
+
     //expand the size of axisSet1 and hide axisSet2 for all interfaces
     document.getElementById('axisSet1').className = 'col-sm-12';
     document.getElementById('axisSet2').style.display = 'none';

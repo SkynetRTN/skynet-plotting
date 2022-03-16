@@ -34,6 +34,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
     document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
     document.getElementById('axisSet1').className = 'col-sm-6';
     document.getElementById('axisSet2').style.display = 'inline';
+  document.getElementById('chartTag1').style.display = "inline";
+  document.getElementById('chartTag2').style.display = "inline";
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;

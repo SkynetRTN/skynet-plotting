@@ -25,10 +25,9 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale] {
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-    //remove chartTag from 'mychart1' and 'mychart2'
-    document.getElementById('chartTag1').remove();
-    document.getElementById('chartTag2').remove();
-    //document.getElementById('myChart1').remove();
+  //remove chartTag from 'mychart1' and 'mychart2'
+    document.getElementById('chartTag1').style.display = "None";
+    document.getElementById('chartTag2').style.display = "None";
     document.getElementById('chart-div1').style.display = 'block';
     document.getElementById('chart-div2').style.display = 'block';
     document.getElementById('chart-div3').style.display = 'block';
