@@ -71,9 +71,17 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            try {
                 callback(xmlHttp.responseText);
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
         } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == ""){
-                failedCallback();
+            try {
+                failedCallback(xmlHttp.responseText);
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
         }
     };
     xmlHttp.open("GET", theUrl, true); // true for asynchronous
@@ -84,9 +92,17 @@ export function httpPostAsync(theUrl: string, data: any, callback: Function, fai
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
         if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != ""){
-            callback(xmlHttp.responseText);
+            try {
+                callback(xmlHttp.responseText);
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
         } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
-            failedCallback();
+            try {
+                failedCallback(xmlHttp.responseText);
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
         }
     };
     xmlHttp.open("POST", theUrl, true); // true for asynchronous
