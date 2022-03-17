@@ -95,13 +95,14 @@ export function httpPostAsync(theUrl: string, data: any, callback: Function, fai
             try {
                 callback(xmlHttp.responseText);
             } catch {
+                failedCallback(xmlHttp.responseText);
                 console.log(JSON.parse(xmlHttp.responseText))
             }
         } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
             try {
                 failedCallback(xmlHttp.responseText);
             } catch {
-                console.log(JSON.parse(xmlHttp.responseText))
+                console.log(xmlHttp.responseText)
             }
         }
     };
