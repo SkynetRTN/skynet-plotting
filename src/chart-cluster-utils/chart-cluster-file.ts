@@ -107,17 +107,17 @@ export function clusterFileUpload(
         httpPostAsync(url, cleanedup[1],
             (result: string)=>{
                 let gaia = JSON.parse(result)
-                if (gaia !== [] && result !== "{\"error\": \"Input invalid type\"}"){
+                if (!result.includes('error')) {
                     let [dict, filters] = generateDatadictGaia(sortedData, gaia)
                     updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
                 } else {
                     let [dict, filters] = generateDatadict(sortedData)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
                 }
             },
             ()=>{
                 let [dict, filters] = generateDatadict(sortedData)
-                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
+                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
             }
         )
     };
@@ -150,6 +150,8 @@ function updateCharts(
     const headers: any[] = [];
     const columns: any[] = [];
     let hiddenColumns: any[] = [];
+    let queryCharts =  myCharts.length > 2? myCharts.slice(0,2) : myCharts
+    let chartLength = queryCharts.length
     for (let i = 0; i < filters.length; i++) {
         //makes a list of options for each filter
         let filter_i = filters[i] //.replace('prime', '\'');
@@ -223,7 +225,6 @@ function updateCharts(
 
         tableData.push(row);
     });
-    let chartLength = isCluster3? myCharts.length-1: myCharts.length;
     for (let c = 0; c < chartLength; c++) {
         let myChart = myCharts[c] as Chart<'line'>;
         myChart.options.plugins.title.text = "Title";
@@ -248,7 +249,6 @@ function updateCharts(
         red.value = filters[1];
         lum.value = filters[1];
     }
-    let queryCharts = isCluster3? myCharts.slice(0,2) : myCharts
     updateHRModel(modelForm, table, queryCharts,
         (c: number) => {
             if (c === chartLength-1){
@@ -267,9 +267,9 @@ function updateCharts(
                 if (isCluster3){
                     proMinMax = proFormMinmax(table, modelForm)
                     updateProForm(proMinMax, proForm)
-                    updateProChartScale(myCharts[2], proMinMax)
                     let chart = myCharts[myCharts.length-1];
-                    updateClusterProScatter(table, [myCharts[myCharts.length-1]], modelForm, [2]);
+                    updateProChartScale(chart, proMinMax)
+                    updateClusterProScatter(table, [chart], modelForm, [2]);
                     updateChart2(chart, proForm, proMinMax)
                     chart.update();
                 }
