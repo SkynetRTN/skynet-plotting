@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { updateLabels, updateTableHeight, sanitizeTableData } from "./util"
+import { updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
@@ -351,7 +351,8 @@ function updateVariable(table: Handsontable, myChart: Chart) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    // let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    let tableData = table.getData();
     let src1Data = [];
     let src2Data = [];
     tableData = tableData.sort(sortJdate)
