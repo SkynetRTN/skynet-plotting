@@ -178,10 +178,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   });
   //make a function that disables the distrange slider if the distrangeCheckbox is not checked
 
-  
-
-  
-
   const ctx2 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
 
   const myChart4 = new Chart(ctx2, {
@@ -440,12 +436,13 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   window.onresize = function () {
     setTimeout(function () {
       myChart3.data.datasets[2].backgroundColor = HRrainbow(myChart3,
-        modelForm["red"].value, modelForm["blue"].value)
+        modelForm["red"].value, modelForm["blue"].value);
       myChart4.data.datasets[2].backgroundColor = HRrainbow(myChart4,
-            modelForm["red2"].value, modelForm["blue2"].value)
-      myChart3.update()
-      myChart2.update()
-      myChart4.update()
+            modelForm["red2"].value, modelForm["blue2"].value);
+      myChart3.update();
+      myChart2.update();
+      myChart4.update();
+      updateTableHeight(hot);
     }, 10)
   }
   const update = function () {

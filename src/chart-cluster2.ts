@@ -284,11 +284,12 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   window.onresize = function () {
     setTimeout(function () {
       myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
-        modelForm["red"].value, modelForm["blue"].value)
+        modelForm["red"].value, modelForm["blue"].value);
       myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
-            modelForm["red2"].value, modelForm["blue2"].value)
-      myChart1.update()
-      myChart2.update()
+            modelForm["red2"].value, modelForm["blue2"].value);
+      myChart1.update();
+      myChart2.update();
+      updateTableHeight(hot);
     }, 10)
   }
   const update = function () {
