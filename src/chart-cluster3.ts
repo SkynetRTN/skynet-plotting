@@ -524,14 +524,14 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
 }
 
 export function updateProForm(minmax: number[], clusterProForm: ClusterProForm ) {
-  let maxRa = minmax[0]
-  let minRa = minmax[1]
-  let maxDec = minmax[2]
-  let minDec = minmax[3]
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.01, ((maxRa+minRa)/2), false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (maxRa-minRa), 0.01, (maxRa-minRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.01, ((maxDec+minDec)/2), false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (maxDec-minDec), 0.01, (maxDec-minDec), false, false);
+  let maxRa = parseFloat(minmax[0].toFixed(1))
+  let minRa = parseFloat(minmax[1].toFixed(1))
+  let maxDec = parseFloat(minmax[2].toFixed(1))
+  let minDec = parseFloat(minmax[3].toFixed(1))
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, ((maxRa+minRa)/2), false, false);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (maxRa-minRa), 0.1, (maxRa-minRa), false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, ((maxDec+minDec)/2), false, false);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (maxDec-minDec), 0.1, (maxDec-minDec), false, false);
 }
 
 export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
