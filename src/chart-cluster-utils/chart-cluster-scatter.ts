@@ -28,7 +28,7 @@ export function updateScatter(
     clusterProForm: ClusterProForm = null,) {
 
     let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
-    let err = 1;
+    let err = 0.312347;
     let dist = parseFloat(clusterForm["d_num"].value);
     //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
     let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
