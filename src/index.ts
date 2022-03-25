@@ -67,23 +67,25 @@ window.onload = function () {
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        } else if ('myChart' in window) {
+        }
+        else if ('myChart' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             // NO MORE JQUERY BYE BYE xD
             // $('#honor-pledge-modal').modal('hide');
             saveImage(0, signature, true, 1.0);
-        } else if ('myChart2' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide');
-            saveImage(1, signature, true, 1.0);
-            //combine into one image
-            
-        } else if ('myChart4' in window) {
+        
+        
+        } 
+        else if ('myChart4' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             // NO MORE JQUERY BYE BYE xD
             // $('#honor-pledge-modal').modal('hide')
-            saveImage(2, signature, true, 1.0);
+            if ('myChart1' in window) {
+                saveImage(1, signature, true, 1.0);
+            }
+            else {
+                saveImage(2, signature, true, 1.0);
+            }
 
         }
     };
@@ -354,32 +356,25 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     } else {
         console.log('Only jpg export is supported for EXIF info.');
     }
-    } else if (chartNum === 2) {
-        const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
-        const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
-        const canvas3 = document.getElementById('myChart3') as HTMLCanvasElement;
-        const canvas4 = document.getElementById('myChart4') as HTMLCanvasElement;
+    }   else if (chartNum === 2) {
+        const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
+        const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
         // Create a dummy canvas
             // Create a dummy canvas
     const destCanvas = document.createElement('canvas');
     destCanvas.width = 2 * canvas.width;
-    destCanvas.height = 2 * canvas.height;
+    destCanvas.height = canvas.height;
 
     const destCtx = destCanvas.getContext('2d');
 
     // Create a rectangle with the desired color
     destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, 2* canvas.width, 2* canvas.height);
+    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
 
     // Draw the original canvas onto the destination canvas
     let compile = destCtx.drawImage(canvas, 0, 0);
     //draw canvas 2 onto the destination canvas
     compile = destCtx.drawImage(canvas2, canvas.width, 0);
-    //draw canvas 3 onto the destination canvas
-    compile = destCtx.drawImage(canvas3, 0, canvas.height);
-    //draw canvas 4 onto the destination canvas
-    compile = destCtx.drawImage(canvas4, canvas.width, canvas.height);
-
 
 
     // Download the dummy canvas
