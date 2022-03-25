@@ -121,10 +121,13 @@ interface PolarizationForm extends HTMLFormElement {
 }
 
 interface ClusterForm extends HTMLFormElement {
+    distrangeCheckbox: HTMLInputElement,
     d: HTMLInputElement,
+    distrange: HTMLInputElement,
     err: HTMLInputElement,
     red: HTMLInputElement,
     d_num: HTMLInputElement,
+    distrange_num: HTMLInputElement,
     err_num: HTMLInputElement,
     red_num: HTMLInputElement,
 }
@@ -146,6 +149,18 @@ interface ModelForm extends HTMLFormElement {
     red4: HTMLInputElement,
     blue4: HTMLInputElement,
     lum4: HTMLInputElement,
+}
+interface ClusterProForm extends HTMLFormElement {
+    ramotion: HTMLInputElement,
+    ramotion_num: HTMLInputElement,
+    rarange: HTMLInputElement,
+    rarange_num: HTMLInputElement,
+    decmotion: HTMLInputElement,
+    decmotion_num: HTMLInputElement,
+    decrange: HTMLInputElement,
+    decrange_num: HTMLInputElement,
+    rarangeCheckbox: HTMLInputElement,
+    decrangeCheckbox: HTMLInputElement,
 }
 
 interface GravityForm extends HTMLFormElement {

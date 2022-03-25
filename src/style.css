@@ -216,6 +216,14 @@ input[type=checkbox] {
     height: 0;
 }
 
+input[type=checkbox].range{
+    position: absolute;
+    opacity: 1;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -346,8 +354,8 @@ label.scaleSelection-graphSelection {
 
 .chartTag {
     position: absolute;
-    bottom: 40px;
-    left: 90px;
+    bottom: 48px;
+    left: 75px;
     z-index: -1;
     font-size: 60px;
     color: gray;

@@ -23,7 +23,7 @@ declare module 'chart.js/auto'{
     }
 }
 
-type PulsarMode = 'lc' | 'ft' | 'pf';
+type PulsarMode = 'lc' | 'ft' | 'pf' ;
 
 interface ModeLabels {
     t: string,

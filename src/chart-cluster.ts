@@ -1,13 +1,12 @@
 "use strict";
-
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { colors, tableCommonOptions } from "./config";
+import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls } from "./chart-cluster-utils/chart-cluster-interface";
-import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
@@ -29,41 +28,22 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   // Link each slider with corresponding text box
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["err"], clusterForm["err_num"], 0, 1, 0.01, 1, false, true, 0, 100000000);
+  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-  //default dummy data from util.ts
-  const tableData = dummyData;
 
   //declare graphScale limits
   let graphMinMax = new graphScale();
 
   // create table
   const container = document.getElementById("table-div");
-  const hot = new Handsontable(
-    container,
-    Object.assign({}, tableCommonOptions, {
-      data: tableData,
-      colHeaders: ["B Mag", "Berr", "V Mag", "Verr", "R Mag", "Rerr", "I Mag", "Ierr"], // need to change to filter1, filter2
-      columns: [
-        { data: "B", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Berr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "V", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Verr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "R", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Rerr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "I", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-        { data: "Ierr", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
-      ],
-      hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
-    })
-  );
+  const hot = defaultTable(container)
 
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
-
+  rangeCheckControl(true)
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -154,6 +134,9 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     },
   });
 
+  //customize cursor icon
+  document.getElementById('chart-div').style.cursor = "move"
+
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
   let graphControl = new ChartScaleControl([myChart], modelForm, graphMinMax);
   myChart.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)}
@@ -203,6 +186,8 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   updateHRModel(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
+  (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
+
 
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";

@@ -254,8 +254,8 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
             return;
         }
 
-        let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
-        let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort((a: number[], b: number[]) => a[0] - b[0]);
+        let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
+        let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
 
         let left = 0;
         let right = 0;
@@ -352,17 +352,18 @@ function updateVariable(table: Handsontable, myChart: Chart) {
         myChart.data.datasets[i].data = [];
     }
 
-    const tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    // let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    let tableData = table.getData();
     let src1Data = [];
     let src2Data = [];
-
+    tableData = tableData.sort(sortJdate)
     for (let i = 0; i < tableData.length; i++) {
         let jd = tableData[i][0];
         let src1 = tableData[i][1];
         let src2 = tableData[i][2];
 
         myChart.data.minMJD = Math.min(myChart.data.minMJD, jd);
-        myChart.data.maxMJD = Math.min(myChart.data.maxMJD, jd);
+        myChart.data.maxMJD = Math.max(myChart.data.maxMJD, jd);
 
         src1Data.push({
             "x": jd,
@@ -402,7 +403,7 @@ function lightCurve(myChart: Chart) {
         let label = myChart.data.datasets[i].label;
         lcHTML +=
             '<option value="' + label +
-            '"title="' + label +
+            '" title="' + label +
             '">' + label + '</option>\n';
     }
     lcHTML +=
@@ -654,4 +655,17 @@ function showDiv(id: string) {
         document.getElementById("table-div").hidden = false;
         document.getElementById("add-row-button").hidden = false;
     }
+}
+
+/**
+ * Julian Date Sort
+ * Takes in two tableData rows and return the comparison based on Julian Date
+ * @param row1 First row of data to be compared
+ * @param row2 Second srow of data to be comapred
+ */
+function sortJdate(row1: any[], row2: any[]) {
+    if (row1[0] === row2[0]) {
+        return 0;
+    }
+    return (row1[0] < row2[0]) ? -1 : 1;
 }
