@@ -561,11 +561,11 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   let minRa = minmax[1]
   let maxDec = minmax[2]
   let minDec = minmax[3]
-  myChart2.data.datasets[0].data = [{x: maxRa+100, y: decmotion_num}, {x: minRa-100, y: decmotion_num}];
-  myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+100}, {x: ramotion_num, y: minDec-100}];
-  myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+100}, {x: ramotion_num-rarange_num, y: minDec-100}];
-  myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+100}, {x: ramotion_num+rarange_num, y: minDec-100}];
-  myChart2.data.datasets[5].data = [{x: maxRa+100, y: decmotion_num-decrange_num}, {x: minRa-100, y: decmotion_num-decrange_num}];
-  myChart2.data.datasets[6].data = [{x: maxRa+100, y: decmotion_num+decrange_num}, {x: minRa-100, y: decmotion_num+decrange_num}];
+  myChart2.data.datasets[0].data = [{x: maxRa+10000, y: decmotion_num}, {x: minRa-10000, y: decmotion_num}];
+  myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+10000}, {x: ramotion_num, y: minDec-10000}];
+  myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+10000}, {x: ramotion_num-rarange_num, y: minDec-10000}];
+  myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+10000}, {x: ramotion_num+rarange_num, y: minDec-10000}];
+  myChart2.data.datasets[5].data = [{x: maxRa+10000, y: decmotion_num-decrange_num}, {x: minRa-10000, y: decmotion_num-decrange_num}];
+  myChart2.data.datasets[6].data = [{x: maxRa+10000, y: decmotion_num+decrange_num}, {x: minRa-10000, y: decmotion_num+decrange_num}];
   myChart2.update();
 }
