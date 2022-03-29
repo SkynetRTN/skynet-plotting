@@ -129,7 +129,7 @@ export function clusterProSliders(clusterPro: true = true) {
     let htmlContent = "" 
     htmlContent += '<form id="clusterProForm" class="form-inline">\n' +
                    '</div>\n'
-    htmlContent += '<div class="row" style = "padding-top: 10.5px">\n'
+    htmlContent += '<div class="row" style = "padding-top: 14.25px">\n'
     htmlContent += '<div class = "col-sm-6 des">Motion in RA (mas/yr):</div>\n' +
                    '<div class="col-sm-4 range"><input type="range" title="ramotion" name="ramotion"></div>\n' +
                    '<div class="col-sm-2 text"><input type="number" title="Ra" name="ramotion_num" class="field"></div>\n' +
