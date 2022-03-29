@@ -122,7 +122,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.140,
+      aspectRatio: 1.0925,
       hover: {
         mode: "nearest",
       },
@@ -155,7 +155,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           display: true,
           align: "start",
           padding: {
-            top: 0,
+            top: -3,
             bottom: 10,
           }
         },
@@ -230,7 +230,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.140,
+      aspectRatio: 1.0925,
       hover: {
         mode: "nearest",
       },
@@ -267,7 +267,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
             size: 1},
           padding: {
             top: -12.50,
-            bottom: 10,
+            bottom: 8,
           }
         },
         legend: {
@@ -393,7 +393,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 2,
+      aspectRatio: 2.3,
       hover: {
         mode: "nearest",
       },
