@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
+import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter, removeMotionScatter } from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
@@ -461,6 +461,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     //console.log(tableData);
     updateTableHeight(hot);
     updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   };
   // link chart to table
   hot.updateSettings({
@@ -472,20 +473,23 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);},
+    function () { updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+      removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);},
     frameTime);
 
   //update the graph continuoustly when the values in the form change
   clusterProForm.oninput = throttle( ()=>{
     updateChart2(myChart2, clusterProForm, minmax)
     updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   }, frameTime)
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
     updateHRModel(modelForm, hot, [myChart3, myChart4], (chartNum: number) => {
-      updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);}
+      updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);
+      removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);}
     );
    }, 100);
 

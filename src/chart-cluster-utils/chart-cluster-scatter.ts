@@ -744,3 +744,94 @@ export function updateClusterProScatter(
     }
 }
 }
+
+export function removeMotionScatter(table: Handsontable,
+    myCharts: Chart[],
+    clusterForm: ClusterForm,
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    graphMaxMin: graphScale,
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm){
+    let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+    let dist = parseFloat(clusterForm["d_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let range = parseFloat(clusterForm["distrange_num"].value);
+    let isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked;
+    let isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked;
+    let raMotion = parseFloat(clusterProForm['ramotion_num'].value);
+    let raRange = parseFloat(clusterProForm['rarange_num'].value);
+    let decMotion = parseFloat(clusterProForm['decmotion_num'].value);
+    let decRange = parseFloat(clusterProForm['decrange_num'].value);
+
+    for (let c = 0; c < myCharts.length; c++) {
+        if (specificChart < 0 || specificChart === c) {
+            let myChart = myCharts[c];
+            
+            let chart = myChart.data.datasets[dataSetIndex[c]].data;
+            let tableData = table.getData();
+            let columns = table.getColHeader();
+                
+            let blueKey = modelFormKey(c, 'blue')
+            let redKey = modelFormKey(c, 'red')
+            let lumKey = modelFormKey(c, 'lum')
+
+            //Identify the column the selected filter refers to
+            let blue = columns.indexOf(modelForm[blueKey].value + " pmra");
+            let blue2 = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let red = columns.indexOf(modelForm[redKey].value + " Mag");
+            let lum = columns.indexOf(modelForm[lumKey].value + " Mag");
+
+            let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
+
+            let start = 0;
+            for (let i = 0; i < tableData.length; i++) {
+                if (
+                    typeof (tableData[i][blue]) != 'number' ||
+                    typeof (tableData[i][red]) != 'number' ||
+                    typeof (tableData[i][lum]) != 'number'
+                ) {
+                    continue;
+                }
+                let distance: number = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")];
+                let isDistNotValid = isNaN(distance) || distance === null
+                if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
+                    continue;
+                }
+                if (clusterProForm !== null) {
+                    if (isRaRange) {
+                        let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
+                        if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
+                            continue;
+                    }
+                    if (isDecRange) {
+                        let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
+                        if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
+                            continue;
+                    }
+                }
+
+
+                //red-blue,lum
+
+                let x = tableData[i][blue]
+                let y = tableData[i][blue2]
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
+                chart[start++] = {
+                    x: x,
+                    y: y
+                };
+                scaleLimits = pointMinMax(scaleLimits, x, y);
+            }
+            while (chart.length !== start) {
+                chart.pop();
+            }
+            graphMaxMin.updateDataLimit(c, scaleLimits);
+            myChart.update()
+        }
+    }
+}
