@@ -11,7 +11,7 @@ import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updat
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 import { build } from "vite";
-import { stringify } from "handsontable/helpers";
+//import { arrayMax, stringify } from "handsontable/helpers";
 import { selectElementIfAllowed } from "handsontable/helpers/dom";
 
 /**
@@ -442,7 +442,6 @@ export function pulsar(): [Handsontable, Chart] {
 
     function play(){
         //audioCtx.resume();
-        sonificationButton.onclick = pause;
         if(pulsarForm.elements["mode"].value === 'lc')
         {
             sonifiedChart = sonify(audioCtx,myChart,0,1,volume);
@@ -463,8 +462,7 @@ export function pulsar(): [Handsontable, Chart] {
         sonificationButton.style.backgroundColor = ''
         sonificationButton.style.color = "black";
     }
-
-    sonificationButton.onclick = play;
+    
     saveSonify.onclick = function (){
         if(pulsarForm.elements["mode"].value === 'lc')
         {
@@ -503,26 +501,34 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
     }
 
 
-    var type = "";
+    var type: string;
 
-    if (file.name.match(".*\.txt")) {
-        type = "standard"
-    }
-    else if(file.name.match(".*\.bestprof"))
+    if(file.name.match(".*\.bestprof"))
     {
         type = "pressto"
     }
+    else if(file.name.match(".*\.txt"))//we'll check file type later
+    {}
     else
     {
         console.log("Uploaded file type is: ", file.type);
         console.log("Uploaded file name is: ", file.name);
-        alert("Please upload a txt file.");
+        alert("Please upload a txt or bestprof file.");
         return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
         var data: string[] = (reader.result as string).split("\n");
+
+        if(!type)
+        {
+            if(data[0].slice(0,7) == "# Input")
+                type = "pressto";
+
+            else
+                type = "standard";
+        }
 
         if(type === "standard"){
 
@@ -568,15 +574,10 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
             let fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])))
             let sampleRat = period/fluxes.length;
 
-            var max = fluxes[0];
-            console.log(max)
-            for(let f = 0; f < fluxes.length; f++)
-            {
-                if(max < fluxes[f])
-                    max = fluxes[f];
-            }
+            var max = ArrMath.max(fluxes);
+            //console.log(max)
             let med = median(fluxes);
-            console.log([med,max])
+            //console.log([med,max])
 
             const chartData = [];
             for (let i = 0; i < 2*fluxes.length; i++) {
@@ -710,6 +711,8 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
             pf: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
+        myChart.data.datasets[5].label = "Channel 1";
+
     } else {
         myChart.data.modeLabels[myChart.data.modeLabels.lastMode] = {
             t: myChart.options.plugins.title.text as string,
@@ -899,7 +902,8 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
         time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
     }
 
-    let norm = 1 / myChart.scales.y.max;
+    let norm0 = 1 / ArrMath.max(channel0.map(p => p.y))
+    let norm1 = 1 / ArrMath.max(channel1.map(p => p.y))
 
     // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
     var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
@@ -921,8 +925,8 @@ function sonify(ctx: AudioContext, myChart: Chart, dataSet1: number, dataSet2: n
             next1++;
         }
 
-        arrayBuffer.getChannelData(0)[i] = norm * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*Math.random()-1); // Left Channel
-        arrayBuffer.getChannelData(1)[i] = norm * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*Math.random()-1);  //multiply by norm: the maximum y value is 10 in the buffer
+        arrayBuffer.getChannelData(0)[i] = norm0 * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*Math.random()-1); // Left Channel
+        arrayBuffer.getChannelData(1)[i] = norm1 * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*Math.random()-1);  //multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.
