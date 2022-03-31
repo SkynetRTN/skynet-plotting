@@ -502,6 +502,9 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         return;
     }
 
+    for (let i in myChart.data.datasets)//empty data on upload
+        myChart.data.datasets[i].data = [];
+
 
     var type = "";
 
