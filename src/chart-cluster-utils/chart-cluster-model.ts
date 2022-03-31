@@ -28,7 +28,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
             form.push(row);
         }
         iSkip = iSkip > 0? iSkip : 0;
-        let age = parseFloat(modelForm['age'].value)
+        let age = parseFloat(modelForm['age_num'].value)
         let iEnd =  Math.round(((-25.84 * age + 451.77) + (-17.17*age**2+264.30*age-753.93))/2)
         return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
     }
@@ -48,6 +48,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                     chart.update("none");
             },
             () => {
+                console.trace(generateURL(modelForm, c))
                 callback(c);
                 if (!isChart)
                     chart.update("none");
