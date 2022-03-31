@@ -757,12 +757,6 @@ export function removeMotionScatter(table: Handsontable,
     let dist = parseFloat(clusterForm["d_num"].value);
     //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
     let range = parseFloat(clusterForm["distrange_num"].value);
-    let isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked;
-    let isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked;
-    let raMotion = parseFloat(clusterProForm['ramotion_num'].value);
-    let raRange = parseFloat(clusterProForm['rarange_num'].value);
-    let decMotion = parseFloat(clusterProForm['decmotion_num'].value);
-    let decRange = parseFloat(clusterProForm['decrange_num'].value);
 
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
@@ -798,18 +792,18 @@ export function removeMotionScatter(table: Handsontable,
                 if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
                     continue;
                 }
-                if (clusterProForm !== null) {
-                    if (isRaRange) {
-                        let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
-                        if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
-                            continue;
-                    }
-                    if (isDecRange) {
-                        let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
-                        if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
-                            continue;
-                    }
-                }
+                //if (clusterProForm !== null) {
+                  //  if (isRaRange) {
+                    //    let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
+                      //  if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
+                        //    continue;
+                    //}
+                    //if (isDecRange) {
+                      //  let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
+                        //if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
+                          //  continue;
+                   // }
+                //}
 
 
                 //red-blue,lum
