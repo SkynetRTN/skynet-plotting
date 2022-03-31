@@ -1,14 +1,13 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import { sortStarDuplicates, sortStarid, starData } from "./chart-cluster-utils/chart-gaia-util";
 import Handsontable from "handsontable";
-import { colors, tableCommonOptions } from "./config";
+import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls } from "./chart-cluster-utils/chart-cluster-interface";
-import { dummyData } from "./chart-cluster-utils/chart-cluster-dummy";
+import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
 
@@ -23,6 +22,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   //setup two charts
     document.getElementById('myChart').remove();
+    //document.getElementById('myChart3').remove();
+    //document.getElementById('myChart4').remove();
     document.getElementById('chart-div1').style.display = 'block';
     document.getElementById('chart-div2').style.display = 'block';
     document.getElementById('axis-label1').style.display = 'inline';
@@ -33,73 +34,29 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
     document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
     document.getElementById('axisSet1').className = 'col-sm-6';
     document.getElementById('axisSet2').style.display = 'inline';
+  document.getElementById('chartTag1').style.display = "inline";
+  document.getElementById('chartTag2').style.display = "inline";
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["range"], clusterForm["range_num"], 0, 100, 0.01, 100, false, false);
+  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-
-  const tableData = dummyData;
+  rangeCheckControl(true)
 
   //declare graphScale limits
   let graphMinMax = new graphScale(2);
 
   // create table
+  // create table
   const container = document.getElementById("table-div");
-  const hot = new Handsontable(
-    container,
-    Object.assign({}, tableCommonOptions, {
-      data: tableData,
-      colHeaders: ["B Mag", "Berr", "V Mag", "Verr", "R Mag", "Rerr", "I Mag", "Ierr"], // need to change to filter1, filter2
-      columns: [
-        {
-          data: "B",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Berr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "V",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Verr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "R",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Rerr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "I",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "Ierr",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-      ],
-      hiddenColumns: { columns: [1, 3, 4, 5, 6, 7] },
-    })
-  );
+  const hot = defaultTable(container)
+
+
+
   // create chart
 
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
@@ -187,8 +144,8 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           display: true,
           align: "start",
           padding: {
-            top: 10.025,
-            bottom: 14,
+            top: 10,
+            bottom: 18,
           }
         },
         legend: {
@@ -327,11 +284,12 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   window.onresize = function () {
     setTimeout(function () {
       myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
-        modelForm["red"].value, modelForm["blue"].value)
+        modelForm["red"].value, modelForm["blue"].value);
       myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
-            modelForm["red2"].value, modelForm["blue2"].value)
-      myChart1.update()
-      myChart2.update()
+            modelForm["red2"].value, modelForm["blue2"].value);
+      myChart1.update();
+      myChart2.update();
+      updateTableHeight(hot);
     }, 10)
   }
   const update = function () {
@@ -367,13 +325,14 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
+  (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x1";
   myChart1.options.scales["y"].title.text = "y1";
   myChart2.options.scales["x"].title.text = "x2";
   myChart2.options.scales["y"].title.text = "y2";
-  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
-  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm);
+  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
+  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart

@@ -5,7 +5,7 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
-import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-cluster-util";
+import {baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-cluster-util";
 
 
 /**
@@ -16,7 +16,7 @@ import {httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-c
  *  @param chart:     The Chartjs object to be updated.
  *  @param callback:  callback function asynchronously execute stuff after model is updated
  */
-export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }) {
+export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
     function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
         let form: ScatterDataPoint[] = [] //the array containing all model points
         let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
@@ -28,7 +28,11 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
             form.push(row);
         }
         iSkip = iSkip > 0? iSkip : 0;
-        let age = parseFloat(modelForm['age'].value)
+        let age = parseFloat(modelForm['age_num'].value);
+        if (age < 6.6)
+            age = 6.6;
+        else if (age > 10.3)
+            age = 10.3;
         let iEnd =  Math.round(((-25.84 * age + 451.77) + (-17.17*age**2+264.30*age-753.93))/2)
         return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
     }
@@ -43,11 +47,15 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                 let filteredModel = modelFilter(dataTable, json['iSkip'])
                 chart.data.datasets[0].data = filteredModel[0];
                 chart.data.datasets[1].data = filteredModel[1];
-                chart.update("none");
                 callback(c);
+                if (!isChart)
+                    chart.update("none");
             },
             () => {
+                console.trace(generateURL(modelForm, c))
                 callback(c);
+                if (!isChart)
+                    chart.update("none");
             },
         );
     }
@@ -55,7 +63,9 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     let columns: string[] = hot.getColHeader() as string[];
     let hidden: number[] = [];
     for (const col in columns) {
-        columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        if (columns[col].includes('Mag')){
+            columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        }
         if (!reveal.includes(columns[col])) {
             //if the column isn't selected in the drop down, hide it
             hidden.push(parseFloat(col));
@@ -70,18 +80,25 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
  * @param chartNum
  */
 function generateURL(form: ModelForm, chartNum: number) {
-    let blueKey = modelFormKey(chartNum, 'blue')
-    let redKey = modelFormKey(chartNum, 'red')
-    let lumKey = modelFormKey(chartNum, 'lum')
-     return "http://localhost:5000/isochrone?" //local testing url
-    // return "http://152.2.18.8:8080/isochrone?" //testing server url
-    //return "http://192.168.128.196:8080/isochrone?" //GBO temp testing server url
-    // return "https://skynet.unc.edu/graph-api/isochrone?" //production url
-        + "age=" + HRModelRounding(form['age_num'].value)
-        + "&metallicity=" + HRModelRounding(form['metal_num'].value)
-        + "&filters=[%22" + form[blueKey].value
-        + "%22,%22" + form[redKey].value
-        + "%22,%22" + form[lumKey].value + "%22]"
+    let blueKey = modelFormKey(chartNum, 'blue');
+    let redKey = modelFormKey(chartNum, 'red');
+    let lumKey = modelFormKey(chartNum, 'lum');
+    let age = parseFloat(HRModelRounding(form['age_num'].value));
+    if (age < 6.6)
+        age = 6.6;
+    else if (age > 10.3)
+        age = 10.3;
+    let metal = parseFloat(HRModelRounding(form['metal_num'].value))
+    if (metal < -3.4)
+        metal = -3.4;
+    else if (metal > 0.2)
+        metal = 0.2;
+    return baseUrl + "/isochrone?"
+        + "age=" + age.toString()
+        + "&metallicity=" + metal.toString()
+        + "&filters=[%22" + form[blueKey].value.replace('\'', 'prime')
+        + "%22,%22" + form[redKey].value.replace('\'', 'prime')
+        + "%22,%22" + form[lumKey].value.replace('\'', 'prime') + "%22]"
 }
 
 

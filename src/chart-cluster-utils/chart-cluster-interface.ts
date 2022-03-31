@@ -15,9 +15,11 @@ export function insertClusterControls(chartCounts:number = 1) {
         '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
-        '<div class="col-sm-6 des">± Range (%):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Range" name="range"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Range" name="range_num" class="field"></div>\n' +
+        //add a checkbox that disables the corresponding slider
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" id="distrangeCheck"></input></div>\n' +
+        '<div class = "col-sm-5 des">±Range (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
@@ -56,18 +58,15 @@ export function insertClusterControls(chartCounts:number = 1) {
                 '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter">I</option></select></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-4"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter">I</option></select></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-4"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter" >I</option></select></div>\n'
+                '<option value="R" title="R filter">R</option></select></div>\n'
         }
     }
     if (chartCounts > 1) {
@@ -96,24 +95,21 @@ export function insertClusterControls(chartCounts:number = 1) {
                 num = (i+1).toString()
             }
             //add a number that corresponds what graph each row of drop down boxes controls
-            htmlContent += '<div class="col-sm-1"><class="title">' + logo + ':</div>\n' +
+            htmlContent += '<div class="col-sm-1" style="font-size: 20px;">' + logo + '</div>\n' +
                 '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter">I</option></select></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
                 '<div class="col-sm-3"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter">I</option></select></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
                 '<div class="col-sm-3"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
-                '<option value="R" title="R filter">R</option></div>\n' +
-                '<option value="I" title="I filter" >I</option></select></div>\n'
+                '<option value="R" title="R filter">R</option></select></div>\n'
         }
     }
 
@@ -128,6 +124,42 @@ export function insertClusterControls(chartCounts:number = 1) {
             htmlContent
         );
 }
+export function clusterProSliders(clusterPro: true = true) {
+    if (clusterPro === true) {
+    let htmlContent = "" 
+    htmlContent += '<form id="clusterProForm" class="form-inline">\n' +
+                   '</div>\n'
+    htmlContent += '<div class="row" style = "padding-top: 14.25px">\n'
+    htmlContent += '<div class = "col-sm-6 des">Motion in RA (mas/yr):</div>\n' +
+                   '<div class="col-sm-4 range"><input type="range" title="ramotion" name="ramotion"></div>\n' +
+                   '<div class="col-sm-2 text"><input type="number" title="Ra" name="ramotion_num" class="field"></div>\n' +
+                     '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="rarangeCheck" value="0" id="rarangeCheck"></input></div>\n' +
+                   '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
+                   '<div class="col-sm-4 range"><input type="range" title="rarange" name="rarange"></div>\n' +
+                   '<div class="col-sm-2 text"><input type="number" title="rarange" name="rarange_num" class="field"></div>\n' +
+                     '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class = "col-sm-6 des">Motion in Dec (mas/yr):</div>\n' +
+                     '<div class="col-sm-4 range"><input type="range" title="decmotion" name="decmotion"></div>\n' +
+                        '<div class="col-sm-2 text"><input type="number" title="decmotion" name="decmotion_num" class="field"></div>\n' +
+                        '</div>\n'
+    htmlContent += '<div class="row">\n'
+    htmlContent += '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="decrangeCheck" value="0" id="decrangeCheck"></input></div>\n' +
+                     '<div class = "col-sm-5 des">±Range (mas/yr):</div>\n' +
+                        '<div class="col-sm-4 range"><input type="range" title="decrange" name="decrange"></div>\n' +
+                        '<div class="col-sm-2 text"><input type="number" title="decrange" name="decrange_num" class="field"></div>\n' +
+                        '</div>\n'
+    htmlContent += '</div>\n'
+    htmlContent += '</div>\n'
+    document
+        .getElementById("chart-div1")
+        .insertAdjacentHTML(
+            "beforeend",
+            htmlContent
+        );
+}}
 
 /**
  * Insert graph control and on-control buttons into html code
@@ -168,4 +200,71 @@ export function insertGraphControl(chartCount: number = 1){
         '<div style="padding: 0 6px 0 6px"></div>' +
         '</div>\n'
     document.getElementById("extra-options").insertAdjacentHTML("beforeend", html)
+}
+export function rangeCheckControl(clusterChart = true){
+    if (clusterChart === true) {
+        const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+        (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false;
+        clusterForm["distrange"].disabled = true;
+        clusterForm["distrange_num"].disabled = true;
+        const distrangeCheckbox = (document.getElementById("distrangeCheck") as HTMLInputElement);   
+        //clusterForm["distrange"].disabled = true;
+        //clusterForm["distrange_num"].disabled = true;
+        //clusterForm["distrange"].disabled = false;
+        //clusterForm["distrange_num"].disabled = false;;
+        distrangeCheckbox.addEventListener("change", () => {
+          let rangeSlider = clusterForm["distrange"]
+          let rangeNum = clusterForm["distrange_num"]
+          if (distrangeCheckbox.checked) {
+            rangeSlider.disabled = false;
+            rangeNum.disabled = false;
+            rangeSlider.style.opacity = "1";
+          } else {
+            rangeSlider.disabled = true;
+            rangeNum.disabled = true;
+            rangeSlider.style.opacity = "0.4";
+            // clusterForm["distrange"].value = "100";
+            // clusterForm["distrange_num"].value = "100";
+          }
+        });
+    }
+}
+
+export function clusterProCheckControl (){
+    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
+        (document.getElementById("rarangeCheck") as HTMLInputElement).checked = false;
+        (document.getElementById("decrangeCheck") as HTMLInputElement).checked = false;
+        clusterProForm["rarange"].disabled = true;
+        clusterProForm["rarange_num"].disabled = true;
+        clusterProForm["decrange"].disabled = true;
+        clusterProForm["decrange_num"].disabled = true;
+        const rarangeCheckbox = (document.getElementById("rarangeCheck") as HTMLInputElement);
+        const decrangeCheckbox = (document.getElementById("decrangeCheck") as HTMLInputElement);
+        rarangeCheckbox.addEventListener("change", () => {
+            let rangeSlider = clusterProForm["rarange"]
+            let rangeNum = clusterProForm["rarange_num"]
+            if (rarangeCheckbox.checked) {
+              rangeSlider.disabled = false;
+              rangeNum.disabled = false;
+              rangeSlider.style.opacity = "1";
+            } else {
+              rangeSlider.disabled = true;
+              rangeNum.disabled = true;
+              rangeSlider.style.opacity = "0.4";
+            }
+          });
+            decrangeCheckbox.addEventListener("change", () => {
+            let rangeSlider = clusterProForm["decrange"]
+            let rangeNum = clusterProForm["decrange_num"]
+            if (decrangeCheckbox.checked) {
+              rangeSlider.disabled = false;
+              rangeNum.disabled = false;
+              rangeSlider.style.opacity = "1";
+            } else {
+              rangeSlider.disabled = true;
+              rangeNum.disabled = true;
+              rangeSlider.style.opacity = "0.4";
+            }
+          }
+        );
 }

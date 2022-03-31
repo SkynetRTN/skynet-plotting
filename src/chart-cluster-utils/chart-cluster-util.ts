@@ -6,6 +6,12 @@
 import { Chart, Color } from "chart.js";
 
 
+export const baseUrl:string = "http://localhost:5000"//local testing url
+// "http://152.2.18.8:8080" //testing server url
+// "http://192.168.128.196:8080" //GBO temp testing server url
+// export const baseUrl:string = "https://skynet.unc.edu/graph-api" //production url
+
+
 /**
  * This function returns a paired key-value of filters corresponding to the function needed to claculate magnitude.
  * Used for data coloring and chart scaling.
@@ -45,11 +51,11 @@ export const filterWavelength: { [key: string]: number } = {
     V: 0.54,
     R: 0.647,
     I: 0.7865,
-    uprime: 0.354,
-    gprime: 0.475,
-    rprime: 0.622,
-    iprime: 0.763,
-    zprime: 0.905,
+    "u\'": 0.354,
+    "g\'": 0.475,
+    "r\'": 0.622,
+    "i\'": 0.763,
+    "z\'": 0.905,
     J: 1.25,
     H: 1.65,
     K: 2.15,
@@ -65,22 +71,39 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            try {
                 callback(xmlHttp.responseText);
-        } else if (xmlHttp.status != 0) {
-                failedCallback();
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
+        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == ""){
+            try {
+                failedCallback(xmlHttp.responseText);
+            } catch {
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
         }
     };
     xmlHttp.open("GET", theUrl, true); // true for asynchronous
     xmlHttp.send(null);
 }
 //create and export a function that uses the http push to send the data to the server
-export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function=()=>{}) {
+export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
-            callback(xmlHttp.responseText);
-        } else if (xmlHttp.status != 0) {
-            failedCallback();
+        if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != ""){
+            try {
+                callback(xmlHttp.responseText);
+            } catch {
+                failedCallback(xmlHttp.responseText);
+                console.log(JSON.parse(xmlHttp.responseText))
+            }
+        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
+            try {
+                failedCallback(xmlHttp.responseText);
+            } catch {
+                console.log(xmlHttp.responseText)
+            }
         }
     };
     xmlHttp.open("POST", theUrl, true); // true for asynchronous
@@ -113,7 +136,7 @@ export function modelFormKeys(chartNum: number, form: ModelForm) {
  */
 export function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
     let newLimits = scaleLimits;
-    if (isNaN(newLimits["minX"])) {
+    if (isNaN(newLimits["minX"])||isNaN(newLimits["maxX"])||isNaN(newLimits["minY"])||isNaN(newLimits["maxY"])) {
         newLimits["minX"] = x;
         newLimits["maxX"] = x;
         newLimits["minY"] = y;
@@ -187,7 +210,7 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
     for (let i = 0; i < filters.length; i++) {
         if ("UBVRI".includes(filters[i])) {
             magIndex[i] = Number(0);
-        } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+        } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
             magIndex[i] = Number(1);
         } else if ("JHKs".includes(filters[i])) {
             magIndex[i] = Number(2);

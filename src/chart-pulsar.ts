@@ -500,6 +500,9 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         return;
     }
 
+    for (let i in myChart.data.datasets)//empty data on upload
+        myChart.data.datasets[i].data = [];
+
 
     var type: string;
 
@@ -695,9 +698,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
 
         periodFoldingForm.elements["pf"].disabled      = false;
         periodFoldingForm.elements["bins"].disabled    = false;
-        polarizationForm.elements["diff"].disabled     = false;
-        polarizationForm.elements["eq"].disabled       = false;
-        polarizationForm.elements["eq_num"].disabled   = false;
+        polarizationForm.hidden                        = false;
         pulsarForm.mode[0].disabled                    = false;
         pulsarForm.mode[1].disabled                    = false;
 
@@ -839,9 +840,7 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
     polForm.elements["eq"].value          = '0';
     periodForm.elements["pf"].disabled    = true;
     periodForm.elements["bins"].disabled  = true;
-    polForm.elements["diff"].disabled     = true;
-    polForm.elements["eq"].disabled       = true;
-    polForm.elements["eq_num"].disabled   = true;
+    polForm.hidden                        = true;
     modeForm.mode[0].disabled             = true;
     modeForm.mode[1].disabled             = true;
 

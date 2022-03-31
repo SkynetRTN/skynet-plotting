@@ -52,7 +52,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
     }
 
     if (chartNum !== 0) {
-        let key = (chartNum + 1).toString();
+        let key = chartNum.toString();
         let xKey = 'x' + key + 'Axis';
         let yKey = 'y' + key + 'Axis';
         // @ts-ignore

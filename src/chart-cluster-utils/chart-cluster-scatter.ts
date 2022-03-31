@@ -7,7 +7,6 @@ import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
-import { sortStarDuplicates, starData, sortStarid, gaiaData } from "./chart-gaia-util";
 
 
 /**
@@ -25,56 +24,37 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,) {
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm = null,) {
+
+    let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+    let err = 0.312347;
+    let dist = parseFloat(clusterForm["d_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+    let range = parseFloat(clusterForm["distrange_num"].value);
+    let isRaRange =  null;
+    let isDecRange =  null;
+    let raMotion = null;
+    let raRange = null;
+    let decMotion = null;
+    let decRange = null;
+    if (clusterProForm !== null){
+        isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked
+        isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked
+        raMotion = parseFloat(clusterProForm['ramotion_num'].value);
+        raRange = parseFloat(clusterProForm['rarange_num'].value);
+        decMotion = parseFloat(clusterProForm['decmotion_num'].value);
+        decRange = parseFloat(clusterProForm['decrange_num'].value);
+    }
+
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            let err = 1;
-            let dist = parseFloat(clusterForm["d_num"].value);
-            //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
-            let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
-            let range = parseFloat(clusterForm["range_num"].value);
-
             
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
             let columns = table.getColHeader();
-            //make a variable that stores all the id values, ra's, and dec's from the table
-            let id = [];
-            let ra = [];
-            let dec = [];
-            for (let i = 0; i < tableData.length; i++) {
-                id.push(tableData[i][columns.indexOf("id")]);
-                ra.push(tableData[i][columns.indexOf("ra")]);
-                dec.push(tableData[i][columns.indexOf("dec")]);
-            }
-            let starOld = new starData(id, ra, dec, null, null);
-            let gaia: gaiaData[] = [];
-            //make a variable that reperesents the number of star id values in the table
-            //for all points in starData
-            //if table is longer than 400
-            // after establishing the variable starsOld, make new variable stars new that is:
-            //sortStarDuplicates(starsOld);
-            if (tableData.length > 400) {
-            
-            for (let i = 0; i < chart.length; i++) {
-                //match id values in starData to id values in acceptableStars
-                let idNaked = stars[i].id;
-                let idGaia = gaia[i].id;
-                //if id numbers mathc, then assign the proper motion and distance data to the starData
-                if (idNaked === idGaia) {
-                    stars[i].distance = gaia[i].distance;
-                    stars[i].motion = gaia[i].motion;
-                }
-                //if the new star distance is not within the range, then remove it from the table data
-                if (stars[i].distance > dist+(dist*(range/100)) || stars[i].distance < dist-(dist*(range/100))) {
-                    tableData.splice(i, 1);
-                    chart.splice(i, 1);
-                    i--;
-                }
-                
-        }
-        }
                 
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
@@ -118,17 +98,41 @@ export function updateScatter(
                 if (
                     typeof (tableData[i][blue]) != 'number' ||
                     typeof (tableData[i][red]) != 'number' ||
-                    typeof (tableData[i][lum]) != 'number' ||
-                    (blueErr != null && tableData[i][blueErr] >= err) ||
+                    typeof (tableData[i][lum]) != 'number'
+                    || (blueErr != null && tableData[i][blueErr] >= err) ||
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
                     continue;
                 }
+                let distance: number = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")];
+                let isDistNotValid = isNaN(distance) || distance === null
+                if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
+                    continue;
+                }
+                if (clusterProForm !== null) {
+                    if (isRaRange) {
+                        let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
+                        if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
+                            continue;
+                    }
+                    if (isDecRange) {
+                        let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
+                        if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
+                            continue;
+                    }
+                }
+
+
                 //red-blue,lum
 
                 let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
                 let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
                 chart[start++] = {
                     x: x,
                     y: y
@@ -583,7 +587,7 @@ function chartRescale(myCharts: Chart[],
                     x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
                     if ("UBVRI".includes(filters[i])) {
                         magIndex[i] = Number(0);
-                    } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+                    } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
                         magIndex[i] = Number(1);
                     } else if ("JHKs".includes(filters[i])) {
                         magIndex[i] = Number(2);
@@ -684,4 +688,144 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
     }
 
     return Number(A_v) * (a + b / R_v);
+}
+export function updateClusterProScatter(
+    table: Handsontable,
+    myCharts: Chart[],
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    specificChart: number = -1,) {
+
+    
+    for (let c = 0; c < myCharts.length; c++) {
+        if (specificChart < 0 || specificChart === c) {
+            let myChart = myCharts[c];
+            //let raRange = parseFloat(clusterProForm["rarange_num"].value);
+            //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+            //let decRange = parseFloat(clusterProForm["decrange_num"].value);
+
+            
+            let chart = myChart.data.datasets[dataSetIndex[c]].data;
+            let tableData = table.getData();
+            let columns = table.getColHeader();
+                
+            let blueKey = modelFormKey(c, 'blue')
+            // let redKey = modelFormKey(c, 'red')
+            //let lumKey = modelFormKey(c, 'lum')
+
+            //Identify the column the selected filter refers to
+            let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
+            //let redra = columns.indexOf(modelForm[redKey].value + " ramotion");
+            //let lumra = columns.indexOf(modelForm[lumKey].value + " ramotion");
+            //let bluedec = columns.indexOf(modelForm[blueKey].value + " decmotion");
+            let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            //let lumdec = columns.indexOf(modelForm[lumKey].value + " decmotion");
+
+            
+            let start = 0;
+            for (let i = 0; i < tableData.length; i++) {
+                //red-blue,lum
+
+                let x = tableData[i][bluera];
+                let y = tableData[i][bluedec];
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+
+                chart[start++] = {
+                    x: x,
+                    y: y
+                };
+            }
+            while (chart.length !== start) {
+                chart.pop();
+            myChart.update()
+        }
+    }
+}
+}
+
+export function removeMotionScatter(table: Handsontable,
+    myCharts: Chart[],
+    clusterForm: ClusterForm,
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    graphMaxMin: graphScale,
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm){
+    let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+    let dist = parseFloat(clusterForm["d_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let range = parseFloat(clusterForm["distrange_num"].value);
+
+    for (let c = 0; c < myCharts.length; c++) {
+        if (specificChart < 0 || specificChart === c) {
+            let myChart = myCharts[c];
+            
+            let chart = myChart.data.datasets[dataSetIndex[c]].data;
+            let tableData = table.getData();
+            let columns = table.getColHeader();
+                
+            let blueKey = modelFormKey(c, 'blue')
+            let redKey = modelFormKey(c, 'red')
+            let lumKey = modelFormKey(c, 'lum')
+
+            //Identify the column the selected filter refers to
+            let blue = columns.indexOf(modelForm[blueKey].value + " pmra");
+            let blue2 = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let red = columns.indexOf(modelForm[redKey].value + " Mag");
+            let lum = columns.indexOf(modelForm[lumKey].value + " Mag");
+
+            let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
+
+            let start = 0;
+            for (let i = 0; i < tableData.length; i++) {
+                if (
+                    typeof (tableData[i][blue]) != 'number' ||
+                    typeof (tableData[i][red]) != 'number' ||
+                    typeof (tableData[i][lum]) != 'number'
+                ) {
+                    continue;
+                }
+                let distance: number = tableData[i][columns.indexOf(modelForm[blueKey].value + " dist")];
+                let isDistNotValid = isNaN(distance) || distance === null
+                if (isRange && (isDistNotValid || ((distance/1000 > dist+(dist*(range/100)) || distance/1000 < dist-(dist*(range/100)))))){
+                    continue;
+                }
+                //if (clusterProForm !== null) {
+                  //  if (isRaRange) {
+                    //    let pmra = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmra")]
+                      //  if (pmra > raMotion + raRange|| pmra < raMotion - raRange)
+                        //    continue;
+                    //}
+                    //if (isDecRange) {
+                      //  let pmdec = tableData[i][columns.indexOf(modelForm[blueKey].value + " pmdec")]
+                        //if (pmdec > decMotion + decRange|| pmdec < decMotion - decRange)
+                          //  continue;
+                   // }
+                //}
+
+
+                //red-blue,lum
+
+                let x = tableData[i][blue]
+                let y = tableData[i][blue2]
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
+                chart[start++] = {
+                    x: x,
+                    y: y
+                };
+                scaleLimits = pointMinMax(scaleLimits, x, y);
+            }
+            while (chart.length !== start) {
+                chart.pop();
+            }
+            graphMaxMin.updateDataLimit(c, scaleLimits);
+            myChart.update()
+        }
+    }
 }
