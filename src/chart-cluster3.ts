@@ -62,6 +62,12 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   rangeCheckControl(true);
   clusterProCheckControl();
 
+  //add invisible box under the x axis of the charts to shift the buttons down
+  //document.getElementById('chart-div1').style.marginBottom = "10px";
+  //document.getElementById('chart-div2').style.marginBottom = "10px";
+  document.getElementById('chart-div3').style.marginBottom = "8px";
+  document.getElementById('chart-div4').style.marginBottom = "8px";
+
   //declare graphScale limits
   let graphMinMax = new graphScale(3);
 
@@ -122,7 +128,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.0925,
+      aspectRatio: 1.1175,
       hover: {
         mode: "nearest",
       },
@@ -156,7 +162,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           align: "start",
           padding: {
             top: -3,
-            bottom: 10,
+            bottom: 14,
           }
         },
         legend: {
@@ -230,7 +236,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 1.0925,
+      aspectRatio: 1.1175,
       hover: {
         mode: "nearest",
       },
@@ -266,8 +272,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           font: {
             size: 1},
           padding: {
-            top: -12.50,
-            bottom: 8,
+            top: 9,
+            bottom: -10,
           }
         },
         legend: {
