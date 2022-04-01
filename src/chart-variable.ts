@@ -528,13 +528,9 @@ function lightCurve(myChart: Chart) {
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-    
-    
 
     console.log(periodFoldingForm)
     periodFoldingForm.oninput = function () {
-        // console.log('triggered')
-        let period = parseFloat(periodFoldingForm.period_num.value);
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
@@ -544,34 +540,12 @@ function lightCurve(myChart: Chart) {
             0, range, 0.001, range, true
         );
 
-        if (period !== 0) {
-            let datasets = myChart.data.datasets;
-            let minMJD = myChart.data.minMJD;
-            let pfData = [];
-            for (let i = 0; i < datasets[2].data.length; i++) {
-                pfData.push({
-                    "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
-                    "y": (datasets[2].data[i] as ScatterDataPoint).y,
-                });
-                pfData.push({
-                    "x": pfData[pfData.length - 1].x + period,
-                    "y": pfData[pfData.length - 1].y,
-                })
-            }
-            myChart.data.datasets[4].data = pfData;
-            // console.log(myChart.data.datasets[4].data)
-        } else {
-            myChart.data.datasets[4].data = myChart.data.datasets[2].data;
-        }
-
     periodFoldingForm.oninput = throttle(function () {
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
-        }, 100);
+        }, 10);
     }
 
 }
-
-
 
 /**
  * This function updates the datapoints on the period folding chart based on the entry in the period folding
@@ -595,6 +569,9 @@ function updatePeriodFolding(myChart: Chart, period: number) {
             })
         }
         myChart.data.datasets[4].data = pfData;
+        myChart.options.scales['x'].min = 0;
+        myChart.options.scales['x'].max = (period * 2);
+        
     } else {
         for (let i = 0; i < datasets[2].data.length; i++) {
             pfData.push({
