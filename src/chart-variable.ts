@@ -437,10 +437,13 @@ function lightCurve(myChart: Chart) {
             const lcData = [];
             const len = Math.min(datasets[0].data.length, datasets[1].data.length);
             for (let i = 0; i < len; i++) {
-                lcData.push({
-                    "x": srcData[i]["x"],
-                    "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
-                });
+                if(srcData[i]["x"] !== null && srcData[i]["y"] !== null){
+
+                    lcData.push({
+                        "x": srcData[i]["x"],
+                        "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                    });
+                }
             }
             variableForm.mode[1].disabled = false;
             variableForm.mode[2].disabled = false;
@@ -453,6 +456,29 @@ function lightCurve(myChart: Chart) {
 
             updateChart(myChart, 2);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+
+
+
+
+            // slider behavior
+        console.log('inside the lightcurve');
+        console.log(lcData)
+        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+
+        // console.log('range',range)
+        // console.log('changed');
+        // console.log(range);
+        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
+        if (currentPosition > range){
+            currentPosition = range
+        }   // check to let the slider stay where it is      
+        linkInputs(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+                0, range, 0.01, currentPosition
+        );
         }
     }
 
@@ -511,42 +537,27 @@ function lightCurve(myChart: Chart) {
     //     0, 140, 0.01, 140
     // );
     // const variableForm = document.getElementById("variable-form");
-    console.log(lightCurveForm)
-    lightCurveForm.onchange = function () {
+    
+    
+
+    console.log(periodFoldingForm)
+    periodFoldingForm.oninput = function () {
+        console.log('triggered')
+        let period = parseFloat(periodFoldingForm.period_num.value);
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
-        console.log('changed');
-        console.log(range);
-        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
-        if (currentPosition > range){
-            currentPosition = range
-        }   // check to let the slider stay where it is      
         linkInputs(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-                0, range, 0.01, currentPosition
+            0, range, 0.01, range
         );
-        
-    }
-    console.log(periodFoldingForm)
-    periodFoldingForm.oninput = function () {
-        // console.log(myChart.data.datasets[2].data)
-        let period = parseFloat(periodFoldingForm.period_num.value);
-        
         // console.log(range)
-        if (whetherLinked == 0){
-            let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
-            let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-            let range = Math.abs(start-end);
-            linkInputs(
-                periodFoldingForm["period"],
-                periodFoldingForm["period_num"],
-                0, range, 0.01, range
-            );
+        // if (whetherLinked == 0){
+            
 
-            whetherLinked = whetherLinked + 1
-        }
+        //     whetherLinked = whetherLinked + 1
+        // }
         //initiation
 
         if (period !== 0) {
@@ -571,11 +582,35 @@ function lightCurve(myChart: Chart) {
 
     periodFoldingForm.oninput = throttle(function () {
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
-    }, 100);
-
+        }, 100);
     }
+
+    // lightCurveForm.oninput = function () {
+    //     console.log('inside the lightcurve');
+    //     // updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
+    //     // let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+    //     // let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+    //     // let range = Math.abs(start-end);
+    //     // console.log('range',range)
+    //     // console.log('changed');
+    //     // console.log(range);
+    //     // let currentPosition = parseFloat(periodFoldingForm.period_num.value);
+    //     // if (currentPosition > range){
+    //     //     currentPosition = range
+    //     // }   // check to let the slider stay where it is      
+    //     // linkInputs(
+    //     //     periodFoldingForm["period"],
+    //     //     periodFoldingForm["period_num"],
+    //     //         0, range, 0.01, currentPosition
+    //     // );
+    // }
 }
 
+// function NANkiller(arr) {
+//     return arr.filter(function(val){
+//         return !(!val||val==="")
+//     });
+// }
 
 /**
  * This function updates the datapoints on the period folding chart based on the entry in the period folding
