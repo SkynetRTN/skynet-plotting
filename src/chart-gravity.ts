@@ -56,26 +56,15 @@ export function gravity(): [Handsontable, Chart] {
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
-//   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
-//   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
-
-    //   '<button class = "graphControl" id="panLeft">◀</button>\n' +
-    //   '<button class = "graphControl" id="panRight">▶</button>\n' +
       '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
       '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
       '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
       '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
       '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
-    //   '<button type="button" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>\n'+
-    //   '<button class = "scaleSelection" id="Reset"><center class = "ScaleControl">Reset</center></button>\n' +
-    //   '<button class="scaleSelection" id="ResetLabel">\n' +
-    //     '<input type="radio" class="scaleSelection" id="Reset" value="Reset" />&nbsp;Reset&nbsp;</label>\n' +
-  '</div>\n'
-    )
+  '</div>\n')
 
     // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
     let Reset = document.getElementById("Reset") as HTMLInputElement;
-    // console.log(Reset)
     let panLeft = document.getElementById("panLeft") as HTMLInputElement;
     let panRight = document.getElementById("panRight") as HTMLInputElement;
     let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
@@ -175,7 +164,7 @@ export function gravity(): [Handsontable, Chart] {
       datasets: [
         {
           label: 'Model',
-          data: null,
+          data: [],
           borderColor: colors['blue'],
           backgroundColor: colors['blue'],
           pointRadius: 0,
@@ -305,16 +294,6 @@ console.log(myChart);
   );
   return [hot, myChart];
 }
-
-/**
- * This function handles the uploaded file to the variable chart. Specifically, it parse the file
- * and load related information into the table.
- * DATA FLOW: file -> table
- * @param {Event} evt The uploadig event
- * @param {Handsontable} table The table to be updated
- * @param {Chartjs} myChart
- */
-
 //remember later to change the file type to .hdf5
 
 export function gravityFileUpload(
@@ -386,59 +365,14 @@ function updateWave(
       ) {
       continue;
         }
-        //red-blue,lum
     
     let x = (tableData[i][0]);
     let y = (tableData[i][1])
-    // let x2 = (tableData[i][0] + merge);
-    // let y2 = (tableData[i][2]*(1-((0.5*Math.sin(inc))*(dist/100))));
     chart[start++] = {
       x: x,
-     // x2: x2,
       y: y,
-     // y2: y2,
         };
-//console.log(x);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//console.log(y);/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//broke chart
-  //while (chart.length !== start) {
-    //chart.pop();
   }
 
   myChart.update()
 }
-
- // }
-   
-/**
- *  This function takes a form to obtain the 4 parameters (a, p, phase, tilt) that determines the
- *  relationship between a moon's angular distance and Julian date, and generates a dataset that
- *  spans over the range determined by the max and min value present in the table.
- *  @param table:   A table used to determine the max and min value for the range
- *  @param form:    A form containing the 4 parameters (amplitude, period, phase, tilt)
- *  @param chart:   The Chartjs object to be updated.
- */
-//insert graviational wave function here
-
-/**
- *  This function generates the data used for functions "updateHRModel" and "gravityGenerator."
- *
- *  @param d:            Distance to the Gravity
- *  @param r:            % of the range
- *  @param age:          Age of the Gravity
- *  @param reddening:    The reddening of the observation
- *  @param metallicity:  Metallicity of the gravity
- *  @param start:        The starting point of the data points
- *  @param end:          The end point of the data points
- *  @param steps:        Steps generated to be returned in the array. Default is 500
- *  @returns {Array}
- */
-
- 
-
-
-    //finding the maximum and minimum of y value for chart scaling
-    
-  
-
