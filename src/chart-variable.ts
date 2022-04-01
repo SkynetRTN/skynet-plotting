@@ -528,21 +528,12 @@ function lightCurve(myChart: Chart) {
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-
-    console.log(myChart.data.datasets[2].data.length)
-    let whetherLinked = 0
-    // linkInputs(
-    //     periodFoldingForm["period"],
-    //     periodFoldingForm["period_num"],
-    //     0, 140, 0.01, 140
-    // );
-    // const variableForm = document.getElementById("variable-form");
     
     
 
     console.log(periodFoldingForm)
     periodFoldingForm.oninput = function () {
-        console.log('triggered')
+        // console.log('triggered')
         let period = parseFloat(periodFoldingForm.period_num.value);
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
@@ -552,13 +543,6 @@ function lightCurve(myChart: Chart) {
             periodFoldingForm["period_num"],
             0, range, 0.01, range
         );
-        // console.log(range)
-        // if (whetherLinked == 0){
-            
-
-        //     whetherLinked = whetherLinked + 1
-        // }
-        //initiation
 
         if (period !== 0) {
             let datasets = myChart.data.datasets;
@@ -585,32 +569,9 @@ function lightCurve(myChart: Chart) {
         }, 100);
     }
 
-    // lightCurveForm.oninput = function () {
-    //     console.log('inside the lightcurve');
-    //     // updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
-    //     // let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
-    //     // let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-    //     // let range = Math.abs(start-end);
-    //     // console.log('range',range)
-    //     // console.log('changed');
-    //     // console.log(range);
-    //     // let currentPosition = parseFloat(periodFoldingForm.period_num.value);
-    //     // if (currentPosition > range){
-    //     //     currentPosition = range
-    //     // }   // check to let the slider stay where it is      
-    //     // linkInputs(
-    //     //     periodFoldingForm["period"],
-    //     //     periodFoldingForm["period_num"],
-    //     //         0, range, 0.01, currentPosition
-    //     // );
-    // }
 }
 
-// function NANkiller(arr) {
-//     return arr.filter(function(val){
-//         return !(!val||val==="")
-//     });
-// }
+
 
 /**
  * This function updates the datapoints on the period folding chart based on the entry in the period folding
