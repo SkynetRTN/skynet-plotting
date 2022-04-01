@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { throttle, updateLabels, updateTableHeight, sanitizeTableData, linkInputs } from "./util"
+import { throttle, updateLabels, updateTableHeight, sanitizeTableData, linkInputs, linkInputsVar } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 
@@ -474,10 +474,10 @@ function lightCurve(myChart: Chart) {
         if (currentPosition > range){
             currentPosition = range
         }   // check to let the slider stay where it is      
-        linkInputs(
+        linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-                0, range, 0.01, currentPosition
+                0, range, 0.001, currentPosition, true
         );
         }
     }
@@ -538,10 +538,10 @@ function lightCurve(myChart: Chart) {
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
-        linkInputs(
+        linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            0, range, 0.01, range
+            0, range, 0.001, range, true
         );
 
         if (period !== 0) {
