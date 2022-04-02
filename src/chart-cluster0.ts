@@ -2,7 +2,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors } from "./config";
-import {linkInputs,updateLabels} from "./util";
+import {linkInputs,updateLabels, throttle} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
@@ -141,7 +141,19 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
       }
     },
   });
+  // update chart whenever the model form changes
+  const fps = 100;
+  const frameTime = Math.floor(1000 / fps);
+  clusterForm.oninput = throttle(
+    function () {
+      updateHRModel(modelForm, hot, [myChart]);
+    },
+    frameTime);
 
+  // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
+  modelForm.oninput = throttle(function () {
+    updateHRModel(modelForm, hot, [myChart]);
+  }, 100);
   //customize cursor icon
   document.getElementById('chart-div').style.cursor = "move"
 
