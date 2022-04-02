@@ -5,7 +5,7 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterSimControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -28,11 +28,16 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   const clusterSimForm = document.getElementById("clustersim-form") as ClusterSimForm;
 
   // Link each slider with corresponding text box
-  linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
+  linkInputs(clusterSimForm["starNum"], clusterSimForm["starNum_num"], 1, 100, 1, 1);
+  linkInputs(clusterSimForm["noise"], clusterSimForm["noise_num"], 0.1, 100, 0.01, 0.1, true);
+  linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 0.1, true);
+  linkInputs(clusterForm["distScatter"], clusterForm["distScatter_num"], 0, 100, 0.01, 0.1);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["redScatter"], clusterForm["redScatter_num"], 0, 100, 0.01, 0.1);
+  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
+  linkInputs(modelForm["ageScatter"], modelForm["ageScatter_num"], 0, 100, 0.01, 0.1);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-
+  linkInputs(modelForm["metalScatter"], modelForm["metalScatter_num"], 0, 100, 0.01, 0.1);
   //declare graphScale limits
   let graphMinMax = new graphScale();
 
@@ -43,7 +48,6 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
-  rangeCheckControl(true)
   const myChart = new Chart(ctx, {
     type: "line",
     data: {

@@ -183,12 +183,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-    } else if (chart === 'cluster') {
+    } else if (chart === 'cluster0') {
         cluster_objects = cluster0();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
+    }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
         objects = [cluster_objects[0], cluster_objects[1][0]]

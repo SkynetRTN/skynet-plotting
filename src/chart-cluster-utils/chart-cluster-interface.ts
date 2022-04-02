@@ -282,7 +282,7 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         '<div class="col-sm-4 range"><input type="range" title="Noise" name="noise"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Noise" name="noise_num" class="field"></div>\n' +
         "</div>\n" +
-        '<div class="row">\n' +
+        "</form>\n" +
         '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
@@ -290,16 +290,9 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
-        //add a checkbox that disables the corresponding slider
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" id="distrangeCheck"></input></div>\n' +
-        '<div class = "col-sm-5 des">±Range (%):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
         '<div class="col-sm-6 des">Scatter (%):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance Scatter" name="distScatter"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Distance Scatter" name="disScatter_num" class="field"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Distance Scatter" name="distScatter_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
