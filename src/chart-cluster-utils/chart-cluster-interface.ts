@@ -327,9 +327,27 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         '<div class="col-sm-2 text"><input type="number" title="Metal Scatter" name="metalScatter_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
+        '<div class="col-lg-6 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="row" style = "padding-top: 12.25px">\n'+
+        "</div>\n" +
+        '<div class="row">\n'+
         '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         "</div>\n" +
-        '<div class="row">\n'
+        '<div class="row">\n' 
     if (chartCounts === 1) {
         for (let i = 0; i < chartCounts; i++) {
             let num = ""
