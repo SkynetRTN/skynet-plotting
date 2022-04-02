@@ -125,6 +125,10 @@ interface ClusterForm extends HTMLFormElement {
     distrange_num: HTMLInputElement,
     err_num: HTMLInputElement,
     red_num: HTMLInputElement,
+    distScatter: HTMLInputElement,
+    distScatter_num: HTMLInputElement,
+    redScatter: HTMLInputElement,
+    redScatter_num: HTMLInputElement,
 }
 
 interface ModelForm extends HTMLFormElement {
@@ -132,6 +136,10 @@ interface ModelForm extends HTMLFormElement {
     age_num: HTMLInputElement,
     metal: HTMLInputElement,
     metal_num: HTMLInputElement,
+    ageScatter: HTMLInputElement,
+    ageScatter_num: HTMLInputElement,
+    metalScatter: HTMLInputElement,
+    metalScatter_num: HTMLInputElement,
     red: HTMLInputElement,
     blue: HTMLInputElement,
     lum: HTMLInputElement,
@@ -170,4 +178,10 @@ interface GravityForm extends HTMLFormElement {
     Time: HTMLInputElement,
     Strain: HTMLInputElement,
 
+}
+interface ClusterSimForm extends HTMLFormElement {
+    starNum: HTMLInputElement,
+    starNum_num: HTMLInputElement,
+    noise: HTMLInputElement,
+    noise_num: HTMLInputElement,
 }
