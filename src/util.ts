@@ -159,7 +159,7 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         }, debounceTime);
     } else {
         if(Math.log(min * 0.999) === -Infinity){
-            slider.min = (-4).toString();
+            slider.min = (-5).toString();
         }else{
             slider.min = Math.log(min * 0.999).toString();
         }
