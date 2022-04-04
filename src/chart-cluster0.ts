@@ -44,11 +44,12 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   // create table
   const container = document.getElementById("table-div");
   const hot = defaultTable(container)
-  // hide table
+  // hide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
   container.style.display = "none";
   document.getElementById('add-row-button').hidden = true;
   document.getElementById('file-upload-button').hidden = true;
-
+  });
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");

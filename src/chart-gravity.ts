@@ -128,6 +128,12 @@ export function gravity(): [Handsontable, Chart] {
   document.getElementById('xAxisPrompt').innerHTML = "X Axis";
   document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   const container = document.getElementById("table-div");
+        // unhide table whenever interface is selected
+        document.getElementById("chart-type-form").addEventListener("click", () => {
+          container.style.display = "block";
+          document.getElementById('add-row-button').hidden = false;
+          document.getElementById('file-upload-button').hidden = false;
+          });
   const hot = new Handsontable(
     container,
     Object.assign({}, tableCommonOptions, {

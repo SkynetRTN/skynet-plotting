@@ -41,6 +41,12 @@ export function variable(): [Handsontable, Chart] {
     }
 
     const container = document.getElementById('table-div');
+          // unhide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
+    container.style.display = "block";
+    document.getElementById('add-row-button').hidden = false;
+    document.getElementById('file-upload-button').hidden = false;
+    });
     const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Julian Date', 'Source1', 'Source2'],

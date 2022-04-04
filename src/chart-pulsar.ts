@@ -126,6 +126,12 @@ export function pulsar(): [Handsontable, Chart] {
     }
 
     const container = document.getElementById('table-div');
+          // unhide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
+    container.style.display = "block";
+    document.getElementById('add-row-button').hidden = false;
+    document.getElementById('file-upload-button').hidden = false;
+    });
     const tableOptions = {
         data: tableData,
         colHeaders: ['Time', 'Channel 1', 'Channel 2'],
