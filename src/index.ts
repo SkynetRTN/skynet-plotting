@@ -12,6 +12,7 @@ import { moon } from './chart-moon';
 import { scatter } from './chart-scatter';
 import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
+import { variableTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
 import {cluster0} from './chart-cluster0';
@@ -170,7 +171,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }
+        }     
+    } else if (chart === 'variableTest') {
+        objects = variableTest();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }    
     } else if (chart === 'spectrum') {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -248,6 +255,7 @@ function chartType(chart: string) {
             updateChartInfo(objects[1], chartInfoForm);
         }
     };
+    console.log(chartInfoForm)
     objects[1].update('none');
 
 }

@@ -1,22 +1,23 @@
 'use strict';
-
+/*test*/ 
 import Chart from "chart.js/auto";
 import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import {sanitizeTableData, updateLabels, updateTableHeight } from "./util"
+import { throttle, updateLabels, updateTableHeight, linkInputsVar } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
-import { PulsarMode } from "./types/chart.js";
+import { PulsarMode } from "./types/chart.js/index.js";
+
 
 /**
  *  Returns generated table and chart for variable.
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
-export function variable(): [Handsontable, Chart] {
+export function variableTest(): [Handsontable, Chart] {
     // console.log("root func called");
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
+        '<form title="VariableTest" id="variableTest-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
         '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
         '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
@@ -41,12 +42,6 @@ export function variable(): [Handsontable, Chart] {
     }
 
     const container = document.getElementById('table-div');
-          // unhide table whenever interface is selected
-  document.getElementById("chart-type-form").addEventListener("click", () => {
-    container.style.display = "block";
-    document.getElementById('add-row-button').hidden = false;
-    document.getElementById('file-upload-button').hidden = false;
-    });
     const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
         colHeaders: ['Julian Date', 'Source1', 'Source2'],
@@ -159,7 +154,7 @@ export function variable(): [Handsontable, Chart] {
 
     lightCurve(myChart);
 
-    const variableForm = document.getElementById("variable-form") as VariableForm;
+    const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.onchange = function () {
         const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
         if (mode === "lc") {
@@ -294,13 +289,13 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
 
-        const variableForm = document.getElementById("variable-form") as VariableForm;
+        const variableForm = document.getElementById("variableTest-form") as VariableForm;
         variableForm.mode[1].disabled = true;
         variableForm.mode[2].disabled = true;
 
         myChart.data.modeLabels = {
             lc: { t: 'Title', x: 'x', y: 'y' },
-            ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+            ft: { t: 'Periodog ram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
@@ -357,8 +352,8 @@ function updateVariable(table: Handsontable, myChart: Chart) {
         myChart.data.datasets[i].data = [];
     }
 
-    let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
-    // let tableData = table.getData();
+    // let tableData = sanitizeTableData(table.getData(), [0, 1, 2]);
+    let tableData = table.getData();
     let src1Data = [];
     let src2Data = [];
     tableData = tableData.sort(sortJdate)
@@ -385,7 +380,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
 
     updateChart(myChart, 0, 1);
 
-    const variableForm = document.getElementById("variable-form") as VariableForm;
+    const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.mode.value = "lc";
     variableForm.onchange(null);
 }
@@ -420,7 +415,7 @@ function lightCurve(myChart: Chart) {
         '</div>\n' +
         '</form>\n';
     document.getElementById('light-curve-div').innerHTML = lcHTML;
-    const variableForm = document.getElementById('variable-form') as VariableForm;
+    const variableForm = document.getElementById('variableTest-form') as VariableForm;
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
     lightCurveForm.oninput = function () {
         if (lightCurveForm.source.value === "none") {
@@ -442,10 +437,13 @@ function lightCurve(myChart: Chart) {
             const lcData = [];
             const len = Math.min(datasets[0].data.length, datasets[1].data.length);
             for (let i = 0; i < len; i++) {
-                lcData.push({
-                    "x": srcData[i]["x"],
-                    "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
-                });
+                if(srcData[i]["x"] !== null && srcData[i]["y"] !== null){
+
+                    lcData.push({
+                        "x": srcData[i]["x"],
+                        "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                    });
+                }
             }
             variableForm.mode[1].disabled = false;
             variableForm.mode[2].disabled = false;
@@ -458,6 +456,29 @@ function lightCurve(myChart: Chart) {
 
             updateChart(myChart, 2);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+
+
+
+
+            // slider behavior
+        console.log('inside the lightcurve');
+        console.log(lcData)
+        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+
+        // console.log('range',range)
+        // console.log('changed');
+        // console.log(range);
+        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
+        if (currentPosition > range){
+            currentPosition = range
+        }   // check to let the slider stay where it is      
+        linkInputsVar(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+                0, range, 0.001, currentPosition
+        );
         }
     }
 
@@ -497,39 +518,74 @@ function lightCurve(myChart: Chart) {
 
     const pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        "</div>\n" +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period (days): </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.0001" name="pf" title="Folding Period" value=0></input></div>\n' +
-        '</div>\n' +
-        '</form>\n';
+        '<div class="col-sm-5 des">Folding Period:</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field"></div>\n' +
+        '</div>\n' ;
+
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
-    periodFoldingForm.oninput = function () {
-        let period = parseFloat(periodFoldingForm.pf.value);
-        if (period !== 0) {
-            let datasets = myChart.data.datasets;
-            let minMJD = myChart.data.minMJD;
-            let pfData = [];
-            for (let i = 0; i < datasets[2].data.length; i++) {
-                pfData.push({
-                    "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
-                    "y": (datasets[2].data[i] as ScatterDataPoint).y,
-                });
-                pfData.push({
-                    "x": pfData[pfData.length - 1].x + period,
-                    "y": pfData[pfData.length - 1].y,
-                })
-            }
-            myChart.data.datasets[4].data = pfData;
-        } else {
-            myChart.data.datasets[4].data = myChart.data.datasets[2].data;
-        }
 
-        updateChart(myChart, 4);
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+    console.log(periodFoldingForm)
+    periodFoldingForm.oninput = function () {
+        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+        linkInputsVar(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+            0, range, 0.001, range
+        );
+
+    periodFoldingForm.oninput = throttle(function () {
+        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
+        }, 10);
     }
+
 }
+
+/**
+ * This function updates the datapoints on the period folding chart based on the entry in the period folding
+ * form. 
+ * @param {Chart} myChart 
+ * @param {Number} dataIndex The period used to fold the data.
+ */
+function updatePeriodFolding(myChart: Chart, period: number) {
+    let datasets = myChart.data.datasets;
+    let minMJD = myChart.data.minMJD;
+    let pfData = [];
+    if (period !== 0) {
+        for (let i = 0; i < datasets[2].data.length; i++) {
+            pfData.push({
+                "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
+                "y": (datasets[2].data[i] as ScatterDataPoint).y,
+            });
+            pfData.push({
+                "x": pfData[pfData.length - 1].x + period,
+                "y": pfData[pfData.length - 1].y,
+            })
+        }
+        myChart.data.datasets[4].data = pfData;
+        myChart.options.scales['x'].min = 0;
+        myChart.options.scales['x'].max = (period * 2);
+        
+    } else {
+        for (let i = 0; i < datasets[2].data.length; i++) {
+            pfData.push({
+                "x": 0, 
+                "y": (datasets[2].data[i] as ScatterDataPoint).y
+            })
+        }
+        myChart.data.datasets[4].data = pfData;
+    }
+
+    updateChart(myChart, 4);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+}
+
 
 /**
  * This function set up the chart by hiding all unnecessary datasets, and then adjust the chart scaling
