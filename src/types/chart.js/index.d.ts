@@ -16,6 +16,15 @@ declare module 'chart.js/auto'{
             pf: ModeLabels,
             lastMode: PulsarMode
         },
+        sonification?:{
+            audioContext: AudioContext,
+            audioSource: AudioBufferSourceNode,
+            audioControls:
+            {
+                playPause: HTMLButtonElement,
+                save: HTMLButtonElement
+            },
+        }
     }
     interface ChartDatasetProperties<TType extends ChartType, TData> {
         immutableLabel?: boolean,
