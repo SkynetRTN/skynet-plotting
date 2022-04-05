@@ -40,6 +40,12 @@ export function scatter(): [Handsontable, Chart] {
     }
 
     const container = document.getElementById('table-div');
+          // unhide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
+    container.style.display = "block";
+    document.getElementById('add-row-button').hidden = false;
+    document.getElementById('file-upload-button').hidden = false;
+    });
     const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['Longitude', 'Latitude', 'Distance'],

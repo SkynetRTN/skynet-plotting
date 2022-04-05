@@ -268,3 +268,122 @@ export function clusterProCheckControl (){
           }
         );
 }
+
+//Since cluster Sim is going to be a little different, I'm going to make a separate interface function for it
+export function insertClusterSimControls(chartCounts:number = 1) {
+    let htmlContent =  '<form title="Sim Parameters" id="clustersim-form">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Number of Stars:</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Star Number" name="starNum"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Star Number" name="starNum_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Signal to Noise:</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Noise" name="noise"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Noise" name="noise_num" class="field"></div>\n' +
+        "</div>\n" +
+        "</form>\n" +
+        '<form title="Cluster Diagram" id="cluster-form">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Scatter (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Distance Scatter" name="distScatter"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Distance Scatter" name="distScatter_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Scatter (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening Scatter" name="redScatter"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Reddening Scatter" name="redScatter_num" class="field"></div>\n' +
+        "</div>\n" +
+        "</form>\n" +
+        '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Scatter (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Age Scatter" name="ageScatter"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Age Scatter" name="ageScatter_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Scatter (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metal Scatter" name="metalScatter"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Metal Scatter" name="metalScatter_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-6 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-lg-3 des">     </div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="row" style = "padding-top: 12.25px">\n'+
+        "</div>\n" +
+        '<div class="row">\n'+
+        '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' 
+    if (chartCounts === 1) {
+        for (let i = 0; i < chartCounts; i++) {
+            let num = ""
+            if (i !== 0) {
+                num = (i+1).toString()
+            }
+            //add a number that corresponds what graph each row of drop down boxes controls
+            htmlContent +=
+                '<div class="col-sm-4">Blue:</div>\n' +
+                '<div class="col-sm-4">Red:</div>\n' +
+                '<div class="col-sm-4">Luminosity:</div>\n' +
+                "</div>\n" +
+                '<div class="row">\n' +
+                '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
+                '<option value="B" title="B filter" selected>B</option></div>\n' +
+                '<option value="V" title="V filter">V</option></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
+                '<div class="col-sm-4"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
+                '<option value="B" title="B filter">B</option></div>\n' +
+                '<option value="V" title="V filter" selected>V</option></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n' +
+                '<div class="col-sm-4"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
+                '<option value="B" title="B filter">B</option></div>\n' +
+                '<option value="V" title="V filter" selected>V</option></div>\n' +
+                '<option value="R" title="R filter">R</option></select></div>\n'
+        }
+    }
+
+
+    htmlContent += "</div>\n" + "</form>\n"
+
+
+    document
+        .getElementById("input-div")
+        .insertAdjacentHTML(
+            "beforeend",
+            htmlContent
+        );
+}

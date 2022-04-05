@@ -2,10 +2,10 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors } from "./config";
-import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
+import {linkInputs,updateLabels, throttle} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {ChartScaleControl, graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -15,8 +15,8 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
-  insertClusterControls();
+export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
+  insertClusterSimControls();
   //make graph scaling options visible to users
   document.getElementById('axis-label1').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
@@ -25,30 +25,34 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
+  const clusterSimForm = document.getElementById("clustersim-form") as ClusterSimForm;
 
   // Link each slider with corresponding text box
-  linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
-  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
+  linkInputs(clusterSimForm["starNum"], clusterSimForm["starNum_num"], 1, 100, 1, 1);
+  linkInputs(clusterSimForm["noise"], clusterSimForm["noise_num"], 0.1, 100, 0.01, 0.1, true);
+  linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 0.1, true);
+  linkInputs(clusterForm["distScatter"], clusterForm["distScatter_num"], 0, 100, 0.01, 0);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["redScatter"], clusterForm["redScatter_num"], 0, 100, 0.01, 0);
+  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
+  linkInputs(modelForm["ageScatter"], modelForm["ageScatter_num"], 0, 100, 0.01, 0);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
-
+  linkInputs(modelForm["metalScatter"], modelForm["metalScatter_num"], 0, 100, 0.01, 0);
   //declare graphScale limits
   let graphMinMax = new graphScale();
 
   // create table
   const container = document.getElementById("table-div");
   const hot = defaultTable(container)
-      // unhide table whenever interface is selected
-      document.getElementById("chart-type-form").addEventListener("click", () => {
-        container.style.display = "block";
-        document.getElementById('add-row-button').hidden = false;
-        document.getElementById('file-upload-button').hidden = false;
-        });
+  // hide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
+  container.style.display = "none";
+  document.getElementById('add-row-button').hidden = true;
+  document.getElementById('file-upload-button').hidden = true;
+  });
   // create chart
   const canvas = document.getElementById("myChart") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
-  rangeCheckControl(true)
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -138,7 +142,19 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
       }
     },
   });
+  // update chart whenever the model form changes
+  const fps = 100;
+  const frameTime = Math.floor(1000 / fps);
+  clusterForm.oninput = throttle(
+    function () {
+      updateHRModel(modelForm, hot, [myChart]);
+    },
+    frameTime);
 
+  // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
+  modelForm.oninput = throttle(function () {
+    updateHRModel(modelForm, hot, [myChart]);
+  }, 100);
   //customize cursor icon
   document.getElementById('chart-div').style.cursor = "move"
 
@@ -156,42 +172,11 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     }, 10)
   }
 
-  //update table height and scatter plotting
-  const update = function () {
-    updateTableHeight(hot);
-    updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
-  };
-
-  // link chart to table
-  hot.updateSettings({
-    afterChange: update,
-    afterRemoveRow: update,
-    afterCreateRow: update,
-  });
-
-  //update scatter plotting when clusterFrom being updated by user
-  const fps = 100;
-  const frameTime = Math.floor(1000 / fps);
-  clusterForm.oninput = throttle(
-    function () {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
-    },
-    frameTime);
-
-  // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
-  modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart], (chartNum: number) => {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax, chartNum);
-    });
-  }, 100);
-
 
   //initializing website
-  update();
   updateHRModel(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
-  (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
 
 
   myChart.options.plugins.title.text = "Title";
@@ -208,10 +193,3 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   return [hot, [myChart], modelForm, graphMinMax];
 }
-
-
-
-
-
-
-

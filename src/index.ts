@@ -12,8 +12,10 @@ import { moon } from './chart-moon';
 import { scatter } from './chart-scatter';
 import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
+import { variableTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
+import {cluster0} from './chart-cluster0';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
@@ -170,7 +172,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }
+        }     
+    } else if (chart === 'variableTest') {
+        objects = variableTest();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }    
     } else if (chart === 'spectrum') {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -183,6 +191,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
+    } else if (chart === 'cluster0') {
+        cluster_objects = cluster0();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+    }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
         objects = [cluster_objects[0], cluster_objects[1][0]]
@@ -250,6 +265,7 @@ function chartType(chart: string) {
         };
     }
 
+    console.log(chartInfoForm)
     objects[1].update('none');
 
 }
