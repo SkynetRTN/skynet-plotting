@@ -54,7 +54,12 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   // create table
   const container = document.getElementById("table-div");
   const hot = defaultTable(container)
-
+        // unhide table whenever interface is selected
+        document.getElementById("chart-type-form").addEventListener("click", () => {
+          container.style.display = "block";
+          document.getElementById('add-row-button').hidden = false;
+          document.getElementById('file-upload-button').hidden = false;
+          });
 
 
   // create chart

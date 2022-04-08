@@ -39,6 +39,7 @@ export function moon(): [Handsontable, Chart] {
     document.getElementById('axis-label3').style.display = 'inline';
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
+
     // Link each slider with corresponding text box
     const moonForm = document.getElementById("moon-form") as MoonForm;
     linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.01, 30, true);

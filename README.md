@@ -9,7 +9,14 @@ Now you can start a testing server that will automatically reload as you make ch
 ```bash
 $ npm start
 ```
-To build the site, run
+To build the site, please double check in the file`./src/chart-cluster-utils/chart-cluster-util.ts`, the API url is the production one
+
+```js
+//production url
+export const baseUrl:string = "https://skynet.unc.edu/graph-api"
+```
+
+then run
 ```bash
 $ npm run build
 ```

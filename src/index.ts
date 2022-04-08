@@ -26,6 +26,7 @@ import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/au
 import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
+import { pause } from './sonification';
 
 /**
  *  Initializing the page when the website loads
@@ -255,6 +256,15 @@ function chartType(chart: string) {
             updateChartInfo(objects[1], chartInfoForm);
         }
     };
+
+    if(objects[1].data.sonification)
+    {
+        document.getElementById('chart-type-form').onchange = function () {
+            pause(objects[1]);
+            chartType(((document.getElementById('chart-type-form') as HTMLFormElement ).elements[0] as HTMLInputElement).value);
+        };
+    }
+
     console.log(chartInfoForm)
     objects[1].update('none');
 
