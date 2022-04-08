@@ -4,16 +4,11 @@ import Chart from "chart.js/auto";
 import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
-import { saveAs } from 'file-saver';
-
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight, formatTime, getDateString } from "./util"
+import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
 import { pause, play, saveSonify } from "./sonification";
-import { build } from "vite";
-//import { arrayMax, stringify } from "handsontable/helpers";
-import { selectElementIfAllowed } from "handsontable/helpers/dom";
 
 /**
  *  Returns generated table and chart for pulsar.
