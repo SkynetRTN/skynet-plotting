@@ -320,6 +320,7 @@ export class ChartScaleControl {
                     this.zoompanDeactivate(this.modelForm, i);
                 }
             };
+            this.charts[i].options.onClick = ()=>{label.click()}
         }
     }
 
