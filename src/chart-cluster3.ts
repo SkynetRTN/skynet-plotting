@@ -69,7 +69,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   document.getElementById('chart-div4').style.marginBottom = "8px";
 
   //declare graphScale limits
-  let graphMinMax = new graphScale(3);
+  let graphMinMax = new graphScale(2);
 
   // create table
   const container = document.getElementById("table-div");
