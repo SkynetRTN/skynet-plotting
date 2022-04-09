@@ -539,14 +539,14 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
 }
 
 export function updateProForm(minmax: number[], clusterProForm: ClusterProForm ) {
-  let maxRa = parseFloat(minmax[0].toFixed(1))
-  let minRa = parseFloat(minmax[1].toFixed(1))
-  let maxDec = parseFloat(minmax[2].toFixed(1))
-  let minDec = parseFloat(minmax[3].toFixed(1))
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, ((maxRa+minRa)/2), false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (maxRa-minRa), 0.1, (maxRa-minRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, ((maxDec+minDec)/2), false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (maxDec-minDec), 0.1, (maxDec-minDec), false, false);
+  let maxRa = floatTo1(minmax[0]);
+  let minRa = floatTo1(minmax[1]);
+  let maxDec = floatTo1(minmax[2]);
+  let minDec = floatTo1(minmax[3]);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, floatTo1((maxRa+minRa)/2), false, false);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, floatTo1(maxRa-minRa), 0.1, floatTo1(maxRa-minRa), false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, floatTo1((maxDec+minDec)/2), false, false);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, floatTo1(maxDec-minDec), 0.1, floatTo1(maxDec-minDec), false, false);
 }
 
 export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
@@ -583,4 +583,8 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   myChart2.data.datasets[5].data = [{x: maxRa+10000, y: decmotion_num-decrange_num}, {x: minRa-10000, y: decmotion_num-decrange_num}];
   myChart2.data.datasets[6].data = [{x: maxRa+10000, y: decmotion_num+decrange_num}, {x: minRa-10000, y: decmotion_num+decrange_num}];
   myChart2.update();
+}
+
+function floatTo1(num: number){
+  return parseFloat(num.toFixed(1))
 }
