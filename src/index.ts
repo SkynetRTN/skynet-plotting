@@ -265,7 +265,6 @@ function chartType(chart: string) {
         };
     }
 
-    console.log(chartInfoForm)
     objects[1].update('none');
 
 }
