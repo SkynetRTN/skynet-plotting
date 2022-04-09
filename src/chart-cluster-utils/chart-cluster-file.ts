@@ -289,6 +289,13 @@ function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, M
     let datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
     while (true) {
         try {
+            while (true) {
+                if (sortedData[data_i]['id'] < gaia[gaia_i]['id']) {
+                    data_i++;
+                } else {
+                    break;
+                }
+            }
             // @ts-ignore
             if (sortedData[data_i]['id'] === gaia[gaia_i]['id']) {
                 sortedData[data_i]['distance'] = gaia[gaia_i]['range']
