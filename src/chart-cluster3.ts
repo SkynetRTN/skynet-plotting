@@ -83,7 +83,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   // create chart
   const ctx1 = (document.getElementById("myChart3") as HTMLCanvasElement).getContext('2d');
 
-  const myChart3 = new Chart(ctx1, {
+  const myChart1 = new Chart(ctx1, {
     type: "line",
     data: {
       labels: ["Model", "Data"],
@@ -191,7 +191,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
 
   const ctx2 = (document.getElementById("myChart4") as HTMLCanvasElement).getContext('2d');
 
-  const myChart4 = new Chart(ctx2, {
+  const myChart2 = new Chart(ctx2, {
         type: "line",
     data: {
       labels: ["Model", "Data"],
@@ -296,7 +296,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
 
   const ctx3 = (document.getElementById("myChart2") as HTMLCanvasElement).getContext('2d');
 
-  const myChart2 = new Chart(ctx3, {
+  const myChart3 = new Chart(ctx3, {
     type: "line",
     data: {
       labels: ["Data"],
@@ -448,31 +448,31 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   //pull the proper motion ra and dec values from the table
   //change the default font size of myChart2
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
-  let graphControl = new ChartScaleControl([myChart3, myChart4], modelForm, graphMinMax);
-  myChart3.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)};
-  myChart3.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
-  myChart4.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-  myChart4.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  let graphControl = new ChartScaleControl([myChart1, myChart2], modelForm, graphMinMax);
+  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)};
+  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
+  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
 
 
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
-      myChart3.data.datasets[2].backgroundColor = HRrainbow(myChart3,
+      myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
         modelForm["red"].value, modelForm["blue"].value);
-      myChart4.data.datasets[2].backgroundColor = HRrainbow(myChart4,
+      myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
             modelForm["red2"].value, modelForm["blue2"].value);
+      myChart1.update();
       myChart3.update();
       myChart2.update();
-      myChart4.update();
       updateTableHeight(hot);
     }, 10)
   }
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
-    removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    removeMotionScatter(hot, [myChart3], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   };
   // link chart to table
   hot.updateSettings({
@@ -484,57 +484,57 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   const frameTime = Math.floor(1000 / fps);
 
   clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
-      removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);},
+    function () { updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+      removeMotionScatter(hot, [myChart3], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);},
     frameTime);
 
   //update the graph continuoustly when the values in the form change
   clusterProForm.oninput = throttle( ()=>{
-    updateChart2(myChart2, clusterProForm, minmax)
-    updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
-    removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    updateChart2(myChart3, clusterProForm, minmax)
+    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
+    removeMotionScatter(hot, [myChart3], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
   }, frameTime)
 
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart3, myChart4], (chartNum: number) => {
-      updateScatter(hot, [myChart3, myChart4], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);
-      removeMotionScatter(hot, [myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);}
+    updateHRModel(modelForm, hot, [myChart1, myChart2], (chartNum: number) => {
+      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);
+      removeMotionScatter(hot, [myChart3], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);}
     );
    }, 100);
 
   //initializing website
   update();
   let minmax = proFormMinmax(hot, modelForm)
-  updateHRModel(modelForm, hot, [myChart3, myChart4]);
+  updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
-  myChart2.options.scales["x"].title.text = "Motion in RA (mas/yr)";
-  myChart2.options.scales["y"].title.text = "Motion in Dec (mas/yr)";
-  myChart3.options.plugins.title.text = "Title";
-  myChart3.options.scales["x"].title.text = "x1";
-  myChart3.options.scales["y"].title.text = "y1";
-  myChart4.options.scales["x"].title.text = "x2";
-  myChart4.options.scales["y"].title.text = "y2";
+  myChart3.options.scales["x"].title.text = "Motion in RA (mas/yr)";
+  myChart3.options.scales["y"].title.text = "Motion in Dec (mas/yr)";
+  myChart1.options.plugins.title.text = "Title";
+  myChart1.options.scales["x"].title.text = "x1";
+  myChart1.options.scales["y"].title.text = "y1";
+  myChart2.options.scales["x"].title.text = "x2";
+  myChart2.options.scales["y"].title.text = "y2";
   updateProForm(minmax, clusterProForm)
-  updateProChartScale(myChart2, minmax)
-  updateClusterProScatter(hot, [myChart2], modelForm, [2])
-  updateChart2(myChart2, clusterProForm, minmax)
-  updateLabels(myChart3, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
-  updateLabels(myChart4, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
+  updateProChartScale(myChart3, minmax)
+  updateClusterProScatter(hot, [myChart3], modelForm, [2])
+  updateChart2(myChart3, clusterProForm, minmax)
+  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
+  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   document.getElementById('rarangeCheck').click()
   document.getElementById('rarangeCheck').click()
   chartTypeForm.addEventListener("change" , function () {
     //destroy the chart
     //testing a bunch of creating charts and destroying them to make the thing work
-    myChart2.destroy();
     myChart3.destroy();
-    myChart4.destroy();
+    myChart1.destroy();
+    myChart2.destroy();
   });
   //console log tabledata
-  return [hot, [myChart3, myChart4, myChart2], modelForm, graphMinMax, clusterProForm];
+  return [hot, [myChart1, myChart2, myChart3], modelForm, graphMinMax, clusterProForm];
   
 }
 
