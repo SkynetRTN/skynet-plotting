@@ -206,7 +206,7 @@ export function variableTest(): [Handsontable, Chart] {
  * @param table The table to be updated
  * @param myChart
  */
-export function variableFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
+export function variableFileUploadTest(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("variableFileUpload called");
     let file = (evt.target as HTMLInputElement).files[0];
     if (file === undefined) {

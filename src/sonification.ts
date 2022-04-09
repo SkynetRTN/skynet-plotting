@@ -6,7 +6,7 @@
  import { colors } from "./config"
  import { saveAs } from 'file-saver';
  import { formatTime, getDateString } from "./util"
- import { ArrMath } from "./my-math"
+ import { ArrMath, sfc32 } from "./my-math"
 
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
@@ -15,7 +15,7 @@
  export function play(myChart: Chart){
     if(!myChart.data.sonification)
     {
-        console.warn("Chart has no sonification options provided.");
+        console.error("Chart has no sonification options provided.");
         return;
     }
 
@@ -24,7 +24,7 @@
     sonification.audioControls.playPause.innerHTML = "Wait";
     sonification.audioControls.playPause.style.backgroundColor = colors['yellow']
     sonification.audioControls.playPause.style.color = "black";
-    setTimeout(() => {
+    setTimeout(() => {//so for some dumb idiot reason, the color of the button doesnt change to yellow until AFTER sonification unless you put a timeout on this
     //audioCtx.resume();
     if(myChart.data.modeLabels.lastMode === 'lc')
     {
@@ -49,7 +49,7 @@
 export function pause(myChart: Chart){
     if(!myChart.data.sonification)
     {
-        console.warn("Chart has no sonification options provided.");
+        console.error("Chart has no sonification options provided.");
         return;
     }
 
@@ -68,6 +68,15 @@ export function pause(myChart: Chart){
     sonification.audioControls.playPause.style.backgroundColor = ''
     sonification.audioControls.playPause.style.color = "black";
 }
+
+/**
+ * Updates a chart's playback speed
+ * @param myChart The chart to be mutated
+ 
+ export function updateSpeed(myChart: Chart)
+ {
+    myChart.data.sonification.audioSource.setplaybackRate = 
+ }*/
 
 /**
  * This saves a chart's sonification as a .wav
@@ -101,6 +110,7 @@ export function saveSonify(myChart: Chart){
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
 export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true, destination?: AudioNode){
+    let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[],
@@ -112,13 +122,11 @@ export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop:
         var first1: ScatterDataPoint = {y:0,x:0};
         first1.y = channel0[0].y;
         var first2: ScatterDataPoint = {y:0,x:0};
-        first2.y = channel1[0].y
+        first2.y = channel1[0].y;
 
         first1.x = channel0[channel0.length-1].x + time/channel0.length;
         first2.x = channel0[channel0.length-1].x + time/channel0.length;
 
-        console.log(first1)
-        console.log(myChart.data.datasets[dataSet1].data[0])
         channel0 = channel0.concat(first1);
         channel1 = channel1.concat(first2);
         time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
@@ -147,8 +155,8 @@ export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop:
             next1++;
         }
 
-        arrayBuffer.getChannelData(0)[i] = norm0 * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*Math.random()-1); // Left Channel
-        arrayBuffer.getChannelData(1)[i] = norm1 * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*Math.random()-1);  //multiply by norm: the maximum y value is 10 in the buffer
+        arrayBuffer.getChannelData(0)[i] = norm0 * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*rand()-1); // Left Channel
+        arrayBuffer.getChannelData(1)[i] = norm1 * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*rand()-1);  //multiply by norm: the maximum y value is 10 in the buffer
     }
     
     // Get an AudioBufferSourceNode to play our buffer.

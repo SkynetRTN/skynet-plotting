@@ -22,7 +22,8 @@ declare module 'chart.js/auto'{
             audioControls:
             {
                 playPause: HTMLButtonElement,
-                save: HTMLButtonElement
+                save: HTMLButtonElement,
+                speed?: HTMLInputElement
             },
         }
     }
