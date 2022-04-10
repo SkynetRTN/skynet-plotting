@@ -271,7 +271,7 @@ function updateCharts(
                     updateProForm(proMinMax, proForm)
                     let chart = myCharts[myCharts.length-1];
                     updateProChartScale(chart, proMinMax)
-                    updateClusterProScatter(table, [chart], modelForm, [2]);
+                    updateClusterProScatter(table, chart, modelForm, clusterForm);
                     updateChart2(chart, proForm, proMinMax)
                     chart.update();
                 }
