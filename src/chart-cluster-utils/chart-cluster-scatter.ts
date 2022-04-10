@@ -8,7 +8,6 @@ import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
 
-
 /**
  *  This function updates scatter data and the boudning scale of the graph
  *  @param table:         handsontable containing the data
@@ -724,6 +723,7 @@ export function updateClusterProScatter(
         let distHighLim = (dist+(dist*(range/100)))*1000;
         let distLowLim =   (dist-(dist*(range/100)))*1000;
 
+        let proMinMax: { [key: string]: number } = { minX: 0, maxX: 0, minY: 0, maxY: 0, };
         let start = 0;
         for (let i = 0; i < tableData.length; i++) {
             let x = tableData[i][bluera];
@@ -739,9 +739,24 @@ export function updateClusterProScatter(
                     x: x,
                     y: y
                 };
+                if (x > proMinMax['maxX'])
+                    proMinMax['maxX'] = x;
+                else if (x < proMinMax['minX'])
+                    proMinMax['minX'] = x;
+                if (y > proMinMax['maxY'])
+                    proMinMax['maxY'] = y;
+                else if (y < proMinMax['minY'])
+                    proMinMax['minY'] = y;
             }
         }
+        updateProChartScale(proChart, proMinMax)
         chart = chart.slice(0, start++)
         proChart.update()
     }
 
+function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
+    proChart.options.scales.x.min = minmax['minX'];
+    proChart.options.scales.x.max = minmax['maxX'];
+    proChart.options.scales.y.min = minmax['minY'];
+    proChart.options.scales.y.max = minmax['maxY'];
+}
