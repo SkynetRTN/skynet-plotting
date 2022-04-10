@@ -519,7 +519,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.scales["x"].title.text = "x2";
   myChart2.options.scales["y"].title.text = "y2";
   updateProForm(minmax, clusterProForm)
-  updateProChartScale(myChart3, minmax)
   updateClusterProScatter(hot, myChart3, modelForm, clusterForm)
   updateChart2(myChart3, clusterProForm, minmax)
   updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
@@ -559,13 +558,6 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
   let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
   return [maxRa, minRa, maxDec, minDec]
-}
-
-export function updateProChartScale(proChart: Chart, minmax: number[]){
-  proChart.options.scales.x.min = minmax[1];
-  proChart.options.scales.x.max = minmax[0];
-  proChart.options.scales.y.min = minmax[3];
-  proChart.options.scales.y.max = minmax[2];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
