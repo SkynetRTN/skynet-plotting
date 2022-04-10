@@ -561,11 +561,11 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   return [maxRa, minRa, maxDec, minDec]
 }
 
-export function updateProChartScale(myChart2: Chart, minmax: number[]){
-  myChart2.options.scales.x.min = minmax[1];
-  myChart2.options.scales.x.max = minmax[0];
-  myChart2.options.scales.y.min = minmax[3];
-  myChart2.options.scales.y.max = minmax[2];
+export function updateProChartScale(proChart: Chart, minmax: number[]){
+  proChart.options.scales.x.min = minmax[1];
+  proChart.options.scales.x.max = minmax[0];
+  proChart.options.scales.y.min = minmax[3];
+  proChart.options.scales.y.max = minmax[2];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
