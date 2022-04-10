@@ -543,21 +543,49 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm )
   let minRa = floatTo1(minmax[1]);
   let maxDec = floatTo1(minmax[2]);
   let minDec = floatTo1(minmax[3]);
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, floatTo1((maxRa+minRa)/2), false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, floatTo1(maxRa-minRa), 0.1, floatTo1(maxRa-minRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, floatTo1((maxDec+minDec)/2), false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, floatTo1(maxDec-minDec), 0.1, floatTo1(maxDec-minDec), false, false);
+  let avgRa = floatTo1(minmax[4]);
+  let avgDec = floatTo1(minmax[5]);
+  let stdRa = floatTo1(minmax[6]);
+  let stdDec = floatTo1(minmax[7]);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, avgRa, false, false);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, avgDec, false, false);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, false);
 }
 
 export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let tableData2 = hot.getData();
   let columns = hot.getColHeader();
-  let blueKey = modelFormKey(1, 'blue')
-  let maxRa = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+  let blueKey = modelFormKey(1, 'blue');
   let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
-  let maxDec = Math.max(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
   let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
-  return [maxRa, minRa, maxDec, minDec]
+  //find average ra out of all stars
+  let avgRa = 0;
+  for (let i = 0; i < tableData2.length; i++) {
+    avgRa += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")];
+  }
+  avgRa = avgRa / tableData2.length;
+  //find average dec out of all stars
+  let avgDec = 0;
+  for (let i = 0; i < tableData2.length; i++) {
+    avgDec += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")];
+  }
+  avgDec = avgDec / tableData2.length;
+  //find the standard deviation of the ra out of all stars
+  let stdRa = 0;
+  for (let i = 0; i < tableData2.length; i++) {
+    stdRa += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")] - avgRa, 2);
+  }
+  stdRa = Math.sqrt(stdRa / tableData2.length);
+  //find the standard deviation of the dec out of all stars
+  let stdDec = 0;
+  for (let i = 0; i < tableData2.length; i++) {
+    stdDec += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")] - avgDec, 2);
+  }
+  stdDec = Math.sqrt(stdDec / tableData2.length);
+  let maxRa = avgRa + (2*stdRa);
+  let maxDec = avgDec + (2*stdDec);
+  return [maxRa, minRa, maxDec, minDec, avgRa, avgDec, stdRa, stdDec];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
