@@ -115,12 +115,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         //   onClick: newLegendClickHandler,
         // }
         legend: {
-          labels: {
-            //remove all lables
-            generateLabels: function (chart) {
-              return [];
-            }
-          }
+          display: false,
         }
       }
     },
@@ -264,4 +259,11 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         }
     }
     hot.updateSettings({hiddenColumns: {columns: hidden, indicators: false,}});
+}
+
+export function distanceScatter(clusterSimForm: ClusterSimForm, clusterForm: ClusterForm, modelForm: ModelForm, hot: Handsontable, chart:Chart){
+  //as distance changes, the model has to shift up and down
+  let distance = parseFloat(clusterSimForm["distance_num"].value);
+  let distanceScatter = parseFloat(clusterSimForm["distanceScatter_num"].value);
+  //- 5 * Math.log10(dist / 0.01)
 }
