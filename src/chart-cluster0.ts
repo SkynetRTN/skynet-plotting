@@ -2,7 +2,7 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors } from "./config";
-import {linkInputs,updateLabels, throttle} from "./util";
+import {linkInputs,updateLabels, throttle, chartDataDiff} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
@@ -56,49 +56,32 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: ["Model", "Data"],
-      datasets: [
-        {
-          type: "line",
-          label: "Model",
-          data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
-          borderWidth: 2,
-          tension: 0.1,
-          pointRadius: 0,
-          fill: false,
-          immutableLabel: true,
-          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
-        },
-        {
-          type: "line",
-          label: "Model2",
-          data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
-          borderWidth: 2,
-          tension: 0.1,
-          pointRadius: 0,
-          fill: false,
-          immutableLabel: true,
-          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
-        },
-        {
-          type: "scatter",
-          label: "Data",
-          data: [{ x: 0, y: 0 }],
-          backgroundColor: colors["gray"],
-          borderColor: colors["black"],
-          borderWidth: 0.2,
-          fill: false,
-          showLine: false,
-          pointRadius: 2,
-          pointHoverRadius: 7,
-          immutableLabel: false,
-          parsing: {}
-        },
-      ],
+      datasets: [{
+        type: "line",
+        label: "Model1",
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },
+      {
+        type: "line",
+        label: "Model2",
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },]
     },
     options: {
       hover: { mode: "nearest", },
@@ -132,16 +115,18 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         // }
         legend: {
           labels: {
-
-            filter: function (item) {
-              // Logic to remove a particular legend item goes here
-              return !item.text.includes('Model2');
-            }
           }
         }
       }
     },
   });
+  //add an event listener that removes all datasets and updates addDatasets when the user changes the number of stars
+  clusterSimForm.addEventListener("change", () => {
+    myChart.data.datasets = [];
+    addDatasets(myChart, clusterSimForm);
+    updateHRModel(modelForm, hot, [myChart]);
+  });
+  console.log(myChart.data.datasets[0])
   // update chart whenever the model form changes
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
@@ -165,14 +150,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   //Adjust the gradient with the window size
   window.onresize = function () {
-    setTimeout(function () {
-      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-        modelForm["red"].value, modelForm["blue"].value)
-      myChart.update()
-    }, 10)
   }
-
-
   //initializing website
   updateHRModel(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
@@ -190,6 +168,30 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
     false,
     false
   );
-
+  
   return [hot, [myChart], modelForm, graphMinMax];
 }
+  //make a function that makes more datasets and adds them to the chart based on starNum
+  export function addDatasets(chart: Chart, clusterSimForm: ClusterSimForm) {
+    let starNum = parseFloat(clusterSimForm["starNum_num"].value);
+    for (let i = 0; i < starNum; i++) { 
+      chart.data.datasets.push({
+        type: "line",
+        label: "Model" + (i + 1),
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },)
+      
+      console.log(chart.data.datasets);
+    }
+    console.log(chart.data.datasets);
+    console.log(chart.data.datasets[0]);
+    chart.update();
+  }

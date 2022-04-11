@@ -597,6 +597,15 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   let minRa = minmax[1]
   let maxDec = minmax[2]
   let minDec = minmax[3]
+  let avgRa = minmax[4]
+  let avgDec = minmax[5]
+  let stdRa = minmax[6] 
+  let stdDec = minmax[7]
+    //set the scales of the chart to match the new sensitivity fix
+    //change xmax
+    myChart2.options.scales["x"].max = avgRa + (2*stdRa);
+    //change ymax
+    myChart2.options.scales["y"].max = avgDec + (2*stdDec);
   myChart2.data.datasets[0].data = [{x: maxRa+10000, y: decmotion_num}, {x: minRa-10000, y: decmotion_num}];
   myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+10000}, {x: ramotion_num, y: minDec-10000}];
   myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+10000}, {x: ramotion_num-rarange_num, y: minDec-10000}];
