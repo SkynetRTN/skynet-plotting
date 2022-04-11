@@ -1,8 +1,8 @@
 'use strict';
 
 import Chart from "chart.js/auto";
-//import { CategoryScale, LinearScale } from "chart.js";
-//import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
+import { CategoryScale, LinearScale, registerables, ScatterDataPoint } from "chart.js";
+import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
 import Handsontable from "handsontable";
 
 import { initializeHTMLElements } from "./chart-transient-utils/chart-transient-html";
@@ -81,6 +81,9 @@ const initializeTable = (data: {jd: number, magnitude: number, filter: string}[]
     }));
 }
 
+    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
+    // register controller in chart.js and ensure the defaults are set
+    Chart.register(ScatterWithErrorBarsController, PointWithErrorBar, LinearScale, CategoryScale, ...registerables);
 
 const initializeChart = () => {
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement)
@@ -423,7 +426,7 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Ch
         // remove bad data and sort my date
         let data = source.get(sourceData)
             .filter((val: number[]) => !isNaN(val[0]))
-                .sort((a: number[], b: number[]) => a[0] - b[0]);
+            .sort((a: number[], b: number[]) => a[0] - b[0]);
 
         const tableData: any[] = [];
         for (let i = 0; i < data.length; i++) {
