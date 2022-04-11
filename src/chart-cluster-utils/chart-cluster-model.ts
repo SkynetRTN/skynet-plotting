@@ -79,7 +79,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
  * @param form
  * @param chartNum
  */
-function generateURL(form: ModelForm, chartNum: number) {
+export function generateURL(form: ModelForm, chartNum: number) {
     let blueKey = modelFormKey(chartNum, 'blue');
     let redKey = modelFormKey(chartNum, 'red');
     let lumKey = modelFormKey(chartNum, 'lum');

@@ -7,8 +7,9 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
-import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
-import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
+import { HRrainbow, baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax  } from "./chart-cluster-utils/chart-cluster-util";
+import { generateURL} from "./chart-cluster-utils/chart-cluster-model";
+import { ScatterDataPoint } from "chart.js";
 
 Chart.register(zoomPlugin);
 /**
@@ -115,6 +116,10 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         // }
         legend: {
           labels: {
+            //remove all lables
+            generateLabels: function (chart) {
+              return [];
+            }
           }
         }
       }
@@ -124,7 +129,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   clusterSimForm.addEventListener("change", () => {
     myChart.data.datasets = [];
     addDatasets(myChart, clusterSimForm);
-    updateHRModel(modelForm, hot, [myChart]);
+    updateHRModelSim(modelForm, hot, [myChart]);
   });
   console.log(myChart.data.datasets[0])
   // update chart whenever the model form changes
@@ -132,13 +137,13 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   const frameTime = Math.floor(1000 / fps);
   clusterForm.oninput = throttle(
     function () {
-      updateHRModel(modelForm, hot, [myChart]);
+      updateHRModelSim(modelForm, hot, [myChart]);
     },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart]);
+    updateHRModelSim(modelForm, hot, [myChart]);
   }, 100);
   //customize cursor icon
   document.getElementById('chart-div').style.cursor = "move"
@@ -152,7 +157,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   window.onresize = function () {
   }
   //initializing website
-  updateHRModel(modelForm, hot, [myChart]);
+  updateHRModelSim(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
 
@@ -195,3 +200,61 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
     console.log(chart.data.datasets[0]);
     chart.update();
   }
+  export function updateHRModelSim(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
+    function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+        let form: ScatterDataPoint[] = [] //the array containing all model points
+        let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
+        for (let i = 0; i < dataArray.length; i++) {
+            let x_i: number = dataArray[i][0];
+            let y_i: number = dataArray[i][1];
+            let row: ScatterDataPoint = {x: x_i, y: y_i};
+            scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
+            form.push(row);
+        }
+        iSkip = iSkip > 0? iSkip : 0;
+        let age = parseFloat(modelForm['age_num'].value);
+        if (age < 6.6)
+            age = 6.6;
+        else if (age > 10.3)
+            age = 10.3;
+        let iEnd =  Math.round(((-25.84 * age + 451.77) + (-17.17*age**2+264.30*age-753.93))/2)
+        return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
+    }
+    let reveal: string[] = [];
+    for (let c = 0; c < charts.length; c++) {
+        let chart = charts[c];
+        reveal = reveal.concat(modelFormKeys(c, modelForm));
+        httpGetAsync(generateURL(modelForm, c),
+            (response: string) => {
+                let json = JSON.parse(response);
+                let dataTable: number[][] = json['data'];
+                let filteredModel = modelFilter(dataTable, json['iSkip']);
+                for (c = 0; c < chart.data.datasets.length; c++) {
+                    chart.data.datasets[c].data = filteredModel[1];
+                }
+                callback(c);
+                if (!isChart)
+                    chart.update("none");
+            },
+            () => {
+                console.trace(generateURL(modelForm, c))
+                callback(c);
+                if (!isChart)
+                    chart.update("none");
+            },
+        );
+    }
+    //update table
+    let columns: string[] = hot.getColHeader() as string[];
+    let hidden: number[] = [];
+    for (const col in columns) {
+        if (columns[col].includes('Mag')){
+            columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        }
+        if (!reveal.includes(columns[col])) {
+            //if the column isn't selected in the drop down, hide it
+            hidden.push(parseFloat(col));
+        }
+    }
+    hot.updateSettings({hiddenColumns: {columns: hidden, indicators: false,}});
+}
