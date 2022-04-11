@@ -126,15 +126,21 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
     },
   });
   //add an event listener that removes all datasets and updates addDatasets when the user changes the number of stars
-  clusterSimForm.addEventListener("change", () => {
-    myChart.data.datasets = [];
-    addDatasets(myChart, clusterSimForm);
-    updateHRModelSim(modelForm, hot, [myChart]);
-  });
+  //clusterSimForm.addEventListener("change", () => {
+    //myChart.data.datasets = [];
+    //addDatasets(myChart, clusterSimForm);
+    //updateHRModelSim(modelForm, hot, [myChart]);
+  //});
   console.log(myChart.data.datasets[0])
   // update chart whenever the model form changes
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
+  clusterSimForm.oninput = throttle(
+    function() {
+    myChart.data.datasets = [];
+    addDatasets(myChart, clusterSimForm);
+    updateHRModelSim(modelForm, hot, [myChart]);
+    }, frameTime);
   clusterForm.oninput = throttle(
     function () {
       updateHRModelSim(modelForm, hot, [myChart]);
@@ -144,6 +150,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
     updateHRModelSim(modelForm, hot, [myChart]);
+
   }, 100);
   //customize cursor icon
   document.getElementById('chart-div').style.cursor = "move"
