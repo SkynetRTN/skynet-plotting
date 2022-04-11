@@ -8,7 +8,6 @@ import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
 
-
 /**
  *  This function updates scatter data and the boudning scale of the graph
  *  @param table:         handsontable containing the data
@@ -24,19 +23,38 @@ export function updateScatter(
     modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
-    specificChart: number = -1,) {
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm = null,) {
+
+    let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+    let err = 0.312347;
+    let dist = parseFloat(clusterForm["d_num"].value);
+    //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
+    let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+    let range = parseFloat(clusterForm["distrange_num"].value);
+    let isRaRange =  null;
+    let isDecRange =  null;
+    let raMotion = null;
+    let raRange = null;
+    let decMotion = null;
+    let decRange = null;
+    if (clusterProForm !== null){
+        isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked
+        isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked
+        raMotion = parseFloat(clusterProForm['ramotion_num'].value);
+        raRange = parseFloat(clusterProForm['rarange_num'].value);
+        decMotion = parseFloat(clusterProForm['decmotion_num'].value);
+        decRange = parseFloat(clusterProForm['decrange_num'].value);
+    }
+
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            let err = parseFloat(clusterForm["err_num"].value);
-            let dist = parseFloat(clusterForm["d_num"].value);
-            //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
-            let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
-
+            
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
             let tableData = table.getData();
             let columns = table.getColHeader();
-
+                
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
             let lumKey = modelFormKey(c, 'lum')
@@ -72,6 +90,17 @@ export function updateScatter(
                     ? null
                     : columns.indexOf(modelForm[lumKey].value + "err");
 
+            let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
+            let distHighLim = (dist+(dist*(range/100)))*1000;
+            let distLowLim =   (dist-(dist*(range/100)))*1000;
+
+            let bluePmra = columns.indexOf(modelForm[blueKey].value + " pmra");
+            let bluePmdec = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let pmraHighLim = raMotion + raRange;
+            let pmraLowLim = raMotion - raRange;
+            let pmdecHighLim = decMotion + decRange;
+            let pmdecLowLim = decMotion - decRange;
+
             let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
 
             let start = 0;
@@ -79,17 +108,41 @@ export function updateScatter(
                 if (
                     typeof (tableData[i][blue]) != 'number' ||
                     typeof (tableData[i][red]) != 'number' ||
-                    typeof (tableData[i][lum]) != 'number' ||
-                    (blueErr != null && tableData[i][blueErr] >= err) ||
+                    typeof (tableData[i][lum]) != 'number'
+                    || (blueErr != null && tableData[i][blueErr] >= err) ||
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
                     continue;
                 }
+                let distance: number = tableData[i][blueDist];
+                let isDistNotValid = isNaN(distance) || distance === null
+                if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
+                    continue;
+                }
+                if (clusterProForm !== null) {
+                    if (isRaRange) {
+                        let pmra = tableData[i][bluePmra]
+                        if (pmra > pmraHighLim|| pmra < pmraLowLim)
+                            continue;
+                    }
+                    if (isDecRange) {
+                        let pmdec = tableData[i][bluePmdec]
+                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim)
+                            continue;
+                    }
+                }
+
+
                 //red-blue,lum
 
                 let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
                 let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+                //testing purposes'
+                //let x = tableData[i][blue] - (tableData[i][red]);
+                //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
+    
+
                 chart[start++] = {
                     x: x,
                     y: y
@@ -277,6 +330,7 @@ export class ChartScaleControl {
                     this.zoompanDeactivate(this.modelForm, i);
                 }
             };
+            this.charts[i].options.onClick = ()=>{label.click()}
         }
     }
 
@@ -544,7 +598,7 @@ function chartRescale(myCharts: Chart[],
                     x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
                     if ("UBVRI".includes(filters[i])) {
                         magIndex[i] = Number(0);
-                    } else if ("uprimegprimerprimeiprimezprime".includes(filters[i])) {
+                    } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
                         magIndex[i] = Number(1);
                     } else if ("JHKs".includes(filters[i])) {
                         magIndex[i] = Number(2);
@@ -645,4 +699,64 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
     }
 
     return Number(A_v) * (a + b / R_v);
+}
+export function updateClusterProScatter(
+    table: Handsontable,
+    proChart: Chart,
+    modelForm: ModelForm,
+    clusterForm: ClusterForm
+    ) {
+        let chart = proChart.data.datasets[2].data;
+        let tableData = table.getData();
+        let columns = table.getColHeader();
+
+        let blueKey = modelFormKey(0, 'blue')
+
+        //Identify the column the selected filter refers to
+        let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
+        let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
+        let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
+
+        let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
+        let dist = parseFloat(clusterForm["d_num"].value);
+        let range = parseFloat(clusterForm["distrange_num"].value);
+        let distHighLim = (dist+(dist*(range/100)))*1000;
+        let distLowLim =   (dist-(dist*(range/100)))*1000;
+
+        let proMinMax: { [key: string]: number } = { minX: 0, maxX: 0, minY: 0, maxY: 0, };
+        let start = 0;
+        for (let i = 0; i < tableData.length; i++) {
+            let x = tableData[i][bluera];
+            let y = tableData[i][bluedec];
+            let distance: number = tableData[i][blueDist];
+            let isDistNotValid = isNaN(distance) || distance === null
+            if (!(
+                typeof (x) != 'number' || typeof (y) != 'number'
+                ||
+                (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim))
+                )){
+                chart[start++] = {
+                    x: x,
+                    y: y
+                };
+                if (x > proMinMax['maxX'])
+                    proMinMax['maxX'] = x;
+                else if (x < proMinMax['minX'])
+                    proMinMax['minX'] = x;
+                if (y > proMinMax['maxY'])
+                    proMinMax['maxY'] = y;
+                else if (y < proMinMax['minY'])
+                    proMinMax['minY'] = y;
+            }
+        }
+        updateProChartScale(proChart, proMinMax)
+        chart = chart.slice(0, start++)
+        proChart.update()
+    }
+
+function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
+    proChart.options.scales.x.min = minmax['minX'];
+    proChart.options.scales.x.max = minmax['maxX'];
+    proChart.options.scales.y.min = minmax['minY'];
+    proChart.options.scales.y.max = minmax['maxY'];
 }

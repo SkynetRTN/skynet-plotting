@@ -48,7 +48,12 @@ export function dual(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-
+      // unhide table whenever interface is selected
+      document.getElementById("chart-type-form").addEventListener("click", () => {
+        container.style.display = "block";
+        document.getElementById('add-row-button').hidden = false;
+        document.getElementById('file-upload-button').hidden = false;
+        });
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
         type: 'line',

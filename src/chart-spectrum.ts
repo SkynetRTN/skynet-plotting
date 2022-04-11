@@ -128,6 +128,12 @@ export function spectrum(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
+          // unhide table whenever interface is selected
+  document.getElementById("chart-type-form").addEventListener("click", () => {
+    container.style.display = "block";
+    document.getElementById('add-row-button').hidden = false;
+    document.getElementById('file-upload-button').hidden = false;
+    });
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";

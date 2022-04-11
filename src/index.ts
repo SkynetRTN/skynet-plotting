@@ -12,19 +12,22 @@ import { moon } from './chart-moon';
 import { scatter } from './chart-scatter';
 import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
+import { variableTest, variableFileUploadTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
+import {cluster0} from './chart-cluster0';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
-import { cluster4, cluster4FileUpload } from './chart-cluster4';
+import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
 import { gravity, gravityFileUpload } from './chart-gravity';
+import { transient, transientFileUpload } from './chart-transient';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
-import { transient, transientFileUpload } from './chart-transient';
+import { pause } from './sonification';
 
 /**
  *  Initializing the page when the website loads
@@ -68,11 +71,26 @@ window.onload = function () {
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        } else {
+        }
+        else if ('myChart' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             // NO MORE JQUERY BYE BYE xD
             // $('#honor-pledge-modal').modal('hide');
-            saveImage('myChart', signature, true, 1.0);
+            saveImage(0, signature, true, 1.0);
+        
+        
+        } 
+        else if ('myChart4' in window) {
+            document.getElementById('no-signature-alert').style.display = 'none';
+            // NO MORE JQUERY BYE BYE xD
+            // $('#honor-pledge-modal').modal('hide')
+            if ('myChart1' in window) {
+                saveImage(1, signature, true, 1.0);
+            }
+            else {
+                saveImage(2, signature, true, 1.0);
+            }
+
         }
     };
 
@@ -101,11 +119,24 @@ function chartType(chart: string) {
     }
     document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
     //remove display of 4 charts
-    for (let i = 0; i < 5; i++) {
-        if (document.getElementById('chart-div'+i.toString()) != null) {
-            document.getElementById('chart-div'+i.toString()).style.display = 'none';
+    for (let i = 1; i < 5; i++) {
+        let chartId: string = 'myChart'+i.toString()
+        let divId: string = 'chart-div'+i.toString()
+        if (document.getElementById(divId) != null) {
+            if (document.getElementById(chartId) != null) {
+                document.getElementById(chartId).remove();
+            }
+            if (i=== 1 || i ===2)
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
+            else
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
+            document.getElementById(divId).style.display = 'none';
         }
     }
+
+    if (document.getElementById('clusterProForm') != null)
+        document.getElementById('clusterProForm').remove()
+
     //expand the size of axisSet1 and hide axisSet2 for all interfaces
     document.getElementById('axisSet1').className = 'col-sm-12';
     document.getElementById('axisSet2').style.display = 'none';
@@ -121,9 +152,11 @@ function chartType(chart: string) {
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
 
+    document.getElementById('chart-div').style.cursor = "auto"
+
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
-    let cluster4_objects: [Handsontable, Chart, Chart, Chart, Chart, ModelForm, graphScale]
+
 
     if (chart === 'curve') {
         objects = curve();
@@ -140,7 +173,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }
+        }     
+    } else if (chart === 'variableTest') {
+        objects = variableTest();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            variableFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
+        }    
     } else if (chart === 'spectrum') {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -153,6 +192,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
+    } else if (chart === 'cluster0') {
+        cluster_objects = cluster0();
+        objects = [cluster_objects[0], cluster_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+    }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
         objects = [cluster_objects[0], cluster_objects[1][0]]
@@ -167,15 +213,18 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
         }
-    } else if (chart === 'cluster4') {
-        cluster4_objects = cluster4();
-        objects = [cluster4_objects[0], cluster4_objects[1]]
+
+
+    } else if (chart === 'cluster3') {
+        let result = cluster3()
+        cluster_objects = [result[0], result[1], result[2], result[3]];
+        objects = [cluster_objects[0], cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            cluster4FileUpload(evt, cluster4_objects[0], cluster4_objects[1] as Chart<'line'>, cluster4_objects[2] as Chart<'line'>, cluster4_objects[3] as Chart<'line'>, cluster4_objects[4] as Chart<'line'>, cluster4_objects[6]);
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
         }
 
-    } else if (chart === 'gravity') {
+    }else if (chart === 'gravity') {
         objects = gravity();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
@@ -206,18 +255,23 @@ function chartType(chart: string) {
 
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
-        if (chart === 'cluster2') {
+        if (chart === 'cluster2' || chart === 'cluster3') {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
-        }
-        if (chart === 'cluster4') {
-            updateChartInfo(cluster4_objects[2], chartInfoForm)
-            updateChartInfo(cluster4_objects[3], chartInfoForm)
-            updateChartInfo(cluster4_objects[4], chartInfoForm)
+        
         } else {
             updateChartInfo(objects[1], chartInfoForm);
         }
     };
+
+    if(objects[1].data.sonification)
+    {
+        document.getElementById('chart-type-form').onchange = function () {
+            pause(objects[1]);
+            chartType(((document.getElementById('chart-type-form') as HTMLFormElement ).elements[0] as HTMLInputElement).value);
+        };
+    }
+
     objects[1].update('none');
 
 }
@@ -262,7 +316,7 @@ function setChartDefaults() {
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
-    let key:string = chartNum === 0 ? "" : (chartNum+1).toString();
+    let key:string = chartNum === 0 ? "" : (chartNum).toString();
     // @ts-ignore
     (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x'+key+'Axis'].value;
     // @ts-ignore
@@ -278,10 +332,10 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
     myChart.update('none');
 }
 
-function saveImage(canvasID: string, signature: string, jpg = true, quality = 1.0) {
-    const canvas = document.getElementById(canvasID) as HTMLCanvasElement;
-
-    // Create a dummy canvas
+function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.0) {
+    if (chartNum === 0) {
+        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
+            // Create a dummy canvas
     const destCanvas = document.createElement('canvas');
     destCanvas.width = canvas.width;
     destCanvas.height = canvas.height;
@@ -299,9 +353,71 @@ function saveImage(canvasID: string, signature: string, jpg = true, quality = 1.
     const time = getDateString();
     if (jpg) {
         const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+        //create image
         saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
     } else {
         console.log('Only jpg export is supported for EXIF info.');
+    }
+    } else if (chartNum === 1) {
+        const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
+        const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
+        // Create a dummy canvas
+            // Create a dummy canvas
+    const destCanvas = document.createElement('canvas');
+    destCanvas.width = 2 * canvas.width;
+    destCanvas.height = canvas.height;
+
+    const destCtx = destCanvas.getContext('2d');
+
+    // Create a rectangle with the desired color
+    destCtx.fillStyle = '#FFFFFF';
+    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
+
+    // Draw the original canvas onto the destination canvas
+    let compile = destCtx.drawImage(canvas, 0, 0);
+    //draw canvas 2 onto the destination canvas
+    compile = destCtx.drawImage(canvas2, canvas.width, 0);
+
+
+    // Download the dummy canvas
+    const time = getDateString();
+    if (jpg) {
+        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+        //create image
+        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    } else {
+        console.log('Only jpg export is supported for EXIF info.');
+    }
+    }   else if (chartNum === 2) {
+        const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
+        const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
+        // Create a dummy canvas
+            // Create a dummy canvas
+    const destCanvas = document.createElement('canvas');
+    destCanvas.width = 2 * canvas.width;
+    destCanvas.height = canvas.height;
+
+    const destCtx = destCanvas.getContext('2d');
+
+    // Create a rectangle with the desired color
+    destCtx.fillStyle = '#FFFFFF';
+    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
+
+    // Draw the original canvas onto the destination canvas
+    let compile = destCtx.drawImage(canvas, 0, 0);
+    //draw canvas 2 onto the destination canvas
+    compile = destCtx.drawImage(canvas2, canvas.width, 0);
+
+
+    // Download the dummy canvas
+    const time = getDateString();
+    if (jpg) {
+        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+        //create image
+        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    } else {
+        console.log('Only jpg export is supported for EXIF info.');
+    }
     }
 }
 

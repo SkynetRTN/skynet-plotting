@@ -52,7 +52,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
     }
 
     if (chartNum !== 0) {
-        let key = (chartNum + 1).toString();
+        let key = chartNum.toString();
         let xKey = 'x' + key + 'Axis';
         let yKey = 'y' + key + 'Axis';
         // @ts-ignore
@@ -113,6 +113,60 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
         slider.min = Math.log(min * 0.999).toString();
         slider.max = Math.log(max * 1.001).toString();
         slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
+        slider.value = Math.log(value).toString();
+        slider.oninput = function () {
+            /**  
+             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
+             * The reason is that the slider has min and max values defined for log. Also this is
+             * clamped to min and max instead of numMin and numMax, because the slider logically
+             * still correspond to min and max, even though the implementation changed to accomodate
+             * the log behavior.
+            */
+            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 2), min, max);
+        };
+        number.oninput = debounce(()=> {
+            number.value = clamp(number.value, numMin, numMax);
+            // Note that we clamp() to min and max instead of numMin and numMax.
+            slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
+        }, debounceTime)
+    }
+}
+
+export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
+    log = false, numOverride = false, numMin = 0, numMax = 0
+) {
+    let debounceTime = 1000;
+    if (!numOverride) {
+        numMin = min;
+        numMax = max;
+    }
+    number.min = numMin.toString();
+    number.max = numMax.toString();
+    number.step = step.toString();
+    number.value = value.toString();
+    if (!log) {
+        slider.min = min.toString();
+        slider.max = max.toString();
+        slider.step = step.toString();
+        slider.value = value.toString();
+
+        slider.oninput = function () {
+            number.value = slider.value;
+        };
+        number.oninput = debounce(()=> {
+            number.value = clamp(number.value, numMin, numMax);
+            slider.value = clamp(number.value, min, max);
+        }, debounceTime);
+    } else {
+        if(Math.log(min * 0.999) === -Infinity){
+            slider.min = (-5).toString();
+        }else{
+            slider.min = Math.log(min * 0.999).toString();
+        }
+        console.log('inside linkeinputs')
+        console.log(slider.min)
+        slider.max = Math.log(max * 1.001).toString();
+        slider.step = step.toString()
         slider.value = Math.log(value).toString();
         slider.oninput = function () {
             /**  
