@@ -104,6 +104,7 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
+        '<input type="number" id="speed" min="0" max="10" placeholder = "Speed">\n' +
         '<button id="sonify"/>Sonify</button>\n' +
         '<button id="saveSonification";/>Save Sonification</button>\n' +
         '</div>\n'
@@ -145,6 +146,7 @@ export function pulsar(): [Handsontable, Chart] {
     const audioCtx = new AudioContext();
     var audioSource = new AudioBufferSourceNode(audioCtx);
     var audioControls = {
+        speed: document.getElementById("speed") as HTMLInputElement,
         playPause: document.getElementById("sonify") as HTMLButtonElement,
         save: document.getElementById("saveSonification") as HTMLButtonElement
     }

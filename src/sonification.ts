@@ -21,6 +21,7 @@
 
     let sonification = myChart.data.sonification
 
+
     sonification.audioControls.playPause.innerHTML = "Wait";
     sonification.audioControls.playPause.style.backgroundColor = colors['yellow']
     sonification.audioControls.playPause.style.color = "black";
@@ -34,6 +35,8 @@
     if(myChart.data.modeLabels.lastMode === 'pf')
         sonification.audioSource = sonify(myChart,5,6,true);
     sonification.audioSource.start();
+    let  speed: number = +myChart.data.sonification.audioControls.speed.value;
+    sonification.audioSource.playbackRate.value = speed;
     sonification.audioControls.playPause.onclick = () => {pause(myChart)}
 
     sonification.audioControls.playPause.innerHTML = "Stop";
@@ -113,9 +116,10 @@ export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop:
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
+  
     let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[],
         channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[],
-        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+        time = (channel0[channel0.length-1].x - channel0[0].x);//length of the audio buffer
     
     if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
     {
