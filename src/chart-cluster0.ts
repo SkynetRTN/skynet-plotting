@@ -2,13 +2,14 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import { colors } from "./config";
-import {linkInputs,updateLabels, throttle} from "./util";
+import {linkInputs,updateLabels, throttle, chartDataDiff} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import { insertClusterSimControls} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
-import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
-import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
+import { HRrainbow, baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax  } from "./chart-cluster-utils/chart-cluster-util";
+import { generateURL} from "./chart-cluster-utils/chart-cluster-model";
+import { ScatterDataPoint } from "chart.js";
 
 Chart.register(zoomPlugin);
 /**
@@ -56,49 +57,32 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
   const myChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: ["Model", "Data"],
-      datasets: [
-        {
-          type: "line",
-          label: "Model",
-          data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
-          borderWidth: 2,
-          tension: 0.1,
-          pointRadius: 0,
-          fill: false,
-          immutableLabel: true,
-          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
-        },
-        {
-          type: "line",
-          label: "Model2",
-          data: null, // will be generated later
-          borderColor: colors["black"],
-          backgroundColor: colors["black"],
-          borderWidth: 2,
-          tension: 0.1,
-          pointRadius: 0,
-          fill: false,
-          immutableLabel: true,
-          parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
-        },
-        {
-          type: "scatter",
-          label: "Data",
-          data: [{ x: 0, y: 0 }],
-          backgroundColor: colors["gray"],
-          borderColor: colors["black"],
-          borderWidth: 0.2,
-          fill: false,
-          showLine: false,
-          pointRadius: 2,
-          pointHoverRadius: 7,
-          immutableLabel: false,
-          parsing: {}
-        },
-      ],
+      datasets: [{
+        type: "line",
+        label: "Model1",
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },
+      {
+        type: "line",
+        label: "Model2",
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },]
     },
     options: {
       hover: { mode: "nearest", },
@@ -131,29 +115,37 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         //   onClick: newLegendClickHandler,
         // }
         legend: {
-          labels: {
-
-            filter: function (item) {
-              // Logic to remove a particular legend item goes here
-              return !item.text.includes('Model2');
-            }
-          }
+          display: false,
         }
       }
     },
   });
+  //add an event listener that removes all datasets and updates addDatasets when the user changes the number of stars
+  //clusterSimForm.addEventListener("change", () => {
+    //myChart.data.datasets = [];
+    //addDatasets(myChart, clusterSimForm);
+    //updateHRModelSim(modelForm, hot, [myChart]);
+  //});
+  console.log(myChart.data.datasets[0])
   // update chart whenever the model form changes
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
+  clusterSimForm.oninput = throttle(
+    function() {
+    myChart.data.datasets = [];
+    addDatasets(myChart, clusterSimForm);
+    updateHRModelSim(modelForm, hot, [myChart]);
+    }, frameTime);
   clusterForm.oninput = throttle(
     function () {
-      updateHRModel(modelForm, hot, [myChart]);
+      updateHRModelSim(modelForm, hot, [myChart]);
     },
     frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart]);
+    updateHRModelSim(modelForm, hot, [myChart]);
+
   }, 100);
   //customize cursor icon
   document.getElementById('chart-div').style.cursor = "move"
@@ -165,16 +157,9 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
 
   //Adjust the gradient with the window size
   window.onresize = function () {
-    setTimeout(function () {
-      myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-        modelForm["red"].value, modelForm["blue"].value)
-      myChart.update()
-    }, 10)
   }
-
-
   //initializing website
-  updateHRModel(modelForm, hot, [myChart]);
+  updateHRModelSim(modelForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
 
@@ -190,6 +175,95 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
     false,
     false
   );
-
+  
   return [hot, [myChart], modelForm, graphMinMax];
+}
+  //make a function that makes more datasets and adds them to the chart based on starNum
+  export function addDatasets(chart: Chart, clusterSimForm: ClusterSimForm) {
+    let starNum = parseFloat(clusterSimForm["starNum_num"].value);
+    for (let i = 0; i < starNum; i++) { 
+      chart.data.datasets.push({
+        type: "line",
+        label: "Model" + (i + 1),
+        data: null, // will be generated later
+        borderColor: colors["black"],
+        backgroundColor: colors["black"],
+        borderWidth: 2,
+        tension: 0.1,
+        pointRadius: 0,
+        fill: false,
+        immutableLabel: true,
+        parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
+      },)
+      
+      console.log(chart.data.datasets);
+    }
+    console.log(chart.data.datasets);
+    console.log(chart.data.datasets[0]);
+    chart.update();
+  }
+  export function updateHRModelSim(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
+    function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
+        let form: ScatterDataPoint[] = [] //the array containing all model points
+        let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
+        for (let i = 0; i < dataArray.length; i++) {
+            let x_i: number = dataArray[i][0];
+            let y_i: number = dataArray[i][1];
+            let row: ScatterDataPoint = {x: x_i, y: y_i};
+            scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
+            form.push(row);
+        }
+        iSkip = iSkip > 0? iSkip : 0;
+        let age = parseFloat(modelForm['age_num'].value);
+        if (age < 6.6)
+            age = 6.6;
+        else if (age > 10.3)
+            age = 10.3;
+        let iEnd =  Math.round(((-25.84 * age + 451.77) + (-17.17*age**2+264.30*age-753.93))/2)
+        return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
+    }
+    let reveal: string[] = [];
+    for (let c = 0; c < charts.length; c++) {
+        let chart = charts[c];
+        reveal = reveal.concat(modelFormKeys(c, modelForm));
+        httpGetAsync(generateURL(modelForm, c),
+            (response: string) => {
+                let json = JSON.parse(response);
+                let dataTable: number[][] = json['data'];
+                let filteredModel = modelFilter(dataTable, json['iSkip']);
+                for (c = 0; c < chart.data.datasets.length; c++) {
+                    chart.data.datasets[c].data = filteredModel[1];
+                }
+                callback(c);
+                if (!isChart)
+                    chart.update("none");
+            },
+            () => {
+                console.trace(generateURL(modelForm, c))
+                callback(c);
+                if (!isChart)
+                    chart.update("none");
+            },
+        );
+    }
+    //update table
+    let columns: string[] = hot.getColHeader() as string[];
+    let hidden: number[] = [];
+    for (const col in columns) {
+        if (columns[col].includes('Mag')){
+            columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
+        }
+        if (!reveal.includes(columns[col])) {
+            //if the column isn't selected in the drop down, hide it
+            hidden.push(parseFloat(col));
+        }
+    }
+    hot.updateSettings({hiddenColumns: {columns: hidden, indicators: false,}});
+}
+
+export function distanceScatter(clusterSimForm: ClusterSimForm, clusterForm: ClusterForm, modelForm: ModelForm, hot: Handsontable, chart:Chart){
+  //as distance changes, the model has to shift up and down
+  let distance = parseFloat(clusterSimForm["distance_num"].value);
+  let distanceScatter = parseFloat(clusterSimForm["distanceScatter_num"].value);
+  //- 5 * Math.log10(dist / 0.01)
 }
