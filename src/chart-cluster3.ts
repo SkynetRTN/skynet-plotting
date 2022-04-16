@@ -520,6 +520,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.scales["y"].title.text = "y2";
   updateProForm(minmax, clusterProForm)
   updateClusterProScatter(hot, myChart3, modelForm, clusterForm)
+  chart2Scale(myChart3, minmax)
   updateChart2(myChart3, clusterProForm, minmax)
   updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
   updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
@@ -597,15 +598,6 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   let minRa = minmax[1]
   let maxDec = minmax[2]
   let minDec = minmax[3]
-  let avgRa = minmax[4]
-  let avgDec = minmax[5]
-  let stdRa = minmax[6] 
-  let stdDec = minmax[7]
-    //set the scales of the chart to match the new sensitivity fix
-    //change xmax
-    myChart2.options.scales["x"].max = avgRa + (2*stdRa);
-    //change ymax
-    myChart2.options.scales["y"].max = avgDec + (2*stdDec);
   myChart2.data.datasets[0].data = [{x: maxRa+10000, y: decmotion_num}, {x: minRa-10000, y: decmotion_num}];
   myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+10000}, {x: ramotion_num, y: minDec-10000}];
   myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+10000}, {x: ramotion_num-rarange_num, y: minDec-10000}];
@@ -614,7 +606,21 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   myChart2.data.datasets[6].data = [{x: maxRa+10000, y: decmotion_num+decrange_num}, {x: minRa-10000, y: decmotion_num+decrange_num}];
   myChart2.update();
 }
-
+//create a function that defines constant x and y scale values for the chart
+export function chart2Scale (myChart2: Chart,  minmax: number[]) {
+  let avgRa = minmax[4]
+  let avgDec = minmax[5]
+  let stdRa = minmax[6] 
+  let stdDec = minmax[7]
+  //set the scales of the chart to match the new sensitivity fix
+    //change xmax
+    myChart2.options.scales["x"].max = avgRa + (2*stdRa);
+    //change ymax
+    myChart2.options.scales["y"].max = avgDec + (2*stdDec);
+    //right now test with minimum values
+    myChart2.options.scales['x'].min = avgRa - (2*stdRa);
+    myChart2.options.scales['y'].min = avgDec - (2*stdDec); 
+}
 function floatTo1(num: number){
   return parseFloat(num.toFixed(1))
 }

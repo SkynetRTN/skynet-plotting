@@ -749,14 +749,14 @@ export function updateClusterProScatter(
                     proMinMax['minY'] = y;
             }
         }
-        updateProChartScale(proChart, proMinMax)
+       // updateProChartScale(proChart, proMinMax)
         chart = chart.slice(0, start++)
         proChart.update()
     }
-
-function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
-    proChart.options.scales.x.min = minmax['minX'];
-    proChart.options.scales.x.max = minmax['maxX'];
-    proChart.options.scales.y.min = minmax['minY'];
-    proChart.options.scales.y.max = minmax['maxY'];
-}
+//obselete -- new scale code in cluster3.ts
+//function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
+  //  proChart.options.scales.x.min = minmax['minX'];
+    //proChart.options.scales.x.max = minmax['maxX'];
+    //proChart.options.scales.y.min = minmax['minY'];
+    //proChart.options.scales.y.max = minmax['maxY'];
+//}
