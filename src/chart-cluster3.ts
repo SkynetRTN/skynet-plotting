@@ -42,7 +42,9 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     document.getElementById('axisSet1').className = 'col-sm-6';
     document.getElementById('axisSet2').style.display = 'inline';
     document.getElementById("clusterProForm").style.cursor= "auto";
-    document.getElementById("myChart2").style.cursor= "auto";
+    //I don't know why this is necessary, but it is.
+    //document.getElementById("myChart2").style.cursor= "auto";
+    //document.getElementById("myChart3").style.cursor= "auto";
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
