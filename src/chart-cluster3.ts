@@ -25,7 +25,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-  //remove chartTag from 'mychart1' and 'mychart2'
+  //remove chart tags from myChart1 and 2
+  //change the class of chart-div2 to col-lg-4
     document.getElementById('chartTag1').style.display = "None";
     document.getElementById('chartTag2').style.display = "None";
     document.getElementById('chart-div1').style.display = 'block';

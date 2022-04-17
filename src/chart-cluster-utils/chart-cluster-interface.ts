@@ -270,29 +270,46 @@ export function clusterProCheckControl (){
 }
 
 export function clusterProButtons(){
-    let html = '<div class = "extra" id = "scaleGraphNo">\n';
+    let html = '';
     html += 
         '</label>\n' + '&nbsp;' +
+        '<div class="row">\n' +
         '<button class = "graphControl" id="panUpPro"><center class = "graphControl">&#8593;</center></button>\n' +
         '&nbsp;' +
         '<div class="row">\n' +
         '<button class = "graphControl" id="panLeftPro"><center class = "graphControl">&#8592;</center></button>\n' +
         '&nbsp;' +
         '<button class = "graphControl" id="panRightPro"><center class = "graphControl">&#8594;</center></button>\n' +
-        '<div class="row">\n' +
         '&nbsp;' +
+        '<div class="row">\n' +
         '<button class = "graphControl" id="panDownPro"><center class = "graphControl">&#8595;</center></button>\n' +
-        '<div class="row">\n' +
         '&nbsp;' +
+        '<div class="row">\n' +
         '<button class = "graphControl" id="zoomInPro"><center class = "graphControl">&plus;</center></button>\n' +
         '&nbsp;' +
         '<button class = "graphControl" id="zoomOutPro"><center class = "graphControl">&minus;</center></button>\n' +
-        '<div class="row">\n' +
         '&nbsp;' +
+        '<div class="row">\n' +
         '<button class = "graphControl" id="ResetPro"><center class = "graphControl">Reset</center></button>\n' +
         '<div style="padding: 0 6px 0 6px"></div>' +
         '</div>\n'
     document.getElementById("chart-pro-options").insertAdjacentHTML("beforeend", html)
+    const chartTypeForm = document.getElementById("chart-type-form") as HTMLFormElement;
+    document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
+    document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+      //add an event listener that changes the column size of chart-div2-colControl when the chart type is changed 
+  //and also removes cluster-pro-options if the chart type is not cluster-pro
+  chartTypeForm.addEventListener("change", function () {
+    if (chartTypeForm.value != "cluster3") {
+      document.getElementById("chart-pro-options").style.display = "none";
+      document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
+      document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+    } else {
+      document.getElementById("chart-pro-options").style.display = "block";
+      document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
+      document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+    }
+  });
 }
 
 
