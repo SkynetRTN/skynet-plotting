@@ -269,6 +269,33 @@ export function clusterProCheckControl (){
         );
 }
 
+export function clusterProButtons(){
+    let html = '<div class = "extra" id = "scaleGraphNo">\n';
+    html += 
+        '</label>\n' + '&nbsp;' +
+        '<button class = "graphControl" id="panUp"><center class = "graphControl">&#8593;</center></button>\n' +
+        '&nbsp;' +
+        '<div class="row">\n' +
+        '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+        '<div class="row">\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="panDown"><center class = "graphControl">&#8595;</center></button>\n' +
+        '<div class="row">\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+        '<div class="row">\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="Reset"><center class = "graphControl">Reset</center></button>\n' +
+        '<div style="padding: 0 6px 0 6px"></div>' +
+        '</div>\n'
+    document.getElementById("chart-pro-options").insertAdjacentHTML("beforeend", html)
+}
+
+
 //Since cluster Sim is going to be a little different, I'm going to make a separate interface function for it
 export function insertClusterSimControls(chartCounts:number = 1) {
     let htmlContent =  '<form title="Sim Parameters" id="clustersim-form">\n' +

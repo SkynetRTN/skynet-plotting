@@ -6,7 +6,7 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -18,6 +18,7 @@ Chart.register(zoomPlugin);
  */
 export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
     insertClusterControls(2);
+    clusterProButtons();
     clusterProSliders(true);
     //make graph scaling options visible to users
 
