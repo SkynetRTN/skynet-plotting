@@ -6,7 +6,7 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons, clusterProButtonControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -458,7 +458,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
 
-
+  clusterProButtonControl(myChart3);
+  //myChart3.update();
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
