@@ -272,43 +272,18 @@ export function clusterProCheckControl (){
         );
 }
 
-export function clusterProButtons(){
-    let html = '';
-    html += 
-        '<div class="row-clusterPro" style="margin-left: 18%">\n' +
-        '<button class = "graphControl" id="panUpPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8593;</center></button>\n' +
-        '</div>' +
-        '<div class="row" style="margin: 0;">\n' +
-        '<button class = "graphControl" id="panLeftPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8592;</center></button>&nbsp;\n' +
-        '<button class = "graphControl" id="panRightPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8594;</center></button>\n' +
-        '</div>' +
-        '<div class="row-clusterPro" style="margin-left: 18%">\n' +
-        '<button class = "graphControl" id="panDownPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8595;</center></button>\n' +
-        '</div>' +
-        '<div class="row" style="margin: 0;">\n' +
-        '<button class = "graphControl" id="zoomInPro" style="margin-bottom: 1px;"><center class = "graphControl">&plus;</center></button>&nbsp;\n' +
-        '<button class = "graphControl" id="zoomOutPro" style="margin-bottom: 1px;"><center class = "graphControl">&minus;</center></button>\n' +
-        '</div>' +
-        '<button class = "clusterRest" id="ResetPro" style="margin-bottom: 1px;"><div style="margin-left: 20%">Reset</div></button>\n' +
-        '</div>' +
-        '\n'
-    document.getElementById("chart-pro-options").insertAdjacentHTML("beforeend", html)
-    const chartTypeForm = document.getElementById("chart-type-form") as HTMLFormElement;
-    document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
-    document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
-      //add an event listener that changes the column size of chart-div2-colControl when the chart type is changed 
-  //and also removes cluster-pro-options if the chart type is not cluster-pro
-  chartTypeForm.addEventListener("change", function () {
-    if (chartTypeForm.value != "cluster3") {
-      document.getElementById("chart-pro-options").style.display = "none";
-      document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
-      document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+export function clusterProButtons(isClusterPro: boolean){
+    if (isClusterPro){
+        document.getElementById('clusterProPmChartControl').style.display = 'block';
+        // document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+        // document.getElementById("chart-pro-options").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
     } else {
-      document.getElementById("chart-pro-options").style.display = "block";
-      document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
-      document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+        document.getElementById("clusterProPmChartControl").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
     }
-  });
 }
 
 export function clusterProButtonControl(chart: Chart){

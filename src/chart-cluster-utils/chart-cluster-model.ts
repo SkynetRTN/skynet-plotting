@@ -52,7 +52,6 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                     chart.update("none");
             },
             () => {
-                console.trace(generateURL(modelForm, c))
                 callback(c);
                 if (!isChart)
                     chart.update("none");

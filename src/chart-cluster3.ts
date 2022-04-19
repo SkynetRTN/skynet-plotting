@@ -18,7 +18,7 @@ Chart.register(zoomPlugin);
  */
 export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
     insertClusterControls(2);
-    clusterProButtons();
+    clusterProButtons(true);
     clusterProSliders(true);
     //make graph scaling options visible to users
 
