@@ -6,7 +6,7 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons, clusterProButtonControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -18,13 +18,15 @@ Chart.register(zoomPlugin);
  */
 export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
     insertClusterControls(2);
+    clusterProButtons(true);
     clusterProSliders(true);
     //make graph scaling options visible to users
 
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-  //remove chartTag from 'mychart1' and 'mychart2'
+  //remove chart tags from myChart1 and 2
+  //change the class of chart-div2 to col-lg-4
     document.getElementById('chartTag1').style.display = "None";
     document.getElementById('chartTag2').style.display = "None";
     document.getElementById('chart-div1').style.display = 'block';
@@ -406,7 +408,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 2.3,
+      aspectRatio: 1.43,
       hover: {
         mode: "nearest",
       },
@@ -456,7 +458,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
 
-
+  clusterProButtonControl(myChart3);
+  //myChart3.update();
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {

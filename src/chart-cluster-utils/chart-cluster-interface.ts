@@ -2,6 +2,8 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
+import { floatMod } from "../my-math"
+import { Chart, ScatterDataPoint } from "chart.js";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -201,6 +203,7 @@ export function insertGraphControl(chartCount: number = 1){
         '</div>\n'
     document.getElementById("extra-options").insertAdjacentHTML("beforeend", html)
 }
+
 export function rangeCheckControl(clusterChart = true){
     if (clusterChart === true) {
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
@@ -268,6 +271,46 @@ export function clusterProCheckControl (){
           }
         );
 }
+
+export function clusterProButtons(isClusterPro: boolean){
+    if (isClusterPro){
+        document.getElementById('clusterProPmChartControl').style.display = 'block';
+        // document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+        // document.getElementById("chart-pro-options").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+    } else {
+        document.getElementById("clusterProPmChartControl").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+    }
+}
+
+export function clusterProButtonControl(chart: Chart){
+    //add event listeners that will be used to control the chart based ion the clusterProButtons function
+    document.getElementById("panLeftPro").addEventListener("click", () => {
+        chart.pan(-5);
+    });
+    document.getElementById("panRightPro").addEventListener("click", () => {
+        chart.pan(5);
+    });
+    document.getElementById("panUpPro").addEventListener("click", () => {
+        chart.pan(5, []);
+    });
+    document.getElementById("panDownPro").addEventListener("click", () => {
+        chart.pan(-5, []);
+    });
+    document.getElementById("zoomInPro").addEventListener("click", () => {
+        chart.zoom(1.1);
+    });
+    document.getElementById("zoomOutPro").addEventListener("click", () => {
+        chart.zoom(0.9);
+    });
+    document.getElementById("ResetPro").addEventListener("click", () => {
+        chart.reset();
+    });
+}
+
 
 //Since cluster Sim is going to be a little different, I'm going to make a separate interface function for it
 export function insertClusterSimControls(chartCounts:number = 1) {
