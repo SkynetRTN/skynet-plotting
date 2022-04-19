@@ -27,6 +27,7 @@ import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
+import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
 
 /**
  *  Initializing the page when the website loads
@@ -152,6 +153,8 @@ function chartType(chart: string) {
     document.getElementById('add-row-button').hidden = false;
 
     document.getElementById('chart-div').style.cursor = "auto"
+
+    clusterProButtons(false);
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
