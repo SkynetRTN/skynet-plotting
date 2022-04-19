@@ -477,7 +477,7 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-                0, range, 0.001, currentPosition
+                0, range, 0.001, currentPosition, true
         );
         }
     }
@@ -520,9 +520,14 @@ function lightCurve(myChart: Chart) {
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         "</div>\n" +
         '<div class="row">\n' +
-        '<div class="col-sm-5 des">Folding Period:</div>\n' +
+        '<div class="col-sm-5 des">Period (days):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field"></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Perifod" name="phase"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Perifod" name="phase_num" class="field"></div>\n' +
         '</div>\n' ;
 
 
@@ -537,7 +542,7 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            0, range, 0.001, range
+            0, range, 0.001, range, true
         );
 
     periodFoldingForm.oninput = throttle(function () {

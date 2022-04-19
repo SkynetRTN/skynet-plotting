@@ -233,6 +233,20 @@ input[type=number] {
     -moz-appearance:textfield;
 }
 
+
+/* the following spinboxnum is specifically used in variable period folding Period (days) number box. This specific subclass provide a spin button on the right of the input box. */
+input.spinboxnum[type=number]::-webkit-outer-spin-button,
+input.spinboxnum[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button;
+    opacity: 1;
+    margin: 0;
+}
+input.spinboxnum[type=number] {
+    -moz-appearance:textfield;
+}
+
+
+
 input[type=range] {
     -webkit-appearance: none;
     width: 100%;

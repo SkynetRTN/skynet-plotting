@@ -213,6 +213,7 @@ export function spectrum(): [Handsontable, Chart] {
     };
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+    document.getElementById('chart-div').style.cursor = "move";
 
     const update = function () {
         updateSpectrum(hot, myChart);
