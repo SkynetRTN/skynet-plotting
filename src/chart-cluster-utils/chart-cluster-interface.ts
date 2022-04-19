@@ -2,6 +2,8 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
+import { floatMod } from "../my-math"
+
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -272,27 +274,23 @@ export function clusterProCheckControl (){
 export function clusterProButtons(){
     let html = '';
     html += 
-        '</label>\n' + '&nbsp;' +
-        '<div class="row">\n' +
-        '<button class = "graphControl" id="panUpPro"><center class = "graphControl">&#8593;</center></button>\n' +
-        '&nbsp;' +
-        '<div class="row">\n' +
-        '<button class = "graphControl" id="panLeftPro"><center class = "graphControl">&#8592;</center></button>\n' +
-        '&nbsp;' +
-        '<button class = "graphControl" id="panRightPro"><center class = "graphControl">&#8594;</center></button>\n' +
-        '&nbsp;' +
-        '<div class="row">\n' +
-        '<button class = "graphControl" id="panDownPro"><center class = "graphControl">&#8595;</center></button>\n' +
-        '&nbsp;' +
-        '<div class="row">\n' +
-        '<button class = "graphControl" id="zoomInPro"><center class = "graphControl">&plus;</center></button>\n' +
-        '&nbsp;' +
-        '<button class = "graphControl" id="zoomOutPro"><center class = "graphControl">&minus;</center></button>\n' +
-        '&nbsp;' +
-        '<div class="row">\n' +
-        '<button class = "graphControl" id="ResetPro"><center class = "graphControl">Reset</center></button>\n' +
-        '<div style="padding: 0 6px 0 6px"></div>' +
-        '</div>\n'
+        '<div class="row-clusterPro" style="margin-left: 18%">\n' +
+        '<button class = "graphControl" id="panUpPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8593;</center></button>\n' +
+        '</div>' +
+        '<div class="row" style="margin: 0;">\n' +
+        '<button class = "graphControl" id="panLeftPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8592;</center></button>&nbsp;\n' +
+        '<button class = "graphControl" id="panRightPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8594;</center></button>\n' +
+        '</div>' +
+        '<div class="row-clusterPro" style="margin-left: 18%">\n' +
+        '<button class = "graphControl" id="panDownPro" style="margin-bottom: 1px;"><center class = "graphControl">&#8595;</center></button>\n' +
+        '</div>' +
+        '<div class="row" style="margin: 0;">\n' +
+        '<button class = "graphControl" id="zoomInPro" style="margin-bottom: 1px;"><center class = "graphControl">&plus;</center></button>&nbsp;\n' +
+        '<button class = "graphControl" id="zoomOutPro" style="margin-bottom: 1px;"><center class = "graphControl">&minus;</center></button>\n' +
+        '</div>' +
+        '<button class = "clusterRest" id="ResetPro" style="margin-bottom: 1px;"><div style="margin-left: 20%">Reset</div></button>\n' +
+        '</div>' +
+        '\n'
     document.getElementById("chart-pro-options").insertAdjacentHTML("beforeend", html)
     const chartTypeForm = document.getElementById("chart-type-form") as HTMLFormElement;
     document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');

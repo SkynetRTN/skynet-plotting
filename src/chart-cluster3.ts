@@ -408,7 +408,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 2.3,
+      aspectRatio: 1.43,
       hover: {
         mode: "nearest",
       },
