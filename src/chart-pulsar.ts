@@ -104,9 +104,9 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-        '<input type="number" id="speed" min="0" max="10" placeholder = "Speed">\n' +
-        '<button id="sonify"/>Sonify</button>\n' +
-        '<button id="saveSonification";/>Save Sonification</button>\n' +
+        '<input class="extraoptions" type="number" id="speed" min="0" max="10" placeholder = "Speed">' +
+        '<button id="sonify"/>Sonify</button>' +
+        '<button id="saveSonification";/>Save Sonification</button>' +
         '</div>\n'
     );
     document.getElementById('axis-label1').style.display = 'inline';

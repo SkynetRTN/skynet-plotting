@@ -209,6 +209,20 @@ input.field {
     outline: none;
     box-shadow: none;
 }
+
+/*For text boxes in extra options*/
+input.extraoptions {
+    border: 2px solid #E7E7E7;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    opacity: 0.7;
+    transition: .2s;
+    margin-bottom: .5em;
+    line-height: 2em;
+    outline: none;
+}
+
 input.field:focus {
     background-color: #E7E7E7;
 }
