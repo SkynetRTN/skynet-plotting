@@ -4,6 +4,7 @@
 
 import { floatMod } from "../my-math"
 import { Chart, ScatterDataPoint } from "chart.js";
+import { chart2Scale } from "../chart-cluster3";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -286,7 +287,7 @@ export function clusterProButtons(isClusterPro: boolean){
     }
 }
 
-export function clusterProButtonControl(chart: Chart){
+export function clusterProButtonControl(chart: Chart, minmax: number[]){
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
     document.getElementById("panLeftPro").addEventListener("click", () => {
         chart.pan(-5, [chart.scales["x"]]);
@@ -307,7 +308,8 @@ export function clusterProButtonControl(chart: Chart){
         chart.zoom(0.9);
     });
     document.getElementById("ResetPro").addEventListener("click", () => {
-        chart.reset();
+        chart2Scale(chart, minmax);
+        chart.update();
     });
 }
 

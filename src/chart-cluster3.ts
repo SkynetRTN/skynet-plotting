@@ -48,6 +48,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     //document.getElementById("myChart2").style.cursor= "auto";
     //document.getElementById("myChart3").style.cursor= "auto";
   // Link each slider with corresponding text box
+  //const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
@@ -457,8 +458,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-
-  clusterProButtonControl(myChart3);
+  let minmax = proFormMinmax(hot, modelForm)
+  clusterProButtonControl(myChart3, minmax);
   //myChart3.update();
   //Adjust the gradient with the window size
   window.onresize = function () {
@@ -510,9 +511,13 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     });
    }, 100);
 
+   //clusterProPmChartControl.oninput = throttle(function () {
+    //clusterProButtonControl(myChart3);
+  //}, 100);
+
+
   //initializing website
   update();
-  let minmax = proFormMinmax(hot, modelForm)
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
