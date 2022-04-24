@@ -554,13 +554,13 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm )
   let minRa = floatTo1(minmax[1]);
   let maxDec = floatTo1(minmax[2]);
   let minDec = floatTo1(minmax[3]);
-  let avgRa = floatTo1(minmax[4]);
-  let avgDec = floatTo1(minmax[5]);
+  let medRa = floatTo1(minmax[4]);
+  let medDec = floatTo1(minmax[5]);
   let stdRa = floatTo1(minmax[6]);
   let stdDec = floatTo1(minmax[7]);
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, avgRa, false, false);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, medRa, false, false);
   linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, avgDec, false, false);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, false);
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, false);
 }
 
@@ -570,33 +570,46 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let blueKey = modelFormKey(1, 'blue');
   let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
   let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
-  //find average ra out of all stars
-  let avgRa = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    avgRa += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")];
-  }
-  avgRa = avgRa / tableData2.length;
-  //find average dec out of all stars
-  let avgDec = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    avgDec += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")];
-  }
-  avgDec = avgDec / tableData2.length;
-  //find the standard deviation of the ra out of all stars
-  let stdRa = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    stdRa += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")] - avgRa, 2);
-  }
-  stdRa = Math.sqrt(stdRa / tableData2.length);
+  //make an array of all the ra values in numerical order from smallest to largest
+  let raArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
+  //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
+  let raArrayLength = raArray.length;
+  let medRa = 0;
+    if (raArrayLength % 2 === 0) {
+      medRa = (raArray[raArrayLength/2] + raArray[raArrayLength/2 - 1])/2;
+    } else {
+      medRa = raArray[raArrayLength/2];
+    }
+
+  //make an array of all the dec values in numerical order from smallest to largest
+  let decArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
+  //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
+  let decArrayLength = decArray.length;
+  let medDec = 0;
+    if (decArrayLength % 2 === 0) {
+      medDec = (decArray[decArrayLength/2] + decArray[decArrayLength/2 - 1])/2;
+    } else {
+      medDec = decArray[decArrayLength/2];
+    }
+  //find the middle 68.3% of values in the ra array
+  let decArray68 = decArray.slice(Math.floor(decArrayLength*0.1585), Math.ceil(decArrayLength*0.8415));
   //find the standard deviation of the dec out of all stars
   let stdDec = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    stdDec += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")] - avgDec, 2);
+  for (let i = 0; i < decArray68.length; i++) {
+    stdDec += Math.pow(decArray68[i] - medDec, 2);
   }
-  stdDec = Math.sqrt(stdDec / tableData2.length);
-  let maxRa = avgRa + (2*stdRa);
-  let maxDec = avgDec + (2*stdDec);
-  return [maxRa, minRa, maxDec, minDec, avgRa, avgDec, stdRa, stdDec];
+  stdDec = Math.sqrt(stdDec / decArray68.length);
+  //find the middle 68.3% of values in the ra array
+  let raArray68 = raArray.slice(Math.floor(raArrayLength*0.1585), Math.ceil(raArrayLength*0.8415));
+  //find the standard deviation of the dec out of all stars
+  let stdRa = 0;
+  for (let i = 0; i < raArray68.length; i++) {
+    stdRa += Math.pow(raArray68[i] - medRa, 2);
+  }
+  stdRa = Math.sqrt(stdRa / raArray68.length);
+  let maxRa = medRa + (2*stdRa);
+  let maxDec = medDec + (2*stdDec);
+  return [maxRa, minRa, maxDec, minDec, medRa, medDec, stdRa, stdDec];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
@@ -618,18 +631,18 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
 }
 //create a function that defines constant x and y scale values for the chart
 export function chart2Scale (myChart2: Chart,  minmax: number[]) {
-  let avgRa = minmax[4]
-  let avgDec = minmax[5]
+  let medRa = minmax[4]
+  let medDec = minmax[5]
   let stdRa = minmax[6] 
   let stdDec = minmax[7]
   //set the scales of the chart to match the new sensitivity fix
     //change xmax
-    myChart2.options.scales["x"].max = avgRa + (2*stdRa);
+    myChart2.options.scales["x"].max = medRa + (2*stdRa);
     //change ymax
-    myChart2.options.scales["y"].max = avgDec + (2*stdDec);
+    myChart2.options.scales["y"].max = medDec + (2*stdDec);
     //right now test with minimum values
-    myChart2.options.scales['x'].min = avgRa - (2*stdRa);
-    myChart2.options.scales['y'].min = avgDec - (2*stdDec); 
+    myChart2.options.scales['x'].min = medRa - (2*stdRa);
+    myChart2.options.scales['y'].min = medDec - (2*stdDec); 
 }
 function floatTo1(num: number){
   return parseFloat(num.toFixed(1))
