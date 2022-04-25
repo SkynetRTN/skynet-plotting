@@ -650,6 +650,7 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+10000}, {x: ramotion_num+rarange_num, y: minDec-10000}];
   myChart2.data.datasets[5].data = [{x: maxRa+10000, y: decmotion_num-decrange_num}, {x: minRa-10000, y: decmotion_num-decrange_num}];
   myChart2.data.datasets[6].data = [{x: maxRa+10000, y: decmotion_num+decrange_num}, {x: minRa-10000, y: decmotion_num+decrange_num}];
+  chart2Scale(myChart2, minmax);
   myChart2.update();
 }
 //create a function that defines constant x and y scale values for the chart
