@@ -586,22 +586,23 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let raArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
   //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
   let raArrayLength = raArray.length;
+  let raArraHalfLength = Math.floor(raArrayLength/2);
   let medRa = 0;
-    if (raArrayLength % 2 === 0) {
-      medRa = (raArray[raArrayLength/2] + raArray[raArrayLength/2 - 1])/2;
-    } else {
-      medRa = raArray[raArrayLength/2];
-    }
-
+  if (raArrayLength % 2 === 0) {
+    medRa = (raArray[raArraHalfLength] + raArray[raArraHalfLength - 1])/2;
+  } else {
+    medRa = raArray[raArraHalfLength];
+  }
   //make an array of all the dec values in numerical order from smallest to largest
   let decArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
   //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
   let decArrayLength = decArray.length;
+  let decArraHalfLength = Math.floor(decArrayLength/2);
   let medDec = 0;
     if (decArrayLength % 2 === 0) {
-      medDec = (decArray[decArrayLength/2] + decArray[decArrayLength/2 - 1])/2;
+      medDec = (decArray[decArraHalfLength] + decArray[decArraHalfLength - 1])/2;
     } else {
-      medDec = decArray[decArrayLength/2];
+      medDec = decArray[raArraHalfLength];
     }
   //find the middle 68.3% of values in the ra array
   let decArray68 = decArray.slice(Math.floor(decArrayLength*0.1585), Math.ceil(decArrayLength*0.8415));
