@@ -186,12 +186,12 @@ function updateCharts(
         columns.push({
             data: filter_i + "ra",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "dec",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "dist",
@@ -201,12 +201,12 @@ function updateCharts(
         columns.push({
             data: filter_i + "pmra",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "pmdec",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
     }
     // filters = newFilter;

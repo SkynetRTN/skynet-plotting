@@ -545,6 +545,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     myChart2.destroy();
   });
   //console log tabledata
+  //console.log(minmax[8]);
+  //console.log(minmax[4]);
   return [hot, [myChart1, myChart2, myChart3], modelForm, graphMinMax, clusterProForm];
   
 }
@@ -562,14 +564,20 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm )
   linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, false);
   linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, false);
   linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, false);
+  //make sliders precise to the nearest thousandth
+  clusterProForm["ramotion"].step = "0.001";
+  clusterProForm["decmotion"].step = "0.001";
+  clusterProForm["rarange"].step = "0.001";
+  clusterProForm["decrange"].step = "0.001";
+
 }
 
 export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let tableData2 = hot.getData();
   let columns = hot.getColHeader();
   let blueKey = modelFormKey(1, 'blue');
-  let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
-  let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+  //let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+  //let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
   //make an array of all the ra values in numerical order from smallest to largest
   let raArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
   //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
@@ -609,7 +617,18 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   stdRa = Math.sqrt(stdRa / raArray68.length);
   let maxRa = medRa + (2*stdRa);
   let maxDec = medDec + (2*stdDec);
-  return [maxRa, minRa, maxDec, minDec, medRa, medDec, stdRa, stdDec];
+  let minRa = medRa - (2*stdRa);
+  let minDec = medDec - (2*stdDec);
+  //report all values to the nearest thousandth
+  maxRa = floatTo1(maxRa);
+  minRa = floatTo1(minRa);
+  maxDec = floatTo1(maxDec);
+  minDec = floatTo1(minDec);
+  medRa = floatTo1(medRa);
+  medDec = floatTo1(medDec);
+  stdRa = floatTo1(stdRa);
+  stdDec = floatTo1(stdDec);
+  return [maxRa, minRa, maxDec, minDec, medRa, medDec, stdRa, stdDec, raArray68.length];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
@@ -635,6 +654,7 @@ export function chart2Scale (myChart2: Chart,  minmax: number[]) {
   let medDec = minmax[5]
   let stdRa = minmax[6] 
   let stdDec = minmax[7]
+  //make these values precise to the nearest thousandth
   //set the scales of the chart to match the new sensitivity fix
     //change xmax
     myChart2.options.scales["x"].max = medRa + (2*stdRa);
