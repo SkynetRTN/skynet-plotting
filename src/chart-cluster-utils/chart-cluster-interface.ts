@@ -289,7 +289,6 @@ export function clusterProButtons(isClusterPro: boolean){
 
 export function clusterProButtonControl(chart: Chart, minmax: number[]){
     //update chart as button is held down
-
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
     document.getElementById("panLeftPro").addEventListener("click", () => {
         chart.pan(-5, [chart.scales["x"]]);

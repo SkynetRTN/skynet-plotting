@@ -48,7 +48,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     //document.getElementById("myChart2").style.cursor= "auto";
     //document.getElementById("myChart3").style.cursor= "auto";
   // Link each slider with corresponding text box
-  //const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
+  const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
@@ -459,7 +459,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   let minmax = proFormMinmax(hot, modelForm)
-  clusterProButtonControl(myChart3, minmax);
   //myChart3.update();
   //Adjust the gradient with the window size
   window.onresize = function () {
@@ -489,6 +488,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
+  //clusterProPmChartControl.onclick = throttle(() => {
+      //clusterProButtonControl(myChart3, minmax);
+      //},
+    //frameTime);
+    clusterProButtonControl(myChart3, minmax);
   clusterForm.oninput = throttle(
     function () {
       updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
