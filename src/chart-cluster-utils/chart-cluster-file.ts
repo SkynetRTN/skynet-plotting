@@ -11,7 +11,7 @@ import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
 import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
-import { updateProForm, proFormMinmax, updateChart2 } from "../chart-cluster3";
+import { updateProForm, proFormMinmax, updateChart2, chart2Scale } from "../chart-cluster3";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -272,6 +272,7 @@ function updateCharts(
                     let chart = myCharts[myCharts.length-1];
                     updateClusterProScatter(table, chart, modelForm, clusterForm);
                     updateChart2(chart, proForm, proMinMax)
+                    chart2Scale(chart, proMinMax);
                     chart.update();
                 }
                 document.getElementById("standardView").click();
