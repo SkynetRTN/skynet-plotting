@@ -2,9 +2,9 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
-import { floatMod } from "../my-math"
-import { Chart, ScatterDataPoint } from "chart.js";
-import { chart2Scale } from "../chart-cluster3";
+import { Chart } from "chart.js";
+import { chart2Scale, proFormMinmax } from "../chart-cluster3";
+import Handsontable from "handsontable";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -287,7 +287,7 @@ export function clusterProButtons(isClusterPro: boolean){
     }
 }
 
-export function clusterProButtonControl(chart: Chart, minmax: number[]){
+export function clusterProButtonControl(chart: Chart, table: Handsontable, modelForm: ModelForm){
     //update chart as button is held down
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
     document.getElementById("panLeftPro").addEventListener("click", () => {
@@ -309,7 +309,7 @@ export function clusterProButtonControl(chart: Chart, minmax: number[]){
         chart.zoom(0.9);
     });
     document.getElementById("ResetPro").addEventListener("click", () => {
-        chart2Scale(chart, minmax);
+        chart2Scale(chart, proFormMinmax(table, modelForm));
         chart.update();
     });
 }
