@@ -477,7 +477,7 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-                0, range, 0.001, currentPosition, true
+                0, range, (periodFoldingForm.period_num.value/range)*0.01, currentPosition, true
         );
         }
     }
@@ -543,7 +543,7 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, 0.0001, range, true
+            parseFloat(fourierForm.start.value), range, (periodFoldingForm.period_num.value/range)*0.01, range, true
         );
         linkInputs(
             periodFoldingForm["phase"], 
@@ -554,7 +554,7 @@ function lightCurve(myChart: Chart) {
             0
         );
         
-    periodFoldingForm.period.onchange = function () {
+    periodFoldingForm.period_num.onchange = function () {
         // console.log(periodFoldingForm)
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
@@ -566,7 +566,7 @@ function lightCurve(myChart: Chart) {
         );
         // periodFoldingForm.period.step = (periodFoldingForm.period_num.value/range)*0.01
         
-        console.log((periodFoldingForm.period_num.value/range)*0.01)
+        console.log((periodFoldingForm.period_num.value/range)*0.1)
     };
         
 
