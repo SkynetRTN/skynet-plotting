@@ -1,21 +1,16 @@
 'use strict';
 
-import Chart from "chart.js/auto";
-import { CategoryScale, LinearScale, registerables, ScatterDataPoint } from "chart.js";
-import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
+//import Chart from "chart.js/auto";
+import "chartjs-chart-error-bars";
 import Handsontable from "handsontable";
 
-import { initializeHTMLElements } from "./chart-transient-utils/chart-transient-html";
+import { initializeHTMLElements, disableDropdown } from "./chart-transient-utils/chart-transient-html";
+import { TransientChart } from "./chart-transient-utils/chart-transient-chart";
+import { readCSVData, verifyCSV } from "./chart-transient-utils/chart-transient-file"; 
 import { tableCommonOptions } from "./config"
-import { updateTableHeight, sanitizeTableData } from "./util"
-import { round } from "./my-math"
+import { linkInputs, updateTableHeight, sanitizeTableData } from "./util"
 
 
-/**
- * Generates data set using random values
- * @param numOfPoints number of data points to generate
- * @returns array of { julian data, magnitude, filter }
- */
 const generateRandomData = (numOfPoints: number) => {
     // filters array is arbitrary
     const filters = ['B', 'V', 'R', 'I'];
@@ -44,10 +39,8 @@ const sortDataByFilter = (usData: {jd: number, magnitude: number, filter: string
             filters.push(usData[i].filter);  
         }
     }
-    console.log(filters);
 
     let sData = new Map();
-    // sort
 
     filters.forEach(f => {
         if (!sData.has(f)) {
@@ -81,62 +74,16 @@ const initializeTable = (data: {jd: number, magnitude: number, filter: string}[]
     }));
 }
 
-    const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
-    // register controller in chart.js and ensure the defaults are set
-    Chart.register(ScatterWithErrorBarsController, PointWithErrorBar, LinearScale, CategoryScale, ...registerables);
 
-const initializeChart = () => {
-    const ctx = (document.getElementById("myChart") as HTMLCanvasElement)
-        .getContext('2d');
-
-    const chart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            maxMJD: Number.NEGATIVE_INFINITY,
-            minMJD: Number.POSITIVE_INFINITY,
-            labels: [],
-            datasets: []
-        },
-        options: {
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return '(' + round(context.parsed.x, 4) + ', ' +
-                                round(context.parsed.y, 4) + ')';
-                        },
-                    },
-                },
-            },
-            scales: {
-                x: {
-                    display: true,
-                    type: 'logarithmic',
-                    position: 'bottom',
-                }
-            }
-        }
-    });
-    chart.options.plugins.title.text = "Title";
-    chart.options.scales['x'].title.text = "x";
-    chart.options.scales['y'].title.text = "y";
-
-    return chart;
-};
-
-
-const shiftMagnitudes = (hot: Handsontable, myChart: Chart, form: ChartInfoForm) => {
+const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: ChartInfoForm) => {
     let shiftedData = [];
     let delim = '';
     let sign = 1;
     let numOfRows = hot.getDataAtCol(0).length;
     const elementStringArray = form.elements['data'].value.split(',');
 
-    // prevent massive datasets
-    if (numOfRows > 10000) {
-        return;
-    } // prevent large inputs
-    if (elementStringArray.length > 1000) {
+    // prevent large inputs
+    if (elementStringArray.length > 500) {
         return;
     }
 
@@ -166,11 +113,19 @@ const shiftMagnitudes = (hot: Handsontable, myChart: Chart, form: ChartInfoForm)
         }
 
         let updatedFilter = str.split(delim)[0];
-        let shiftVal = parseInt(str.split(delim)[1]);
+        let shiftVal = parseFloat(str.split(delim)[1]);
+
+        if (isNaN(shiftVal)) {
+            continue;
+        }
+        if (shiftVal > 100 || shiftVal < -100) {
+            alert('Magnitudes can only be shifted +/- 100');
+            continue;
+        }
 
         // search chart data
-        for (let i = 0; i < myChart.data.datasets.length; i++) {
-            if (myChart.data.datasets[i].label.search(updatedFilter) !== -1) {
+        for (let i = 0; i < myChart.getDatasets().length; i++) {
+            if (myChart.getDataset(i).label.search(updatedFilter) !== -1) {
 
                 shiftedData = [];
                 // search table data
@@ -178,116 +133,123 @@ const shiftMagnitudes = (hot: Handsontable, myChart: Chart, form: ChartInfoForm)
                     let tableFilter = hot.getDataAtCol(2)[j];
 
                     if (tableFilter === updatedFilter) {
+
                         let mjd = hot.getDataAtCol(0)[j];
                         let mag = hot.getDataAtCol(1)[j];
-
                         shiftedData.push({
-                            'x': mjd,
+                            'x': mjd - (myChart.eventShift),//(myChart.timeShift),// - (myChart.eventShift),
                             'y': mag + (sign * shiftVal),
                         })
                     }
                 }
                 // update chart
-                myChart.data.datasets[i].data = [];
-                myChart.data.datasets[i].data = shiftedData;
-                myChart.update('none');
+                myChart.clearDataFromDataset(i);
+                myChart.updateDataFromDataset(shiftedData, i);
+                myChart.update();
             }
         }
     }
 };
 
 
-const handleDropdownInput = (chart: Chart) => {
-    const dropdown = document.getElementById('dropdown') as HTMLSelectElement;
-        dropdown.onchange = () => {
-            const sel = dropdown.selectedIndex;
-            const opt = dropdown.options[sel];
-            const temporalModel = (<HTMLOptionElement>opt).value
+const handleDropdownInput = (chart: TransientChart) => {
+    const dropdown = document.getElementById('temporal') as HTMLSelectElement;
+    dropdown.onchange = () => {
+        const sel = dropdown.selectedIndex;
+        const opt = dropdown.options[sel];
+        const temporalModel = (<HTMLOptionElement>opt).value
 
-            if (temporalModel === 'Power Law') {
-                chart.options.scales['x'].type = 'logarithmic';
-            } 
-            else if (temporalModel === 'Exponential') {
-                chart.options.scales['x'].type = 'linear';
-            } else {
-                chart.options.scales['x'].type = 'logarithmic'; // default
-            }
-            chart.update('none');
-        }
-};
-
-
-const verifyCSV = (file: File) => {
-    // file empty?
-    if (file === undefined) {
-        return false;
+        chart.setScaleType(temporalModel);
     }
 
-    // file exists - is it .csv?
-    if (!file.type.match("(text/csv|application/vnd.ms-excel)")) {
-        if (!file.name.match(".*\.csv")) {
-            console.log("Uploaded file type is: ", file.type);
-            console.log("Uploaded file name is: ", file.name);
-            alert("Please upload a CSV file.");
+    const spectralDD = document.getElementById('spectral') as HTMLSelectElement;
+    spectralDD.onchange = () => {
+        const sel = spectralDD.selectedIndex;
+        const opt = spectralDD.options[sel];
+        const spectralModel = (<HTMLOptionElement>opt).value
 
-            return false;
-        }
-    }
-    return true;
-};
-
-
-const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: string) => {
-
-    const keyIdx = cols.indexOf(key);
-    const cMagIdx = cols.indexOf('calibrated_mag');
-    const map = new Map();
-
-    for (const row of data) {
-        let items = row.trim().split(',');
-
-        if (!map.has(items[keyIdx])) {
-            map.set(items[keyIdx], []);
-        }
-        if (key === 'id' && colIds.length === 3) {
-            const [col1, col2, col3] = colIds;
-
-            if (items[cMagIdx] !== "") {
-                map.get(items[keyIdx]).push([
-                    parseFloat(items[col1]),
-                    parseFloat(items[col2]),
-                    items[col3]
-                ]);
-            }
-        } else if (key === 'filter' && colIds.length === 2) {
-            const [col1, col2] = colIds;
-
-            map.get(items[keyIdx]).push([
-                parseFloat(items[col1]),
-                parseFloat(items[col2])
-            ]);
+        if (spectralModel === 'Power Law') {
+            disableDropdown('ebv', true);
         } else {
-            return map;
-        };
+            disableDropdown('ebv', false);
+        }
     }
-    return map;
 };
 
-/**]
- *  Returns generated table and chart for variable.
- *  @returns {[Handsontable, Chart]}
- */
-export function transient(): [Handsontable, Chart] {
-    /* Initialize page elements */
 
-    // insert/format HTML
+const handleEventTimeInput = (chart: TransientChart) => {
+    const eventTimeInput = document.getElementById('time') as HTMLInputElement;
+
+    eventTimeInput.oninput = () => {
+        if (eventTimeInput.value === '') {
+            return;
+        } 
+        const eventTime = parseFloat(eventTimeInput.value);
+        if (eventTime < 0 || isNaN(eventTime)) {
+            return;
+        }
+        chart.shiftData(eventTime);
+        chart.update();
+    }
+}
+
+
+const handleChartZoomOptions = (chart: TransientChart) => {
+    let Reset = document.getElementById("Reset") as HTMLInputElement;
+    let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+    let panRight = document.getElementById("panRight") as HTMLInputElement;
+    let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+    let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
+    const myChart = chart.chart;
+    let pan: number;
+
+    panLeft.onmousedown = function() {
+        pan = setInterval( () => {chart.chart.pan(5)}, 20 )
+    }
+    panLeft.onmouseup = panLeft.onmouseleave = function() {
+        clearInterval(pan);
+    }
+    panRight.onmousedown = function() {
+        pan = setInterval( () => {chart.chart.pan(-5)}, 20 )
+      }
+    panRight.onmouseup = panRight.onmouseleave = function() {
+        clearInterval(pan);
+    }
+
+    Reset.onclick = function(){
+        chart.resetView();
+        chart.update();
+    }
+
+    let zoom: number;
+    zoomIn.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
+    }
+    zoomIn.onmouseup = zoomIn.onmouseleave = function () {
+    clearInterval(zoom);
+    }
+    zoomOut.onmousedown = function () {
+    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
+    }
+    zoomOut.onmouseup = zoomOut.onmouseleave = function () {
+    clearInterval(zoom);
+    }
+}
+
+
+/*
+    DRIVER 
+*/
+export function transient(): [Handsontable, TransientChart] {
+    /* INITIALIZE PAGE ELEMENTS */
     initializeHTMLElements();
 
-    // generate initial 'junk' data
     const tableData = generateRandomData(14);
-
-    // sort 'junk' data by filter
     let randomData = sortDataByFilter(tableData);
+
+    // create data table 
+    const hot = initializeTable(tableData);
 
     // 'Data' element receives input from user (unfortunately)
     const chartInfoForm = document
@@ -295,14 +257,12 @@ export function transient(): [Handsontable, Chart] {
 
     populateDataElement(randomData, chartInfoForm);
 
-    // create data table 
-    const hot = initializeTable(tableData);
-
     // create chart using ChartJS
-    const myChart = initializeChart();
+    const myChart = new TransientChart();
+    myChart.initialize();
 
     // populate chart with random data
-    addDataSetsToChart(myChart, randomData);
+    addDataSetsToChart(myChart, randomData, 0);
 
     /* Handle updates to forms */
 
@@ -318,98 +278,53 @@ export function transient(): [Handsontable, Chart] {
     });
 
     // handle user shifting mags
-    chartInfoForm.elements['data'].onchange = () => {
+    chartInfoForm.elements['data'].oninput = () => {
         shiftMagnitudes(hot, myChart, chartInfoForm);
     }
 
     const parameterForm = document
-        .getElementById('light-curve-form') as VariableLightCurveForm;
+        .getElementById('transient-form') as VariableLightCurveForm;
 
     // handle user changing dropdown
     parameterForm.oninput = () => {
         handleDropdownInput(myChart);
-
-        myChart.data.maxMJD = 0;
-        myChart.data.minMJD = Number.POSITIVE_INFINITY;
-
-        const tableData = sanitizeTableData(hot.getData(), [0, 1]);
-
-        // get data from table
-        for (let i = 0; i < tableData.length; i++) {
-            let julianDate = tableData[i][0];
-
-            myChart.data.minMJD = Math.min(myChart.data.minMJD, julianDate);
-            myChart.data.maxMJD = Math.max(myChart.data.maxMJD, julianDate);
-        }
-        const minBuffer = myChart.data.minMJD * 0.05;
-        const maxBuffer = myChart.data.maxMJD * 0.05;
-
-        myChart.options.scales['x'].min = myChart.data.minMJD - minBuffer;
-        myChart.options.scales['x'].max = myChart.data.maxMJD + maxBuffer;
+        handleEventTimeInput(myChart);
+        myChart.update();
     }
-
-    const variableForm = document
-        .getElementById("variable-form") as VariableForm;
-
-    // handle user changing input boxes
-    variableForm.onchange = function () {
-        const lightCurveForm = document.getElementById("light-curve-form");
-        lightCurveForm.oninput(null);
-
-        myChart.update('none');
-        updateTableHeight(hot);
-    }
-
+    handleChartZoomOptions(myChart);
     updateVariable(hot, myChart);
     updateTableHeight(hot);
+    myChart.update();
+
+    /* sliders */
+    const tAvg = (myChart.getMinMJD() + myChart.getMaxMJD()) / 2.
+    const mAvg = (myChart.getMinMag() + myChart.getMaxMag()) / 2.
+
+    linkInputs(parameterForm["b"], parameterForm["b_num"], -2, 1, 0.01, -0.5, false);
+    linkInputs(parameterForm["ebv"], parameterForm["ebv_num"], 0, 1, 0.01, 0, false);
+    linkInputs(parameterForm["t"], parameterForm["t_num"], myChart.getMinMJD(), 
+        myChart.getMaxMJD(), 0.01, tAvg, false);
+    linkInputs(parameterForm["mag"], parameterForm["mag_num"], myChart.getMinMag(),
+        myChart.getMaxMag(), 0.01, mAvg, false);
+    linkInputs(parameterForm["a"], parameterForm["a_num"], -3, 1, 0.01, -1, false);
 
     return [hot, myChart];
 }
 
 
-/**
- * This function handles the uploaded file to the variable chart. Specifically, it parse the file
- * and load related information into the table.
- * DATA FLOW: file -> table
- * @param evt The uploadig event
- * @param table The table to be updated
- * @param myChart
- */
-export function transientFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
+export function transientFileUpload(evt: Event, table: Handsontable, myChart: TransientChart) {
 
-    /* Read in data from csv */
     let file = (evt.target as HTMLInputElement).files[0];
 
-    // do nothing if file fails verification
-    if (!verifyCSV(file)) {
-        return;
-    }
+    if (!verifyCSV(file)) { return; }
 
     let reader = new FileReader();
     reader.onload = () => {
-        let csvData = (reader.result as string).split("\n")
-            .filter(str => (str !== null && str !== undefined && str !== ""));
+        const fileData = readCSVData(reader);
+        if (!fileData.valid) { return; }
 
-        //let magErrorIdx = columns.indexOf('mag_error');
-        //let cZeroPointIdx = columns.indexOf('calibrated_zero_point');*/        
-
-        let cols = csvData[0].trim().split(",");
-        csvData.splice(0, 1);
-
-        // columns must be in order that get pushed to map
-        const sourceCols = [cols.indexOf('mjd'),
-            cols.indexOf('mag'),
-            cols.indexOf('filter')];
-        const source = getDataFromCSV(csvData, cols, sourceCols, 'id')
-
-        const filterCols = [cols.indexOf('mjd'),
-            cols.indexOf('mag')];
-        const filterSortedValues = getDataFromCSV(csvData, cols, filterCols, 'filter')
-
-        if (!source.size || !filterSortedValues.size) {
-            console.log('Data sorting failed!');
-            return;
-        }
+        const source = fileData.source;
+        const filterSortedValues = fileData.filter;
 
         const itr = source.keys();
         let sourceData = itr.next().value;
@@ -418,57 +333,55 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Ch
             alert('No source detected in file!');
             return;
         }
-
-        /* Push data to table and chart */
-        myChart.data.maxMJD = 0;
-        myChart.data.minMJD = Number.POSITIVE_INFINITY;
+        
+        myChart.setMinMJD(Number.POSITIVE_INFINITY);
+        myChart.setMaxMJD(0);
 
         // remove bad data and sort my date
         let data = source.get(sourceData)
             .filter((val: number[]) => !isNaN(val[0]))
             .sort((a: number[], b: number[]) => a[0] - b[0]);
 
+        let min = myChart.getMinMJD();
+        let max = myChart.getMaxMJD();
+
         const tableData: any[] = [];
         for (let i = 0; i < data.length; i++) {
-            myChart.data.minMJD = Math.min(myChart.data.minMJD, data[i][0]);
-            myChart.data.maxMJD = Math.max(myChart.data.maxMJD, data[i][0]);
+            min = Math.min(min, data[i][0]);
+            max = Math.max(max, data[i][0]);
             pushTableData(tableData, data[i][0], data[i][1], data[i][2]);
         }
+        myChart.setMinMJD(min);
+        myChart.setMaxMJD(max);
 
-        myChart.options.scales['x'].min = myChart.data.minMJD;
-        myChart.options.scales['x'].max = myChart.data.maxMJD;
+        // shift x axis for event time
+        const time = myChart.getMinMJD() - (myChart.getMaxMJD() - myChart.getMinMJD())*0.1;
+        const shift = time;
+        myChart.setEventShift(time);
+        const eventTime = document.getElementById('time') as HTMLInputElement;
+        eventTime.value = String(time);
 
-        myChart.data.datasets = [];
+        myChart.clearDatasets();
         const chartForm = document
             .getElementById('chart-info-form') as ChartInfoForm;
 
         // update chart data
-        addDataSetsToChart(myChart, filterSortedValues);
+        addDataSetsToChart(myChart, filterSortedValues, shift);
         populateDataElement(filterSortedValues, chartForm);
-        //updateVariable(table, myChart)
 
-        myChart.options.scales['x'].type = 'logarithmic'; // reset to default when uploading file
-        myChart.update('none');
+        myChart.setScaleType('logarithmic');
 
         // reset dropdown
-        const dropdown = document.getElementById('dropdown') as HTMLSelectElement;
+        const dropdown = document.getElementById('temporal') as HTMLSelectElement;
         dropdown.selectedIndex = 0;
 
-        // update table data
+        myChart.update();
         table.updateSettings({ data: tableData });
     }
     reader.readAsText(file);
 }
 
 
-/**
- * Checks the potential entry to the tableData. If jd is not NaN,
- * the entry will be pushed to tableData with `NaN` turned to `null`.
- * @param {List} tableData tableData list to be updated
- * @param {number} jd Julian date of the row
- * @param {number} mag Magnitude of source
- * @param {string} filter Filter used for exposure
- */
 function pushTableData(tableData: any[], jd: number, mag: number, filter: string) {
     if (isNaN(jd)) {
         // Ignore entries with invalid timestamp.
@@ -482,14 +395,8 @@ function pushTableData(tableData: any[], jd: number, mag: number, filter: string
 }
 
 
-/**
- * Called when the values in table is changed (either by manual input or by file upload).
- * It then updates the chart according to the data in the table.
- * DATA FLOW: table -> chart
- * @param table The table object
- * @param myChart The chart object
- */
-function updateVariable(table: Handsontable, myChart: Chart) {
+function updateVariable(table: Handsontable, myChart: TransientChart) {
+    console.log('update Variable called');
 
     // can't pass filter col ([2]) to sanitize since is string
     const tableData = sanitizeTableData(table.getData(), [0, 1]);
@@ -498,37 +405,65 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     const form = document
         .getElementById('chart-info-form') as ChartInfoForm;
 
+    myChart.setMinMJD(Number.POSITIVE_INFINITY);
+    myChart.setMaxMJD(0);
+
+    let minMJD = myChart.getMinMJD();
+    let maxMJD = myChart.getMaxMJD();
+    let minMag = myChart.getMinMag();
+    let maxMag = myChart.getMaxMag();
+
+    for (let i = 0; i < tableData.length; i++) {
+        minMJD = Math.min(minMJD, tableData[i][0]);
+        maxMJD = Math.max(maxMJD, tableData[i][0]);
+        minMag = Math.min(minMag, tableData[i][1]);
+        maxMag = Math.max(maxMag, tableData[i][1]);
+    }
+    myChart.setMinMJD(minMJD);
+    myChart.setMaxMJD(maxMJD);
+    myChart.setMinMag(minMag);
+    myChart.setMaxMag(maxMag);
+
+    let time = myChart.getMinMJD() - ((myChart.getMaxMJD() - myChart.getMinMJD())*0.1);
+
+    if (time < 0) {
+        time = 0;
+    }
+    myChart.setTimeShift(time);
+
+    if (isNaN(myChart.eventShift)) {
+        myChart.eventShift = 0;
+    }
+
     // get data from table
     for (let i = 0; i < tableData.length; i++) {
-        let julianDate = tableData[i][0];
+        let julianDate = tableData[i][0] - time;
         let magnitude = tableData[i][1];
         let filter = tableData[i][2];
 
         if (!map.has(filter)) {
             map.set(filter, []);
         }
-
         map.get(filter).push({
-            'x':julianDate,
-            'y':magnitude
+            x:julianDate,
+            y:magnitude
         });
     }
 
-    // current filters
     let currentFilters = [] as string[];
-    for (let i=0; i < myChart.data.datasets.length; i++) {
+    for (let i=0; i < myChart.getDatasets().length; i++) {
         // delete any unused datasets
-        if (!map.has(myChart.data.datasets[i].label)) {
+        if (!map.has(myChart.getDataset(i).label)) {
             let ss = ', '; 
-            ss += myChart.data.datasets[i].label;
-            myChart.data.datasets.splice(i, 1);
+            ss += myChart.getDataset(i).label;
+            myChart.getDatasets().splice(i, 1);
             ss+= '+0';
             //console.log(ss);
             form.elements['data'].value.replace(ss, '');
             //console.log(form.elements['data'].value.search(', gprime'));
             continue;
         } 
-        currentFilters.push(myChart.data.datasets[i].label);
+        currentFilters.push(myChart.getDataset(i).label);
     }
 
     // supported filters
@@ -544,15 +479,16 @@ function updateVariable(table: Handsontable, myChart: Chart) {
         if (!supportedFilters.includes(key)) {
             continue;
         }
+
         if (currentFilters.includes(key)) {
-            for (let i=0; i < myChart.data.datasets.length; i++) {
-                if (myChart.data.datasets[i].label.search(key) !== -1) {
-                    myChart.data.datasets[i].data = value;
+            for (let i=0; i < myChart.getDatasets().length; i++) {
+                if (myChart.getDataset(i).label.search(key) !== -1) {
+                    myChart.getDataset(i).data = value;
                     break;
                 }
             }
         } else {
-            myChart.data.datasets.push({
+            myChart.addDataset({
                 label: key,
                 data: value,
                 backgroundColor: colorMap.get(key),
@@ -562,25 +498,14 @@ function updateVariable(table: Handsontable, myChart: Chart) {
                 hidden: false,
             });
             // update labels here
-            console.log(key);
             form.elements['data'].value += `, ${key}+0`;
         }
     }
-
-    // accounts for reverse magnitude scale
-    myChart.options.scales['y'].reverse = true;
-
-    const variableForm = document.getElementById("variable-form") as VariableForm;
-    variableForm.onchange(null);
+    myChart.setReverseScale(true);
+    myChart.update();
 }
 
 
-/**
- * Takes an map of values and populates
- * the 'Data' element in index.html.
- * @param array array of strings containing form text
- * @param form form containing the element to be populated
- */
 const populateDataElement = (filterMap: Map<number, number>, form: ChartInfoForm) => {
     let labels = "";
     const itr = filterMap.keys();
@@ -596,30 +521,27 @@ const populateDataElement = (filterMap: Map<number, number>, form: ChartInfoForm
 }
 
 
-/**
- * 
- * 
- * 
- */
-const addDataSetsToChart = (myChart: Chart, filters: Map<string, Array<Array<number>>>) => {
+const addDataSetsToChart = (myChart: TransientChart, filters: Map<string, Array<Array<number>>>, xShift:number) => {
     // colorMap maps filter name to color
     let colorMap = getColorMap();
     const itr = filters.keys();
 
+    myChart.clearDatasets();
     for (let i = 0; i < filters.size; i++) {
         let key = itr.next().value;
 
-        let data = [];
+        let data: Array<{x: number, y: number}> = [];
         let xyData = filters.get(key);
 
         for (let j = 0; j < xyData.length; j++) {
             data.push({
-                'x': xyData[j][0],
+                'x': xyData[j][0] - xShift,
                 'y': xyData[j][1],
+                //'yMin': xyData[j][1]-1,
+                //'yMax': xyData[j][1]+0.5,
             });
         }
-
-        myChart.data.datasets.push({
+        myChart.addDataset({
             label: key, // 'filter+0'
             data: data,
             backgroundColor: colorMap.get(key),
@@ -632,10 +554,6 @@ const addDataSetsToChart = (myChart: Chart, filters: Map<string, Array<Array<num
 }
 
 
-/**
- * hard-coded to be consistent and intuitive
- * @return Map for filter -> color
- */
 const getColorMap = () => {
     let filterColorArray = [
         ['U', '#8601AF'],
@@ -662,3 +580,33 @@ const getColorMap = () => {
 
     return colorMap;
 }
+
+/*const people = [
+        [{email: 'email1@email', y:[1,2,3]},
+        {email: 'email2@email', y:'y2'}],
+        [{email: 'email3@email', y:'y3'}]
+    ];
+    let emails = [people.map(([{ email, y }]) => [email, y])];
+    console.log(emails);
+
+    const dataTest = 
+    [
+        {
+            label:'gen1',
+            backgroundColor: 'blue',
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBorderWidth: 2,
+            hidden: false,
+            data:[
+                {x:3., y:0.5, yMin:0.4, yMax:0.6}, 
+                {x:2., y:0.5, yMin:0.45, yMax:0.60}
+        ]},
+        {
+            label: 'gen2',
+            backgroundColor: 'red',
+            data:[
+                {x:7., y:0.5, yMin:0.4, yMax:0.6}, 
+                {x:4., y:0.5, yMin:0.48, yMax:0.8}
+        ]},
+    ];*/

@@ -28,6 +28,7 @@ import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
+import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 
 /**
  *  Initializing the page when the website loads
@@ -231,10 +232,14 @@ function chartType(chart: string) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'transient') {
-        objects = transient();
+        let transientObjects: [Handsontable, TransientChart];
+        //objects = transient();
+        transientObjects = transient();
+        objects = [transientObjects[0], transientObjects[1].chart];
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            transientFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            // transientFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            transientFileUpload(evt, transientObjects[0], transientObjects[1]);
         }
     }
     updateTableHeight(objects[0]);
@@ -271,7 +276,6 @@ function chartType(chart: string) {
             chartType(((document.getElementById('chart-type-form') as HTMLFormElement ).elements[0] as HTMLInputElement).value);
         };
     }
-
     objects[1].update('none');
 
 }
