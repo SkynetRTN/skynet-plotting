@@ -158,11 +158,12 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
             slider.value = clamp(number.value, min, max);
         }, debounceTime);
     } else {
-        if(Math.log(min * 0.999) === -Infinity){
-            slider.min = (-5).toString();
-        }else{
-            slider.min = Math.log(min * 0.999).toString();
-        }
+        // if(Math.log(min * 0.999) === -Infinity){
+        //     slider.min = (-5).toString();
+        // }else{
+        //     slider.min = Math.log(min * 0.999).toString();
+        // }
+        slider.min = Math.log(min * 0.999).toString();
         console.log('inside linkeinputs')
         console.log(slider.min)
         slider.max = Math.log(max * 1.001).toString();
@@ -176,7 +177,7 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
              * still correspond to min and max, even though the implementation changed to accomodate
              * the log behavior.
             */
-            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 2), min, max);
+            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 5), min, max);
         };
         number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);

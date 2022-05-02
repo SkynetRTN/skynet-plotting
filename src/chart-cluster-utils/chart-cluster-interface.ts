@@ -2,8 +2,9 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
-import { floatMod } from "../my-math"
-import { Chart, ScatterDataPoint } from "chart.js";
+import { Chart } from "chart.js";
+import { chart2Scale, proFormMinmax } from "../chart-cluster3";
+import Handsontable from "handsontable";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -286,19 +287,20 @@ export function clusterProButtons(isClusterPro: boolean){
     }
 }
 
-export function clusterProButtonControl(chart: Chart){
+export function clusterProButtonControl(chart: Chart, table: Handsontable, modelForm: ModelForm){
+    //update chart as button is held down
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
     document.getElementById("panLeftPro").addEventListener("click", () => {
-        chart.pan(-5);
+        chart.pan(-5, [chart.scales["x"]]);
     });
     document.getElementById("panRightPro").addEventListener("click", () => {
-        chart.pan(5);
+        chart.pan(5, [chart.scales["x"]]);
     });
     document.getElementById("panUpPro").addEventListener("click", () => {
-        chart.pan(5, []);
+        chart.pan(-5, [chart.scales["y"]]);
     });
     document.getElementById("panDownPro").addEventListener("click", () => {
-        chart.pan(-5, []);
+        chart.pan(5, [chart.scales["y"]]);
     });
     document.getElementById("zoomInPro").addEventListener("click", () => {
         chart.zoom(1.1);
@@ -307,7 +309,8 @@ export function clusterProButtonControl(chart: Chart){
         chart.zoom(0.9);
     });
     document.getElementById("ResetPro").addEventListener("click", () => {
-        chart.reset();
+        chart2Scale(chart, proFormMinmax(table, modelForm));
+        chart.update();
     });
 }
 

@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { throttle, updateLabels, updateTableHeight, linkInputsVar } from "./util"
+import { throttle, updateLabels, updateTableHeight, linkInputsVar, linkInputs } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
 import { PulsarMode } from "./types/chart.js/index.js";
 
@@ -477,7 +477,7 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-                0, range, 0.001, currentPosition, true
+                0, range, (periodFoldingForm.period_num.value/range)*0.01, currentPosition, true
         );
         }
     }
@@ -522,19 +522,20 @@ function lightCurve(myChart: Chart) {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Period (days):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" step="0.1"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Perifod" name="phase"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Perifod" name="phase_num" class="field"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="phase" name="phase"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="phase_num" name="phase_num" class="field"></div>\n' +
         '</div>\n' ;
 
 
     document.getElementById("period-folding-div").innerHTML = pfHTML;
     const periodFoldingForm = document.getElementById("period-folding-form") as VariablePeriodFoldingForm;
 
-    console.log(periodFoldingForm)
+    
+
     periodFoldingForm.oninput = function () {
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
@@ -542,40 +543,76 @@ function lightCurve(myChart: Chart) {
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            0, range, 0.001, range, true
+            parseFloat(fourierForm.start.value), range, (periodFoldingForm.period_num.value/range)*0.01, range, true
         );
+        linkInputs(
+            periodFoldingForm["phase"], 
+            periodFoldingForm["phase_num"], 
+            0, 
+            1, 
+            0.01, 
+            0
+        );
+        
+    periodFoldingForm.period_num.onchange = function () {
+        // console.log(periodFoldingForm)
+        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+        linkInputsVar(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+            parseFloat(fourierForm.start.value), range, (periodFoldingForm.period_num.value/range)*0.01, periodFoldingForm.period_num.value , true
+        );
+        // periodFoldingForm.period.step = (periodFoldingForm.period_num.value/range)*0.01
+        
+        console.log((periodFoldingForm.period_num.value/range)*0.1)
+    };
+        
 
     periodFoldingForm.oninput = throttle(function () {
-        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value))
+        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value))
         }, 10);
+        
     }
 
 }
 
+export function debounce(func: Function, wait: number) {
+    let timeout: number = undefined;
+    return function (...args: any[]) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => { func.apply(this, args); }, wait);
+    }
+}
 /**
  * This function updates the datapoints on the period folding chart based on the entry in the period folding
  * form. 
  * @param {Chart} myChart 
  * @param {Number} dataIndex The period used to fold the data.
  */
-function updatePeriodFolding(myChart: Chart, period: number) {
+function updatePeriodFolding(myChart: Chart, period: number, phase: number) {
     let datasets = myChart.data.datasets;
     let minMJD = myChart.data.minMJD;
     let pfData = [];
     if (period !== 0) {
         for (let i = 0; i < datasets[2].data.length; i++) {
+            let temp_x = phase*period + floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period);
+            if(temp_x > period){
+                temp_x -= period
+            };
             pfData.push({
-                "x": floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period),
+                "x": temp_x,
                 "y": (datasets[2].data[i] as ScatterDataPoint).y,
             });
-            pfData.push({
-                "x": pfData[pfData.length - 1].x + period,
-                "y": pfData[pfData.length - 1].y,
-            })
+        //     pfData.push({
+        //         "x": pfData[pfData.length - 1].x + period,
+        //         "y": pfData[pfData.length - 1].y,
+        //     })
         }
         myChart.data.datasets[4].data = pfData;
         myChart.options.scales['x'].min = 0;
-        myChart.options.scales['x'].max = (period * 2);
+        myChart.options.scales['x'].max = (period);
         
     } else {
         for (let i = 0; i < datasets[2].data.length; i++) {

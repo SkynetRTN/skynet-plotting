@@ -8,6 +8,15 @@
  import { formatTime, getDateString } from "./util"
  import { ArrMath, sfc32 } from "./my-math"
 
+
+ export function check(oldVal: number, myChart:Chart ){
+    let speed: number = +myChart.data.sonification.audioControls.speed.value;
+    if(speed !== oldVal){
+        pause(myChart);
+    }
+}
+
+
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
  * @param myChart The chart to play.
@@ -20,7 +29,7 @@
     }
 
     let sonification = myChart.data.sonification
-
+    let speed: number = +sonification.audioControls.speed.value;
 
     sonification.audioControls.playPause.innerHTML = "Wait";
     sonification.audioControls.playPause.style.backgroundColor = colors['yellow']
@@ -34,16 +43,21 @@
     };
     if(myChart.data.modeLabels.lastMode === 'pf')
         sonification.audioSource = sonify(myChart,5,6,true);
-    sonification.audioSource.start();
-    let  speed: number = +myChart.data.sonification.audioControls.speed.value;
     sonification.audioSource.playbackRate.value = speed;
+    sonification.audioSource.start();
+
+    setInterval(check, 500, speed, myChart);
+
     sonification.audioControls.playPause.onclick = () => {pause(myChart)}
+    
 
     sonification.audioControls.playPause.innerHTML = "Stop";
     sonification.audioControls.playPause.style.backgroundColor = colors['red']
     sonification.audioControls.playPause.style.color = "white";
     }, 0);
 }
+
+
 
 /**
  * This function stops a Chart's playing sonification (or does nothing if it isn't playing).

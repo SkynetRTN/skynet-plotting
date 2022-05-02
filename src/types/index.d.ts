@@ -170,6 +170,15 @@ interface ClusterProForm extends HTMLFormElement {
     rarangeCheckbox: HTMLInputElement,
     decrangeCheckbox: HTMLInputElement,
 }
+interface ClusterProPmChartControl extends HTMLFormElement {
+    panLeftPro: HTMLInputElement,
+    panRightPro: HTMLInputElement,
+    panUpPro: HTMLInputElement,
+    panDownPro: HTMLInputElement,
+    zoomInPro: HTMLInputElement,
+    zoomOutPro: HTMLInputElement,
+    resetPro: HTMLInputElement
+}
 
 interface GravityForm extends HTMLFormElement {
     mass: HTMLInputElement,
