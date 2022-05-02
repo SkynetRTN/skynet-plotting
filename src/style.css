@@ -211,7 +211,7 @@ input.field {
 }
 
 /*For text boxes in extra options*/
-input.extraoptions {
+.extraoptions {
     border: 2px solid #E7E7E7;
     border-radius: 10px;
     background-color: white;
