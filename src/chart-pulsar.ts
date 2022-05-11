@@ -164,6 +164,7 @@ export function pulsar(): [Handsontable, Chart] {
                 lc: { t: 'Title', x: 'x', y: 'y' },
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
+                pressto: { t: 'Title', x: 'x', y: 'y' },
                 lastMode: 'lc'
             },
             sonification:
@@ -477,6 +478,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
     for (let i in myChart.data.datasets)//empty data on upload
         myChart.data.datasets[i].data = [];
+    myChart.data.sonification.audioSource.buffer = null;
 
 
     var type: string;
@@ -611,6 +613,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
     const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
 
     pause(myChart);
+    myChart.data.sonification.audioSource.buffer = null;
 
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {
@@ -687,6 +690,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
             lc: { t: 'Title', x: 'x', y: 'y' },
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
+            pressto: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
         myChart.data.datasets[5].label = "Channel 1";
@@ -825,7 +829,8 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
         lc: { t: 'Title', x: 'x', y: 'y' },
         ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
         pf: { t: 'Title', x: 'x', y: 'y' },
-        lastMode: 'pf'
+        pressto: { t: 'Title', x: 'x', y: 'y' },
+        lastMode: 'pressto'
     };
 
     myChart.options.plugins.title.text = 'Title';
