@@ -593,7 +593,8 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   } else {
     medRa = raArray[raArraHalfLength];
   }
-  //make an array of all the dec values in numerical order from smallest to largest
+  let raArrayAbs = raArray.map(row => Math.abs(row - medRa)).sort((a, b) => a - b);
+  //make an array of all the dec values
   let decArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
   //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
   let decArrayLength = decArray.length;
@@ -604,20 +605,25 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
     } else {
       medDec = decArray[raArraHalfLength];
     }
-  //find the middle 68.3% of values in the ra array
-  let decArray68 = decArray.slice(Math.floor(decArrayLength*0.1585), Math.ceil(decArrayLength*0.8415));
+      //make an array of the absolute value of the dec values minus the median
+  let decArrayAbs = decArray.map(row => Math.abs(row - medDec)).sort((a, b) => a - b);
+  //find the 68.3% of values in the dec array
+  let decArray68 = decArrayAbs.slice(Math.floor(decArrayLength*0), Math.ceil(decArrayLength*0.683));
+  //find the mean of this array
+  //let decArray68Mean = decArray68.reduce((a, b) => a + b, 0) / decArray68.length;
   //find the standard deviation of the dec out of all stars
   let stdDec = 0;
   for (let i = 0; i < decArray68.length; i++) {
-    stdDec += Math.pow(decArray68[i] - medDec, 2);
+    stdDec += Math.pow(decArray68[i], 2);
   }
   stdDec = Math.sqrt(stdDec / decArray68.length);
   //find the middle 68.3% of values in the ra array
-  let raArray68 = raArray.slice(Math.floor(raArrayLength*0.1585), Math.ceil(raArrayLength*0.8415));
+  let raArray68 = raArrayAbs.slice(Math.floor(raArrayLength*0), Math.ceil(raArrayLength*0.683));
+  //let raArray68Mean = raArray68.reduce((a, b) => a + b, 0) / raArray68.length;
   //find the standard deviation of the dec out of all stars
   let stdRa = 0;
   for (let i = 0; i < raArray68.length; i++) {
-    stdRa += Math.pow(raArray68[i] - medRa, 2);
+    stdRa += Math.pow(raArray68[i], 2);
   }
   stdRa = Math.sqrt(stdRa / raArray68.length);
   let maxRa = medRa + (2*stdRa);
