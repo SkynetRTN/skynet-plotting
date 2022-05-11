@@ -179,11 +179,11 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
             */
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 5), min, max);
         };
-        number.oninput = debounce(()=> {
+        number.oninput = function() {
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
-        }, debounceTime)
+        }
     }
 }
 
