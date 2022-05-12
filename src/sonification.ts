@@ -9,13 +9,17 @@
  import { ArrMath, sfc32 } from "./my-math"
 
 
- export function check(oldVal: number, myChart:Chart ){
+ export function check(oldVal: number, myChart:Chart){
     let speed: number = +myChart.data.sonification.audioControls.speed.value;
     if(speed !== oldVal){
         pause(myChart);
     }
 }
 
+export function Set2DefaultSpeed(myChart:Chart){
+    myChart.data.sonification.audioControls.speed.setAttribute("value", ""); 
+    myChart.data.sonification.audioControls.speed.value = "";   
+}
 
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
@@ -45,8 +49,13 @@
         sonification.audioSource = sonify(myChart,[5,6],true);
     if(myChart.data.modeLabels.lastMode === 'pressto')
         sonification.audioSource = sonify(myChart,[5],true);
-
+    
+    if(speed == 0){
+        sonification.audioSource.playbackRate.value = 1;
+    }
+    else{
     sonification.audioSource.playbackRate.value = speed;
+    }
     sonification.audioSource.start();
 
     setInterval(check, 500, speed, myChart);
@@ -58,6 +67,7 @@
     sonification.audioControls.playPause.style.backgroundColor = colors['red']
     sonification.audioControls.playPause.style.color = "white";
     }, 0);
+    
 }
 
 
@@ -87,6 +97,10 @@ export function pause(myChart: Chart){
     sonification.audioControls.playPause.innerHTML = "Sonify";
     sonification.audioControls.playPause.style.backgroundColor = ''
     sonification.audioControls.playPause.style.color = "black";
+    var interval_id = window.setInterval(()=>{}, 99999);
+    for (var i = 0; i < interval_id; i++){
+	    window.clearInterval(i);
+    }
 }
 
 /**
