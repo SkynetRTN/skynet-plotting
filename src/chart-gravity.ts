@@ -113,7 +113,8 @@ export function gravity(): [Handsontable, Chart] {
       }
   // Link each slider with corresponding text box
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
-  const filterForm = document.getElementById("filter-form") as ModelForm;
+  //Dont think we are using filterForm
+ // const filterForm = document.getElementById("filter-form") as ModelForm;
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 100, 0.01, 50);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
@@ -200,25 +201,15 @@ export function gravity(): [Handsontable, Chart] {
       },
       scales: {
         x: {
-          //label: 'B-V',
+          //label: 'time',
           type: "linear",
           position: "bottom",
         },
-        //x2: {
-          //type: "linear",
-          //position: "bottom",
-        //},
         y: {
-          //label: 'V',
+          //label: 'grav stuff',
           reverse: false,
           suggestedMin: 0,
         },
-        //y2: {
-          //type: "linear",
-          //position: "left",
-          //reverse: false,
-          //suggestedMin: 0,
-        //},
       },
       plugins: {
         zoom: {
@@ -240,7 +231,8 @@ export function gravity(): [Handsontable, Chart] {
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    updateWave(hot, myChart, gravityForm, 1);  
+    updateDataPlot(hot, myChart);
+    updateModelPlot(hot, myChart, gravityForm);
     
   };
 console.log(myChart);
@@ -253,39 +245,43 @@ console.log(myChart);
   const fps = 100;
   const frameTime = Math.floor(100 / fps);
   gravityForm.oninput = throttle(
-    function () {updateWave(hot,myChart,gravityForm,1)},
+    function () {updateModelPlot(hot, myChart, gravityForm)},
     frameTime);
   // link chart to model form (slider + text)
 
-  filterForm.oninput = function () {
-    //console.log(tableData);
-//leaving this stuff here just in case we need drop down dependencies later
-    const reveal: string[] = [
-    ];
+  /*
+  commented out the stuff below because not being used (don't know if it will ever be)
+   */
+//   filterForm.oninput = function () {
+//     //console.log(tableData);
+// //leaving this stuff here just in case we need drop down dependencies later
+//     const reveal: string[] = [
+//     ];
+//
+//     const columns: string[] = hot.getColHeader() as string[];
+//     const hidden: number[] = [];
+//     for (const col in columns) { //cut off " Mag"
+//       if (!reveal.includes(columns[col])) {
+//         //if the column isn't selected in the drop down, hide it
+//         hidden.push(parseFloat(col));
+//       }
+//     }
+//     hot.updateSettings({
+//       hiddenColumns: {
+//         columns: hidden,
+//         // copyPasteEnabled: false,
+//         indicators: false,
+//       },
+//     });
+//
+//     update();
+//     updateLabels(
+//       myChart,
+//       document.getElementById("chart-info-form") as ChartInfoForm
+//     );
+//     myChart.update("none");
+//   };
 
-    const columns: string[] = hot.getColHeader() as string[];
-    const hidden: number[] = [];
-    for (const col in columns) { //cut off " Mag"
-      if (!reveal.includes(columns[col])) {
-        //if the column isn't selected in the drop down, hide it
-        hidden.push(parseFloat(col));
-      }
-    }
-    hot.updateSettings({
-      hiddenColumns: {
-        columns: hidden,
-        // copyPasteEnabled: false,
-        indicators: false,
-      },
-    });
-
-    update();
-    updateLabels(
-      myChart,
-      document.getElementById("chart-info-form") as ChartInfoForm
-    );
-    myChart.update("none");
-  };
   update();
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -349,29 +345,30 @@ export function gravityFileUpload(
       false
     );
   }}
-function updateWave(
-  table: Handsontable,
-  myChart: Chart,
-  gravityForm: GravityForm,
-  dataSetIndex: 1) 
-{
-  // let inc = parseFloat(gravityForm["inc_num"].value);
-  // let dist = parseFloat(gravityForm["dist_num"].value);
-  // let merge = parseFloat(gravityForm["merge_num"].value);
-    
+
+/**
+ * updates the data plot using the data in the Henderson table
+ * @param table
+ * @param myChart
+ */
+function updateDataPlot(
+    table: Handsontable,
+    myChart: Chart) {
+
   let start = 0;
-  let chart = myChart.data.datasets[dataSetIndex].data;
+  //data on chart 1
+  let chart = myChart.data.datasets[1].data;
   let tableData = table.getData();
-    
+
     for (let i = 0; i < tableData.length; i++) {
       if (
       tableData[i][0] === null ||
       tableData[i][1] === null ||
-      tableData[i][2] === null 
+      tableData[i][2] === null
       ) {
       continue;
         }
-    
+
     let x = (tableData[i][0]);
     let y = (tableData[i][1])
     chart[start++] = {
@@ -380,5 +377,46 @@ function updateWave(
         };
   }
 
+  myChart.update()
+}
+
+/**
+ * updates the curve for the model using the chart, Henderson table and the gravityForm
+ * @param table
+ * @param myChart
+ * @param gravityForm
+ */
+function updateModelPlot(
+    table: Handsontable,
+    myChart: Chart,
+    gravityForm: GravityForm)
+{
+  let inc = parseFloat(gravityForm["inc_num"].value);
+  let dist = parseFloat(gravityForm["dist_num"].value);
+  let merge = parseFloat(gravityForm["merge_num"].value);
+  //default d0 for now
+  let d0 = 100;
+
+  let start = 0;
+  //model data stored in chart 0
+  let chart = myChart.data.datasets[0].data;
+  let tableData = table.getData();
+  for (let i = 0; i < tableData.length; i++) {
+    if (
+        tableData[i][0] === null
+    ) {
+      continue;
+    }
+
+    let x = (tableData[i][0]);
+    // call a model function on x and the other parameters to get y
+
+    // tableData[i][2] = amp(x-merge) * (1 - 0.5 * Math.sin(inc)) * (d0/dist)
+    let y = (tableData[i][2])
+    chart[start++] = {
+      x: x,
+      y: y,
+    };
+  }
   myChart.update()
 }
