@@ -9,13 +9,17 @@
  import { ArrMath, sfc32 } from "./my-math"
 
 
- export function check(oldVal: number, myChart:Chart ){
+ export function check(oldVal: number, myChart:Chart){
     let speed: number = +myChart.data.sonification.audioControls.speed.value;
     if(speed !== oldVal){
         pause(myChart);
     }
 }
 
+export function Set2DefaultSpeed(myChart:Chart){
+    myChart.data.sonification.audioControls.speed.setAttribute("value", ""); 
+    myChart.data.sonification.audioControls.speed.value = "";   
+}
 
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
@@ -38,12 +42,20 @@
     //audioCtx.resume();
     if(myChart.data.modeLabels.lastMode === 'lc')
     {
-        sonification.audioSource = sonify(myChart,0,1,false);
+        sonification.audioSource = sonify(myChart,[0,1],false);
         sonification.audioSource.onended = () => pause(myChart);
     };
     if(myChart.data.modeLabels.lastMode === 'pf')
-        sonification.audioSource = sonify(myChart,5,6,true);
+        sonification.audioSource = sonify(myChart,[5,6],true);
+    if(myChart.data.modeLabels.lastMode === 'pressto')
+        sonification.audioSource = sonify(myChart,[5],true);
+    
+    if(speed == 0){
+        sonification.audioSource.playbackRate.value = 1;
+    }
+    else{
     sonification.audioSource.playbackRate.value = speed;
+    }
     sonification.audioSource.start();
 
     setInterval(check, 500, speed, myChart);
@@ -55,6 +67,7 @@
     sonification.audioControls.playPause.style.backgroundColor = colors['red']
     sonification.audioControls.playPause.style.color = "white";
     }, 0);
+    
 }
 
 
@@ -84,6 +97,10 @@ export function pause(myChart: Chart){
     sonification.audioControls.playPause.innerHTML = "Sonify";
     sonification.audioControls.playPause.style.backgroundColor = ''
     sonification.audioControls.playPause.style.color = "black";
+    var interval_id = window.setInterval(()=>{}, 99999);
+    for (var i = 0; i < interval_id; i++){
+	    window.clearInterval(i);
+    }
 }
 
 /**
@@ -104,7 +121,7 @@ export function saveSonify(myChart: Chart){
     if(myChart.data.modeLabels.lastMode === 'lc')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,0,1)
+            sonification.audioSource = sonify(myChart,[0,1])
         downloadBuffer(sonification.audioSource.buffer)
     }
 
@@ -112,71 +129,65 @@ export function saveSonify(myChart: Chart){
     if(myChart.data.modeLabels.lastMode === 'pf')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,4,5, true)
+            sonification.audioSource = sonify(myChart,[5,6], true)
+        downloadBuffer(sonification.audioSource.buffer, 60)
+    }
+
+    if(myChart.data.modeLabels.lastMode === 'pressto')
+    {
+        if(!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart, [5], true)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
 }
 
-//May want to add a mono mode. I hate how this function looks but it works
 /**
  * This function creates an audioBuffer using data from the chart
  * @param myChart The chart to be sonified.
- * @param dataSet1 The dataset to sonify as the first stereo channel.
-*  @param dataSet2 The dataset to sonify as the second stereo channel.
+ * @param dataSets A number array containing the numbers of datasets to be converted into channels
  * @param loop Loop audio?
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
-export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true, destination?: AudioNode){
+export function sonify(myChart: Chart, dataSets: number[], loop: boolean = true, destination?: AudioNode){
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
-  
-    let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[],
-        channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[],
-        time = (channel0[channel0.length-1].x - channel0[0].x);//length of the audio buffer
-    
+    let channels =  dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]);
+    let time = channels[0][channels[0].length - 1].x - channels[0][0].x;
+
     if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
     {
-        var first1: ScatterDataPoint = {y:0,x:0};
-        first1.y = channel0[0].y;
-        var first2: ScatterDataPoint = {y:0,x:0};
-        first2.y = channel1[0].y;
-
-        first1.x = channel0[channel0.length-1].x + time/channel0.length;
-        first2.x = channel0[channel0.length-1].x + time/channel0.length;
-
-        channel0 = channel0.concat(first1);
-        channel1 = channel1.concat(first2);
-        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+        for (let i = 0; i < channels.length; i++)
+        {
+            var first: ScatterDataPoint = {x:0,y:0};
+            first.y = channels[i][0].y;
+            first.x = channels[i][channels[i].length-1].x + time/channels[i].length;
+            channels[i] = channels[i].concat(first);
+        }
+        time = channels[0][channels[0].length - 1].x - channels[0][0].x;
     }
 
-    let norm0 = 1 / ArrMath.max(channel0.map(p => p.y))
-    let norm1 = 1 / ArrMath.max(channel1.map(p => p.y))
+    let norm = channels.map(c => 1 / ArrMath.max(c.map(p => p.y)));
 
     // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
-    var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
+    var arrayBuffer = ctx.createBuffer(channels.length,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
 
-    let prev0 = 0;//data point with the greatest time value less than the current time
-    let prev1 = 0;
-    let next0 = 1;//next data point
-    let next1 = 1;
+    for (var c = 0; c < channels.length; c++)
+    {
+        let prev = 0;//data point with the greatest time value less than the current time
+        let next = 1;//next data point
 
-    for (var i = 0; i < arrayBuffer.length; i++) {
-        let x0 = channel0[0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
-        let x1 = channel0[0].x + i/ctx.sampleRate;
-        if(x0 > channel0[next0].x){
-            prev0 = next0;
-            next0++;
+        for (var i = 0; i < arrayBuffer.length; i++) {
+            let x = channels[c][0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
+            if(x > channels[c][next].x){
+                prev = next;
+                next++;
+            }
+
+            arrayBuffer.getChannelData(c)[i] = norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1); // Left Channel
+
         }
-        if(x1 > channel1[next1].x){
-            prev1 = next1
-            next1++;
-        }
-
-        arrayBuffer.getChannelData(0)[i] = norm0 * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*rand()-1); // Left Channel
-        arrayBuffer.getChannelData(1)[i] = norm1 * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*rand()-1);  //multiply by norm: the maximum y value is 10 in the buffer
     }
-    
     // Get an AudioBufferSourceNode to play our buffer.
     const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
     sonifiedChart.loop = loop; //play on repeat?
@@ -209,7 +220,7 @@ function bufferToWav(buf: AudioBuffer, time: number)
         numOfSamples = Math.round(time * buf.sampleRate),
         length = numOfSamples * numOfChan * 4 + 44//add room for metadata
     length = length > 2147483648? 2147483648 : length; //cuts back if the length is beyond 2GB (Hopefully )
-    
+
     var buffer = new ArrayBuffer(length),
         view = new DataView(buffer), //Where we put a da data
         channels = [], 

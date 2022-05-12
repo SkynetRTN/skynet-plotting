@@ -1,5 +1,3 @@
-'use strict';
-
 import Chart from "chart.js/auto";
 import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
@@ -8,7 +6,7 @@ import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
-import { pause, play, saveSonify } from "./sonification";
+import { pause, play, saveSonify,Set2DefaultSpeed } from "./sonification";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -164,6 +162,7 @@ export function pulsar(): [Handsontable, Chart] {
                 lc: { t: 'Title', x: 'x', y: 'y' },
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
+                pressto: { t: 'Title', x: 'x', y: 'y' },
                 lastMode: 'lc'
             },
             sonification:
@@ -467,6 +466,7 @@ export function pulsar(): [Handsontable, Chart] {
 export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("pulsarFileUpload called");
     pause(myChart);
+    Set2DefaultSpeed(myChart);
 
     let file = (evt.target as HTMLInputElement).files[0];
 
@@ -477,6 +477,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
     for (let i in myChart.data.datasets)//empty data on upload
         myChart.data.datasets[i].data = [];
+    myChart.data.sonification.audioSource.buffer = null;
 
 
     var type: string;
@@ -549,7 +550,14 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
             let fluxstr: string[] = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.slice(6).trim());
-            let fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])))
+ //           console.log(fluxstr);
+            if(fluxstr[0].split("e+").length == 1){
+                var fluxes: number[] = fluxstr.map(Number);
+            }
+            else{
+                var fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])));
+            }            
+ //           console.log(fluxes);
             let sampleRat = period/fluxes.length;
 
             var max = ArrMath.max(fluxes);
@@ -611,6 +619,8 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
     const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
 
     pause(myChart);
+    Set2DefaultSpeed(myChart);
+    myChart.data.sonification.audioSource.buffer = null;
 
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {
@@ -687,6 +697,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
             lc: { t: 'Title', x: 'x', y: 'y' },
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
+            pressto: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
         myChart.data.datasets[5].label = "Channel 1";
@@ -825,7 +836,8 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
         lc: { t: 'Title', x: 'x', y: 'y' },
         ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
         pf: { t: 'Title', x: 'x', y: 'y' },
-        lastMode: 'pf'
+        pressto: { t: 'Title', x: 'x', y: 'y' },
+        lastMode: 'pressto'
     };
 
     myChart.options.plugins.title.text = 'Title';
