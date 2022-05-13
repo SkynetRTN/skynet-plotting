@@ -209,12 +209,21 @@ function updateCharts(
             numericFormat: {pattern: {mantissa: 5}},
         });
     }
+    headers.push("id")
+    columns.push({
+        data: "id",
+        type: "text",
+        readOnly: true,
+    })
     // filters = newFilter;
     hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
+    hiddenColumns.push(columns.length-1)
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
+    let itr = datadict.keys()
     datadict.forEach((src) => {
         const row: { [key: string]: number } = {};
+        row['id'] = itr.next().value
         for (let filterIndex in filters) {
             row[filters[filterIndex]] = src.get(filters[filterIndex]);
             row[filters[filterIndex] + "err"] = src.get(filters[filterIndex] + "err");
