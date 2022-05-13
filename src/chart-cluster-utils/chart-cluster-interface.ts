@@ -280,10 +280,12 @@ export function clusterProButtons(isClusterPro: boolean){
         // document.getElementById("chart-pro-options").style.display = "none";
         document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
         document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+        document.getElementById('save-data-button').style.display = 'inline'
     } else {
         document.getElementById("clusterProPmChartControl").style.display = "none";
         document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
         document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+        document.getElementById('save-data-button').style.display = 'none'
     }
 }
 
