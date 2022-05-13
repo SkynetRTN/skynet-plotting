@@ -11,6 +11,7 @@ import {
   updateLabels,
   updateTableHeight,
 } from "./util";
+import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -56,10 +57,10 @@ export function gravity(): [Handsontable, Chart] {
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
-      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
-      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
-      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
-      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+      '<button class = "graphControl" id="panLeft">< class = "graphControl">&#8592;</></button>\n' +
+      '<button class = "graphControl" id="panRight">< class = "graphControl">&#8594;</></button>\n' +
+      '<button class = "graphControl" id="zoomIn">< class = "graphControl">&plus;</></button>\n' +
+      '<button class = "graphControl" id="zoomOut">< class = "graphControl">&minus;</></button>\n' +
       '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
   '</div>\n')
 
@@ -100,13 +101,13 @@ export function gravity(): [Handsontable, Chart] {
       //handel zoom/pan buttons
       let zoom: number;
       zoomIn.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
+        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);
       }
       zoomIn.onmouseup = zoomIn.onmouseleave = function () {
         clearInterval(zoom);
       }
       zoomOut.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
+        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);
       }
       zoomOut.onmouseup = zoomOut.onmouseleave = function () {
         clearInterval(zoom);
@@ -115,13 +116,18 @@ export function gravity(): [Handsontable, Chart] {
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
   //Dont think we are using filterForm
  // const filterForm = document.getElementById("filter-form") as ModelForm;
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 100, 0.01, 50);
+  const tableData = dummyData
+
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 50, 0.001, 16.5);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityForm["mass"],gravityForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.01,1,true);
 
-  const tableData = dummyData
+
+  //read in model default data
+  const modelData = defaultModelData
+
 
   // create table
   document.getElementById('axis-label1').style.display = 'inline';
@@ -232,7 +238,7 @@ export function gravity(): [Handsontable, Chart] {
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    updateModelPlot(hot, myChart, gravityForm);
+    updateModelPlot(myChart, gravityForm);
     
   };
 console.log(myChart);
@@ -245,7 +251,7 @@ console.log(myChart);
   const fps = 100;
   const frameTime = Math.floor(100 / fps);
   gravityForm.oninput = throttle(
-    function () {updateModelPlot(hot, myChart, gravityForm)},
+    function () {updateModelPlot(myChart, gravityForm)},
     frameTime);
   // link chart to model form (slider + text)
 
@@ -363,8 +369,7 @@ function updateDataPlot(
     for (let i = 0; i < tableData.length; i++) {
       if (
       tableData[i][0] === null ||
-      tableData[i][1] === null ||
-      tableData[i][2] === null
+      tableData[i][1] === null
       ) {
       continue;
         }
@@ -382,15 +387,12 @@ function updateDataPlot(
 
 /**
  * updates the curve for the model using the chart, Henderson table and the gravityForm
- * @param table
  * @param myChart
  * @param gravityForm
  */
 function updateModelPlot(
-    table: Handsontable,
     myChart: Chart,
-    gravityForm: GravityForm)
-{
+    gravityForm: GravityForm) {
   let inc = parseFloat(gravityForm["inc_num"].value);
   let dist = parseFloat(gravityForm["dist_num"].value);
   let merge = parseFloat(gravityForm["merge_num"].value);
@@ -400,22 +402,13 @@ function updateModelPlot(
   let start = 0;
   //model data stored in chart 0
   let chart = myChart.data.datasets[0].data;
-  let tableData = table.getData();
-  for (let i = 0; i < tableData.length; i++) {
-    if (
-        tableData[i][0] === null
-    ) {
+  for (let i = 0; i < defaultModelData.length; i++) {
+    if ((defaultModelData[i][0] === null) || (defaultModelData[i][1] === null)) {
       continue;
     }
-
-    let x = (tableData[i][0]);
-    // call a model function on x and the other parameters to get y
-
-    // tableData[i][2] = amp(x-merge) * (1 - 0.5 * Math.sin(inc)) * (d0/dist)
-    let y = (tableData[i][2])
     chart[start++] = {
-      x: x,
-      y: y,
+      x: defaultModelData[i][0] + merge,
+      y: defaultModelData[i][1] * (1-0.5*Math.sin(inc*(3.1415/180)))*(d0 / dist) * Math.pow(10,24),
     };
   }
   myChart.update()
