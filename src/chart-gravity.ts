@@ -118,7 +118,7 @@ export function gravity(): [Handsontable, Chart] {
  // const filterForm = document.getElementById("filter-form") as ModelForm;
   const tableData = dummyData
 
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 50, 0.001, 16.5);
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)), 0.001, 16.5);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityForm["mass"],gravityForm["mass_num"],2.5,250,0.01,25,true);
