@@ -126,6 +126,27 @@ export function clusterFileUpload(
     reader.readAsText(file);
 }
 
+
+/**
+ * This function downloads filtered data from Handsontable
+ * DATA FLOW: table -> file
+ * @param {Handsontable} table The table which data is in
+ */
+export function clusterFileDownload(
+    table: Handsontable,
+){
+    // access to exportFile plugin instance
+    var exportPlugin = table.getPlugin('exportFile');
+    // export as a string (with specified data range):
+    exportPlugin.downloadFile('csv', {
+        filename: 'Cluster-Pro-Data',
+        exportHiddenRows: true,     // default false
+        exportHiddenColumns: true,  // default false
+        columnHeaders: true,        // default false
+        rowHeaders: true,           // default false
+    });
+}
+
 function updateCharts(
     myCharts: Chart[],
     table: Handsontable,
