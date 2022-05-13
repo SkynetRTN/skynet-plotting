@@ -57,10 +57,10 @@ export function gravity(): [Handsontable, Chart] {
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
-      '<button class = "graphControl" id="panLeft">< class = "graphControl">&#8592;</></button>\n' +
-      '<button class = "graphControl" id="panRight">< class = "graphControl">&#8594;</></button>\n' +
-      '<button class = "graphControl" id="zoomIn">< class = "graphControl">&plus;</></button>\n' +
-      '<button class = "graphControl" id="zoomOut">< class = "graphControl">&minus;</></button>\n' +
+      '<button class = "graphControl" id="panLeft"><class = "graphControl">&#8592;</></button>\n' +
+      '<button class = "graphControl" id="panRight"><class = "graphControl">&#8594;</></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><class = "graphControl">&plus;</></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><class = "graphControl">&minus;</></button>\n' +
       '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
   '</div>\n')
 
