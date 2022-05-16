@@ -134,7 +134,30 @@ export function clusterFileUpload(
  */
 export function clusterFileDownload(
     table: Handsontable,
+    myCharts: Chart[],
+    clusterForm: ClusterForm,
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    graphMaxMin: graphScale,
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm = null,
+
 ){
+    // console.log('init')
+    let toBeFlagged = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm)
+    // console.log(toBeFlagged)
+    let data = table.getSourceData()
+    let columns = table.getColHeader();
+    // console.log(data)
+    let isValidIndex = columns.indexOf('isValid');
+    if (isValidIndex > 0){
+        for (let i = 0; i < toBeFlagged.length; i++) {
+            (data[toBeFlagged[i]] as { [key: string]: string })['isValid'] = "False"
+        }
+    }
+
+    table.loadData(data)
+
     // access to exportFile plugin instance
     var exportPlugin = table.getPlugin('exportFile');
     // export as a string (with specified data range):
@@ -145,6 +168,7 @@ export function clusterFileDownload(
         columnHeaders: true,        // default false
         rowHeaders: true,           // default false
     });
+    console.log('oops')
 }
 
 function updateCharts(
@@ -236,15 +260,22 @@ function updateCharts(
         type: "text",
         readOnly: true,
     })
+    headers.push("isValid")
+    columns.push({
+        data: "isValid",
+        type: "text",
+    })
     // filters = newFilter;
     hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
     hiddenColumns.push(columns.length-1)
+    hiddenColumns.push(columns.length-2)
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
     let itr = datadict.keys()
     datadict.forEach((src) => {
         const row: { [key: string]: number } = {};
-        row['id'] = itr.next().value
+        row['id'] = itr.next().value;
+        row['isValid'] = "True" as any;
         for (let filterIndex in filters) {
             row[filters[filterIndex]] = src.get(filters[filterIndex]);
             row[filters[filterIndex] + "err"] = src.get(filters[filterIndex] + "err");
