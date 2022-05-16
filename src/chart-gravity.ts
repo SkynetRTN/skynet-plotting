@@ -4,7 +4,9 @@ import Chart from "chart.js/auto";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
+import {totalMassLogSpace} from "./chart-gravity-utils/chart-gravity-totalMassGridSpace";
 import { tableCommonOptions, colors } from "./config";
+
 import {
   linkInputs,
   throttle,
@@ -122,12 +124,13 @@ export function gravity(): [Handsontable, Chart] {
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityForm["mass"],gravityForm["mass_num"],2.5,250,0.01,25,true);
-  linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.01,1,true);
+  linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.1,1);
 
 
   //read in model default data
   const modelData = defaultModelData
 
+  const totalMassGrid = totalMassLogSpace
 
   // create table
   document.getElementById('axis-label1').style.display = 'inline';
@@ -351,7 +354,30 @@ export function gravityFileUpload(
       false
     );
   }}
+function pullNewModel(gravityForm : GravityForm){
+  let totalMass = parseFloat(gravityForm["mass_num"].value);
+  let ratioMass = parseFloat(gravityForm["ratio_num"].value);
 
+  let roundedMassRatio = Math.round(10*ratioMass) / 10;
+  console.log(roundedMassRatio)
+
+  // Fitting the slider to the logspace
+  const differences: number[] = [];
+  for (let i = 0; i < totalMassLogSpace.length; i++){
+    differences.push(Math.abs(totalMass - totalMassLogSpace[i]));
+  }
+
+  let min: number = 251;
+  let argmin = 0;
+  for (let i = 0; i < totalMassLogSpace.length; i++){
+    if (differences[i] < min) {
+      min = differences[i];
+      argmin = i;
+    }
+  }
+  let roundedTotalMass = totalMassLogSpace[argmin];
+  console.log(roundedTotalMass)
+}
 /**
  * updates the data plot using the data in the Henderson table
  * @param table
@@ -393,6 +419,7 @@ function updateDataPlot(
 function updateModelPlot(
     myChart: Chart,
     gravityForm: GravityForm) {
+  pullNewModel(gravityForm);
   let inc = parseFloat(gravityForm["inc_num"].value);
   let dist = parseFloat(gravityForm["dist_num"].value);
   let merge = parseFloat(gravityForm["merge_num"].value);
@@ -408,7 +435,7 @@ function updateModelPlot(
     }
     chart[start++] = {
       x: defaultModelData[i][0] + merge,
-      y: defaultModelData[i][1] * (1-0.5*Math.sin(inc*(3.1415/180)))*(d0 / dist) * Math.pow(10,24),
+      y: defaultModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,24),
     };
   }
   myChart.update()
