@@ -46,14 +46,15 @@ export function updateScatter(
         decMotion = parseFloat(clusterProForm['decmotion_num'].value);
         decRange = parseFloat(clusterProForm['decrange_num'].value);
     }
-
+    let tableData = table.getData();
+    let columns = table.getColHeader();
+    let isValidIndex = columns.indexOf('isValid');
+    let flagColumns = [];
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
             
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
-            let tableData = table.getData();
-            let columns = table.getColHeader();
                 
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
@@ -113,23 +114,33 @@ export function updateScatter(
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
+                    if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
+                        flagColumns.push(i)
                     continue;
                 }
                 let distance: number = tableData[i][blueDist];
                 let isDistNotValid = isNaN(distance) || distance === null
                 if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
+                    if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
+                        flagColumns.push(i)
                     continue;
                 }
                 if (clusterProForm !== null) {
                     if (isRaRange) {
                         let pmra = tableData[i][bluePmra]
-                        if (pmra > pmraHighLim|| pmra < pmraLowLim)
+                        if (pmra > pmraHighLim|| pmra < pmraLowLim) {
+                            if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
+                                flagColumns.push(i)
                             continue;
+                        }
                     }
                     if (isDecRange) {
                         let pmdec = tableData[i][bluePmdec]
-                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim)
+                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim) {
+                            if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
+                                flagColumns.push(i)
                             continue;
+                        }
                     }
                 }
 
@@ -161,6 +172,7 @@ export function updateScatter(
             myChart.update()
         }
     }
+    return flagColumns
 }
 
 
