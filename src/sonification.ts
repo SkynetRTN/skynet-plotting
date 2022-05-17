@@ -9,7 +9,7 @@
  import { ArrMath, sfc32 } from "./my-math"
 
 
- export function check(oldVal: number, myChart:Chart){
+ export function check(oldVal: number, myChart:Chart ){
     let speed: number = +myChart.data.sonification.audioControls.speed.value;
     if(speed !== oldVal){
         pause(myChart);
@@ -20,6 +20,7 @@ export function Set2DefaultSpeed(myChart:Chart){
     myChart.data.sonification.audioControls.speed.setAttribute("value", ""); 
     myChart.data.sonification.audioControls.speed.value = "";   
 }
+
 
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
@@ -49,12 +50,13 @@ export function Set2DefaultSpeed(myChart:Chart){
         sonification.audioSource = sonify(myChart,[5,6],true);
     if(myChart.data.modeLabels.lastMode === 'pressto')
         sonification.audioSource = sonify(myChart,[5],true);
-    
+
+
     if(speed == 0){
         sonification.audioSource.playbackRate.value = 1;
     }
     else{
-    sonification.audioSource.playbackRate.value = speed;
+        sonification.audioSource.playbackRate.value = speed;
     }
     sonification.audioSource.start();
 
@@ -67,7 +69,6 @@ export function Set2DefaultSpeed(myChart:Chart){
     sonification.audioControls.playPause.style.backgroundColor = colors['red']
     sonification.audioControls.playPause.style.color = "white";
     }, 0);
-    
 }
 
 
@@ -76,7 +77,7 @@ export function Set2DefaultSpeed(myChart:Chart){
  * This function stops a Chart's playing sonification (or does nothing if it isn't playing).
  * @param myChart The chart to stop.
  */
-export function pause(myChart: Chart){
+export function pause(myChart: Chart, clearInter: boolean = true){
     if(!myChart.data.sonification)
     {
         console.error("Chart has no sonification options provided.");
@@ -86,21 +87,26 @@ export function pause(myChart: Chart){
     let sonification = myChart.data.sonification
     sonification.audioControls.playPause.onclick = () => {play(myChart)};
 
+    
     try//If the buffer is already stopped, don't do it again
     {
         sonification.audioSource.stop();
+        sonification.audioControls.playPause.innerHTML = "Sonify";
+        sonification.audioControls.playPause.style.backgroundColor = ''
+        sonification.audioControls.playPause.style.color = "black";
+        if(clearInter){
+            var i = setInterval(function () {}, 100);
+            console.log(i);
+            console.log(i-1);
+            clearInterval(i-1);
+            clearInterval(i);
+        }  
     }
     catch (DOMException)
     {}
 
     //change button to normal
-    sonification.audioControls.playPause.innerHTML = "Sonify";
-    sonification.audioControls.playPause.style.backgroundColor = ''
-    sonification.audioControls.playPause.style.color = "black";
-    var interval_id = window.setInterval(()=>{}, 99999);
-    for (var i = 0; i < interval_id; i++){
-	    window.clearInterval(i);
-    }
+
 }
 
 /**

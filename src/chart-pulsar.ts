@@ -6,7 +6,7 @@ import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { PulsarMode } from "./types/chart.js";
-import { pause, play, saveSonify,Set2DefaultSpeed } from "./sonification";
+import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -542,22 +542,22 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 
-            switchMode(myChart, 'lc', true);
+            switchMode(myChart, 'lc', true, false);
         }
 
         //PRESSTO files
         if(type === "pressto")
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
-            let fluxstr: string[] = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.slice(6).trim());
- //           console.log(fluxstr);
-            if(fluxstr[0].split("e+").length == 1){
+            let fluxstr: string[] = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
+            console.log(fluxstr);
+            if(!fluxstr[0].includes("e+")){
                 var fluxes: number[] = fluxstr.map(Number);
             }
             else{
                 var fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])));
             }            
- //           console.log(fluxes);
+            console.log(fluxes);
             let sampleRat = period/fluxes.length;
 
             var max = ArrMath.max(fluxes);
@@ -611,14 +611,14 @@ function updatePulsar(myChart: Chart<'line'>) {
  * @param reset         Default is false. If true, will override `mode` and
  *                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = false) {
+function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = false, clearInter: boolean = true) {
     const pulsarForm = document.getElementById("pulsar-form") as PulsarForm;
     const lightCurveForm = document.getElementById('light-curve-form') as LightCurveForm;
     const fourierForm = document.getElementById('fourier-form') as FourierForm;
     const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
     const polarizationForm = document.getElementById("polarization-form") as PolarizationForm;
 
-    pause(myChart);
+    pause(myChart, clearInter);
     Set2DefaultSpeed(myChart);
     myChart.data.sonification.audioSource.buffer = null;
 
