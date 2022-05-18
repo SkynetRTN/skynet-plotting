@@ -187,6 +187,8 @@ interface GravityForm extends HTMLFormElement {
     ratio_num: HTMLInputElement
     dist: HTMLInputElement,
     dist_num: HTMLInputElement
+    inc: HTMLInputElement,
+    inc_num: HTMLInputElement,
     merge: HTMLInputElement,
     merge_num: HTMLInputElement
     Time: HTMLInputElement,

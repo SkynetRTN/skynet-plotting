@@ -5,12 +5,14 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
+
 import {
   linkInputs,
   throttle,
   updateLabels,
   updateTableHeight,
 } from "./util";
+import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -56,10 +58,10 @@ export function gravity(): [Handsontable, Chart] {
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
-      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
-      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
-      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
-      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+      '<button class = "graphControl" id="panLeft"><class = "graphControl">&#8592;</></button>\n' +
+      '<button class = "graphControl" id="panRight"><class = "graphControl">&#8594;</></button>\n' +
+      '<button class = "graphControl" id="zoomIn"><class = "graphControl">&plus;</></button>\n' +
+      '<button class = "graphControl" id="zoomOut"><class = "graphControl">&minus;</></button>\n' +
       '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
   '</div>\n')
 
@@ -100,27 +102,30 @@ export function gravity(): [Handsontable, Chart] {
       //handel zoom/pan buttons
       let zoom: number;
       zoomIn.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
+        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);
       }
       zoomIn.onmouseup = zoomIn.onmouseleave = function () {
         clearInterval(zoom);
       }
       zoomOut.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
+        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);
       }
       zoomOut.onmouseup = zoomOut.onmouseleave = function () {
         clearInterval(zoom);
       }
   // Link each slider with corresponding text box
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
-  const filterForm = document.getElementById("filter-form") as ModelForm;
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], 0, 100, 0.01, 50);
+  //Dont think we are using filterForm
+ // const filterForm = document.getElementById("filter-form") as ModelForm;
+  const tableData = dummyData
+
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)), 0.001, 16.5);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityForm["mass"],gravityForm["mass_num"],2.5,250,0.01,25,true);
-  linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.01,1,true);
+  linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.1,1, true);
 
-  const tableData = dummyData
+
 
   // create table
   document.getElementById('axis-label1').style.display = 'inline';
@@ -200,25 +205,15 @@ export function gravity(): [Handsontable, Chart] {
       },
       scales: {
         x: {
-          //label: 'B-V',
+          //label: 'time',
           type: "linear",
           position: "bottom",
         },
-        //x2: {
-          //type: "linear",
-          //position: "bottom",
-        //},
         y: {
-          //label: 'V',
+          //label: 'grav stuff',
           reverse: false,
           suggestedMin: 0,
         },
-        //y2: {
-          //type: "linear",
-          //position: "left",
-          //reverse: false,
-          //suggestedMin: 0,
-        //},
       },
       plugins: {
         zoom: {
@@ -240,7 +235,8 @@ export function gravity(): [Handsontable, Chart] {
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    updateWave(hot, myChart, gravityForm, 1);  
+    updateDataPlot(hot, myChart);
+    updateModelPlot(myChart, gravityForm);
     
   };
 console.log(myChart);
@@ -253,39 +249,43 @@ console.log(myChart);
   const fps = 100;
   const frameTime = Math.floor(100 / fps);
   gravityForm.oninput = throttle(
-    function () {updateWave(hot,myChart,gravityForm,1)},
+    function () {updateModelPlot(myChart, gravityForm)},
     frameTime);
   // link chart to model form (slider + text)
 
-  filterForm.oninput = function () {
-    //console.log(tableData);
-//leaving this stuff here just in case we need drop down dependencies later
-    const reveal: string[] = [
-    ];
+  /*
+  commented out the stuff below because not being used (don't know if it will ever be)
+   */
+//   filterForm.oninput = function () {
+//     //console.log(tableData);
+// //leaving this stuff here just in case we need drop down dependencies later
+//     const reveal: string[] = [
+//     ];
+//
+//     const columns: string[] = hot.getColHeader() as string[];
+//     const hidden: number[] = [];
+//     for (const col in columns) { //cut off " Mag"
+//       if (!reveal.includes(columns[col])) {
+//         //if the column isn't selected in the drop down, hide it
+//         hidden.push(parseFloat(col));
+//       }
+//     }
+//     hot.updateSettings({
+//       hiddenColumns: {
+//         columns: hidden,
+//         // copyPasteEnabled: false,
+//         indicators: false,
+//       },
+//     });
+//
+//     update();
+//     updateLabels(
+//       myChart,
+//       document.getElementById("chart-info-form") as ChartInfoForm
+//     );
+//     myChart.update("none");
+//   };
 
-    const columns: string[] = hot.getColHeader() as string[];
-    const hidden: number[] = [];
-    for (const col in columns) { //cut off " Mag"
-      if (!reveal.includes(columns[col])) {
-        //if the column isn't selected in the drop down, hide it
-        hidden.push(parseFloat(col));
-      }
-    }
-    hot.updateSettings({
-      hiddenColumns: {
-        columns: hidden,
-        // copyPasteEnabled: false,
-        indicators: false,
-      },
-    });
-
-    update();
-    updateLabels(
-      myChart,
-      document.getElementById("chart-info-form") as ChartInfoForm
-    );
-    myChart.update("none");
-  };
   update();
   myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
@@ -349,29 +349,29 @@ export function gravityFileUpload(
       false
     );
   }}
-function updateWave(
-  table: Handsontable,
-  myChart: Chart,
-  gravityForm: GravityForm,
-  dataSetIndex: 1) 
-{
-  // let inc = parseFloat(gravityForm["inc_num"].value);
-  // let dist = parseFloat(gravityForm["dist_num"].value);
-  // let merge = parseFloat(gravityForm["merge_num"].value);
-    
+
+/**
+ * updates the data plot using the data in the Henderson table
+ * @param table
+ * @param myChart
+ */
+function updateDataPlot(
+    table: Handsontable,
+    myChart: Chart) {
+
   let start = 0;
-  let chart = myChart.data.datasets[dataSetIndex].data;
+  //data on chart 1
+  let chart = myChart.data.datasets[1].data;
   let tableData = table.getData();
-    
+
     for (let i = 0; i < tableData.length; i++) {
       if (
       tableData[i][0] === null ||
-      tableData[i][1] === null ||
-      tableData[i][2] === null 
+      tableData[i][1] === null
       ) {
       continue;
         }
-    
+
     let x = (tableData[i][0]);
     let y = (tableData[i][1])
     chart[start++] = {
@@ -380,5 +380,34 @@ function updateWave(
         };
   }
 
+  myChart.update()
+}
+
+/**
+ * updates the curve for the model using the chart, Henderson table and the gravityForm
+ * @param myChart
+ * @param gravityForm
+ */
+function updateModelPlot(
+    myChart: Chart,
+    gravityForm: GravityForm) {
+  let inc = parseFloat(gravityForm["inc_num"].value);
+  let dist = parseFloat(gravityForm["dist_num"].value);
+  let merge = parseFloat(gravityForm["merge_num"].value);
+  //default d0 for now
+  let d0 = 100;
+
+  let start = 0;
+  //model data stored in chart 0
+  let chart = myChart.data.datasets[0].data;
+  for (let i = 0; i < defaultModelData.length; i++) {
+    if ((defaultModelData[i][0] === null) || (defaultModelData[i][1] === null)) {
+      continue;
+    }
+    chart[start++] = {
+      x: defaultModelData[i][0] + merge,
+      y: defaultModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,24),
+    };
+  }
   myChart.update()
 }
