@@ -1,30 +1,62 @@
-import {baseUrl, httpGetAsync} from "../chart-cluster-util";
-import {modelFormKey} from "../chart-cluster-utils/chart-cluster-util";
+
+import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
+import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
+
+
+export function updateGravityModel(gravityForm: GravityForm)
 
 
 /**
- * generate url for HRModel data fetching
- * @param form
- * @param chartNum
+ * generate url for Gravity Model data fetching
+ * @param gravityForm
  */
-export function generateURL(form: ModelForm, chartNum: number) {
-    let blueKey = modelFormKey(chartNum, 'blue');
-    let redKey = modelFormKey(chartNum, 'red');
-    let lumKey = modelFormKey(chartNum, 'lum');
-    let age = parseFloat(HRModelRounding(form['age_num'].value));
-    if (age < 6.6)
-        age = 6.6;
-    else if (age > 10.3)
-        age = 10.3;
-    let metal = parseFloat(HRModelRounding(form['metal_num'].value))
-    if (metal < -3.4)
-        metal = -3.4;
-    else if (metal > 0.2)
-        metal = 0.2;
-    return baseUrl + "/isochrone?"
-        + "age=" + age.toString()
-        + "&metallicity=" + metal.toString()
-        + "&filters=[%22" + form[blueKey].value.replace('\'', 'prime')
-        + "%22,%22" + form[redKey].value.replace('\'', 'prime')
-        + "%22,%22" + form[lumKey].value.replace('\'', 'prime') + "%22]"
+export function generateURL(gravityForm: GravityForm) {
+    const [totalMass, ratioMass] = fitValuesToGrid(gravityForm)
+
+
+    return baseUrl + "/gravity?"
+        + "totalMass=" + totalMass.toString()
+        + "&ratioMass=" + ratioMass.toString()
+}
+
+function fitValuesToGrid(gravityForm : GravityForm){
+    let totalMass = parseFloat(gravityForm["mass_num"].value);
+    let ratioMass = parseFloat(gravityForm["ratio_num"].value);
+
+    // Fitting the sliders to each logspace
+    //Mass Ratio
+    const differences_mr: number[] = [];
+    for (let i = 0; i < ratioMassLogSpace.length; i++){
+        differences_mr.push(Math.abs(ratioMass - ratioMassLogSpace[i]));
+    }
+
+    let min_mr: number = 251;
+    let argmin_mr = 0;
+    for (let i = 0; i < ratioMassLogSpace.length; i++){
+        if (differences_mr[i] < min_mr) {
+            min_mr = differences_mr[i];
+            argmin_mr = i;
+        }
+    }
+    let roundedMassRatio = ratioMassLogSpace[argmin_mr];
+    console.log(roundedMassRatio)
+
+    //Total Mass
+    const differences_tm: number[] = [];
+    for (let i = 0; i < totalMassLogSpace.length; i++){
+        differences_tm.push(Math.abs(totalMass - totalMassLogSpace[i]));
+    }
+
+    let min_tm: number = 251;
+    let argmin_tm = 0;
+    for (let i = 0; i < totalMassLogSpace.length; i++){
+        if (differences_tm[i] < min_tm) {
+            min_tm = differences_tm[i];
+            argmin_tm = i;
+        }
+    }
+    let roundedTotalMass = totalMassLogSpace[argmin_tm];
+    console.log(roundedTotalMass)
+
+    return [roundedTotalMass, roundedMassRatio];
 }
