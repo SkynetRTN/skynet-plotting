@@ -10,6 +10,7 @@ import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterPro
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
+import { clusterFileDownload } from "./chart-cluster-utils/chart-cluster-file";
 
 Chart.register(zoomPlugin);
 /**
@@ -515,6 +516,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     });
    }, 100);
 
+  document.getElementById('save-data-button').onclick = ()=>{clusterFileDownload(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm)}
    //clusterProPmChartControl.oninput = throttle(function () {
     //clusterProButtonControl(myChart3);
   //}, 100);

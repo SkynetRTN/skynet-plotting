@@ -14,6 +14,7 @@ declare module 'chart.js/auto'{
             lc: ModeLabels,
             ft: ModeLabels,
             pf: ModeLabels,
+            pressto: ModeLabels
             lastMode: PulsarMode
         },
         sonification?:{
@@ -33,7 +34,7 @@ declare module 'chart.js/auto'{
     }
 }
 
-type PulsarMode = 'lc' | 'ft' | 'pf' ;
+type PulsarMode = 'lc' | 'ft' | 'pf' | 'pressto' ;
 
 interface ModeLabels {
     t: string,

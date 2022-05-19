@@ -34,7 +34,7 @@ export function defaultTable(container: HTMLElement){
                 { data: "Rpmra", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
                 { data: "Rpmdec", type: "numeric", numericFormat: { pattern: { mantissa: 2 } }, },
             ],
-            hiddenColumns: { columns: [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20] },
+            // hiddenColumns: { columns: [1,2,3,4,5,6,8,9,10,11,12,13,15,16,17,18,19,20] },
         }))
     }
 
