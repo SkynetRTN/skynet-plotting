@@ -549,7 +549,14 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         if(type === "pressto")
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
-            let fluxstr: string[] = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
+            let fluxstr: string[] = data
+            console.log(fluxstr);
+            if(data[27].includes("\t")){
+                fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split("\t")[str.split("\t").length-1].trim());
+            }
+            else{
+                fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
+            }
             console.log(fluxstr);
             if(!fluxstr[0].includes("e+")){
                 var fluxes: number[] = fluxstr.map(Number);
