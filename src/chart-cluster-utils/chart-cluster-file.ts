@@ -143,32 +143,24 @@ export function clusterFileDownload(
     clusterProForm: ClusterProForm = null,
 
 ){
-    // console.log('init')
-    let toBeFlagged = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm)
-    // console.log(toBeFlagged)
-    let data = table.getSourceData()
-    let columns = table.getColHeader();
-    // console.log(data)
-    let isValidIndex = columns.indexOf('isValid');
-    if (isValidIndex > 0){
-        for (let i = 0; i < toBeFlagged.length; i++) {
-            (data[toBeFlagged[i]] as { [key: string]: string })['isValid'] = "False"
-        }
+    console.log('init')
+    let csvRows = [];
+    let data = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    if (data.length === 0){
+        alert("Please upload a data file before downloading");
+        return
+    }
+    // let data = [{'V mag': 69},{'V mag': 18}]
+    let headers = Object.keys(data[0])
+    csvRows.push(headers.join(','));
+
+    for (let i = 0; i < data.length; i++) {
+        // @ts-ignore
+        let vals = Object.values(data[i]);
+        csvRows.push(vals);
     }
 
-    table.loadData(data)
-
-    // access to exportFile plugin instance
-    var exportPlugin = table.getPlugin('exportFile');
-    // export as a string (with specified data range):
-    exportPlugin.downloadFile('csv', {
-        filename: 'Cluster-Pro-Data',
-        exportHiddenRows: true,     // default false
-        exportHiddenColumns: true,  // default false
-        columnHeaders: true,        // default false
-        rowHeaders: true,           // default false
-    });
-    console.log('oops')
+    csvDownload(csvRows.join('\n'))
 }
 
 function updateCharts(
@@ -445,4 +437,27 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
         }
     }
     return [datadict, filters]
+}
+
+function csvDownload(dataString: string){
+    // Creating a Blob for having a csv file format
+    // and passing the data with type
+    const blob = new Blob([dataString], { type: 'text/csv' });
+
+    // Creating an object for downloading url
+    const url = window.URL.createObjectURL(blob);
+
+    // Creating an anchor(a) tag of HTML
+    const a = document.createElement('a');
+
+    // Passing the blob downloading url
+    a.setAttribute('href', url);
+
+    // Setting the anchor tag attribute for downloading
+    // and passing the download file name
+    a.setAttribute('download', 'download.csv');
+
+    a.click();
+
+    a.remove();
 }
