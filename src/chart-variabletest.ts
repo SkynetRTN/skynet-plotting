@@ -182,6 +182,7 @@ export function variableTest(): [Handsontable, Chart] {
         myChart.options.scales['x'].title.text = myChart.data.modeLabels[mode].x;
         myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update('none');
+        // myChart.update()
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
         updateTableHeight(hot);
@@ -417,6 +418,7 @@ function lightCurve(myChart: Chart) {
     document.getElementById('light-curve-div').innerHTML = lcHTML;
     const variableForm = document.getElementById('variableTest-form') as VariableForm;
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
+
     lightCurveForm.oninput = function () {
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1);
@@ -570,9 +572,9 @@ function lightCurve(myChart: Chart) {
     };
         
 
-    periodFoldingForm.oninput = throttle(function () {
+    periodFoldingForm.oninput = function () {
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value))
-        }, 10);
+        };
         
     }
 
@@ -611,8 +613,6 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number) {
         //     })
         }
         myChart.data.datasets[4].data = pfData;
-        myChart.options.scales['x'].min = 0;
-        myChart.options.scales['x'].max = (period);
         
     } else {
         for (let i = 0; i < datasets[2].data.length; i++) {
