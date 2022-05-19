@@ -106,6 +106,8 @@ export function updateScatter(
 
             let start = 0;
             for (let i = 0; i < tableData.length; i++) {
+                let isSkip = false;
+
                 if (
                     typeof (tableData[i][blue]) != 'number' ||
                     typeof (tableData[i][red]) != 'number' ||
@@ -114,36 +116,36 @@ export function updateScatter(
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
-                    if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
-                        flagColumns.push(i)
-                    continue;
+                    isSkip = true
                 }
-                let distance: number = tableData[i][blueDist];
-                let isDistNotValid = isNaN(distance) || distance === null
-                if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
-                    if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
-                        flagColumns.push(i)
-                    continue;
+
+                if (!isSkip){
+                    let distance: number = tableData[i][blueDist];
+                    let isDistNotValid = isNaN(distance) || distance === null
+                    if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
+                        isSkip = true
+                    }
                 }
-                if (clusterProForm !== null) {
+                if (!isSkip && clusterProForm !== null) {
                     if (isRaRange) {
                         let pmra = tableData[i][bluePmra]
                         if (pmra > pmraHighLim|| pmra < pmraLowLim) {
-                            if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
-                                flagColumns.push(i)
-                            continue;
+                            isSkip = true
                         }
                     }
                     if (isDecRange) {
                         let pmdec = tableData[i][bluePmdec]
                         if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim) {
-                            if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
-                                flagColumns.push(i)
-                            continue;
+                            isSkip = true
                         }
                     }
                 }
 
+                if (isSkip) {
+                    if (isValidIndex > 0 && flagColumns.indexOf(i) < 0)
+                        flagColumns.push(i)
+                    continue;
+                }
 
                 //red-blue,lum
 
