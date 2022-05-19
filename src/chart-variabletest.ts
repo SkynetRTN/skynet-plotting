@@ -380,6 +380,17 @@ function updateVariable(table: Handsontable, myChart: Chart) {
 
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
+    let localMin = src1Data[0].x
+    if (localMin >= src2Data[0].x){
+        localMin = src2Data[0].x
+    }
+
+    let localMax = src1Data[src1Data.length-1].x
+    if (localMax <= src2Data[src1Data.length-1].x){
+        localMax = src2Data[src1Data.length-1].x
+    }
+    myChart.options.scales['x'].min = localMin;
+    myChart.options.scales['x'].max = localMax;
 
     updateChart(myChart, 0, 1);
 
