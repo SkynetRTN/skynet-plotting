@@ -413,3 +413,7 @@ div.row.clusterPro {
     margin: 0;
     padding: 0;
 }
+
+#clusterProPmChartControl {
+    width: auto;
+}

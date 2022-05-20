@@ -119,6 +119,9 @@ export function insertClusterControls(chartCounts:number = 1) {
 
     htmlContent += "</div>\n" + "</form>\n"
 
+    if (chartCounts === 2) {
+        document.getElementById('chart-div2').style.width = '428px'
+    }
 
     document
         .getElementById("input-div")
@@ -162,6 +165,7 @@ export function clusterProSliders(clusterPro: true = true) {
             "beforeend",
             htmlContent
         );
+    document.getElementById('chart-div2').style.width = '280px'
 }}
 
 /**
