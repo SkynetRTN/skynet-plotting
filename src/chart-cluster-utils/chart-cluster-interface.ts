@@ -166,7 +166,7 @@ export function clusterProSliders(clusterPro: true = true) {
             "beforeend",
             htmlContent
         );
-    document.getElementById('chart-div2').style.width = '330px'
+    document.getElementById('chart-div2').style.width = '310px'
     document.getElementById('chart-div2').style.height = '100px'
     document.getElementById('chart-div2-colControl').style.width = '330px'
 }}
