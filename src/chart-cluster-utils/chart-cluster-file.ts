@@ -6,7 +6,7 @@
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
-import {changeOptions, updateLabels, updateTableHeight } from "../util";
+import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
@@ -143,24 +143,41 @@ export function clusterFileDownload(
     clusterProForm: ClusterProForm = null,
 
 ){
-    console.log('init')
-    let csvRows = [];
-    let data = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
-    if (data.length === 0){
+    let csvRowsStar = [];
+    let starData = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    if (starData.length === 0){
         alert("Please upload a data file before downloading");
         return
     }
     // let data = [{'V mag': 69},{'V mag': 18}]
-    let headers = Object.keys(data[0])
-    csvRows.push(headers.join(','));
+    csvRowsStar.push(Object.keys(starData[0]).join(','));
 
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < starData.length; i++) {
         // @ts-ignore
-        let vals = Object.values(data[i]);
-        csvRows.push(vals);
+        let vals = Object.values(starData[i]);
+        csvRowsStar.push(vals);
     }
 
-    csvDownload(csvRows.join('\n'))
+
+    let csvRowsHR = ['x,y,chart,segment'];
+    for (let c = 0; c < myCharts.length; c++) {
+        let chart = myCharts[c];
+        let dataSets = Object.assign([chart.data.datasets[1].data, chart.data.datasets[0].data])
+        for (let set = 0; set < dataSets.length; set++) {
+            let dataSet = dataSets[set];
+            if (dataSet.length !== 0) {
+                for (let i = 0; i <dataSet.length; i++) {
+                    dataSet[i]['chart'] = (c + 1).toString()
+                    dataSet[i]['segment'] = (set + 1).toString()
+                    // @ts-ignore
+                    csvRowsHR.push(Object.values(dataSet[i]))
+                }
+            }
+        }
+    }
+    let dateTime = getDateString()
+    csvDownload(csvRowsStar.join('\n'), 'Cluster Pro Scatter Download '+ dateTime + '.csv')
+    csvDownload(csvRowsHR.join('\n'), 'Cluster Pro Model Download '+ dateTime + '.csv')
 }
 
 function updateCharts(
@@ -439,7 +456,7 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
     return [datadict, filters]
 }
 
-function csvDownload(dataString: string){
+function csvDownload(dataString: string, fileName: string){
     // Creating a Blob for having a csv file format
     // and passing the data with type
     const blob = new Blob([dataString], { type: 'text/csv' });
@@ -455,7 +472,7 @@ function csvDownload(dataString: string){
 
     // Setting the anchor tag attribute for downloading
     // and passing the download file name
-    a.setAttribute('download', 'download.csv');
+    a.setAttribute('download', fileName);
 
     a.click();
 
