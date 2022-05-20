@@ -433,6 +433,7 @@ function lightCurve(myChart: Chart) {
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
 
     lightCurveForm.oninput = function () {
+        console.log('lcTriggered')
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
@@ -478,15 +479,9 @@ function lightCurve(myChart: Chart) {
 
 
             // slider behavior
-        console.log('inside the lightcurve');
-        console.log(lcData)
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
-
-        // console.log('range',range)
-        // console.log('changed');
-        // console.log(range);
         let currentPosition = parseFloat(periodFoldingForm.period_num.value);
         if (currentPosition > range){
             currentPosition = range
@@ -544,15 +539,17 @@ function lightCurve(myChart: Chart) {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Period (days):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" step="0.1"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" step="0.001"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="phase" name="phase"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="phase_num" name="phase_num" class="field"></div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="" name="doublePeriodMode" value="0" id="doublePeriodMode"></div>\n'+
-        '<div class="col-sm-5">Double Period mode</div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode"></div>\n'+
+        '<div class="col-sm-5">Double Period</div>\n' +
         
         '</div>\n' 
 
@@ -592,9 +589,12 @@ function lightCurve(myChart: Chart) {
             0
         );
         // console.log(start,end)
+        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
         
-    periodFoldingForm.period_num.onchange = function () {
-        console.log('triggered')
+        
+
+    periodFoldingForm.oninput = throttle(function () {
+        
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
@@ -602,9 +602,9 @@ function lightCurve(myChart: Chart) {
         if (currentPosition > range){
             currentPosition = range
         } 
-        let step = 10e-6
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
+        let step = 10e-5
+        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
+            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
         }
 
         linkInputsVar(
@@ -612,19 +612,15 @@ function lightCurve(myChart: Chart) {
             periodFoldingForm["period_num"],
             parseFloat(fourierForm.start.value), range, step, currentPosition , true
         );
-        // periodFoldingForm.period.step = (periodFoldingForm.period_num.value/range)*0.01
-        
-        console.log((periodFoldingForm.period_num.value/range)*0.1)
-    };
-        
 
-    periodFoldingForm.oninput = throttle(function () {
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
-        },10);
+
+        },3);
         
     }
 
-}
+
+    }
 
 export function debounce(func: Function, wait: number) {
     let timeout: number = undefined;
@@ -677,6 +673,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         }
         myChart.data.datasets[4].data = pfData;
     }
+    console.log('triggered')
 
     updateChart(myChart, 4);
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
