@@ -120,7 +120,8 @@ export function insertClusterControls(chartCounts:number = 1) {
     htmlContent += "</div>\n" + "</form>\n"
 
     if (chartCounts === 2) {
-        document.getElementById('chart-div2').style.width = '428px'
+        document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
+        document.getElementById('chart-div2-colControl').style.width = '50%';
     }
 
     document
