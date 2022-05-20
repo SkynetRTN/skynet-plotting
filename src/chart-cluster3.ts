@@ -459,6 +459,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  let frameChart1 = ()=>{document.getElementById('frameChart1').click()};
+  let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
+  document.getElementById('chart-div3').onmousedown = frameChart1;
+  document.getElementById('chart-div4').onmousedown = frameChart2;
   let minmax = proFormMinmax(hot, modelForm)
   //myChart3.update();
   //Adjust the gradient with the window size
