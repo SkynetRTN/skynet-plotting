@@ -181,20 +181,21 @@ interface ClusterProPmChartControl extends HTMLFormElement {
 }
 
 interface GravityForm extends HTMLFormElement {
-    mass: HTMLInputElement,
-    ratio: HTMLInputElement,
-    mass_num: HTMLInputElement,
-    ratio_num: HTMLInputElement
     dist: HTMLInputElement,
     dist_num: HTMLInputElement
     inc: HTMLInputElement,
     inc_num: HTMLInputElement,
     merge: HTMLInputElement,
     merge_num: HTMLInputElement
-    Time: HTMLInputElement,
-    Strain: HTMLInputElement,
-
 }
+
+interface GravityModelForm extends HTMLFormElement {
+    mass: HTMLInputElement,
+    ratio: HTMLInputElement,
+    mass_num: HTMLInputElement,
+    ratio_num: HTMLInputElement,
+}
+
 interface ClusterSimForm extends HTMLFormElement {
     starNum: HTMLInputElement,
     starNum_num: HTMLInputElement,

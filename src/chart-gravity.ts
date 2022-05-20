@@ -14,6 +14,7 @@ import {
 } from "./util";
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
+import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -40,6 +41,9 @@ export function gravity(): [Handsontable, Chart] {
         '<div class="col-sm-4 range"><input type="range" title="Inclination" name="inc"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="field"></div>\n' +
         "</div>\n" +
+        "</form>\n" +
+
+        '<form title="Gravity Model Form" id="gravity-model-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Total Mass (solar):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Mass" name="mass"></div>\n' +
@@ -50,12 +54,7 @@ export function gravity(): [Handsontable, Chart] {
         '<div class="col-sm-4 range"><input type="range" title="Ratio" name="ratio"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Ratio" name="ratio_num" class="field"></div>\n' +
         "</div>\n" +
-        "</form>\n" +
-        '<form title="Filters" id="filter-form" style="padding-bottom: .5em">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6" style="color: black;">Remnant Mass:</div>\n' +
-        '<div class="col-sm-6" style="color: black;">Mass to Energy:</div>\n' +
-        "</div>\n" 
+        "</form>"
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
@@ -116,15 +115,19 @@ export function gravity(): [Handsontable, Chart] {
       }
   // Link each slider with corresponding text box
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
+
+  const gravityModelForm = document.getElementById("gravity-model-form") as GravityModelForm;
   //Dont think we are using filterForm
  // const filterForm = document.getElementById("filter-form") as ModelForm;
-  const tableData = dummyData
+  const tableData = dummyData;
+
+  let gravClass = new gravityClass();
 
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)), 0.001, 16.5);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
-  linkInputs(gravityForm["mass"],gravityForm["mass_num"],2.5,250,0.01,25,true);
-  linkInputs(gravityForm["ratio"],gravityForm["ratio_num"],1,10,0.1,1, true);
+  linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
+  linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1,10,0.1,1, true);
 
 
 
@@ -246,9 +249,13 @@ console.log(myChart);
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-  gravityForm.oninput = throttle(
-    function () {updateGravModelData(gravityForm, (modelData : number[][]) => updateModelPlot(myChart, gravityForm, modelData));},
-    400);
+  // gravityForm.oninput = throttle(
+  //     function () {updateGravModelData(gravityForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
+  //     400);
+  gravityModelForm.oninput = throttle(
+     function () {updateGravModelData(gravityModelForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
+     400);
+  gravityForm.oninput = throttle(function () {gravClass.updateModelPlot(myChart, gravityForm)}, 100)
   // link chart to model form (slider + text)
 
   /*
@@ -381,33 +388,44 @@ function updateDataPlot(
   myChart.update()
 }
 
-/**
- * updates the curve for the model using the chart, Henderson table and the gravityForm
- * @param myChart
- * @param gravityForm
- */
-function updateModelPlot(
-    myChart: Chart,
-    gravityForm: GravityForm,
-    modelData: number[][]) {
-  let inc = parseFloat(gravityForm["inc_num"].value);
-  let dist = parseFloat(gravityForm["dist_num"].value);
-  let merge = parseFloat(gravityForm["merge_num"].value);
-  //default d0 for now
-  let d0 = 100;
 
-  let start = 0;
-  //model data stored in chart 0
-  let chart = myChart.data.datasets[0].data;
 
-  for (let i = 0; i < modelData.length; i++) {
-    if ((modelData[i][0] === null) || (modelData[i][1] === null)) {
-      continue;
-    }
-    chart[start++] = {
-      x: modelData[i][0] + merge,
-      y: modelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,24),
-    };
+class gravityClass{
+  currentModelData : number[][];
+  constructor(){
+    this.currentModelData = defaultModelData;
   }
-  myChart.update()
+
+  public updateModelPlot(
+      myChart: Chart,
+      gravityForm: GravityForm) {
+    let inc = parseFloat(gravityForm["inc_num"].value);
+    let dist = parseFloat(gravityForm["dist_num"].value);
+    let merge = parseFloat(gravityForm["merge_num"].value);
+    //default d0 for now
+    let d0 = 100;
+
+    let start = 0;
+    //model data stored in chart 0
+    let chart = myChart.data.datasets[0].data;
+    for (let i = 0; i < this.currentModelData.length; i++) {
+      if ((this.currentModelData[i][0] === null) || (this.currentModelData[i][1] === null)) {
+        continue;
+      }
+      chart[start++] = {
+        x: this.currentModelData[i][0] + merge,
+        y: this.currentModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,22),
+      };
+    }
+    console.trace()
+    myChart.update()
+  }
+
+  public plotNewModel(myChart: Chart,
+                        gravityForm: GravityForm,
+                        modelData: number[][]){
+    this.currentModelData = modelData
+    this.updateModelPlot(myChart, gravityForm)
+  }
+
 }

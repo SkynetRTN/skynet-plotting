@@ -4,8 +4,8 @@ import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimensi
 import {defaultModelData} from "./chart-gravity-defaultmodeldata";
 
 
-export function updateGravModelData(gravityForm: GravityForm, updateChartCallback: Function = () => { }){
-    httpGetAsync(generateURL(gravityForm), (response: string) => {
+export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
+    httpGetAsync(generateURL(gravityModelForm), (response: string) => {
         let json = JSON.parse(response);
         let dataTable = json['data']; updateChartCallback(dataTable)}, updateChartCallback(defaultModelData))
 }
@@ -15,8 +15,8 @@ export function updateGravModelData(gravityForm: GravityForm, updateChartCallbac
  * generate url for Gravity Model data fetching
  * @param gravityForm
  */
-function generateURL(gravityForm: GravityForm) {
-    const [totalMass, ratioMass] = fitValuesToGrid(gravityForm)
+function generateURL(gravityModelForm: GravityModelForm) {
+    const [totalMass, ratioMass] = fitValuesToGrid(gravityModelForm)
 
 
     return baseUrl + "/gravity?"
@@ -24,9 +24,9 @@ function generateURL(gravityForm: GravityForm) {
         + "&ratioMass=" + ratioMass.toString()
 }
 
-function fitValuesToGrid(gravityForm : GravityForm){
-    let totalMass = parseFloat(gravityForm["mass_num"].value);
-    let ratioMass = parseFloat(gravityForm["ratio_num"].value);
+function fitValuesToGrid(gravityModelForm : GravityModelForm){
+    let totalMass = parseFloat(gravityModelForm["mass_num"].value);
+    let ratioMass = parseFloat(gravityModelForm["ratio_num"].value);
 
     // Fitting the sliders to each logspace
     //Mass Ratio
@@ -44,7 +44,6 @@ function fitValuesToGrid(gravityForm : GravityForm){
         }
     }
     let roundedMassRatio = ratioMassLogSpace[argmin_mr];
-    console.log(roundedMassRatio)
 
     //Total Mass
     const differences_tm: number[] = [];
@@ -61,7 +60,6 @@ function fitValuesToGrid(gravityForm : GravityForm){
         }
     }
     let roundedTotalMass = totalMassLogSpace[argmin_tm];
-    console.log(roundedTotalMass)
 
     return [roundedTotalMass, roundedMassRatio];
 }
