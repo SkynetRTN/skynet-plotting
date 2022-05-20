@@ -12,7 +12,8 @@ import {
   updateLabels,
   updateTableHeight,
 } from "./util";
-import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
+
+import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -236,7 +237,6 @@ export function gravity(): [Handsontable, Chart] {
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    updateModelPlot(myChart, gravityForm);
     
   };
 console.log(myChart);
@@ -246,11 +246,9 @@ console.log(myChart);
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-  const fps = 100;
-  const frameTime = Math.floor(100 / fps);
   gravityForm.oninput = throttle(
-    function () {updateModelPlot(myChart, gravityForm)},
-    frameTime);
+    function () {updateGravModelData(gravityForm, (modelData : number[][]) => updateModelPlot(myChart, gravityForm, modelData));},
+    400);
   // link chart to model form (slider + text)
 
   /*
@@ -390,7 +388,8 @@ function updateDataPlot(
  */
 function updateModelPlot(
     myChart: Chart,
-    gravityForm: GravityForm) {
+    gravityForm: GravityForm,
+    modelData: number[][]) {
   let inc = parseFloat(gravityForm["inc_num"].value);
   let dist = parseFloat(gravityForm["dist_num"].value);
   let merge = parseFloat(gravityForm["merge_num"].value);
@@ -400,13 +399,14 @@ function updateModelPlot(
   let start = 0;
   //model data stored in chart 0
   let chart = myChart.data.datasets[0].data;
-  for (let i = 0; i < defaultModelData.length; i++) {
-    if ((defaultModelData[i][0] === null) || (defaultModelData[i][1] === null)) {
+
+  for (let i = 0; i < modelData.length; i++) {
+    if ((modelData[i][0] === null) || (modelData[i][1] === null)) {
       continue;
     }
     chart[start++] = {
-      x: defaultModelData[i][0] + merge,
-      y: defaultModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,24),
+      x: modelData[i][0] + merge,
+      y: modelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,24),
     };
   }
   myChart.update()

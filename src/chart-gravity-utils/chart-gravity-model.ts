@@ -1,16 +1,21 @@
 
 import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
+import {defaultModelData} from "./chart-gravity-defaultmodeldata";
 
 
-export function updateGravityModel(gravityForm: GravityForm)
+export function updateGravModelData(gravityForm: GravityForm, updateChartCallback: Function = () => { }){
+    httpGetAsync(generateURL(gravityForm), (response: string) => {
+        let json = JSON.parse(response);
+        let dataTable = json['data']; updateChartCallback(dataTable)}, updateChartCallback(defaultModelData))
+}
 
 
 /**
  * generate url for Gravity Model data fetching
  * @param gravityForm
  */
-export function generateURL(gravityForm: GravityForm) {
+function generateURL(gravityForm: GravityForm) {
     const [totalMass, ratioMass] = fitValuesToGrid(gravityForm)
 
 
