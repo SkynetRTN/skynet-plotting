@@ -184,7 +184,7 @@ export function variableTest(): [Handsontable, Chart] {
         myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update('none');
         // myChart.update()
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
         updateTableHeight(hot);
     }
@@ -192,7 +192,7 @@ export function variableTest(): [Handsontable, Chart] {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
-    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     updateVariable(hot, myChart);
     updateTableHeight(hot);
@@ -306,7 +306,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
         lightCurve(myChart);
 
@@ -436,7 +436,7 @@ function lightCurve(myChart: Chart) {
         console.log('lcTriggered')
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
             variableForm.mode[1].disabled = true;
             variableForm.mode[2].disabled = true;
         } else {
@@ -473,7 +473,7 @@ function lightCurve(myChart: Chart) {
             myChart.options.scales['x'].max = lcData[lcData.length-1].x;
             
             updateChart(myChart, 2);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
 
 
@@ -676,7 +676,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
     console.log('triggered')
 
     updateChart(myChart, 4);
-    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 }
 
 
