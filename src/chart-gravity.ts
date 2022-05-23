@@ -57,13 +57,15 @@ export function gravity(): [Handsontable, Chart] {
         "</form>"
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
+  '<div class = "row" style="float: right;">\n' +
       '<button class = "graphControl" id="panLeft"><class = "graphControl">&#8592;</></button>\n' +
       '<button class = "graphControl" id="panRight"><class = "graphControl">&#8594;</></button>\n' +
       '<button class = "graphControl" id="zoomIn"><class = "graphControl">&plus;</></button>\n' +
       '<button class = "graphControl" id="zoomOut"><class = "graphControl">&minus;</></button>\n' +
-      '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
+      '<button class = "graphControlAlt" id="Reset" >Reset</button>\n'+
   '</div>\n')
+
+
 
     // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
     let Reset = document.getElementById("Reset") as HTMLInputElement;
@@ -123,7 +125,8 @@ export function gravity(): [Handsontable, Chart] {
 
   let gravClass = new gravityClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, 16.5);
+  let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
