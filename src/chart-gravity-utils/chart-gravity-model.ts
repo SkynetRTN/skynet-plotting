@@ -7,7 +7,7 @@ import {defaultModelData} from "./chart-gravity-defaultmodeldata";
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
     httpGetAsync(generateURL(gravityModelForm), (response: string) => {
         let json = JSON.parse(response);
-        let dataTable = json['data']; updateChartCallback(dataTable)}, updateChartCallback(defaultModelData))
+        let dataTable = json['data']; updateChartCallback(dataTable)}, () => {})
 }
 
 

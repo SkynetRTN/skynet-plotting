@@ -407,18 +407,21 @@ class gravityClass{
 
     let start = 0;
     //model data stored in chart 0
-    let chart = myChart.data.datasets[0].data;
+    let modelChart = myChart.data.datasets[0].data;
+    modelChart.forEach(() => modelChart.pop());
+    console.log(modelChart)
     for (let i = 0; i < this.currentModelData.length; i++) {
       if ((this.currentModelData[i][0] === null) || (this.currentModelData[i][1] === null)) {
         continue;
       }
-      chart[start++] = {
+      modelChart[start++] = {
         x: this.currentModelData[i][0] + merge,
         y: this.currentModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,22),
       };
     }
+    console.log(modelChart)
     console.trace()
-    myChart.update()
+    myChart.update("none")
   }
 
   public plotNewModel(myChart: Chart,
