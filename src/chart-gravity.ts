@@ -122,8 +122,8 @@ export function gravity(): [Handsontable, Chart] {
   const tableData = dummyData;
 
   let gravClass = new gravityClass();
-
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)), 0.001, 16.5);
+  gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, 16.5);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
@@ -384,7 +384,6 @@ function updateDataPlot(
       y: y,
         };
   }
-
   myChart.update()
 }
 
@@ -393,6 +392,8 @@ function updateDataPlot(
 class gravityClass{
   currentModelData : number[][];
   totalMassDivGridMass : number;
+  minX : number;
+  maxX : number;
   constructor(){
     this.currentModelData = defaultModelData;
     this.totalMassDivGridMass = 1;
@@ -423,8 +424,19 @@ class gravityClass{
     while (modelChart.length !== start) {
       modelChart.pop();
     }
-
     myChart.update("none")
+    myChart.options.scales['x'].min = this.minX;
+    myChart.options.scales['x'].max = this.maxX;
+  }
+
+
+  public setXbounds(minX:number, maxX:number){
+    this.minX = minX;
+    this.maxX = maxX;
+  }
+
+  public getXbounds(){
+    return [this.minX, this.maxX]
   }
 
   public plotNewModel(myChart: Chart,
@@ -434,5 +446,4 @@ class gravityClass{
     this.totalMassDivGridMass = totalMassRatio
     this.updateModelPlot(myChart, gravityForm)
   }
-
 }
