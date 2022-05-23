@@ -70,7 +70,12 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
             hidden.push(parseFloat(col));
         }
     }
-    hot.updateSettings({hiddenColumns: {columns: hidden, indicators: false,}});
+    hot.updateSettings({hiddenColumns: {
+            columns: hidden,
+            // exclude hidden columns from copying and pasting
+            //@ts-ignore
+            copyPasteEnabled: false,
+        }});
 }
 
 /**

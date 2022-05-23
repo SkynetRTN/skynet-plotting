@@ -69,6 +69,7 @@ export function variable(): [Handsontable, Chart] {
                 lc: { t: 'Title', x: 'x', y: 'y' },
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
+                pressto: { t: 'Title', x: 'x', y: 'y' },
                 lastMode: 'lc'
             },
             datasets: [
@@ -303,6 +304,7 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
             lc: { t: 'Title', x: 'x', y: 'y' },
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
+            pressto: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
 
