@@ -253,8 +253,8 @@ console.log(myChart);
   //     function () {updateGravModelData(gravityForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
   //     400);
   gravityModelForm.oninput = throttle(
-     function () {updateGravModelData(gravityModelForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
-     400);
+     function () {updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) => gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid));},
+     200);
   gravityForm.oninput = throttle(function () {gravClass.updateModelPlot(myChart, gravityForm)}, 100)
   // link chart to model form (slider + text)
 
@@ -392,8 +392,10 @@ function updateDataPlot(
 
 class gravityClass{
   currentModelData : number[][];
+  totalMassDivGridMass : number;
   constructor(){
     this.currentModelData = defaultModelData;
+    this.totalMassDivGridMass = 1;
   }
 
   public updateModelPlot(
@@ -414,8 +416,8 @@ class gravityClass{
         continue;
       }
       modelChart[start++] = {
-        x: this.currentModelData[i][0] + merge,
-        y: this.currentModelData[i][1] * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,22),
+        x: this.currentModelData[i][0] * this.totalMassDivGridMass + merge,
+        y: this.currentModelData[i][1] * this.totalMassDivGridMass * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,22),
       };
     }
     while (modelChart.length !== start) {
@@ -427,8 +429,9 @@ class gravityClass{
 
   public plotNewModel(myChart: Chart,
                         gravityForm: GravityForm,
-                        modelData: number[][]){
+                        modelData: number[][], totalMassRatio: number){
     this.currentModelData = modelData
+    this.totalMassDivGridMass = totalMassRatio
     this.updateModelPlot(myChart, gravityForm)
   }
 

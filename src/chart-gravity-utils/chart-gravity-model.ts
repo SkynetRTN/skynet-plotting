@@ -1,23 +1,23 @@
 
 import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
-import {defaultModelData} from "./chart-gravity-defaultmodeldata";
 
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
-    httpGetAsync(generateURL(gravityModelForm), (response: string) => {
+    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
+    httpGetAsync(generateURL(totalMass, ratioMass), (response: string) => {
         let json = JSON.parse(response);
-        let dataTable = json['data']; updateChartCallback(dataTable)}, () => {})
+        let dataTable = json['data'];
+        updateChartCallback(dataTable, totalMassDivGridMass)}, () => {})
 }
 
 
 /**
  * generate url for Gravity Model data fetching
- * @param gravityForm
+ * @param totalMass
+ * @param ratioMass
  */
-function generateURL(gravityModelForm: GravityModelForm) {
-    const [totalMass, ratioMass] = fitValuesToGrid(gravityModelForm)
-
+function generateURL(totalMass: number, ratioMass: number) {
 
     return baseUrl + "/gravity?"
         + "totalMass=" + totalMass.toString()
@@ -60,6 +60,6 @@ function fitValuesToGrid(gravityModelForm : GravityModelForm){
         }
     }
     let roundedTotalMass = totalMassLogSpace[argmin_tm];
-
-    return [roundedTotalMass, roundedMassRatio];
+    let totalMassDivGridMass = totalMass / roundedTotalMass;
+    return [roundedTotalMass, roundedMassRatio, totalMassDivGridMass];
 }
