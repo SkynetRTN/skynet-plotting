@@ -62,7 +62,7 @@ export function gravity(): [Handsontable, Chart] {
       '<button class = "graphControl" id="panRight"><class = "graphControl">&#8594;</></button>\n' +
       '<button class = "graphControl" id="zoomIn"><class = "graphControl">&plus;</></button>\n' +
       '<button class = "graphControl" id="zoomOut"><class = "graphControl">&minus;</></button>\n' +
-      '<button class = "graphControlAlt" id="Reset" >Reset</button>\n'+
+      '<button class = "graphControlAlt" id="Reset"><class = "graphControl">Reset</button>\n'+
   '</div>\n')
 
 
@@ -90,17 +90,6 @@ export function gravity(): [Handsontable, Chart] {
         clearInterval(pan);
     }
 
-    
-    Reset.onclick = function(){
-        myChart.options.scales = {
-            x: {
-                type: 'linear',
-                position: 'bottom'
-            }
-        }
-        myChart.update();
-    }
-    
       //handel zoom/pan buttons
       let zoom: number;
       zoomIn.onmousedown = function () {
@@ -125,7 +114,20 @@ export function gravity(): [Handsontable, Chart] {
 
   let gravClass = new gravityClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
+
+  Reset.onclick = function(){
+    myChart.options.scales = {
+      x: {
+        type: 'linear',
+        position: 'bottom'
+      }
+    }
+    gravClass.fitChartToBounds(myChart);
+        myChart.update();
+  }
+
   let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
@@ -243,7 +245,8 @@ export function gravity(): [Handsontable, Chart] {
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    
+    updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) =>
+        gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid))
   };
 console.log(myChart);
   // link chart to table
@@ -397,6 +400,7 @@ class gravityClass{
   totalMassDivGridMass : number;
   minX : number;
   maxX : number;
+  xBuffer : number;
   constructor(){
     this.currentModelData = defaultModelData;
     this.totalMassDivGridMass = 1;
@@ -427,15 +431,20 @@ class gravityClass{
     while (modelChart.length !== start) {
       modelChart.pop();
     }
+    this.fitChartToBounds(myChart);
     myChart.update("none")
-    myChart.options.scales['x'].min = this.minX;
-    myChart.options.scales['x'].max = this.maxX;
   }
 
 
   public setXbounds(minX:number, maxX:number){
     this.minX = minX;
     this.maxX = maxX;
+    this.xBuffer = (maxX - minX) * 0.15;
+  }
+
+  public fitChartToBounds(myChart: Chart){
+    myChart.options.scales['x'].min = this.minX - this.xBuffer;
+    myChart.options.scales['x'].max = this.maxX + this.xBuffer;
   }
 
   public getXbounds(){
