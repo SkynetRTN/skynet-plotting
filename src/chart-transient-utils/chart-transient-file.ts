@@ -39,12 +39,19 @@ const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: s
                     items[col3]
                 ]);
             }
-        } else if (key === 'filter' && colIds.length === 2) {
-            const [col1, col2] = colIds;
+        } else if (key === 'filter' && colIds.length === 3) {
+            const [col1, col2, col3] = colIds;
 
             map.get(items[keyIdx]).push([
                 parseFloat(items[col1]),
-                parseFloat(items[col2])
+                parseFloat(items[col2]),
+                parseFloat(items[col3])
+            ]);
+        } else if (colIds.length === 1) {
+            const col1 = colIds[0];
+
+            map.get(items[keyIdx]).push([
+                parseFloat(items[col1])
             ]);
         } else {
             return map;
@@ -60,6 +67,8 @@ const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: s
     const data = {
         source: new Map(),
         filter: new Map(),
+        errors: new Map(),
+        zeroPoints: new Map(),
         valid: false, // unused
     }
 
@@ -72,9 +81,6 @@ const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: s
         data.valid = true;
     }
 
-    //let magErrorIdx = columns.indexOf('mag_error');
-    //let cZeroPointIdx = columns.indexOf('calibrated_zero_point');*/        
-
     let cols = csvData[0].trim().split(",");
     csvData.splice(0, 1);
 
@@ -84,8 +90,14 @@ const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: s
     data.source = getDataFromCSV(csvData, cols, sourceCols, 'id')
 
     const filterCols = [cols.indexOf('mjd'),
-        cols.indexOf('mag')];
+        cols.indexOf('mag'), cols.indexOf('mag_error')];
     data.filter = getDataFromCSV(csvData, cols, filterCols, 'filter')
+
+    const errorCol = [cols.indexOf('mag_error')];
+    data.errors = getDataFromCSV(csvData, cols, errorCol, 'filter');
+
+    const zeroPointCols = [cols.indexOf('zero_point_correction')];
+    data.zeroPoints = getDataFromCSV(csvData, cols, zeroPointCols, 'zero_point_correction');
 
     console.log('Finished reading in data.');
     return data;

@@ -9,6 +9,7 @@ import { TransientChart } from "./chart-transient-utils/chart-transient-chart";
 import { readCSVData, verifyCSV } from "./chart-transient-utils/chart-transient-file"; 
 import { tableCommonOptions } from "./config"
 import { linkInputs, updateTableHeight, sanitizeTableData } from "./util"
+import { calculateLambda, filterWavelength } from "./chart-cluster-utils/chart-cluster-util";
 
 
 const generateRandomData = (numOfPoints: number) => {
@@ -75,7 +76,7 @@ const initializeTable = (data: {jd: number, magnitude: number, filter: string}[]
 }
 
 
-const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: ChartInfoForm) => {
+const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: ChartInfoForm, init: boolean=false) => {
     let shiftedData = [];
     let delim = '';
     let sign = 1;
@@ -123,6 +124,8 @@ const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: Chart
             continue;
         }
 
+        //myChart.update();
+
         // search chart data
         for (let i = 0; i < myChart.getDatasets().length; i++) {
             if (myChart.getDataset(i).label.search(updatedFilter) !== -1) {
@@ -137,8 +140,8 @@ const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: Chart
                         let mjd = hot.getDataAtCol(0)[j];
                         let mag = hot.getDataAtCol(1)[j];
                         shiftedData.push({
-                            'x': mjd - (myChart.eventShift),//(myChart.timeShift),// - (myChart.eventShift),
-                            'y': mag + (sign * shiftVal),
+                            x: mjd - (myChart.eventShift),//(myChart.timeShift),// - (myChart.eventShift),
+                            y: mag + (sign * shiftVal),
                         })
                     }
                 }
@@ -188,7 +191,7 @@ const handleEventTimeInput = (chart: TransientChart) => {
         if (eventTime < 0 || isNaN(eventTime)) {
             return;
         }
-        chart.shiftData(eventTime);
+        chart.shiftData("x", eventTime);
         chart.update();
     }
 }
@@ -235,6 +238,26 @@ const handleChartZoomOptions = (chart: TransientChart) => {
     zoomOut.onmouseup = zoomOut.onmouseleave = function () {
     clearInterval(zoom);
     }
+}
+
+
+const calculateCurve = (form: VariableLightCurveForm) => {
+    const a = form["a_num"].value;
+    const b = form["b_num"].value;
+    const t0 = form["t_num"].value;
+    const Av = form["ebv_num"].value;
+    const f0 = filterWavelength[form["filter"].value];
+    const Rv = 3.1;
+
+    const F0 = 10**((1)/2.5);//temp
+    const FZP = 1;//temp
+    const td = 1;//temp
+    const f  = filterWavelength[form["filter"].value];//temp
+
+    const Anu = calculateLambda(Av*Rv, 10**6);
+    const F = F0 * ((td/t0)**a) * ((f/f0)**b) * 10**(-Anu/2.5);
+
+    return -2.5 * Math.log10(F / FZP)
 }
 
 
@@ -308,6 +331,8 @@ export function transient(): [Handsontable, TransientChart] {
         myChart.getMaxMag(), 0.01, mAvg, false);
     linkInputs(parameterForm["a"], parameterForm["a_num"], -3, 1, 0.01, -1, false);
 
+    //calculateCurve(parameterForm)
+
     return [hot, myChart];
 }
 
@@ -325,6 +350,8 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Tr
 
         const source = fileData.source;
         const filterSortedValues = fileData.filter;
+        const zeroPoints = fileData.zeroPoints;
+        //console.log('filterSorted: ', filterSortedValues);
 
         const itr = source.keys();
         let sourceData = itr.next().value;
@@ -333,7 +360,7 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Tr
             alert('No source detected in file!');
             return;
         }
-        
+
         myChart.setMinMJD(Number.POSITIVE_INFINITY);
         myChart.setMaxMJD(0);
 
@@ -370,6 +397,7 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Tr
         populateDataElement(filterSortedValues, chartForm);
 
         myChart.setScaleType('logarithmic');
+        shiftMagnitudes(table, myChart, chartForm, true);
 
         // reset dropdown
         const dropdown = document.getElementById('temporal') as HTMLSelectElement;
@@ -446,25 +474,30 @@ function updateVariable(table: Handsontable, myChart: TransientChart) {
         }
         map.get(filter).push({
             x:julianDate,
-            y:magnitude
+            y:magnitude,
+            yMin: magnitude-0.5,
+            yMax:magnitude+0.5,
         });
     }
 
     let currentFilters = [] as string[];
     for (let i=0; i < myChart.getDatasets().length; i++) {
         // delete any unused datasets
-        if (!map.has(myChart.getDataset(i).label)) {
-            let ss = ', '; 
-            ss += myChart.getDataset(i).label;
-            myChart.getDatasets().splice(i, 1);
-            ss+= '+0';
-            //console.log(ss);
-            form.elements['data'].value.replace(ss, '');
-            //console.log(form.elements['data'].value.search(', gprime'));
-            continue;
-        } 
-        currentFilters.push(myChart.getDataset(i).label);
+        if (myChart.getDataset(i).label !== "error-bar") {
+            if (!map.has(myChart.getDataset(i).label)) {
+                let ss = ', '; 
+                ss += myChart.getDataset(i).label;
+                myChart.getDatasets().splice(i, 1);
+                ss+= '+0';
+                //console.log(ss);
+                form.elements['data'].value.replace(ss, '');
+                //console.log(form.elements['data'].value.search(', gprime'));
+                continue;
+            } 
+            currentFilters.push(myChart.getDataset(i).label);
+        }
     }
+
 
     // supported filters
     const colorMap = getColorMap();
@@ -496,6 +529,7 @@ function updateVariable(table: Handsontable, myChart: TransientChart) {
                 pointHoverRadius: 8,
                 pointBorderWidth: 2,
                 hidden: false,
+                parsing: {},
             });
             // update labels here
             form.elements['data'].value += `, ${key}+0`;
@@ -531,24 +565,46 @@ const addDataSetsToChart = (myChart: TransientChart, filters: Map<string, Array<
         let key = itr.next().value;
 
         let data: Array<{x: number, y: number}> = [];
+        let errors: Array<{x: number, y: number}> = [];
         let xyData = filters.get(key);
+        //console.log(xyData);
 
         for (let j = 0; j < xyData.length; j++) {
             data.push({
-                'x': xyData[j][0] - xShift,
-                'y': xyData[j][1],
-                //'yMin': xyData[j][1]-1,
-                //'yMax': xyData[j][1]+0.5,
+                x: xyData[j][0] - xShift,
+                y: xyData[j][1],
+            });
+            errors.push({x:null, y:null});
+            errors.push({
+                x: xyData[j][0] - xShift,
+                y: xyData[j][1]-1,//xyData[j][2],
+            });
+            errors.push({
+                x: xyData[j][0] - xShift,
+                y: xyData[j][1] + 1,//xyData[j][2],
             });
         }
+
         myChart.addDataset({
-            label: key, // 'filter+0'
+            label: key,
             data: data,
             backgroundColor: colorMap.get(key),
             pointRadius: 6,
             pointHoverRadius: 8,
             pointBorderWidth: 2,
             hidden: false,
+            parsing: {},
+        });
+
+        myChart.addDataset({
+            label: "error-bar",
+            data: errors,
+            borderColor: "black",
+            borderWidth: 1,
+            pointRadius: 0,
+            showLine:true,
+            spanGaps: false,
+            parsing: {}
         });
     }
 }
@@ -580,33 +636,3 @@ const getColorMap = () => {
 
     return colorMap;
 }
-
-/*const people = [
-        [{email: 'email1@email', y:[1,2,3]},
-        {email: 'email2@email', y:'y2'}],
-        [{email: 'email3@email', y:'y3'}]
-    ];
-    let emails = [people.map(([{ email, y }]) => [email, y])];
-    console.log(emails);
-
-    const dataTest = 
-    [
-        {
-            label:'gen1',
-            backgroundColor: 'blue',
-            pointRadius: 6,
-            pointHoverRadius: 8,
-            pointBorderWidth: 2,
-            hidden: false,
-            data:[
-                {x:3., y:0.5, yMin:0.4, yMax:0.6}, 
-                {x:2., y:0.5, yMin:0.45, yMax:0.60}
-        ]},
-        {
-            label: 'gen2',
-            backgroundColor: 'red',
-            data:[
-                {x:7., y:0.5, yMin:0.4, yMax:0.6}, 
-                {x:4., y:0.5, yMin:0.48, yMax:0.8}
-        ]},
-    ];*/

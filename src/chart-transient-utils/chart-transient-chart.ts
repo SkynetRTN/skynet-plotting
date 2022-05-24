@@ -5,12 +5,18 @@ import "chartjs-chart-error-bars";
 import { CategoryScale, ChartDataset, LinearScale, registerables } from "chart.js";
 import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
 import { round } from "./../my-math"
+import ConditionCollection from "handsontable/plugins/filters/conditionCollection";
 
 export class TransientChart {
 
     chart: Chart;
+
+    /* SHIFTS */
     timeShift: number;
     eventShift: number;
+    filterShift: Map<string, number> = new Map();
+
+    /* MIN MAX */
     minMag: number;
     maxMag: number;
 
@@ -33,10 +39,21 @@ export class TransientChart {
                 maxMJD: Number.NEGATIVE_INFINITY,
                 minMJD: Number.POSITIVE_INFINITY,
                 labels: [],
-                datasets: [],
+                //datasets: [],
+                datasets: [{
+                    type: ScatterWithErrorBarsController.id,
+                    data: null,
+                }],
             },
             options: {
                 plugins: {
+                    legend: {
+                        labels: {
+                            filter: item => {
+                                return item.text != "error-bar";
+                            }
+                        }
+                    },
                     zoom: {
                         pan: {
                           enabled: true,
@@ -97,7 +114,7 @@ export class TransientChart {
 
     /* DATA MANIPULATION */
 
-    shiftData(shift: number) {
+    shiftData(axis:string, shift: number) {
         // shift           // new input 
         // this.eventShift // previous input
         // this.timeShift  // scale shift using min/max values
@@ -111,14 +128,16 @@ export class TransientChart {
         for (let i = 0; i < range; i++) {
             tmp = [];
             for (let j = 0; j < this.getDataset(i).data.length; j++) {
-                tmp.push({
-                    x: this.getDataset(i).data[j][x] - (shift - this.eventShift),
-                    y: this.getDataset(i).data[j][y]
-                });
+                if (axis === "x") {
+                    tmp.push({
+                        x: this.getDataset(i).data[j][x] - (shift - this.eventShift),
+                        y: this.getDataset(i).data[j][y]
+                    });
+                }
             }
             this.updateDataFromDataset(tmp, i);
         }
-        this.eventShift = shift;
+        if (axis === "x") { this.setEventShift(shift) }
     }
 
     clearDataFromDataset(idx: number) {
@@ -158,12 +177,20 @@ export class TransientChart {
         this.eventShift = shift;
     }
 
-    /*setBuffer(buffer: number) {
-        const min = this.chart.data.minMJD;
-        const max = this.chart.data.maxMJD;
-        this.chart.options.scales['x'].min = min - buffer;
-        this.chart.options.scales['x'].max = max + buffer;
-    }*/
+    setMagShift(filter: string, shift: number) 
+    {
+        // console.log(filter, shift);
+        // console.log(this.filterShift);
+        this.filterShift.set(filter, shift);   
+        this.update();     
+    }
+
+    setBuffer(buffer: number) {
+        const min = this.minMag;
+        const max = this.maxMag;
+        this.chart.options.scales['y'].min = min - buffer;
+        this.chart.options.scales['y'].max = max + buffer;
+    }
     
     setMinMJD(min: number) {
         this.chart.data.minMJD = min;
@@ -213,6 +240,10 @@ export class TransientChart {
 
     getMaxMag() {
         return this.maxMag;
+    }
+
+    getMagShift(filter: string) {
+        return this.filterShift.get(filter);
     }
 
     getDataset(idx: number) {
