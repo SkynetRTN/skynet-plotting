@@ -328,7 +328,12 @@ function updateCharts(
                     data: tableData,
                     colHeaders: headers,
                     columns: columns,
-                    hiddenColumns: {columns: hiddenColumns},
+                    hiddenColumns: {
+                        columns: hiddenColumns,
+                        // exclude hidden columns from copying and pasting
+                        //@ts-ignore
+                        copyPasteEnabled: false,
+                    },
                 }); //hide all but the first 3 columns
                 updateTableHeight(table);
                 for (let i = 0; i < chartLength; i++) {
