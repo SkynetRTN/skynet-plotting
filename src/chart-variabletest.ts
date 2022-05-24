@@ -112,7 +112,18 @@ export function variableTest(): [Handsontable, Chart] {
                     pointBorderWidth: 2,
                     // immutableLabel: true,
                     hidden: true,
+                }, {
+                    label: "error-bar",
+                    data: [],
+                    borderColor: "black",
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    showLine:true,
+                    spanGaps: false,
+                    parsing: {},
+                    hidden: true
                 }
+        
             ]
         },
         options: {
@@ -235,6 +246,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         let id_col = columns.indexOf("id");
         let mjd_col = columns.indexOf("mjd");
         let mag_col = columns.indexOf("mag");
+        let mag_err = columns.indexOf("mag_error")
 
         let srcs = new Map();
         for (const row of data) {
@@ -244,7 +256,8 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             }
             srcs.get(items[id_col]).push([
                 parseFloat(items[mjd_col]),
-                parseFloat(items[mag_col])
+                parseFloat(items[mag_col]),
+                parseFloat(items[mag_err]),
             ]);
         }
 
@@ -265,23 +278,23 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
 
         while (left < data1.length && right < data2.length) {
             if (data1[left][0] === data2[right][0]) {
-                pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1]);
+                pushTableData(tableData, data1[left][0], data1[left][1], data2[right][1], data1[left][2], data2[right][2]);
                 left++;
                 right++;
             } else if (data1[left][0] < data2[right][0]) {
-                pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+                pushTableData(tableData, data1[left][0], data1[left][1], NaN, data1[left][2], NaN);
                 left++;
             } else {
-                pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+                pushTableData(tableData, data2[right][0], NaN, data2[right][1], NaN, data2[right][2]);
                 right++;
             }
         }
         while (left < data1.length) {
-            pushTableData(tableData, data1[left][0], data1[left][1], NaN);
+            pushTableData(tableData, data1[left][0], data1[left][1], NaN, data1[left][2], NaN);
             left++;
         }
         while (right < data2.length) {
-            pushTableData(tableData, data2[right][0], NaN, data2[right][1]);
+            pushTableData(tableData, data2[right][0], NaN, data2[right][1], NaN, data2[right][2]);
             right++;
         }
 
@@ -314,6 +327,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         // in turn trigger update to the variable form and the light curve form, which needs to be cleared
         // prior to being triggered by this upload.
         table.updateSettings({ data: tableData });
+        
     }
     reader.readAsText(file);
 }
@@ -326,7 +340,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
  * @param {number} src1 Magnitude of source 1
  * @param {number} src2 Magnitude of source 2
  */
-function pushTableData(tableData: any[], jd: number, src1: number, src2: number) {
+function pushTableData(tableData: any[], jd: number, src1: number, src2: number, err1: number, err2: number) {
     if (isNaN(jd)) {
         // Ignore entries with invalid timestamp.
         return;
@@ -334,7 +348,9 @@ function pushTableData(tableData: any[], jd: number, src1: number, src2: number)
     tableData.push({
         'jd': jd,
         'src1': isNaN(src1) ? null : src1,
-        'src2': isNaN(src2) ? null : src2
+        'src2': isNaN(src2) ? null : src2,
+        'err1': isNaN(err1) ? null : err1,
+        'err2': isNaN(err2) ? null : err2,
     });
 }
 
@@ -537,6 +553,12 @@ function lightCurve(myChart: Chart) {
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         "</div>\n" +
         '<div class="row">\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode" checked></div>\n'+
+        '<div class="col-sm-5">Show Double Period</div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
         '<div class="col-sm-5 des">Period (days):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" step="0.001"></div>\n' +
@@ -546,11 +568,6 @@ function lightCurve(myChart: Chart) {
         '<div class="col-sm-4 range"><input type="range" title="phase" name="phase"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="phase_num" name="phase_num" class="field"></div>\n' +
         '<div class="row">\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode"></div>\n'+
-        '<div class="col-sm-5">Double Period</div>\n' +
-        
         '</div>\n' 
 
 
@@ -673,7 +690,8 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         }
         myChart.data.datasets[4].data = pfData;
     }
-    console.log('triggered')
+
+
 
     updateChart(myChart, 4);
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
