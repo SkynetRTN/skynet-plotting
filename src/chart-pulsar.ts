@@ -102,9 +102,10 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-        '<input class="extraoptions" type="number" id="speed" min="0" max="10" placeholder = "Speed" style="width: 52px;">' +
-        '<button id="sonify"/>Sonify</button>' +
-        '<button id="saveSonification";/>Save Sonification</button>' +
+        '<button id="sonify" style = "position: relative; left:92px;"/>Sonify</button>' +
+        '<label style = "position:relative; right:73px;">Speed:</label>' +
+        '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:205px; width: 52px;" >' +        
+        '<button id="saveSonification" style = "position:relative; left:50px;"/>Save Sonification</button>' +
         '</div>\n'
     );
     document.getElementById('axis-label1').style.display = 'inline';
@@ -550,14 +551,14 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
             let fluxstr: string[] = data
-            console.log(fluxstr);
+//           console.log(fluxstr);
             if(data[27].includes("\t")){
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split("\t")[str.split("\t").length-1].trim());
             }
             else{
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
             }
-            console.log(fluxstr);
+//            console.log(fluxstr);
             if(!fluxstr[0].includes("e+")){
                 var fluxes: number[] = fluxstr.map(Number);
             }

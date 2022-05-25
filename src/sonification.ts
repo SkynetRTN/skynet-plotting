@@ -43,21 +43,33 @@ export function Set2DefaultSpeed(myChart:Chart){
     //audioCtx.resume();
     if(myChart.data.modeLabels.lastMode === 'lc')
     {
-        sonification.audioSource = sonify(myChart,[0,1],false);
-        sonification.audioSource.onended = () => pause(myChart);
+        if(speed == 0){
+            sonification.audioSource = sonify(myChart,[0,1], 1, false);
+            sonification.audioSource.onended = () => pause(myChart);
+        }
+        else{
+            sonification.audioSource = sonify(myChart,[0,1], speed, false);
+            sonification.audioSource.onended = () => pause(myChart);
+        }    
     };
     if(myChart.data.modeLabels.lastMode === 'pf')
-        sonification.audioSource = sonify(myChart,[5,6],true);
-    if(myChart.data.modeLabels.lastMode === 'pressto')
-        sonification.audioSource = sonify(myChart,[5],true);
+        if(speed == 0)
+            sonification.audioSource = sonify(myChart,[5,6], 1);
+        else
+            sonification.audioSource = sonify(myChart,[5,6], speed);
+    if(myChart.data.modeLabels.lastMode === 'pressto'){
+        if(speed == 0)
+            sonification.audioSource = sonify(myChart,[5,6]);
+        else
+            sonification.audioSource = sonify(myChart,[5,6], speed);
+}
 
-
-    if(speed == 0){
-        sonification.audioSource.playbackRate.value = 1;
-    }
-    else{
-        sonification.audioSource.playbackRate.value = speed;
-    }
+//    if(speed == 0){
+//        sonification.audioSource.playbackRate.value = 1;
+//    }
+//    else{
+//        sonification.audioSource.playbackRate.value = speed;
+//    }
     sonification.audioSource.start();
 
     setInterval(check, 500, speed, myChart);
@@ -96,8 +108,8 @@ export function pause(myChart: Chart, clearInter: boolean = true){
         sonification.audioControls.playPause.style.color = "black";
         if(clearInter){
             var i = setInterval(function () {}, 100);
-            console.log(i);
-            console.log(i-1);
+//            console.log(i);
+//            console.log(i-1);
             clearInterval(i-1);
             clearInterval(i);
         }  
@@ -124,10 +136,14 @@ export function pause(myChart: Chart, clearInter: boolean = true){
  */
 export function saveSonify(myChart: Chart){
     let sonification = myChart.data.sonification
+    let speed: number = +sonification.audioControls.speed.value;
+    if(speed == 0)
+        speed = 1;
+
     if(myChart.data.modeLabels.lastMode === 'lc')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,[0,1])
+            sonification.audioSource = sonify(myChart,[0,1], speed)
         downloadBuffer(sonification.audioSource.buffer)
     }
 
@@ -135,14 +151,14 @@ export function saveSonify(myChart: Chart){
     if(myChart.data.modeLabels.lastMode === 'pf')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,[5,6], true)
+            sonification.audioSource = sonify(myChart,[5,6], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
 
     if(myChart.data.modeLabels.lastMode === 'pressto')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart, [5], true)
+            sonification.audioSource = sonify(myChart, [5], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
 }
@@ -154,12 +170,21 @@ export function saveSonify(myChart: Chart){
  * @param loop Loop audio?
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
-export function sonify(myChart: Chart, dataSets: number[], loop: boolean = true, destination?: AudioNode){
+export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
+    
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
-    let channels =  dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]);
-    let time = channels[0][channels[0].length - 1].x - channels[0][0].x;
+    let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
+
+
+    for (let j = 0; j < channels[0].length; j++){
+        // console.log(channels[i][j]);
+        channels[0][j].x = (channels[0][j].x) / speed;
+        // console.log(channels[i][j]);
+    }
+
+    let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
 
     if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
     {
@@ -167,10 +192,14 @@ export function sonify(myChart: Chart, dataSets: number[], loop: boolean = true,
         {
             var first: ScatterDataPoint = {x:0,y:0};
             first.y = channels[i][0].y;
-            first.x = channels[i][channels[i].length-1].x + time/channels[i].length;
+//            console.log("first.y is " + first.y);
+            first.x = (channels[i][channels[i].length-1].x + time/channels[i].length);
+//            console.log("first.x is " + first.x);
             channels[i] = channels[i].concat(first);
         }
         time = channels[0][channels[0].length - 1].x - channels[0][0].x;
+//        console.log("time is " + time);
+//        console.log("channels length is " + channels.length);
     }
 
     let norm = channels.map(c => 1 / ArrMath.max(c.map(p => p.y)));
@@ -194,6 +223,13 @@ export function sonify(myChart: Chart, dataSets: number[], loop: boolean = true,
 
         }
     }
+
+    for (let j = 0; j < channels[0].length; j++){
+        // console.log(channels[i][j]);
+        channels[0][j].x = (channels[0][j].x) * speed;
+        // console.log(channels[i][j]);
+    }
+
     // Get an AudioBufferSourceNode to play our buffer.
     const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
     sonifiedChart.loop = loop; //play on repeat?
@@ -203,7 +239,7 @@ export function sonify(myChart: Chart, dataSets: number[], loop: boolean = true,
     if(destination)
         sonifiedChart.connect(destination);
     else
-    sonifiedChart.connect(ctx.destination);
+        sonifiedChart.connect(ctx.destination);
     return sonifiedChart;
 
     //accepts x values and returns a y value based on a line between the points immediately before and after the given x value
