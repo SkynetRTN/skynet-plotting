@@ -459,6 +459,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  let frameChart1 = ()=>{document.getElementById('frameChart1').click()};
+  let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
+  document.getElementById('chart-div3').onmousedown = frameChart1;
+  document.getElementById('chart-div4').onmousedown = frameChart2;
   let minmax = proFormMinmax(hot, modelForm)
   //myChart3.update();
   //Adjust the gradient with the window size
@@ -566,10 +570,10 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm )
   let medDec = floatTo1(minmax[5]);
   let stdRa = floatTo1(minmax[6]);
   let stdDec = floatTo1(minmax[7]);
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, medRa, false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, false);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, medRa, false, true, -999, 999);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, true, 0, 999);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, true, -99, 999);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, true, 0, 999);
   //make sliders precise to the nearest thousandth
   clusterProForm["ramotion"].step = "0.001";
   clusterProForm["decmotion"].step = "0.001";

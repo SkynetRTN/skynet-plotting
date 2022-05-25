@@ -6,7 +6,7 @@
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
-import {changeOptions, updateLabels, updateTableHeight } from "../util";
+import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
@@ -143,32 +143,41 @@ export function clusterFileDownload(
     clusterProForm: ClusterProForm = null,
 
 ){
-    // console.log('init')
-    let toBeFlagged = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm)
-    // console.log(toBeFlagged)
-    let data = table.getSourceData()
-    let columns = table.getColHeader();
-    // console.log(data)
-    let isValidIndex = columns.indexOf('isValid');
-    if (isValidIndex > 0){
-        for (let i = 0; i < toBeFlagged.length; i++) {
-            (data[toBeFlagged[i]] as { [key: string]: string })['isValid'] = "False"
-        }
+    let csvRowsStar = [];
+    let starData = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    if (starData.length === 0){
+        alert("Please upload a data file before downloading");
+        return
+    }
+    // let data = [{'V mag': 69},{'V mag': 18}]
+    csvRowsStar.push(Object.keys(starData[0]).join(','));
+
+    for (let i = 0; i < starData.length; i++) {
+        // @ts-ignore
+        let vals = Object.values(starData[i]);
+        csvRowsStar.push(vals);
     }
 
-    table.loadData(data)
 
-    // access to exportFile plugin instance
-    var exportPlugin = table.getPlugin('exportFile');
-    // export as a string (with specified data range):
-    exportPlugin.downloadFile('csv', {
-        filename: 'Cluster-Pro-Data',
-        exportHiddenRows: true,     // default false
-        exportHiddenColumns: true,  // default false
-        columnHeaders: true,        // default false
-        rowHeaders: true,           // default false
-    });
-    console.log('oops')
+    let csvRowsHR = ['x,y,chart,segment'];
+    for (let c = 0; c < myCharts.length; c++) {
+        let chart = myCharts[c];
+        let dataSets = Object.assign([chart.data.datasets[1].data, chart.data.datasets[0].data])
+        for (let set = 0; set < dataSets.length; set++) {
+            let dataSet = dataSets[set];
+            if (dataSet.length !== 0) {
+                for (let i = 0; i <dataSet.length; i++) {
+                    dataSet[i]['chart'] = (c + 1).toString()
+                    dataSet[i]['segment'] = (set + 1).toString()
+                    // @ts-ignore
+                    csvRowsHR.push(Object.values(dataSet[i]))
+                }
+            }
+        }
+    }
+    let dateTime = getDateString()
+    csvDownload(csvRowsStar.join('\n'), 'Cluster Pro Scatter Download '+ dateTime + '.csv')
+    csvDownload(csvRowsHR.join('\n'), 'Cluster Pro Model Download '+ dateTime + '.csv')
 }
 
 function updateCharts(
@@ -319,7 +328,12 @@ function updateCharts(
                     data: tableData,
                     colHeaders: headers,
                     columns: columns,
-                    hiddenColumns: {columns: hiddenColumns},
+                    hiddenColumns: {
+                        columns: hiddenColumns,
+                        // exclude hidden columns from copying and pasting
+                        //@ts-ignore
+                        copyPasteEnabled: false,
+                    },
                 }); //hide all but the first 3 columns
                 updateTableHeight(table);
                 for (let i = 0; i < chartLength; i++) {
@@ -445,4 +459,27 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
         }
     }
     return [datadict, filters]
+}
+
+function csvDownload(dataString: string, fileName: string){
+    // Creating a Blob for having a csv file format
+    // and passing the data with type
+    const blob = new Blob([dataString], { type: 'text/csv' });
+
+    // Creating an object for downloading url
+    const url = window.URL.createObjectURL(blob);
+
+    // Creating an anchor(a) tag of HTML
+    const a = document.createElement('a');
+
+    // Passing the blob downloading url
+    a.setAttribute('href', url);
+
+    // Setting the anchor tag attribute for downloading
+    // and passing the download file name
+    a.setAttribute('download', fileName);
+
+    a.click();
+
+    a.remove();
 }
