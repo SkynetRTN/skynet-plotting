@@ -175,7 +175,7 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
              * still correspond to min and max, even though the implementation changed to accomodate
              * the log behavior.
             */
-            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 5), min, max);
+            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 4), min, max);
         };
         number.oninput = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);

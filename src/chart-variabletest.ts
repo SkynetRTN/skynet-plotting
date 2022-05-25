@@ -113,6 +113,34 @@ export function variableTest(): [Handsontable, Chart] {
                     // immutableLabel: true,
                     hidden: true,
                 }, {
+                    label: "err1",
+                    data: [],
+                    borderColor: "black",
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    showLine:true,
+                    spanGaps: false,
+                    parsing: {}
+                }, {
+                    label: "err2",
+                    data: [],
+                    borderColor: "black",
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    showLine:true,
+                    spanGaps: false,
+                    parsing: {},
+                }, {
+                    label: "error-bar",
+                    data: [],
+                    borderColor: "black",
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    showLine:true,
+                    spanGaps: false,
+                    parsing: {},
+                    hidden: true
+                }, {
                     label: "error-bar",
                     data: [],
                     borderColor: "black",
@@ -128,6 +156,18 @@ export function variableTest(): [Handsontable, Chart] {
         },
         options: {
             plugins: {
+                // zoom: {
+                //     pan: {
+                //       enabled: true,
+                //       mode: 'xy',
+                //     },
+                //     zoom: {
+                //       wheel: {
+                //         enabled: true,
+                //       },
+                //       mode: 'xy',
+                //     },
+                //   },
                 legend: {
                     labels: {
                         filter: function (legendItem) {
@@ -164,7 +204,37 @@ export function variableTest(): [Handsontable, Chart] {
         afterCreateRow: update,
     });
 
-    lightCurve(myChart);
+    let err1: Array<{x: number, y: number}> = [];
+    let err2: Array<{x: number, y: number}> = [];
+    for (let j = 0; j < tableData.length; j++) {
+        // insert gap between error bars
+        err1.push({x:null, y:null});
+        err2.push({x:null, y:null});
+
+        // lower limit error
+        err1.push({
+            x: tableData[j].jd ,
+            y: tableData[j].src1-1,
+        });
+
+        err2.push({
+            x: tableData[j].jd,
+            y: tableData[j].src2-1,
+        });
+
+        // upper limit error
+        err1.push({
+            x: tableData[j].jd,
+            y: tableData[j].src1+1,
+        });
+
+        err2.push({
+            x: tableData[j].jd,
+            y: tableData[j].src2+1,
+        });
+    }
+    
+    lightCurve(myChart, err1, err2);
 
     const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.onchange = function () {
@@ -268,6 +338,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             alert("Less than two sources are detected in the uploaded file.");
             return;
         }
+        console.log(myChart.data.datasets[0].data)
 
         let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
         let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
@@ -316,16 +387,65 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             lastMode: 'lc'
         };
 
+        console.log(myChart.data.datasets[0].data)
+
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
-        lightCurve(myChart);
 
-        // Need to put this line down in the end, because it will trigger update on the Chart, which will 
-        // in turn trigger update to the variable form and the light curve form, which needs to be cleared
-        // prior to being triggered by this upload.
+
+        let err1: Array<{x: number, y: number}> = [];
+        let err2: Array<{x: number, y: number}> = [];
+        console.log(tableData[0].err1)
+
+        for (let j = 0; j < tableData.length; j++) {
+                    // insert gap between error bars
+                    err1.push({x:null, y:null});
+                    err2.push({x:null, y:null});
+        
+                    // lower limit error
+                    err1.push({
+                        x: parseFloat(tableData[j].jd),
+                        y: tableData[j].src1-tableData[j].err1,
+                    });
+
+                    err2.push({
+                        x: parseFloat(tableData[j].jd),
+                        y: tableData[j].src2-tableData[j].err2,
+                    });
+        
+                    // upper limit error
+                    err1.push({
+                        x: parseFloat(tableData[j].jd),
+                        y: tableData[j].src1+tableData[j].err1,
+                    });
+
+                    err2.push({
+                        x: parseFloat(tableData[j].jd),
+                        y: tableData[j].src2+tableData[j].err2,
+                    });
+                }
+                
+
+        // myChart.data.datasets[5].data = err1
+        // updateChart(myChart,0, 1)
+        // console.log(myChart.data.datasets[1].data)
+        // console.log(myChart.data.datasets[0].data)
+        // console.log(myChart.data.datasets[5].data)
+        // // myChart.data.datasets[5].hidden = false
+        // // updateChart(myChart,5)
+        console.log(err2)
+
+        lightCurve(myChart, err1, err2);
+        // console.log(myChart.data.datasets[5].data)
+
+        // // Need to put this line down in the end, because it will trigger update on the Chart, which will 
+        // // in turn trigger update to the variable form and the light curve form, which needs to be cleared
+        // // prior to being triggered by this upload.
+        
+
         table.updateSettings({ data: tableData });
         
     }
@@ -367,7 +487,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     myChart.data.maxMJD = 0;
     myChart.data.minMJD = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 8; i++) {
         myChart.data.datasets[i].data = [];
     }
 
@@ -408,7 +528,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     myChart.options.scales['x'].min = localMin;
     myChart.options.scales['x'].max = localMax;
 
-    updateChart(myChart, 0, 1);
+    updateChart(myChart, 0, 1, 5, 6);
 
     const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.mode.value = "lc";
@@ -421,8 +541,9 @@ function updateVariable(table: Handsontable, myChart: Chart) {
  * DATA FLOW: chart[0], chart[1] -> chart[2]
  * @param myChart The chart object
  */
-function lightCurve(myChart: Chart) {
-    // console.log("lightCurve called");
+function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataPoint[]) {
+    console.log('here')
+    console.log(myChart.data.datasets[0].data);
     let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
@@ -449,9 +570,10 @@ function lightCurve(myChart: Chart) {
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
 
     lightCurveForm.oninput = function () {
-        console.log('lcTriggered')
+        myChart.data.datasets[5].data = err1
+        myChart.data.datasets[6].data = err2
         if (lightCurveForm.source.value === "none") {
-            updateChart(myChart, 0, 1);
+            updateChart(myChart, 0, 1, 5, 6);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
             variableForm.mode[1].disabled = true;
             variableForm.mode[2].disabled = true;
@@ -459,14 +581,18 @@ function lightCurve(myChart: Chart) {
             const datasets = myChart.data.datasets;
             let srcData: ScatterDataPoint[];
             let refData: ScatterDataPoint[];
+            let errData: ScatterDataPoint[];
             if (lightCurveForm.source.value === datasets[0].label) {
                 srcData = datasets[0].data as ScatterDataPoint[];
                 refData = datasets[1].data as ScatterDataPoint[];
+                errData = datasets[5].data as ScatterDataPoint[];
             } else {
                 srcData = datasets[1].data as ScatterDataPoint[];
                 refData = datasets[0].data as ScatterDataPoint[];
+                errData = datasets[6].data as ScatterDataPoint[];
             }
             const lcData = [];
+            const ebarData = []
             const len = Math.min(datasets[0].data.length, datasets[1].data.length);
             for (let i = 0; i < len; i++) {
                 if(srcData[i]["x"] !== null && srcData[i]["y"] !== null){
@@ -475,12 +601,26 @@ function lightCurve(myChart: Chart) {
                         "x": srcData[i]["x"],
                         "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
                     });
+                    for (let j = 0; j < 3; j++){
+                        if (errData [3*i+j]["y"] === null){
+                            ebarData.push({
+                                "x": null,
+                                "y": null,
+                            })
+                        }else{
+                        ebarData.push({
+                            "x": srcData[i]["x"],
+                            "y": errData[3*i+j]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                        })
+                        }
+                    }
                 }
             }
             variableForm.mode[1].disabled = false;
             variableForm.mode[2].disabled = false;
 
             myChart.data.datasets[2].data = lcData;
+            myChart.data.datasets[7].data = ebarData
 
             for (let i = 2; i < 5; i++) {
                 myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
@@ -488,7 +628,9 @@ function lightCurve(myChart: Chart) {
             myChart.options.scales['x'].min = lcData[0].x;
             myChart.options.scales['x'].max = lcData[lcData.length-1].x;
             
-            updateChart(myChart, 2);
+            updateChart(myChart, 2, 7);
+            // myChart.data.datasets[8].hidden = true
+            // console.log('triggered')
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
 
@@ -554,7 +696,7 @@ function lightCurve(myChart: Chart) {
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode" checked></div>\n'+
-        '<div class="col-sm-5">Show Double Period</div>\n' +
+        '<div class="col-sm-5">Show Two Periods</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '</div>\n' +
@@ -656,6 +798,8 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
     let datasets = myChart.data.datasets;
     let minMJD = myChart.data.minMJD;
     let pfData = [];
+    // let error = myChart.data.datasets[7].data;
+    let ebarData = [];
     if (period !== 0) {
         for (let i = 0; i < datasets[2].data.length; i++) {
             let temp_x = phase*period + floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period);
@@ -666,14 +810,28 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
                 "x": temp_x,
                 "y": (datasets[2].data[i] as ScatterDataPoint).y,
             });
+            for (let j = 0; j < 3; j++){
+                ebarData.push({
+                    "x": temp_x,
+                    "y": (datasets[7].data[3*i+j] as ScatterDataPoint).y,
+                });
+            }
+
             if (doubleMode == true){
             pfData.push({
                 "x": temp_x+period,
                 "y": (datasets[2].data[i] as ScatterDataPoint).y,
             });
+            for (let j = 0; j < 3; j++){
+                ebarData.push({
+                    "x": temp_x+period,
+                    "y": (datasets[7].data[3*i+j] as ScatterDataPoint).y,
+                });
+            }
             }
         }
         myChart.data.datasets[4].data = pfData;
+        myChart.data.datasets[8].data = ebarData
         myChart.options.scales['x'].min = 0;
         if (doubleMode == true){
             myChart.options.scales['x'].max = (period)*2
@@ -687,13 +845,26 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
                 "x": 0, 
                 "y": (datasets[2].data[i] as ScatterDataPoint).y
             })
+
+            for (let j = 0; j < 3; j++){
+                ebarData.push({
+                    "x": 0,
+                    "y": (datasets[7].data[3*i+j] as ScatterDataPoint).y,
+                });
+            }
         }
         myChart.data.datasets[4].data = pfData;
     }
 
+    // let error = myChart.data.datasets[7].data
+    // console.log((datasets[5].data[0] as ScatterDataPoint).y)
+    let errors: Array<{x: number, y: number}> = [];
+    
+    // myChart.data.datasets[7].data=errors
 
 
-    updateChart(myChart, 4);
+
+    updateChart(myChart, 4, 8);
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 }
 
@@ -706,8 +877,9 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
  */
 function updateChart(myChart: Chart, ...dataIndices: number[]) {
     // console.log("updateChart called");
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 9; i++) {
         myChart.data.datasets[i].hidden = true;
+
     }
     // Reversing y-axis for lc and pf, since a lower value for star magnitude means it's brighter.
     myChart.options.scales['y'].reverse = true;
