@@ -5,6 +5,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
+import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 import {
   linkInputs,
