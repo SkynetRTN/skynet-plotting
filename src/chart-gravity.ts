@@ -1,6 +1,7 @@
 "use strict";
 
 import Chart from "chart.js/auto";
+import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
@@ -59,13 +60,30 @@ export function gravity(): [Handsontable, Chart] {
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div class = "row" style="float: right;">\n' +
-      '<button class = "graphControl" id="panLeft"><class = "graphControl">&#8592;</></button>\n' +
-      '<button class = "graphControl" id="panRight"><class = "graphControl">&#8594;</></button>\n' +
-      '<button class = "graphControl" id="zoomIn"><class = "graphControl">&plus;</></button>\n' +
-      '<button class = "graphControl" id="zoomOut"><class = "graphControl">&minus;</></button>\n' +
-      '<button class = "graphControlAlt" id="Reset" >Reset</button>\n'+
+      '<button class = "graphControl" id="panLeft" style = "position:relative; right:5px;"><class = "graphControl">&#8592;</></button>\n' +
+      '<button class = "graphControl" id="panRight" style = "position:relative; right:5px;"><class = "graphControl">&#8594;</></button>\n' +
+      '<button class = "graphControl" id="zoomIn" style = "position:relative; right:5px;"><class = "graphControl">&plus;</></button>\n' +
+      '<button class = "graphControl" id="zoomOut" style = "position:relative; right:5px;"><class = "graphControl">&minus;</></button>\n' +
+      '<button class = "graphControlAlt" id="Reset" style = "position:; top:1px; right:5px; padding: 0px;   width:50px; text-align: center;">Reset</button>\n'+
   '</div>\n')
+  document.getElementById("extra-options").insertAdjacentHTML("beforeend",
+  '<div style="float: right;">\n' +
+  '<button id="sonify" style = "position: relative; left:2px;"/>Sonify</button>' +
+  '<label style = "position:relative; right:163px;">Speed:</label>' +
+  '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:295px; width: 52px;" >' +        
+  '<button id="saveSonification" style = "position:relative; right:40px;"/>Save Sonification</button>' +
+  '</div>\n'
+  );
 
+  const audioCtx = new AudioContext();
+  var audioSource = new AudioBufferSourceNode(audioCtx);
+  var audioControls = {
+      speed: document.getElementById("speed") as HTMLInputElement,
+      playPause: document.getElementById("sonify") as HTMLButtonElement,
+      save: document.getElementById("saveSonification") as HTMLButtonElement
+  }
+  const sonificationButton = document.getElementById("sonify") as HTMLInputElement;
+  const saveSon = document.getElementById("saveSonification") as HTMLInputElement;
 
 
     // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
@@ -74,6 +92,7 @@ export function gravity(): [Handsontable, Chart] {
     let panRight = document.getElementById("panRight") as HTMLInputElement;
     let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
     let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+    
 
     
     
@@ -177,7 +196,8 @@ export function gravity(): [Handsontable, Chart] {
   const ctx = (
     document.getElementById("myChart") as HTMLCanvasElement
   ).getContext("2d");
-  const myChart = new Chart(ctx, {
+
+  const chartOptions: ChartConfiguration = {
     type: "line",
     data: {
       datasets: [
@@ -206,6 +226,20 @@ export function gravity(): [Handsontable, Chart] {
           immutableLabel: false,
         },
       ],
+      sonification:
+      {
+          audioContext: audioCtx,
+          audioSource: audioSource,
+          audioControls: audioControls
+      },
+      modeLabels: {
+        lc: { t: 'Title', x: 'x', y: 'y' },
+        ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
+        pf: { t: 'Title', x: 'x', y: 'y' },
+        pressto: { t: 'Title', x: 'x', y: 'y' },
+        gravity: {t: 'Title', x: 'x', y: 'y'},
+        lastMode: 'gravity'
+      },
     },
     options: {
       hover: {
@@ -237,7 +271,10 @@ export function gravity(): [Handsontable, Chart] {
           },
         },},
     },
-  });
+  };
+
+  const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+
   console.log(myChart);
   document.getElementById('chart-div').style.cursor = "move";
   const update = function () {
@@ -246,7 +283,7 @@ export function gravity(): [Handsontable, Chart] {
     updateDataPlot(hot, myChart);
     
   };
-console.log(myChart);
+  console.log(myChart);
   // link chart to table
   hot.updateSettings({
     afterChange: update,
@@ -257,9 +294,12 @@ console.log(myChart);
   //     function () {updateGravModelData(gravityForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
   //     400);
   gravityModelForm.oninput = throttle(
-     function () {updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) => gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid));},
+    function () {updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) => gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid));},
      200);
+
   gravityForm.oninput = throttle(function () {gravClass.updateModelPlot(myChart, gravityForm)}, 100)
+
+//  gravityModelForm.oninput = function(){console.log("dataTable is "); console.log(gravClass.currentModelData);};
   // link chart to model form (slider + text)
 
   /*
@@ -307,6 +347,10 @@ console.log(myChart);
     false,
     false
   );
+
+  sonificationButton.onclick = () => play(myChart);
+  saveSon.onclick = () => saveSonify(myChart);
+  
   return [hot, myChart];
 }
 //remember later to change the file type to .hdf5
@@ -409,12 +453,14 @@ class gravityClass{
     let inc = parseFloat(gravityForm["inc_num"].value);
     let dist = parseFloat(gravityForm["dist_num"].value);
     let merge = parseFloat(gravityForm["merge_num"].value);
+
     //default d0 for now
     let d0 = 100;
 
     let start = 0;
     //model data stored in chart 0
     let modelChart = myChart.data.datasets[0].data;
+
 
     for (let i = 0; i < this.currentModelData.length; i++) {
       if ((this.currentModelData[i][0] === null) || (this.currentModelData[i][1] === null)) {
@@ -428,7 +474,10 @@ class gravityClass{
     while (modelChart.length !== start) {
       modelChart.pop();
     }
-    myChart.update("none")
+
+    console.log("modelChart is");
+
+    myChart.update("none");
     myChart.options.scales['x'].min = this.minX;
     myChart.options.scales['x'].max = this.maxX;
   }

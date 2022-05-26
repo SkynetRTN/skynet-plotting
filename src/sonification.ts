@@ -17,8 +17,8 @@
 }
 
 export function Set2DefaultSpeed(myChart:Chart){
-    myChart.data.sonification.audioControls.speed.setAttribute("value", ""); 
-    myChart.data.sonification.audioControls.speed.value = "";   
+    myChart.data.sonification.audioControls.speed.setAttribute("value", "1"); 
+    myChart.data.sonification.audioControls.speed.value = "1";   
 }
 
 
@@ -41,28 +41,21 @@ export function Set2DefaultSpeed(myChart:Chart){
     sonification.audioControls.playPause.style.color = "black";
     setTimeout(() => {//so for some dumb idiot reason, the color of the button doesnt change to yellow until AFTER sonification unless you put a timeout on this
     //audioCtx.resume();
-    if(myChart.data.modeLabels.lastMode === 'lc')
-    {
-        if(speed == 0){
-            sonification.audioSource = sonify(myChart,[0,1], 1, false);
-            sonification.audioSource.onended = () => pause(myChart);
-        }
-        else{
-            sonification.audioSource = sonify(myChart,[0,1], speed, false);
-            sonification.audioSource.onended = () => pause(myChart);
-        }    
-    };
-    if(myChart.data.modeLabels.lastMode === 'pf')
-        if(speed == 0)
-            sonification.audioSource = sonify(myChart,[5,6], 1);
-        else
-            sonification.audioSource = sonify(myChart,[5,6], speed);
-    if(myChart.data.modeLabels.lastMode === 'pressto'){
-        if(speed == 0)
-            sonification.audioSource = sonify(myChart,[5,6]);
-        else
-            sonification.audioSource = sonify(myChart,[5,6], speed);
-}
+    if(myChart.data.modeLabels.lastMode == "gravity"){
+        console.log("gravity mode played");
+        sonification.audioSource = sonify(myChart,[0], speed, false);
+        sonification.audioSource.onended = () => pause(myChart);
+    } 
+    if(myChart.data.modeLabels.lastMode === 'lc'){
+        sonification.audioSource = sonify(myChart,[0,1], speed, false);
+        sonification.audioSource.onended = () => pause(myChart);
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pf'){
+        sonification.audioSource = sonify(myChart,[5,6], speed);
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pressto'){
+        sonification.audioSource = sonify(myChart,[5,6], speed);
+    }
 
 //    if(speed == 0){
 //        sonification.audioSource.playbackRate.value = 1;
@@ -137,25 +130,26 @@ export function pause(myChart: Chart, clearInter: boolean = true){
 export function saveSonify(myChart: Chart){
     let sonification = myChart.data.sonification
     let speed: number = +sonification.audioControls.speed.value;
-    if(speed == 0)
-        speed = 1;
 
-    if(myChart.data.modeLabels.lastMode === 'lc')
+    
+    if(myChart.data.modeLabels.lastMode == "gravity"){
+        if(!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart,[0], speed, false);
+        downloadBuffer(sonification.audioSource.buffer)
+    }  
+    else if(myChart.data.modeLabels.lastMode === 'lc')
     {
         if(!sonification.audioSource.buffer)
             sonification.audioSource = sonify(myChart,[0,1], speed)
         downloadBuffer(sonification.audioSource.buffer)
     }
-
-    
-    if(myChart.data.modeLabels.lastMode === 'pf')
+    else if(myChart.data.modeLabels.lastMode === 'pf')
     {
         if(!sonification.audioSource.buffer)
             sonification.audioSource = sonify(myChart,[5,6], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
-
-    if(myChart.data.modeLabels.lastMode === 'pressto')
+    else if(myChart.data.modeLabels.lastMode === 'pressto')
     {
         if(!sonification.audioSource.buffer)
             sonification.audioSource = sonify(myChart, [5], speed)
@@ -178,11 +172,16 @@ export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, lo
     let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
 
 
+    console.log(channels);
+
+
     for (let j = 0; j < channels[0].length; j++){
         // console.log(channels[i][j]);
         channels[0][j].x = (channels[0][j].x) / speed;
         // console.log(channels[i][j]);
     }
+
+    
 
     let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
 
@@ -219,7 +218,8 @@ export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, lo
                 next++;
             }
 
-            arrayBuffer.getChannelData(c)[i] = norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1); // Left Channel
+            arrayBuffer.getChannelData(c)[i] = Math.abs(norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1));
+                ; // Left Channel
 
         }
     }
