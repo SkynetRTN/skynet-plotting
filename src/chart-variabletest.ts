@@ -584,22 +584,30 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             const datasets = myChart.data.datasets;
             let srcData: ScatterDataPoint[];
             let refData: ScatterDataPoint[];
+            let errVar: ScatterDataPoint[];
+            let errRef: ScatterDataPoint[];
             let errData: ScatterDataPoint[];
 
             if (lightCurveForm.source.value === datasets[0].label) {
                 srcData = datasets[0].data as ScatterDataPoint[];
                 refData = datasets[1].data as ScatterDataPoint[];
-                errData = datasets[5].data as ScatterDataPoint[];
+                errVar = datasets[5].data as ScatterDataPoint[];
+                errRef = datasets[6].data as ScatterDataPoint[];
             } else {
                 srcData = datasets[1].data as ScatterDataPoint[];
                 refData = datasets[0].data as ScatterDataPoint[];
-                errData = datasets[6].data as ScatterDataPoint[];
+                errVar = datasets[6].data as ScatterDataPoint[];
+                errRef = datasets[5].data as ScatterDataPoint[];
             }
             const lcData = [];
             const ebarData = []
             const len = Math.min(datasets[0].data.length, datasets[1].data.length);
-            let src1Data = 0
-            let src2Data = 0
+            let srcDataPoint = 0
+            let refDataPoint = 0
+            let err_var_plus = 0
+            let err_var_minus = 0
+            let err_ref_plus = 0
+            let err_ref_minus = 0
             let erred1 = 0
             let erred2 = 0
             let combErr = 0
@@ -611,31 +619,34 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                         "y": srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
                     });
                     for (let j = 0; j < 3; j++){
-                        if (errData [3*i+j]["y"] === null){
+                        if (errVar[3*i+j]["y"] === null){
                             ebarData.push({
                                 "x": null,
                                 "y": null,
                             })
                         }else if(j === 1){
-                            src1Data = (datasets[0].data as ScatterDataPoint[])[i]["y"]
-                            src2Data = (datasets[1].data as ScatterDataPoint[])[i]["y"]
-                            erred1 = (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
-                            erred2 = (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
-                            combErr = Math.sqrt(Math.pow(src1Data-erred1,2)+Math.pow(src2Data-erred2,2))
-                            ebarData.push({
-                            "x": srcData[i]["x"],
-                            "y": - combErr + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
-                            })
+                            srcDataPoint = (srcData as ScatterDataPoint[])[i]["y"]
+                            refDataPoint = (refData as ScatterDataPoint[])[i]["y"]
+                            err_var_minus = srcDataPoint - (errVar as ScatterDataPoint[])[3*i+j]["y"]
+                            err_ref_minus = refDataPoint - (errRef as ScatterDataPoint[])[3*i+j]["y"]
+                            
                         }else{
-                            src1Data = (datasets[0].data as ScatterDataPoint[])[i]["y"]
-                            src2Data = (datasets[1].data as ScatterDataPoint[])[i]["y"]
-                            erred1 = (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
-                            erred2 = (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
-                            combErr = Math.sqrt(Math.pow(src1Data-erred1,2)+Math.pow(src2Data-erred2,2))
+                            srcDataPoint = (datasets[0].data as ScatterDataPoint[])[i]["y"]
+                            refDataPoint = (datasets[1].data as ScatterDataPoint[])[i]["y"]
+                            err_var_plus = - srcDataPoint + (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
+                            err_ref_plus = - refDataPoint + (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
+                            // combErr = Math.sqrt(Math.pow(srcDataPoint-erred1,2)+Math.pow(refDataPoint-erred2,2))
                             ebarData.push({
                             "x": srcData[i]["x"],
-                            "y": combErr + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                            "y": -Math.sqrt(Math.pow(err_var_minus,2) + Math.pow(err_ref_plus,2)) + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value), 
                             })
+                            
+                            ebarData.push({
+                                "x": srcData[i]["x"],
+                                "y": Math.sqrt(Math.pow(err_var_plus,2) + Math.pow(err_ref_minus,2)) + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                            })
+                            
+
                         }
                         
                     }
