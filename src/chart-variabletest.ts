@@ -120,7 +120,8 @@ export function variableTest(): [Handsontable, Chart] {
                     pointRadius: 0,
                     showLine:true,
                     spanGaps: false,
-                    parsing: {}
+                    parsing: {},
+                    hidden: true,
                 }, {
                     label: "err2",
                     data: [],
@@ -130,6 +131,7 @@ export function variableTest(): [Handsontable, Chart] {
                     showLine:true,
                     spanGaps: false,
                     parsing: {},
+                    hidden: true,
                 }, {
                     label: "error-bar",
                     data: [],
@@ -398,6 +400,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
 
         let err1: Array<{x: number, y: number}> = [];
         let err2: Array<{x: number, y: number}> = [];
+        // let errComb: Array<{x: number, y: number}> = [];
         console.log(tableData[0].err1)
 
         for (let j = 0; j < tableData.length; j++) {
@@ -582,6 +585,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             let srcData: ScatterDataPoint[];
             let refData: ScatterDataPoint[];
             let errData: ScatterDataPoint[];
+
             if (lightCurveForm.source.value === datasets[0].label) {
                 srcData = datasets[0].data as ScatterDataPoint[];
                 refData = datasets[1].data as ScatterDataPoint[];
@@ -594,6 +598,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             const lcData = [];
             const ebarData = []
             const len = Math.min(datasets[0].data.length, datasets[1].data.length);
+            let src1Data = 0
+            let src2Data = 0
+            let erred1 = 0
+            let erred2 = 0
+            let combErr = 0
             for (let i = 0; i < len; i++) {
                 if(srcData[i]["x"] !== null && srcData[i]["y"] !== null){
 
@@ -607,12 +616,28 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                                 "x": null,
                                 "y": null,
                             })
-                        }else{
-                        ebarData.push({
+                        }else if(j === 1){
+                            src1Data = (datasets[0].data as ScatterDataPoint[])[i]["y"]
+                            src2Data = (datasets[1].data as ScatterDataPoint[])[i]["y"]
+                            erred1 = (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
+                            erred2 = (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
+                            combErr = Math.sqrt(Math.pow(src1Data-erred1,2)+Math.pow(src2Data-erred2,2))
+                            ebarData.push({
                             "x": srcData[i]["x"],
-                            "y": errData[3*i+j]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
-                        })
+                            "y": - combErr + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                            })
+                        }else{
+                            src1Data = (datasets[0].data as ScatterDataPoint[])[i]["y"]
+                            src2Data = (datasets[1].data as ScatterDataPoint[])[i]["y"]
+                            erred1 = (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
+                            erred2 = (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
+                            combErr = Math.sqrt(Math.pow(src1Data-erred1,2)+Math.pow(src2Data-erred2,2))
+                            ebarData.push({
+                            "x": srcData[i]["x"],
+                            "y": combErr + srcData[i]["y"] - refData[i]["y"] + parseFloat(lightCurveForm.mag.value),
+                            })
                         }
+                        
                     }
                 }
             }
@@ -703,7 +728,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Period (days):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" step="0.001"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" StringFormat={}{0:N2} step="0.001"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
@@ -728,13 +753,13 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
         let step = 10e-6
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
-        }
+        // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
+        //     step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
+        // }
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, step, range, true
+            parseFloat(fourierForm.start.value), range, 0.01, range, true
         );
 
 
@@ -747,30 +772,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             0.01, 
             0
         );
-        // console.log(start,end)
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
         
         
 
     periodFoldingForm.oninput = throttle(function () {
-        
-        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
-        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-        let range = Math.abs(start-end);
-        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
-        if (currentPosition > range){
-            currentPosition = range
-        } 
-        let step = 10e-5
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
-        }
-
-        linkInputsVar(
-            periodFoldingForm["period"],
-            periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, step, currentPosition , true
-        );
 
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
@@ -854,6 +860,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
             }
         }
         myChart.data.datasets[4].data = pfData;
+        myChart.data.datasets[8].data = ebarData;
     }
 
     // let error = myChart.data.datasets[7].data
