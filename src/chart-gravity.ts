@@ -15,6 +15,7 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
+import {upload_file_to_server} from "./chart-gravity-utils/chart-gravity-file";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -327,39 +328,38 @@ export function gravityFileUpload(
 
   // File type validation
   if (
-    !file.type.match("(text/csv|application/vnd.ms-excel)") &&
-    !file.name.match(".*.csv")
+    !file.name.match(".*.hdf5")
   ) {
-    alert("Please upload a CSV file.");
+    alert("Please upload a .hdf5 file.");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    // console.log(gravityForm.elements['d'].value);
-    gravityForm["dist"].value = Math.log(300).toString();
-    // console.log(gravityForm.elements['d'].value);
-    gravityForm["mass"].value = Math.log(25).toString();
-    gravityForm["ratio"].value = "1";
-    gravityForm["merge"].value = "50";
-    gravityForm["dist_num"].value = "300";
-    gravityForm["mass_num"].value = "25";
-    gravityForm["ratio_num"].value = "1";
-    gravityForm["merge_num"].value = "50";
-    myChart.options.plugins.title.text = "Title";
-    myChart.data.datasets[1].label = "Data";
-    myChart.options.scales["x"].title.text = "x";
-    myChart.options.scales["y"].title.text = "y";
-    updateLabels(
-      myChart,
-      document.getElementById("chart-info-form") as ChartInfoForm,
-      false,
-      false,
-      false,
-      false
-    );
-  }}
+  upload_file_to_server(file)
+}
+  //   const gravityForm = document.getElementById("gravity-form") as GravityForm;
+  //   // console.log(gravityForm.elements['d'].value);
+  //   gravityForm["dist"].value = Math.log(300).toString();
+  //   // console.log(gravityForm.elements['d'].value);
+  //   gravityForm["mass"].value = Math.log(25).toString();
+  //   gravityForm["ratio"].value = "1";
+  //   gravityForm["merge"].value = "50";
+  //   gravityForm["dist_num"].value = "300";
+  //   gravityForm["mass_num"].value = "25";
+  //   gravityForm["ratio_num"].value = "1";
+  //   gravityForm["merge_num"].value = "50";
+  //   myChart.options.plugins.title.text = "Title";
+  //   myChart.data.datasets[1].label = "Data";
+  //   myChart.options.scales["x"].title.text = "x";
+  //   myChart.options.scales["y"].title.text = "y";
+  //   updateLabels(
+  //     myChart,
+  //     document.getElementById("chart-info-form") as ChartInfoForm,
+  //     false,
+  //     false,
+  //     false,
+  //     false
+  //   );
+  // }}
 
 /**
  * updates the data plot using the data in the Henderson table
