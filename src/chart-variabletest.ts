@@ -6,8 +6,9 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { throttle, updateLabels, updateTableHeight, linkInputsVar, linkInputs } from "./util"
-import { round, lombScargle, floatMod } from "./my-math"
+import { round, lombScargle, floatMod, lombScargleWithError } from "./my-math"
 import { PulsarMode } from "./types/chart.js/index.js";
+import { valueAccordingPercent } from "handsontable/helpers";
 
 
 /**
@@ -113,7 +114,7 @@ export function variableTest(): [Handsontable, Chart] {
                     // immutableLabel: true,
                     hidden: true,
                 }, {
-                    label: "err1",
+                    label: "error-bar",
                     data: [],
                     borderColor: "black",
                     borderWidth: 1,
@@ -123,7 +124,7 @@ export function variableTest(): [Handsontable, Chart] {
                     parsing: {},
                     hidden: true,
                 }, {
-                    label: "err2",
+                    label: "error-bar",
                     data: [],
                     borderColor: "black",
                     borderWidth: 1,
@@ -172,11 +173,12 @@ export function variableTest(): [Handsontable, Chart] {
                 //   },
                 legend: {
                     labels: {
-                        filter: function (legendItem) {
-                            return !legendItem.hidden;
+                        filter: function (legendItem){
+                            return !(legendItem.text.includes("error-bar")||legendItem.hidden);                            
                         }
                     }
                 },
+
                 tooltip: {
                     callbacks: {
                         label: function (context) {
@@ -340,7 +342,6 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             alert("Less than two sources are detected in the uploaded file.");
             return;
         }
-        console.log(myChart.data.datasets[0].data)
 
         let data1 = srcs.get(src1).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
         let data2 = srcs.get(src2).filter((val: number[]) => !isNaN(val[0])).sort(sortJdate);
@@ -389,7 +390,6 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             lastMode: 'lc'
         };
 
-        console.log(myChart.data.datasets[0].data)
 
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
@@ -401,7 +401,6 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         let err1: Array<{x: number, y: number}> = [];
         let err2: Array<{x: number, y: number}> = [];
         // let errComb: Array<{x: number, y: number}> = [];
-        console.log(tableData[0].err1)
 
         for (let j = 0; j < tableData.length; j++) {
                     // insert gap between error bars
@@ -439,7 +438,6 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         // console.log(myChart.data.datasets[5].data)
         // // myChart.data.datasets[5].hidden = false
         // // updateChart(myChart,5)
-        console.log(err2)
 
         lightCurve(myChart, err1, err2);
         // console.log(myChart.data.datasets[5].data)
@@ -545,8 +543,6 @@ function updateVariable(table: Handsontable, myChart: Chart) {
  * @param myChart The chart object
  */
 function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataPoint[]) {
-    console.log('here')
-    console.log(myChart.data.datasets[0].data);
     let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
@@ -586,7 +582,6 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             let refData: ScatterDataPoint[];
             let errVar: ScatterDataPoint[];
             let errRef: ScatterDataPoint[];
-            let errData: ScatterDataPoint[];
 
             if (lightCurveForm.source.value === datasets[0].label) {
                 srcData = datasets[0].data as ScatterDataPoint[];
@@ -608,9 +603,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             let err_var_minus = 0
             let err_ref_plus = 0
             let err_ref_minus = 0
-            let erred1 = 0
-            let erred2 = 0
-            let combErr = 0
+
             for (let i = 0; i < len; i++) {
                 if(srcData[i]["x"] !== null && srcData[i]["y"] !== null){
 
@@ -630,11 +623,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                             err_var_minus = srcDataPoint - (errVar as ScatterDataPoint[])[3*i+j]["y"]
                             err_ref_minus = refDataPoint - (errRef as ScatterDataPoint[])[3*i+j]["y"]
                             
-                        }else{
-                            srcDataPoint = (datasets[0].data as ScatterDataPoint[])[i]["y"]
-                            refDataPoint = (datasets[1].data as ScatterDataPoint[])[i]["y"]
-                            err_var_plus = - srcDataPoint + (datasets[5].data as ScatterDataPoint[])[3*i+j]["y"]
-                            err_ref_plus = - refDataPoint + (datasets[6].data as ScatterDataPoint[])[3*i+j]["y"]
+                        }else if(j === 2){
+                            srcDataPoint = (srcData as ScatterDataPoint[])[i]["y"]
+                            refDataPoint = (refData as ScatterDataPoint[])[i]["y"]
+                            err_var_plus = - srcDataPoint + (errVar as ScatterDataPoint[])[3*i+j]["y"]
+                            err_ref_plus = - refDataPoint + (errRef as ScatterDataPoint[])[3*i+j]["y"]
                             // combErr = Math.sqrt(Math.pow(srcDataPoint-erred1,2)+Math.pow(refDataPoint-erred2,2))
                             ebarData.push({
                             "x": srcData[i]["x"],
@@ -710,20 +703,36 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             return;
         }
         let fData = [];
+        let fDataWError = [];
 
         let lcData = myChart.data.datasets[2].data as ScatterDataPoint[];
         let tArray = lcData.map((entry: ScatterDataPoint) => entry.x);
         let yArray = lcData.map((entry: ScatterDataPoint) => entry.y);
+        let errData = myChart.data.datasets[7].data as ScatterDataPoint[];
+        let errOriginal = errData.map((entry: ScatterDataPoint) => entry.y);
+        let error = []
+
+        for(let i = 0; i < yArray.length; i++){
+            error.push(
+                errOriginal[3*i+2]-yArray[i]
+            )
+        }
+        // console.log(error)
+
+        fDataWError = lombScargleWithError(tArray, yArray, error, start,stop, 2000)
+        myChart.data.datasets[3].data = fDataWError;
 
         fData = lombScargle(tArray, yArray, start, stop, 2000);
-
-        myChart.data.datasets[3].data = fData;
+        // myChart.data.datasets[3].data = fData;
+        // console.log(fData)
+        // console.log(fDataWError)
+        
+        
 
         
         
         myChart.options.scales['x'].min = start;
         myChart.options.scales['x'].max = stop;
-        console.log(stop)
         updateChart(myChart, 3);
     }
 
@@ -763,7 +772,6 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
-        let step = 10e-6
         // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
         //     step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
         // }
@@ -788,6 +796,8 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         
 
     periodFoldingForm.oninput = throttle(function () {
+
+        // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
 
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
@@ -876,7 +886,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
 
     // let error = myChart.data.datasets[7].data
     // console.log((datasets[5].data[0] as ScatterDataPoint).y)
-    let errors: Array<{x: number, y: number}> = [];
+    // let errors: Array<{x: number, y: number}> = [];
     
     // myChart.data.datasets[7].data=errors
 
