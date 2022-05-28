@@ -666,18 +666,18 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
 
             // slider behavior
-        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
-        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-        let range = Math.abs(start-end);
-        let currentPosition = parseFloat(periodFoldingForm.period_num.value);
-        if (currentPosition > range){
-            currentPosition = range
-        }   // check to let the slider stay where it is      
-        linkInputsVar(
-            periodFoldingForm["period"],
-            periodFoldingForm["period_num"],
-                0, range, (periodFoldingForm.period_num.value/range)*0.01, currentPosition, true
-        );
+        // let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        // let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        // let range = Math.abs(start-end);
+        // let currentPosition = parseFloat(periodFoldingForm.period_num.value);
+        // if (currentPosition > range){
+        //     currentPosition = range
+        // }   // check to let the slider stay where it is      
+        // linkInputsVar(
+        //     periodFoldingForm["period"],
+        //     periodFoldingForm["period_num"],
+        //         0, range, (periodFoldingForm.period_num.value/range)*0.01, currentPosition, true
+        // );
         }
     }
 
@@ -772,10 +772,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(start-end);
-        // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
-        //     step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
+        let step = 10e-5
+        // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
+        //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
         // }
-        linkInputsVar(
+        linkInputs(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
             parseFloat(fourierForm.start.value), range, 0.01, range, true
@@ -796,6 +797,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         
 
     periodFoldingForm.oninput = throttle(function () {
+        console.log('throttle why is triggering')
+
+        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
+            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
+        }else{
+            step = 10e-5
+        }
+        periodFoldingForm["period_num"].step = step
 
         // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
 
