@@ -5,7 +5,7 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { throttle, updateLabels, updateTableHeight, linkInputsVar, linkInputs } from "./util"
+import { throttle, updateLabels, updateTableHeight, linkInputs } from "./util"
 import { round, lombScargle, floatMod, lombScargleWithError } from "./my-math"
 import { PulsarMode } from "./types/chart.js/index.js";
 import { valueAccordingPercent } from "handsontable/helpers";
