@@ -136,19 +136,21 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
     log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
     let debounceTime = 1000;
+    
     if (!numOverride) {
         numMin = min;
         numMax = max;
     }
     number.min = numMin.toString();
     number.max = numMax.toString();
-    number.step = step.toString();
     number.value = value.toString();
     if (!log) {
         slider.min = min.toString();
         slider.max = max.toString();
         slider.step = step.toString();
         slider.value = value.toString();
+
+        number.step = step.toString();
 
         slider.oninput = function () {
             number.value = slider.value;
@@ -167,7 +169,23 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         slider.max = Math.log(max * 1.00001).toString();
         slider.step = step.toString()
         slider.value = Math.log(value).toString();
+        let range = (max-min)
+        let st = 10e-5
+        if ((value/range)*0.01 > 10e-5){
+            st = round((value/range)*step, 5)
+        }
+
+        number.step = st.toString();
+        
         slider.oninput = function () {
+            if ((parseFloat(slider.value)/range)*0.01 > 10e-5){
+                st = round((parseFloat(slider.value)/range)*step, 5)
+            }else{
+                st = 10e-5
+            }
+            console.log('slider')
+            console.log(st)
+    
             /**  
              * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
              * The reason is that the slider has min and max values defined for log. Also this is
@@ -175,13 +193,27 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
              * still correspond to min and max, even though the implementation changed to accomodate
              * the log behavior.
             */
-            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 6), min, max);
+            slider.step = st.toString()
+            number.step = st.toString()
+            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 4), min, max);
         };
-        number.oninput = function() {
+        number.onchange = function(){
+            console.log('changed')
+            if ((parseFloat(number.value)/range)*0.01 > 10e-5){
+                st = round((parseFloat(number.value)/range)*step, 5)
+            }else{
+                st = 10e-5
+            }
+
+            slider.step = st.toString()
+            number.step = st.toString()
+        }
+        number.oninput = debounce(()=> {
+            
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
-        }
+        }, debounceTime);
     }
 }
 

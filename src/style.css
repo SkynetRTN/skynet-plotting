@@ -277,6 +277,7 @@ input.spinboxnum[type=number]::-webkit-inner-spin-button {
 }
 input.spinboxnum[type=number] {
     -moz-appearance:textfield;
+    /* width: 5px; */
 }
 
 
