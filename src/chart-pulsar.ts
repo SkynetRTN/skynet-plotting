@@ -239,7 +239,8 @@ export function pulsar(): [Handsontable, Chart] {
                     hidden: true,
                     fill: false
                 }
-            ]
+            ],
+            gClass: null
         },
         options: {
             plugins: {

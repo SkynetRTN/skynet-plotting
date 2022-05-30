@@ -7,7 +7,7 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config"
 import { throttle, updateLabels, updateTableHeight, linkInputsVar, linkInputs } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
-import { PulsarMode } from "./types/chart.js/index.js";
+import { Mode } from "./types/chart.js/index.js";
 
 
 /**
@@ -64,6 +64,7 @@ export function variableTest(): [Handsontable, Chart] {
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
                 pressto: { t: 'Title', x: 'x', y: 'y' },
+                gravity: {t: 'Title', x: 'x', y: 'y'    },
                 lastMode: 'lc'
             },
             datasets: [
@@ -113,7 +114,8 @@ export function variableTest(): [Handsontable, Chart] {
                     // immutableLabel: true,
                     hidden: true,
                 }
-            ]
+            ],
+            gClass: null
         },
         options: {
             plugins: {
@@ -157,7 +159,7 @@ export function variableTest(): [Handsontable, Chart] {
 
     const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.onchange = function () {
-        const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
+        const mode: Mode = variableForm.elements["mode"].value as Mode;
         if (mode === "lc") {
             showDiv("light-curve-div");
             const lightCurveForm = document.getElementById("light-curve-form");
@@ -300,6 +302,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             pressto: { t: 'Title', x: 'x', y: 'y' },
+            gravity: {t: 'Title', x: 'x', y: 'y'},
             lastMode: 'lc'
         };
 

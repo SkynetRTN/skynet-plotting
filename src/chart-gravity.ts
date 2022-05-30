@@ -130,10 +130,11 @@ export function gravity(): [Handsontable, Chart] {
   const gravityModelForm = document.getElementById("gravity-model-form") as GravityModelForm;
   //Dont think we are using filterForm
  // const filterForm = document.getElementById("filter-form") as ModelForm;
+ 
   const tableData = dummyData;
-
   let gravClass = new gravityClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
+  let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
 
   Reset.onclick = function(){
     myChart.options.scales = {
@@ -145,8 +146,6 @@ export function gravity(): [Handsontable, Chart] {
     gravClass.fitChartToBounds(myChart);
         myChart.update();
   }
-
-  let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
 
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
@@ -242,6 +241,10 @@ export function gravity(): [Handsontable, Chart] {
         gravity: {t: 'Title', x: 'x', y: 'y'},
         lastMode: 'gravity'
       },
+      gClass: {
+        graClass: gravClass,
+        gravityform: gravityForm
+      } 
     },
     options: {
       hover: {
@@ -378,8 +381,18 @@ export function gravityFileUpload(
     return;
   }
 
-  upload_file_to_server(file)
+  upload_file_to_server(file, (response: string) => {
+    let json = JSON.parse(response);
+    let dataTable = json['data'];
+    updateDataPlot(dataTable, myChart);
+    let gravClass = myChart.data.gClass.graClass;
+    let gravityForm = myChart.data.gClass.gravityform;
+    gravClass.setXbounds(Math.min(...dataTable.map(t => t.Time)), Math.max(...dataTable.map(t => t.Time)));
+    let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
+  }) 
 }
+
   //   const gravityForm = document.getElementById("gravity-form") as GravityForm;
   //   // console.log(gravityForm.elements['d'].value);
   //   gravityForm["dist"].value = Math.log(300).toString();
@@ -439,7 +452,7 @@ function updateDataPlot(
 
 
 
-class gravityClass{
+export class gravityClass{
   currentModelData : number[][];
   totalMassDivGridMass : number;
   minX : number;

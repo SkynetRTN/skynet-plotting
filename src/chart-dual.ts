@@ -80,7 +80,8 @@ export function dual(): [Handsontable, Chart] {
                     hidden: false,
                     immutableLabel: false,
                 }
-            ]
+            ],
+            gClass: null
         },
         options: {
             hover: {
