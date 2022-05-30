@@ -1,6 +1,5 @@
-import { ChartDatasetProperties, ChartType, ScatterDataPoint } from 'chart.js/auto'
+import {ChartType, ScatterDataPoint } from 'chart.js/auto'
 
-import {gravityClass} from '../../chart-gravity'
 
 declare module 'chart.js/auto'{
     interface ChartData<TType extends ChartType, TData, TLabel = unknown> {
@@ -30,10 +29,6 @@ declare module 'chart.js/auto'{
                 speed?: HTMLInputElement
             },
         },
-        gClass: { 
-            graClass: gravityClass,
-            gravityform: GravityForm
-        }
     }
     interface ChartDatasetProperties<TType extends ChartType, TData> {
         immutableLabel?: boolean,

@@ -17,13 +17,13 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
-import {upload_file_to_server} from "./chart-gravity-utils/chart-gravity-file";
+import {clean_data_server} from "./chart-gravity-utils/chart-gravity-file";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart]}:
  */
-export function gravity(): [Handsontable, Chart] {
+export function gravity(): [Handsontable, Chart, gravityClass] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
@@ -171,7 +171,7 @@ export function gravity(): [Handsontable, Chart] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain", "Model"], // need to change to filter1, filter2
+      colHeaders: ["Time", "Strain"],
       columns: [
         {
           data: "Time",
@@ -183,16 +183,9 @@ export function gravity(): [Handsontable, Chart] {
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
-        {
-          data: "Model",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
       ],
-      hiddenColumns: { columns: [2] },
     })
   );
-  //now we need to hide the model column
   // create chart
   const ctx = (
     document.getElementById("myChart") as HTMLCanvasElement
@@ -241,10 +234,6 @@ export function gravity(): [Handsontable, Chart] {
         gravity: {t: 'Title', x: 'x', y: 'y'},
         lastMode: 'gravity'
       },
-      gClass: {
-        graClass: gravClass,
-        gravityform: gravityForm
-      } 
     },
     options: {
       hover: {
@@ -280,7 +269,6 @@ export function gravity(): [Handsontable, Chart] {
 
   const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
 
-  console.log(myChart);
   document.getElementById('chart-div').style.cursor = "move";
   const update = function () {
     //console.log(tableData);
@@ -289,57 +277,20 @@ export function gravity(): [Handsontable, Chart] {
     updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) =>
         gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid))
   };
-console.log(myChart);
-  // link chart to table
+
+  //link chart to table
   hot.updateSettings({
     afterChange: update,
     afterRemoveRow: update,
     afterCreateRow: update,
   });
-  // gravityForm.oninput = throttle(
-  //     function () {updateGravModelData(gravityForm, (modelData : number[][]) => gravClass.plotNewModel(myChart, gravityForm, modelData));},
-  //     400);
+
   gravityModelForm.oninput = throttle(
     function () {updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) => gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid));},
      200);
 
   gravityForm.oninput = throttle(function () {gravClass.updateModelPlot(myChart, gravityForm)}, 100)
 
-//  gravityModelForm.oninput = function(){console.log("dataTable is "); console.log(gravClass.currentModelData);};
-  // link chart to model form (slider + text)
-
-  /*
-  commented out the stuff below because not being used (don't know if it will ever be)
-   */
-//   filterForm.oninput = function () {
-//     //console.log(tableData);
-// //leaving this stuff here just in case we need drop down dependencies later
-//     const reveal: string[] = [
-//     ];
-//
-//     const columns: string[] = hot.getColHeader() as string[];
-//     const hidden: number[] = [];
-//     for (const col in columns) { //cut off " Mag"
-//       if (!reveal.includes(columns[col])) {
-//         //if the column isn't selected in the drop down, hide it
-//         hidden.push(parseFloat(col));
-//       }
-//     }
-//     hot.updateSettings({
-//       hiddenColumns: {
-//         columns: hidden,
-//         // copyPasteEnabled: false,
-//         indicators: false,
-//       },
-//     });
-//
-//     update();
-//     updateLabels(
-//       myChart,
-//       document.getElementById("chart-info-form") as ChartInfoForm
-//     );
-//     myChart.update("none");
-//   };
 
   update();
   myChart.options.plugins.title.text = "Title";
@@ -357,14 +308,15 @@ console.log(myChart);
   sonificationButton.onclick = () => play(myChart);
   saveSon.onclick = () => saveSonify(myChart);
 
-  return [hot, myChart];
+  return [hot, myChart, gravClass];
 }
 //remember later to change the file type to .hdf5
 
 export function gravityFileUpload(
   evt: Event,
   table: Handsontable,
-  myChart: Chart<"line">
+  myChart: Chart<"line">,
+  gravClass: gravityClass
 ) 
 {
   const file = (evt.target as HTMLInputElement).files[0];
@@ -381,42 +333,38 @@ export function gravityFileUpload(
     return;
   }
 
-  upload_file_to_server(file, (response: string) => {
+  clean_data_server(file, (response: string) => {
     let json = JSON.parse(response);
-    let dataTable = json['data'];
-    updateDataPlot(dataTable, myChart);
-    let gravClass = myChart.data.gClass.graClass;
-    let gravityForm = myChart.data.gClass.gravityform;
-    gravClass.setXbounds(Math.min(...dataTable.map(t => t.Time)), Math.max(...dataTable.map(t => t.Time)));
+    let data = json['data'];
+    updateTable(table, data, gravClass);
+    updateDataPlot(table, myChart);
+
     let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
     linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
+    gravClass.updateModelPlot(myChart, gravityForm)
   }) 
 }
 
-  //   const gravityForm = document.getElementById("gravity-form") as GravityForm;
-  //   // console.log(gravityForm.elements['d'].value);
-  //   gravityForm["dist"].value = Math.log(300).toString();
-  //   // console.log(gravityForm.elements['d'].value);
-  //   gravityForm["mass"].value = Math.log(25).toString();
-  //   gravityForm["ratio"].value = "1";
-  //   gravityForm["merge"].value = "50";
-  //   gravityForm["dist_num"].value = "300";
-  //   gravityForm["mass_num"].value = "25";
-  //   gravityForm["ratio_num"].value = "1";
-  //   gravityForm["merge_num"].value = "50";
-  //   myChart.options.plugins.title.text = "Title";
-  //   myChart.data.datasets[1].label = "Data";
-  //   myChart.options.scales["x"].title.text = "x";
-  //   myChart.options.scales["y"].title.text = "y";
-  //   updateLabels(
-  //     myChart,
-  //     document.getElementById("chart-info-form") as ChartInfoForm,
-  //     false,
-  //     false,
-  //     false,
-  //     false
-  //   );
-  // }}
+
+function updateTable(table: Handsontable, data: number[][], gravClass: gravityClass){
+  //table.populateFromArray(1, 1, data)
+  let data_dict : {[key: string]: number }[] = [];
+
+  let min = 100000000000;
+  let max = 0;
+  for (let i = 0; i < data.length; i++){
+    data_dict.push({'Time' : data[i][0], 'Strain' : data[i][1]})
+    if (data[i][0] < min){
+      min = data[i][0]
+    }
+    if (data[i][0] > max){
+      max = data[i][0]
+    }
+  }
+  gravClass.setXbounds(min, max)
+  table.loadData(data_dict)
+}
 
 /**
  * updates the data plot using the data in the Henderson table
@@ -426,7 +374,6 @@ export function gravityFileUpload(
 function updateDataPlot(
     table: Handsontable,
     myChart: Chart) {
-
   let start = 0;
   //data on chart 1
   let chart = myChart.data.datasets[1].data;
