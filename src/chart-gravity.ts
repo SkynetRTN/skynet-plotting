@@ -134,7 +134,7 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
   const tableData = dummyData;
   let gravClass = new gravityClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
-  let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+  let defaultMerge = (gravClass.getXbounds()[1] + gravClass.getXbounds()[0]) / 2;
 
   Reset.onclick = function(){
     myChart.options.scales = {
@@ -143,11 +143,15 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
         position: 'bottom'
       }
     }
+    let midpoint = (gravClass.getXbounds()[0] + gravClass.getXbounds()[1])/2
+    gravityForm["merge_num"].value = '' + midpoint
+    gravityForm["merge"].value = '' + midpoint
     gravClass.fitChartToBounds(myChart);
-        myChart.update();
+    myChart.update();
+    gravClass.updateModelPlot(myChart, gravityForm)
   }
 
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.0005, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
@@ -276,6 +280,7 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
     updateDataPlot(hot, myChart);
     updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) =>
         gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid))
+    gravClass.fitChartToBounds(myChart)
   };
 
   //link chart to table
@@ -336,18 +341,22 @@ export function gravityFileUpload(
   clean_data_server(file, (response: string) => {
     let json = JSON.parse(response);
     let data = json['data'];
-    updateTable(table, data, gravClass);
-    updateDataPlot(table, myChart);
-
-    let defaultMerge = (gravClass.getXbounds()[1] * 2 + gravClass.getXbounds()[0]) / 3;
+    let [min, max] = updateTable(table, data);
+    let midpoint = (min + max) / 2
+    let view_buffer = (max - min) * 0.0075
+    let merger_time_buffer = (max - min) * 0.05
+    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.001, defaultMerge);
-    gravClass.updateModelPlot(myChart, gravityForm)
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], midpoint-merger_time_buffer, midpoint+merger_time_buffer, 0.0005, midpoint);
+
+    updateDataPlot(table, myChart);
+    gravClass.fitChartToBounds(myChart);
+    gravClass.updateModelPlot(myChart, gravityForm);
   }) 
 }
 
 
-function updateTable(table: Handsontable, data: number[][], gravClass: gravityClass){
+function updateTable(table: Handsontable, data: number[][]){
   //table.populateFromArray(1, 1, data)
   let data_dict : {[key: string]: number }[] = [];
 
@@ -362,8 +371,8 @@ function updateTable(table: Handsontable, data: number[][], gravClass: gravityCl
       max = data[i][0]
     }
   }
-  gravClass.setXbounds(min, max)
   table.loadData(data_dict)
+  return [min, max]
 }
 
 /**
@@ -436,7 +445,7 @@ export class gravityClass{
     while (modelChart.length !== start) {
       modelChart.pop();
     }
-    this.fitChartToBounds(myChart);
+   // this.fitChartToBounds(myChart);
     myChart.update("none")
   }
 
