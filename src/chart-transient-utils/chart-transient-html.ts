@@ -57,7 +57,7 @@ export const disableDropdown = (id: string, state: boolean, hasInput: boolean=tr
 
 
 /* DRIVER CODE */
-export const initializeHTMLElements = () => {
+export const initHTML = () => {
 
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Variable"' + 

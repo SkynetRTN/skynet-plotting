@@ -5,7 +5,6 @@ import "chartjs-chart-error-bars";
 import { CategoryScale, ChartDataset, LinearScale, registerables } from "chart.js";
 import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
 import { round } from "./../my-math"
-import ConditionCollection from "handsontable/plugins/filters/conditionCollection";
 
 export class TransientChart {
 
@@ -34,23 +33,31 @@ export class TransientChart {
 
         const chart = new Chart(ctx, {
             type: 'scatter',
-            //type: ScatterWithErrorBarsController.id,
             data: {
                 maxMJD: Number.NEGATIVE_INFINITY,
                 minMJD: Number.POSITIVE_INFINITY,
                 labels: [],
-                //datasets: [],
-                datasets: [{
-                    type: ScatterWithErrorBarsController.id,
-                    data: null,
-                }],
+                datasets: [],
             },
             options: {
                 plugins: {
+                    title: {
+                        display: true,
+                        text: '',
+                    },
                     legend: {
                         labels: {
                             filter: item => {
-                                return item.text != "error-bar";
+                                if (typeof(item.text) === 'string') {
+                                    if (item.text.includes("error-bar")) {
+                                        return false
+                                    }
+                                    if (item.text.includes("model")) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                                //return true;
                             }
                         }
                     },
@@ -67,6 +74,7 @@ export class TransientChart {
                         },
                       },
                     tooltip: {
+                        //enabled: false,
                         callbacks: {
                             label: function (context) {
                                 return '(' + round(context.parsed.x, 4) + ', ' +
@@ -114,6 +122,31 @@ export class TransientChart {
 
     /* DATA MANIPULATION */
 
+    setBoundaries(data: any[]) {
+        // reset old bounds first
+        this.setMinMJD(Number.POSITIVE_INFINITY);
+        this.setMinMag(Number.POSITIVE_INFINITY);
+        this.setMaxMJD(0);
+        this.setMaxMag(0);
+
+        // find new bounds
+        let min = this.getMinMJD();
+        let max = this.getMaxMJD();
+        let minMag = this.getMinMag();
+        let maxMag = this.getMaxMag();
+
+        for (let i = 0; i < data.length; i++) {
+            min = Math.min(min, data[i][0]);
+            max = Math.max(max, data[i][0]);
+            minMag = Math.min(minMag, data[i][1]);
+            maxMag = Math.max(maxMag, data[i][1]);
+        }
+        this.setMinMJD(min);
+        this.setMaxMJD(max);
+        this.setMinMag(minMag);
+        this.setMaxMag(maxMag);
+    }
+
     shiftData(axis:string, shift: number) {
         // shift           // new input 
         // this.eventShift // previous input
@@ -121,23 +154,33 @@ export class TransientChart {
 
         let data = {};
         let tmp = [];
+        let tmpX: number;
         let x = "x" as keyof typeof data;
         let y = "y" as keyof typeof data;
 
+        console.log('new shift');
         const range = this.getDatasets().length;
         for (let i = 0; i < range; i++) {
             tmp = [];
             for (let j = 0; j < this.getDataset(i).data.length; j++) {
                 if (axis === "x") {
+                    // keep null for error bars
+                    tmpX = this.getDataset(i).data[j][x];
+                    if (tmpX != null) {
+                        tmpX -= (shift - this.eventShift);
+                    }
+                    if (this.getDataset(i).label.includes("R-model")) {
+                        console.log(tmpX, this.getDataset(i).data[j][y]);
+                    }
                     tmp.push({
-                        x: this.getDataset(i).data[j][x] - (shift - this.eventShift),
+                        x: tmpX,
                         y: this.getDataset(i).data[j][y]
                     });
                 }
             }
             this.updateDataFromDataset(tmp, i);
         }
-        if (axis === "x") { this.setEventShift(shift) }
+        if (axis === "x") { this.setEventShift(shift); }
     }
 
     clearDataFromDataset(idx: number) {

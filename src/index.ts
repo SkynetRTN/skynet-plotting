@@ -264,9 +264,9 @@ function chartType(chart: string) {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
         
-        } else {
+        } else if (chart !== 'transient') {
             updateChartInfo(objects[1], chartInfoForm);
-        }
+        } 
     };
 
     if(objects[1].data.sonification)

@@ -4,155 +4,136 @@
 import "chartjs-chart-error-bars";
 import Handsontable from "handsontable";
 
-import { initializeHTMLElements, disableDropdown } from "./chart-transient-utils/chart-transient-html";
+import { initHTML, disableDropdown } from "./chart-transient-utils/chart-transient-html";
 import { TransientChart } from "./chart-transient-utils/chart-transient-chart";
 import { readCSVData, verifyCSV } from "./chart-transient-utils/chart-transient-file"; 
 import { tableCommonOptions } from "./config"
 import { linkInputs, updateTableHeight, sanitizeTableData } from "./util"
 import { calculateLambda, filterWavelength } from "./chart-cluster-utils/chart-cluster-util";
+import { LinearScaleOptions } from "chart.js";
 
+/*
+    HANDLE USER INPUT
+*/
+const findDelimiter = (s: string) => {
+    let plus = false;
+    let minus = false;
 
-const generateRandomData = (numOfPoints: number) => {
-    // filters array is arbitrary
-    const filters = ['B', 'V', 'R', 'I'];
-    let data = [];
-
-    for (let i=0; i < numOfPoints; i++)  {
-        let idx = Math.floor(Math.random() * filters.length);
-
-        data.push({
-            'jd': i * 10 + Math.random() * 10,
-            'magnitude': Math.random() * 20,
-            'filter': filters[idx],
-        });
-        
+    if (/[+]/g.test(s)) {
+        plus = true;
     }
-    //data.forEach(d => console.log(d));
-    return data;
-};
-
-
-const sortDataByFilter = (usData: {jd: number, magnitude: number, filter: string}[]) => {
-    // grab filter names 
-    let filters = [] as string[];
-    for (let i = 0; i < usData.length; i++) {
-        if (!filters.some(f => f === usData[i].filter)) {
-            filters.push(usData[i].filter);  
-        }
+    if (/[-]/g.test(s)) {
+        minus = true;
     }
-
-    let sData = new Map();
-
-    filters.forEach(f => {
-        if (!sData.has(f)) {
-            sData.set(f, []);
-        }
-        for (let i = 0; i < usData.length; i++) {
-            if (f === usData[i].filter) {
-                sData.get(f).push([
-                    usData[i].jd, usData[i].magnitude
-                ]);
-            }
-        }
-    });
-    //sData.forEach(d => console.log(d));
-    return sData;
+    if (plus && !minus) {
+        return '+';
+    }
+    if (!plus && minus) {
+        return '-';
+    }
+    return null;
 }
 
 
-const initializeTable = (data: {jd: number, magnitude: number, filter: string}[]) => {
-    const container = document.getElementById('table-div');
+const shiftMagnitudes = (myChart: TransientChart, form: ChartInfoForm) => {
+    console.log('===== Shifting magnitudes =====');
 
-    return new Handsontable(container, Object.assign({}, tableCommonOptions, {
-        data: data,
-        colHeaders: ['Julian Date', 'Magnitude', 'Filter'],
-        maxCols: 3,
-        columns: [
-            { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'magnitude', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'filter', type: 'text' },
-        ],
-    }));
-}
-
-
-const shiftMagnitudes = (hot: Handsontable, myChart: TransientChart, form: ChartInfoForm, init: boolean=false) => {
-    let shiftedData = [];
-    let delim = '';
-    let sign = 1;
-    let numOfRows = hot.getDataAtCol(0).length;
-    const elementStringArray = form.elements['data'].value.split(',');
-
-    // prevent large inputs
-    if (elementStringArray.length > 500) {
+    const unparsedData = form.elements['data'].value.split(',');
+    if (unparsedData.length > 500) {
+        alert('Too many characters in Data field!');
         return;
     }
 
-    const hasPlusSign = (str: string) => {
-        return /[+]/g.test(str);
-    }
+    // get updated filters and check if valid inputs
+    let shiftedFilters = new Map();
+    for (let unparsedDatum of unparsedData) {
+        unparsedDatum = unparsedDatum.trim();
 
-    const hasMinusSign = (str: string) => {
-        return /[-]/g.test(str);
-    }
+        let delim = findDelimiter(unparsedDatum);
+        let sign = delim === '+' ? 1 : -1;
 
-    /* Determine the shift in mag the user wants and apply it */
-    /* mjdIdx = 0 , magIdx = 1 , flterIdx = 2 */
-
-    for (let str of elementStringArray) {
-        str = str.trim(); // remove leading/trailing whitespaces
-
-        // get sign of shift
-        if (hasPlusSign(str) && !hasMinusSign(str)) {
-            delim = '+';
-            sign = 1;
-        } else if (hasMinusSign(str) && !hasPlusSign(str)) {
-            delim = '-';
-            sign = -1;
-        } else {
-            return; // do nothing
-        }
-
-        let updatedFilter = str.split(delim)[0];
-        let shiftVal = parseFloat(str.split(delim)[1]);
-
-        if (isNaN(shiftVal)) {
+        if (delim === null || unparsedDatum.split(delim).length > 2) {
             continue;
         }
+
+        let updatedFilter = unparsedDatum.split(delim)[0];
+        let shiftVal = parseFloat(unparsedDatum.split(delim)[1]);
+
+        if (isNaN(shiftVal)) { continue; }
         if (shiftVal > 100 || shiftVal < -100) {
             alert('Magnitudes can only be shifted +/- 100');
             continue;
         }
-
-        //myChart.update();
-
-        // search chart data
-        for (let i = 0; i < myChart.getDatasets().length; i++) {
-            if (myChart.getDataset(i).label.search(updatedFilter) !== -1) {
-
-                shiftedData = [];
-                // search table data
-                for (let j = 0; j < numOfRows; j++) {
-                    let tableFilter = hot.getDataAtCol(2)[j];
-
-                    if (tableFilter === updatedFilter) {
-
-                        let mjd = hot.getDataAtCol(0)[j];
-                        let mag = hot.getDataAtCol(1)[j];
-                        shiftedData.push({
-                            x: mjd - (myChart.eventShift),//(myChart.timeShift),// - (myChart.eventShift),
-                            y: mag + (sign * shiftVal),
-                        })
-                    }
-                }
-                // update chart
-                myChart.clearDataFromDataset(i);
-                myChart.updateDataFromDataset(shiftedData, i);
-                myChart.update();
-            }
+        
+        // map of valid updated values
+        if (!shiftedFilters.has(updatedFilter)) {
+            shiftedFilters.set(updatedFilter, sign*shiftVal);
         }
     }
-};
+    //
+
+    // shift with the given valid data
+    let TYPE = {};
+    let x = "x" as keyof typeof TYPE;
+    let y = "y" as keyof typeof TYPE;
+    let filters = shiftedFilters.keys();
+
+    for (let filter of filters) {
+        let newShiftVal = shiftedFilters.get(filter);
+        let change = newShiftVal - myChart.getMagShift(filter);
+        if (isNaN(change)) { // no prior shift info
+            change = newShiftVal;
+        }
+
+        for (let i = 0; i < myChart.getDatasets().length; i++) {
+            let label = myChart.getDataset(i).label;
+
+            if (label.includes(filter)) {
+                if (change !=0) {
+                    let shiftedData = [];
+                    for (let j=0; j < myChart.getDataset(i).data.length; j++) {
+                        shiftedData.push({
+                            x: myChart.getDataset(i).data[j][x],
+                            y: myChart.getDataset(i).data[j][y] + change
+                        })
+                    }
+                    myChart.clearDataFromDataset(i);
+                    myChart.updateDataFromDataset(shiftedData, i);
+
+                    // update label for data only
+                    if (!label.includes("error") && !label.includes("model")) {
+                        let newLabel = filter + '\+' + String(newShiftVal);
+                        myChart.getDataset(i).label = newLabel;
+                    }
+                }
+            }
+        }
+        myChart.setMagShift(filter, shiftedFilters.get(filter));
+        myChart.update();
+    }
+    //
+}
+
+// internal
+const updateLabels = (myChart: TransientChart, form: ChartInfoForm) => {
+    console.log('==== Updating Labels ====');
+
+    let labels = "";
+    for (let i = 0; i < myChart.getDatasets().length; i++) {
+        let labelToBeAdded = myChart.getDataset(i).label;
+        if (!labelToBeAdded.includes("model") && !labelToBeAdded.includes("error")) {
+            if (labels !== "") {
+                labels += ", ";
+            }
+            labels += labelToBeAdded;
+        }
+    }
+    form.elements['data'].value = labels;
+    myChart.chart.options.plugins.title.text = form.elements['title'].value;
+    (myChart.chart.options.scales['x'] as LinearScaleOptions).title.text = form.elements['xAxis'].value;
+    (myChart.chart.options.scales['y'] as LinearScaleOptions).title.text = form.elements['yAxis'].value;
+    myChart.update();
+}
 
 
 const handleDropdownInput = (chart: TransientChart) => {
@@ -233,7 +214,7 @@ const handleChartZoomOptions = (chart: TransientChart) => {
     clearInterval(zoom);
     }
     zoomOut.onmousedown = function () {
-    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);;
+    zoom = setInterval(() => { myChart.zoom(0.97); }, 20);
     }
     zoomOut.onmouseup = zoomOut.onmouseleave = function () {
     clearInterval(zoom);
@@ -241,23 +222,347 @@ const handleChartZoomOptions = (chart: TransientChart) => {
 }
 
 
-const calculateCurve = (form: VariableLightCurveForm) => {
-    const a = form["a_num"].value;
-    const b = form["b_num"].value;
-    const t0 = form["t_num"].value;
-    const Av = form["ebv_num"].value;
-    const f0 = filterWavelength[form["filter"].value];
+const updateCurve = (myChart: TransientChart, form: VariableLightCurveForm) => {
+
+    let tempData: Array<{x: number, y: number}> = [];
+    let buffer = (myChart.getMaxMJD() - myChart.getMinMJD())*0.5;
+    let range = [Math.max(myChart.getMinMJD() - 10., 0.1), myChart.getMaxMJD() + buffer];
+
+    for (let i = 0; i < myChart.getDatasets().length; i++) {
+        tempData = [];
+        let label = myChart.getDataset(i).label;
+
+        if (label.includes("model")) {
+            for (let j = 0; j < range.length; j++) {
+                let mjd = range[j];
+                let newMag = calculateModel(form, label[0], mjd)+24.+myChart.getMagShift(label[0]);
+                tempData.push({
+                    x: mjd,
+                    y: newMag,
+                });
+            }
+            myChart.clearDataFromDataset(i);
+            myChart.updateDataFromDataset(tempData, i);
+        }
+        myChart.update();
+    }
+}
+
+// 
+function handleTableUpdate(table: Handsontable, myChart: TransientChart) {
+    console.log('Handling update to table..');
+
+    // can't pass filter col ([2]) to sanitize since is string
+    const tableData = sanitizeTableData(table.getData(), [0, 1]);
+
+    const form = document
+        .getElementById('chart-info-form') as ChartInfoForm;
+
+    setChartBoundaries(myChart, table);
+
+    // TODO: Check if ths makes sense + put into function
+    let timeShift = myChart.getMinMJD() - ((myChart.getMaxMJD() - myChart.getMinMJD())*0.1);
+    if (timeShift < 0) { timeShift = 0; }
+
+    myChart.setTimeShift(timeShift);
+    if (isNaN(myChart.eventShift)) {
+        myChart.eventShift = 0;
+    }
+    //
+
+    // get data from table
+    const filterMappedData = new Map();
+    for (let i = 0; i < tableData.length; i++) {
+        let julianDate = tableData[i][0] - timeShift;
+        let magnitude = tableData[i][1];
+        let filter = tableData[i][2];
+
+        filter = formatFilterName(filter);
+
+        if (!filterMappedData.has(filter)) {
+            filterMappedData.set(filter, []);
+        }
+        if (myChart.getMagShift(filter)) {
+            magnitude += myChart.getMagShift(filter);
+        }
+        filterMappedData.get(filter).push([julianDate, magnitude]);
+    }
+
+    // should we allow user to add custom filters ?
+    const supportedFilters = [] as string[];
+    Object.keys(FILTERCOLORS).forEach(key => {
+        supportedFilters.push(key);
+    }); // unused for now
+
+    // update min/max give nthe shift value
+    myChart.setMinMJD(myChart.getMinMJD() - timeShift);
+    myChart.setMaxMJD(myChart.getMaxMJD() - timeShift);
+
+    addChartData(myChart, filterMappedData, 0);
+    createModelSliders(myChart);
+    addModel(filterMappedData, myChart);
+    updateLabels(myChart, form);
+
+    myChart.setReverseScale(true);
+    myChart.update();
+}
+
+
+/*//
+    INITIALIZE WEBPAGE COMPONENTS
+*/
+const initialize = () => {
+    initHTML();
+    const data  = initData();
+    const table = initTable(data.table);
+    const chart = initChart(data.chart);
+    initModel(data.chart, chart, table);
+
+    return {table, chart};
+}
+
+const initData = () => {
+    const NUMOFPOINTS = 14;
+    const dummyData = generateDummyData(NUMOFPOINTS);
+    const mappedDummyData = mapDummyData(dummyData);
+
+    return {table: dummyData, chart: mappedDummyData};
+}
+
+// Handsontable
+const initTable = (data: {jd: number, magnitude: number, filter: string}[]) => {
+    const container = document.getElementById('table-div');
+    return new Handsontable(container, Object.assign({}, tableCommonOptions, {
+        data: data,
+        colHeaders: ['Julian Date', 'Magnitude', 'Filter'],
+        maxCols: 3,
+        columns: [
+            { data: 'jd', type: 'numeric', numericFormat: {pattern: {mantissa: 2}} },
+            { data: 'magnitude', type: 'numeric', numericFormat: {pattern: {mantissa: 2}} },
+            { data: 'filter', type: 'text' },
+        ],
+    }));
+}
+
+// ChartJS
+const initChart = (mappedData: Map<any, any>) => {
+    const chartInfoForm = document
+        .getElementById('chart-info-form') as ChartInfoForm;
+    updateDataField(mappedData, chartInfoForm);
+
+    const chart = new TransientChart();
+    chart.initialize();
+    addChartData(chart, mappedData, 0);
+
+    return chart;
+}
+
+// chi-by-eye model
+const initModel = (data: Map<any, any>, chart: TransientChart, table: Handsontable) => {
+    setChartBoundaries(chart, table);
+    createModelSliders(chart);
+    addModel(data, chart);
+}
+
+// dummy data formatted for table
+const generateDummyData = (numOfPoints: number) => {
+    // dummy filters
+    const filters = ['B', 'V', 'R', 'I'];
+
+    let data = [];
+    for (let i=0; i < numOfPoints; i++)  {
+        let idx = Math.floor(Math.random() * filters.length);
+
+        data.push({
+            'jd': i * 10 + Math.random() * 10,
+            'magnitude': Math.random() * 20,
+            'filter': filters[idx],
+        });
+        
+    }
+    return data;
+}
+
+// dummy data formatted for chart
+const mapDummyData = (data: {jd: number, magnitude: number, filter: string}[]) => {
+
+    let filters = [] as string[];
+    for (let i = 0; i < data.length; i++) {
+        if (!filters.some(f => f === data[i].filter)) {
+            filters.push(data[i].filter);  
+        }
+    }
+
+    let mappedData = new Map();
+    filters.forEach(f => {
+        if (!mappedData.has(f)) {
+            mappedData.set(f, []);
+        }
+        for (let i = 0; i < data.length; i++) {
+            if (f === data[i].filter) {
+                mappedData.get(f).push([
+                    data[i].jd, data[i].magnitude
+                ]);
+            }
+        }
+    });
+    return mappedData;
+}
+
+// fill in the data html element
+const updateDataField = (data: Map<any, any>, form: ChartInfoForm) => {
+    let labels = "";
+    const itr = data.keys();
+    // change this to grab unique filters from table
+    for (let key of itr) {
+        if (labels !== '') {
+            labels += ', ';
+        }
+        labels += key;
+        labels += '+0';
+    }
+    form.elements['data'].value = labels;
+}
+
+// form elements relevant to model
+const createModelSliders = (chart: TransientChart) => {
+    const parameterForm = document
+        .getElementById('transient-form') as VariableLightCurveForm;
+    const tAvg = (chart.getMinMJD() + chart.getMaxMJD()) / 2.
+    const mAvg = (chart.getMinMag() + chart.getMaxMag()) / 2.
+
+    linkInputs(parameterForm["b"], parameterForm["b_num"], -2, 1, 0.01, -0.5, false);
+    linkInputs(parameterForm["ebv"], parameterForm["ebv_num"], 0, 1, 0.01, 0, false);
+    linkInputs(parameterForm["t"], parameterForm["t_num"], chart.getMinMJD(), 
+        chart.getMaxMJD(), 0.01, tAvg, false);
+    linkInputs(parameterForm["mag"], parameterForm["mag_num"], chart.getMinMag(),
+        chart.getMaxMag(), 0.01, mAvg, false);
+    linkInputs(parameterForm["a"], parameterForm["a_num"], -3, 1, 0.01, -1, false);
+}
+
+
+// 
+const addModel = (data: Map<any, any>, chart: TransientChart) => {
+    const parameterForm = document
+        .getElementById('transient-form') as VariableLightCurveForm;
+
+    let tmp: Array<{x: number, y: number}> = [];
+    const itr = data.keys();
+
+    let lowerBound = 0.1;
+    if (chart.getMinMJD() > 0) {
+        lowerBound = chart.getMinMJD();
+    }
+
+    let buffer = (chart.getMaxMJD() - chart.getMinMJD())*0.5;
+    let range = [Math.min(lowerBound, 0.1), chart.getMaxMJD() + buffer];
+    //
+    chart.chart.options.scales["x"].max = range[1];
+    //
+    for (let i = 0; i < data.size; i++) {
+        let key = itr.next().value;
+
+        tmp = [];
+        let magShift = chart.getMagShift(key) ? chart.getMagShift(key): 0;
+        for (let j = 0; j < range.length; j++) {
+            tmp.push({
+                x: range[j],
+                y: calculateModel(parameterForm, key, range[j])+24.+magShift,
+            });
+        }
+        if (key === 'gprime') {
+            key = 'g\'';
+        }
+        chart.addDataset({
+            label: key+"-model",
+            data: tmp,
+            backgroundColor: FILTERCOLORS[key],
+            borderColor: FILTERCOLORS[key],
+            pointRadius: 0,
+            pointHoverRadius: 0,
+            pointBorderWidth: 0,
+            hidden: false,
+            showLine:true,
+            spanGaps: false,
+            parsing: {},
+        });
+    }
+}
+
+// chi-by-eye curve
+const calculateModel = (form: VariableLightCurveForm, filter: string, currentTime: number) => {
+    const a = parseFloat(form["a_num"].value);
+    const b = parseFloat(form["b_num"].value);
+    const t0 = parseFloat(form["t_num"].value);
+    const Av = parseFloat(form["ebv_num"].value);
+    const refFilter = form["filter"].value;
+    const refMagnitude = parseFloat(form["mag_num"].value);
+    const eventTime = 0;//parseFloat(form["time"].value);
+
+    if (filter === 'uprime' || filter == 'u') {
+        filter = "u\'";
+    }
+    if (filter === 'rprime' || filter == 'r') {
+        filter = "r\'";
+    }
+    if (filter === 'gprime' || filter == 'g') {
+        filter = "g\'";
+    }
+    if (filter === 'iprime' || filter == 'i') {
+        filter = "i\'";
+    }
+    if (filter === 'zprime' || filter == 'z') {
+        filter = "z\'";
+    }
+    
+    const f  = filterWavelength[filter];
+    const f0 = filterWavelength[refFilter];
     const Rv = 3.1;
 
-    const F0 = 10**((1)/2.5);//temp
-    const FZP = 1;//temp
-    const td = 1;//temp
-    const f  = filterWavelength[form["filter"].value];//temp
+    const FZP0 = ZERO_POINT_VALUES[refFilter];
+    const FZP = ZERO_POINT_VALUES[filter];
+    const F0 = FZP0 * 10**((refMagnitude)/2.5);
+    const td = currentTime - eventTime;// is this event - data or t) - data
+    const Anu = calculateLambda(Av*Rv, filterWavelength[refFilter]);
 
-    const Anu = calculateLambda(Av*Rv, 10**6);
-    const F = F0 * ((td/t0)**a) * ((f/f0)**b) * 10**(-Anu/2.5);
+    // break into parts
+    // const eq1 = Math.log10(F0) - Math.log10(FZP0) + Math.log10(FZP);
+    const eq1 = Math.log10(F0) - Math.log10(FZP);
+    const eq2 = a * (Math.log10(td) - Math.log10(t0));
+    const eq3 = b * (Math.log10(f0) - Math.log10(f)); // these are actually wavelengths!
+    const eq4 = Anu / 2.5;
 
-    return -2.5 * Math.log10(F / FZP)
+    // console.log('Flux term: ', eq1);
+    // console.log('Time term: ', eq2);
+    // console.log('Frequency term: ', eq3);
+    // console.log('Extinction term: ', eq4);
+    // console.log('Combined: ', -2.5 * (eq1 + eq2 + eq3 - eq4));
+    // console.log('-');
+
+    return -2.5 * (eq1 + eq2 + eq3 - eq4);
+}
+
+// min/max mjd and magnitude
+const setChartBoundaries = (chart: TransientChart, table: Handsontable) => {
+    const tableData = sanitizeTableData(table.getData(), [0, 1]);
+    chart.setMinMJD(Number.POSITIVE_INFINITY);
+    chart.setMaxMJD(0);
+
+    let minMJD = chart.getMinMJD();
+    let maxMJD = chart.getMaxMJD();
+    let minMag = chart.getMinMag();
+    let maxMag = chart.getMaxMag();
+
+    for (let i = 0; i < tableData.length; i++) {
+        minMJD = Math.min(minMJD, tableData[i][0]);
+        maxMJD = Math.max(maxMJD, tableData[i][0]);
+        minMag = Math.min(minMag, tableData[i][1]);
+        maxMag = Math.max(maxMag, tableData[i][1]);
+    }
+    chart.setMinMJD(minMJD);
+    chart.setMaxMJD(maxMJD);
+    chart.setMinMag(minMag);
+    chart.setMaxMag(maxMag);
 }
 
 
@@ -265,78 +570,63 @@ const calculateCurve = (form: VariableLightCurveForm) => {
     DRIVER 
 */
 export function transient(): [Handsontable, TransientChart] {
-    /* INITIALIZE PAGE ELEMENTS */
-    initializeHTMLElements();
 
-    const tableData = generateRandomData(14);
-    let randomData = sortDataByFilter(tableData);
+    /* INITIALIZE WEBPAGE COMPONENTS */
+    let init = initialize()
+    const myTable = init.table;
+    const myChart = init.chart;
 
-    // create data table 
-    const hot = initializeTable(tableData);
-
-    // 'Data' element receives input from user (unfortunately)
+    /* HANDLE USER INPUT */
     const chartInfoForm = document
         .getElementById('chart-info-form') as ChartInfoForm;
+    const parameterForm = document
+        .getElementById('transient-form') as VariableLightCurveForm;
 
-    populateDataElement(randomData, chartInfoForm);
+    // condense these
+    chartInfoForm.elements['data'].oninput = () => {
+        shiftMagnitudes(myChart, chartInfoForm);
+    }
+    chartInfoForm.elements['title'].oninput = () => {
+        updateLabels(myChart, chartInfoForm);
+    }
+    chartInfoForm.elements['xAxis'].oninput = () => {
+        updateLabels(myChart, chartInfoForm);
+    }
+    chartInfoForm.elements['yAxis'].oninput = () => {
+        updateLabels(myChart, chartInfoForm);
+    }
 
-    // create chart using ChartJS
-    const myChart = new TransientChart();
-    myChart.initialize();
+    // update chart
+    parameterForm.oninput = () => {
+        handleDropdownInput(myChart);
+        handleEventTimeInput(myChart);
+        updateCurve(myChart, parameterForm);
+        myChart.update();
+    }
 
-    // populate chart with random data
-    addDataSetsToChart(myChart, randomData, 0);
-
-    /* Handle updates to forms */
-
+    // update table
     const update = function () {
-        updateVariable(hot, myChart);
-        updateTableHeight(hot);
-    };
+        handleTableUpdate(myTable, myChart);
+        updateTableHeight(myTable);
+    }
 
-    hot.updateSettings({
+    myTable.updateSettings({
         afterChange: update,
         afterRemoveRow: update,
         afterCreateRow: update,
     });
 
-    // handle user shifting mags
-    chartInfoForm.elements['data'].oninput = () => {
-        shiftMagnitudes(hot, myChart, chartInfoForm);
-    }
-
-    const parameterForm = document
-        .getElementById('transient-form') as VariableLightCurveForm;
-
-    // handle user changing dropdown
-    parameterForm.oninput = () => {
-        handleDropdownInput(myChart);
-        handleEventTimeInput(myChart);
-        myChart.update();
-    }
     handleChartZoomOptions(myChart);
-    updateVariable(hot, myChart);
-    updateTableHeight(hot);
+    handleTableUpdate(myTable, myChart);
+    updateTableHeight(myTable);
     myChart.update();
 
-    /* sliders */
-    const tAvg = (myChart.getMinMJD() + myChart.getMaxMJD()) / 2.
-    const mAvg = (myChart.getMinMag() + myChart.getMaxMag()) / 2.
-
-    linkInputs(parameterForm["b"], parameterForm["b_num"], -2, 1, 0.01, -0.5, false);
-    linkInputs(parameterForm["ebv"], parameterForm["ebv_num"], 0, 1, 0.01, 0, false);
-    linkInputs(parameterForm["t"], parameterForm["t_num"], myChart.getMinMJD(), 
-        myChart.getMaxMJD(), 0.01, tAvg, false);
-    linkInputs(parameterForm["mag"], parameterForm["mag_num"], myChart.getMinMag(),
-        myChart.getMaxMag(), 0.01, mAvg, false);
-    linkInputs(parameterForm["a"], parameterForm["a_num"], -3, 1, 0.01, -1, false);
-
-    //calculateCurve(parameterForm)
-
-    return [hot, myChart];
+    return [myTable, myChart];
 }
 
-
+/*
+    FILE UPLOAD
+*/
 export function transientFileUpload(evt: Event, table: Handsontable, myChart: TransientChart) {
 
     let file = (evt.target as HTMLInputElement).files[0];
@@ -345,15 +635,15 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Tr
 
     let reader = new FileReader();
     reader.onload = () => {
+        /* READ AND VERIFY CSV UPLOAD */
         const fileData = readCSVData(reader);
         if (!fileData.valid) { return; }
 
-        const source = fileData.source;
-        const filterSortedValues = fileData.filter;
-        const zeroPoints = fileData.zeroPoints;
-        //console.log('filterSorted: ', filterSortedValues);
+        const sourceMappedData = fileData.source;
+        const filterMappedData = fileData.filter;
+        //const zeroPoints = fileData.zeroPoints;
 
-        const itr = source.keys();
+        const itr = sourceMappedData.keys();
         let sourceData = itr.next().value;
 
         if (!sourceData) {
@@ -361,55 +651,64 @@ export function transientFileUpload(evt: Event, table: Handsontable, myChart: Tr
             return;
         }
 
-        myChart.setMinMJD(Number.POSITIVE_INFINITY);
-        myChart.setMaxMJD(0);
-
-        // remove bad data and sort my date
-        let data = source.get(sourceData)
+        let data = sourceMappedData.get(sourceData)
             .filter((val: number[]) => !isNaN(val[0]))
             .sort((a: number[], b: number[]) => a[0] - b[0]);
-
-        let min = myChart.getMinMJD();
-        let max = myChart.getMaxMJD();
+        
+        /* DATA IS VERIFIED - NOW USE IT */
+        myChart.setBoundaries(data);
 
         const tableData: any[] = [];
         for (let i = 0; i < data.length; i++) {
-            min = Math.min(min, data[i][0]);
-            max = Math.max(max, data[i][0]);
             pushTableData(tableData, data[i][0], data[i][1], data[i][2]);
         }
-        myChart.setMinMJD(min);
-        myChart.setMaxMJD(max);
 
         // shift x axis for event time
-        const time = myChart.getMinMJD() - (myChart.getMaxMJD() - myChart.getMinMJD())*0.1;
-        const shift = time;
-        myChart.setEventShift(time);
+        const shift = myChart.getMinMJD() - (myChart.getMaxMJD() - myChart.getMinMJD())*0.1;
         const eventTime = document.getElementById('time') as HTMLInputElement;
-        eventTime.value = String(time);
-
+        eventTime.value = String(shift);
+        myChart.setEventShift(shift);
         myChart.clearDatasets();
+
         const chartForm = document
             .getElementById('chart-info-form') as ChartInfoForm;
 
         // update chart data
-        addDataSetsToChart(myChart, filterSortedValues, shift);
-        populateDataElement(filterSortedValues, chartForm);
+        addChartData(myChart, filterMappedData, shift);
+        updateDataField(filterMappedData, chartForm);
 
-        myChart.setScaleType('logarithmic');
-        shiftMagnitudes(table, myChart, chartForm, true);
+        myChart.setMinMJD(myChart.getMinMJD() - shift);
+        myChart.setMaxMJD(myChart.getMaxMJD() - shift);
 
-        // reset dropdown
-        const dropdown = document.getElementById('temporal') as HTMLSelectElement;
-        dropdown.selectedIndex = 0;
-
+        resetOnUpload(myChart);
+        addModel(filterMappedData, myChart);
         myChart.update();
+
         table.updateSettings({ data: tableData });
     }
     reader.readAsText(file);
 }
 
+// need to reset some form elements on upload
+const resetOnUpload = (myChart: TransientChart) => {
+    myChart.setScaleType('logarithmic');
 
+    const parameterForm = document
+        .getElementById('transient-form') as VariableLightCurveForm;
+
+    const dropdown = document.getElementById('temporal') as HTMLSelectElement;
+    dropdown.selectedIndex = 0;
+
+    const tAvg = (myChart.getMinMJD() + myChart.getMaxMJD()) / 2.
+    const mAvg = (myChart.getMinMag() + myChart.getMaxMag()) / 2.
+
+    linkInputs(parameterForm["t"], parameterForm["t_num"], myChart.getMinMJD(), 
+        myChart.getMaxMJD(), 0.01, tAvg, false);
+    linkInputs(parameterForm["mag"], parameterForm["mag_num"], myChart.getMinMag(),
+        myChart.getMaxMag(), 0.01, mAvg, false);
+}
+
+// 
 function pushTableData(tableData: any[], jd: number, mag: number, filter: string) {
     if (isNaN(jd)) {
         // Ignore entries with invalid timestamp.
@@ -423,181 +722,72 @@ function pushTableData(tableData: any[], jd: number, mag: number, filter: string
 }
 
 
-function updateVariable(table: Handsontable, myChart: TransientChart) {
-    console.log('update Variable called');
-
-    // can't pass filter col ([2]) to sanitize since is string
-    const tableData = sanitizeTableData(table.getData(), [0, 1]);
-    const map = new Map();
-
-    const form = document
-        .getElementById('chart-info-form') as ChartInfoForm;
-
-    myChart.setMinMJD(Number.POSITIVE_INFINITY);
-    myChart.setMaxMJD(0);
-
-    let minMJD = myChart.getMinMJD();
-    let maxMJD = myChart.getMaxMJD();
-    let minMag = myChart.getMinMag();
-    let maxMag = myChart.getMaxMag();
-
-    for (let i = 0; i < tableData.length; i++) {
-        minMJD = Math.min(minMJD, tableData[i][0]);
-        maxMJD = Math.max(maxMJD, tableData[i][0]);
-        minMag = Math.min(minMag, tableData[i][1]);
-        maxMag = Math.max(maxMag, tableData[i][1]);
-    }
-    myChart.setMinMJD(minMJD);
-    myChart.setMaxMJD(maxMJD);
-    myChart.setMinMag(minMag);
-    myChart.setMaxMag(maxMag);
-
-    let time = myChart.getMinMJD() - ((myChart.getMaxMJD() - myChart.getMinMJD())*0.1);
-
-    if (time < 0) {
-        time = 0;
-    }
-    myChart.setTimeShift(time);
-
-    if (isNaN(myChart.eventShift)) {
-        myChart.eventShift = 0;
-    }
-
-    // get data from table
-    for (let i = 0; i < tableData.length; i++) {
-        let julianDate = tableData[i][0] - time;
-        let magnitude = tableData[i][1];
-        let filter = tableData[i][2];
-
-        if (!map.has(filter)) {
-            map.set(filter, []);
-        }
-        map.get(filter).push({
-            x:julianDate,
-            y:magnitude,
-            yMin: magnitude-0.5,
-            yMax:magnitude+0.5,
-        });
-    }
-
-    let currentFilters = [] as string[];
-    for (let i=0; i < myChart.getDatasets().length; i++) {
-        // delete any unused datasets
-        if (myChart.getDataset(i).label !== "error-bar") {
-            if (!map.has(myChart.getDataset(i).label)) {
-                let ss = ', '; 
-                ss += myChart.getDataset(i).label;
-                myChart.getDatasets().splice(i, 1);
-                ss+= '+0';
-                //console.log(ss);
-                form.elements['data'].value.replace(ss, '');
-                //console.log(form.elements['data'].value.search(', gprime'));
-                continue;
-            } 
-            currentFilters.push(myChart.getDataset(i).label);
-        }
-    }
-
-
-    // supported filters
-    const colorMap = getColorMap();
-    const supportedFilters = [] as string[];
-
-    for (const [key] of colorMap.entries()) {
-        supportedFilters.push(key);
-    }
-
-    // update data sets
-    for (const [key, value] of map.entries()) {
-        if (!supportedFilters.includes(key)) {
-            continue;
-        }
-
-        if (currentFilters.includes(key)) {
-            for (let i=0; i < myChart.getDatasets().length; i++) {
-                if (myChart.getDataset(i).label.search(key) !== -1) {
-                    myChart.getDataset(i).data = value;
-                    break;
-                }
-            }
-        } else {
-            myChart.addDataset({
-                label: key,
-                data: value,
-                backgroundColor: colorMap.get(key),
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                pointBorderWidth: 2,
-                hidden: false,
-                parsing: {},
-            });
-            // update labels here
-            form.elements['data'].value += `, ${key}+0`;
-        }
-    }
-    myChart.setReverseScale(true);
-    myChart.update();
-}
-
-
-const populateDataElement = (filterMap: Map<number, number>, form: ChartInfoForm) => {
-    let labels = "";
-    const itr = filterMap.keys();
-    // change this to grab unique filters from table
-    for (let key of itr) {
-        if (labels !== '') {
-            labels += ', ';
-        }
-        labels += key;
-        labels += '+0';
-    }
-    form.elements['data'].value = labels;
-}
-
-
-const addDataSetsToChart = (myChart: TransientChart, filters: Map<string, Array<Array<number>>>, xShift:number) => {
+/*
+    MISC.
+*/
+const addChartData = (myChart: TransientChart, datapoints: Map<string, Array<Array<number>>>, xShift:number) => {
     // colorMap maps filter name to color
-    let colorMap = getColorMap();
-    const itr = filters.keys();
+    const dataITR = datapoints.keys();
+    const errorITR = datapoints.keys();
+    let tmp: Array<{x: number, y: number}> = [];
+    let errors: Array<{x: number, y: number}> = [];
+    console.log(datapoints);
+    /* These loops can be condensed. I split them up
+    because the actual data needed to be the first 
+    datasets to work with the undergrads label 
+    function. I'll be overriding that with my own. */
 
     myChart.clearDatasets();
-    for (let i = 0; i < filters.size; i++) {
-        let key = itr.next().value;
+    for (let i = 0; i < datapoints.size; i++) {
+        let key = dataITR.next().value;
+        let dps = datapoints.get(key);
+        let magShift = myChart.getMagShift(key) ? myChart.getMagShift(key): 0;
 
-        let data: Array<{x: number, y: number}> = [];
-        let errors: Array<{x: number, y: number}> = [];
-        let xyData = filters.get(key);
-        //console.log(xyData);
-
-        for (let j = 0; j < xyData.length; j++) {
-            data.push({
-                x: xyData[j][0] - xShift,
-                y: xyData[j][1],
-            });
-            errors.push({x:null, y:null});
-            errors.push({
-                x: xyData[j][0] - xShift,
-                y: xyData[j][1]-1,//xyData[j][2],
-            });
-            errors.push({
-                x: xyData[j][0] - xShift,
-                y: xyData[j][1] + 1,//xyData[j][2],
+        tmp = [];
+        for (let j = 0; j < dps.length; j++) {
+            tmp.push({
+                x: dps[j][0] - xShift,
+                y: dps[j][1],
             });
         }
-
+        if (key === 'gprime') {
+            key = 'g\''
+        }
         myChart.addDataset({
-            label: key,
-            data: data,
-            backgroundColor: colorMap.get(key),
+            label: key+'\+'+String(magShift),
+            data: tmp,
+            backgroundColor: FILTERCOLORS[key],
             pointRadius: 6,
             pointHoverRadius: 8,
             pointBorderWidth: 2,
+            showLine: false,
             hidden: false,
             parsing: {},
         });
+    }
 
+    // add error bar datasets
+    for (let i = 0; i < datapoints.size; i++) {
+        let key = errorITR.next().value;
+        let dps = datapoints.get(key);
+
+        errors = [];
+        for (let j = 0; j < dps.length; j++) {
+            errors.push({x:null, y:null});
+            errors.push({
+                x: dps[j][0] - xShift,
+                y: dps[j][1]-1,
+            });
+            errors.push({
+                x: dps[j][0] - xShift,
+                y: dps[j][1] + 1,
+            });
+        }
+        if (key === 'gprime') {
+            key = 'g\''
+        }
         myChart.addDataset({
-            label: "error-bar",
+            label: "error-bar-" + String(key),
             data: errors,
             borderColor: "black",
             borderWidth: 1,
@@ -609,30 +799,62 @@ const addDataSetsToChart = (myChart: TransientChart, filters: Map<string, Array<
     }
 }
 
+//
+const formatFilterName = (f: string) => {
 
-const getColorMap = () => {
-    let filterColorArray = [
-        ['U', '#8601AF'],
-        ['B', '#0247FE'],
-        ['V', '#66B032'],
-        ['R', '#FE2712'],
-        ['I', '#4424D6'],
-        ['Y', '#347C98'],
-        ['J', '#66B032'],
-        ['H', '#FC600A'],
-        ['K', '#FE2712'],
-        ['uprime', '#4424D6'],
-        ['gprime', '#347C98'],
-        ['rprime', '#FC600A'],
-        ['iprime', '#8601AF'],
-        ['zprime', '#0247FE'],
-    ]; // colors hand picked by Dan himself!
-
-    let colorMap = new Map();
-
-    for (let i = 0; i < filterColorArray.length; i++) {
-        colorMap.set(filterColorArray[i][0], filterColorArray[i][1]);
+    if (f === 'uprime') {
+        f = "u\'";
     }
+    else if (f === 'rprime') {
+        f = "r\'";
+    }
+    else if (f === 'gprime') {
+        f = "g\'";
+    }
+    else if (f === 'iprime') {
+        f = "i\'";
+    }
+    else if (f === 'zprime') {
+        f = "z\'";
+    }
+    return f;
+}
 
-    return colorMap;
+// colors are picked by Dan
+const FILTERCOLORS: { [key: string]: string } = {
+    'U' : '#8601AF',
+    'B' : '#0247FE',
+    'V' : '#66B032',
+    'R' : '#FE2712',
+    'I' : '#4424D6',
+    'Y' : '#347C98',
+    'J' : '#66B032',
+    'H' : '#FC600A',
+    'K' : '#FE2712',
+    "u\'": '#4424D6',
+    "g\'": '#347C98',
+    "r\'": '#FC600A',
+    "i\'": '#8601AF',
+    "z\'": '#0247FE',
+    'uprime' : '#4424D6',
+    'gprime' : '#347C98',
+    'rprime' : '#FC600A',
+    'iprime' : '#8601AF',
+    'zprime' : '#0247FE'
+}
+
+const ZERO_POINT_VALUES: { [key: string]: number } = {
+    'U' : 1.790,
+    'B' : 4.063,
+    'V' : 3.636,
+    'R' : 3.064,
+    'I' : 2.416,
+    'J' : 1.589,
+    'H' : 1.021,
+    'K' : 0.640,
+    "u\'": 3.680,
+    "g\'": 3.643,
+    "r\'": 3.648,
+    "i\'": 3.644,
+    "z\'": 3.631,
 }
