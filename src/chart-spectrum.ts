@@ -38,8 +38,8 @@ export function spectrum(): [Handsontable, Chart] {
     '&nbsp;' +
     '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
     '&nbsp;' +
-    '<button class = "graphControl" id="Reset"><center class = "graphControl">&#8634;</center></button>\n' +
-    '<div style="padding: 0 12px 0 12px"></div>' +
+    '<button class = "graphControl" id="Reset" style="width: auto" ><center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+    '<div style="padding:12px 12px"></div>' +
     '</div>\n'
     )
 
