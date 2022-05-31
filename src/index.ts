@@ -20,7 +20,7 @@ import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
-import { gravity, gravityFileUpload } from './chart-gravity';
+import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
 
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -158,6 +158,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    let grav_objects: [Handsontable, Chart, gravityClass]
 
 
     if (chart === 'curve') {
@@ -227,10 +228,11 @@ function chartType(chart: string) {
         }
 
     }else if (chart === 'gravity') {
-        objects = gravity();
+        grav_objects = gravity();
+        objects = [grav_objects[0], grav_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
     }
     updateTableHeight(objects[0]);

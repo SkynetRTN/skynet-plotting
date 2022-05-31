@@ -5,10 +5,13 @@ import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { throttle, updateLabels, updateTableHeight, linkInputs } from "./util"
+
+import { throttle, updateLabels, updateTableHeight, linkInputsVar, linkInputs } from "./util"
+import { Mode } from "./types/chart.js/index.js";
 import { round, lombScargle, floatMod, lombScargleWithError } from "./my-math"
 import { PulsarMode } from "./types/chart.js/index.js";
 import { valueAccordingPercent } from "handsontable/helpers";
+
 
 
 /**
@@ -65,6 +68,7 @@ export function variableTest(): [Handsontable, Chart] {
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
                 pressto: { t: 'Title', x: 'x', y: 'y' },
+                gravity: {t: 'Title', x: 'x', y: 'y'    },
                 lastMode: 'lc'
             },
             datasets: [
@@ -154,7 +158,6 @@ export function variableTest(): [Handsontable, Chart] {
                     parsing: {},
                     hidden: true
                 }
-        
             ]
         },
         options: {
@@ -242,7 +245,7 @@ export function variableTest(): [Handsontable, Chart] {
 
     const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.onchange = function () {
-        const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
+        const mode: Mode = variableForm.elements["mode"].value as Mode;
         if (mode === "lc") {
             showDiv("light-curve-div");
             const lightCurveForm = document.getElementById("light-curve-form");
@@ -387,6 +390,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             pressto: { t: 'Title', x: 'x', y: 'y' },
+            gravity: {t: 'Title', x: 'x', y: 'y'},
             lastMode: 'lc'
         };
 

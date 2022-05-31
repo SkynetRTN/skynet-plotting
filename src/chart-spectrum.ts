@@ -165,7 +165,8 @@ export function spectrum(): [Handsontable, Chart] {
                     hidden: true,
 
                 }
-            ]
+            ],
+            gClass: null
         },
         options: {
             elements: {
