@@ -135,7 +135,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           parsing: {}
         },
       ],
-      gClass: null
     },
     options: {
       responsive: true,
@@ -244,7 +243,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           parsing: {}
         },
       ],
-      gClass: null
     },
     options: {
       responsive: true,
@@ -408,7 +406,6 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
           parsing: {}
         },
       ],
-      gClass: null
     },
     options: {
       responsive: true,

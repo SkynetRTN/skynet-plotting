@@ -95,7 +95,6 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
           parsing: {}
         },
       ],
-      gClass: null
     },
     options: {
       hover: { mode: "nearest", },
