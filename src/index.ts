@@ -15,7 +15,8 @@ import { variable, variableFileUpload } from './chart-variable';
 import { variableTest, variableFileUploadTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import {cluster0} from './chart-cluster0';
+import { pulsarTest, pulsarFileUploadTest} from './chart-pulsartest';
+import { cluster0} from './chart-cluster0';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
@@ -193,6 +194,12 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+        }
+    } else if (chart === 'pulsarTest') {
+        objects = pulsarTest();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'cluster0') {
         cluster_objects = cluster0();
