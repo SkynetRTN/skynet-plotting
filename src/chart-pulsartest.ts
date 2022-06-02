@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
-import { PulsarMode } from "./types/chart.js/index.js";
+import { Mode } from "./types/chart.js/index.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 /**
@@ -181,6 +181,7 @@ export function pulsarTest(): [Handsontable, Chart] {
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
                 pressto: { t: 'Title', x: 'x', y: 'y' },
+                gravity: {t: 'Title', x: 'x', y: 'y'},
                 lastMode: 'lc'
             },
             sonification:
@@ -319,7 +320,7 @@ export function pulsarTest(): [Handsontable, Chart] {
     const saveSon = document.getElementById("saveSonification") as HTMLInputElement;
 
     pulsarForm.onchange = function () {
-        let mode = pulsarForm.elements["mode"].value as PulsarMode;
+        let mode = pulsarForm.elements["mode"].value as Mode;
         switchMode(myChart, mode);
 
         // This needs to happen after switchMode() since different parts of height
@@ -732,7 +733,7 @@ function updatePulsar(myChart: Chart<'line'>) {
  * @param reset         Default is false. If true, will override `mode` and
  *                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = false, clearInter: boolean = true) {
+function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, clearInter: boolean = true) {
     const pulsarForm = document.getElementById("pulsar-form") as PulsarForm;
     const lightCurveForm = document.getElementById('light-curve-form') as LightCurveForm;
     const fourierForm = document.getElementById('fourier-form') as FourierForm;
@@ -821,6 +822,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             pressto: { t: 'Title', x: 'x', y: 'y' },
+            gravity: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
         myChart.data.datasets[5].label = "Channel 1";
@@ -975,6 +977,7 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
         ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
         pf: { t: 'Title', x: 'x', y: 'y' },
         pressto: { t: 'Title', x: 'x', y: 'y' },
+        gravity: {t: 'Title', x: 'x', y: 'y'},
         lastMode: 'pressto'
     };
 
