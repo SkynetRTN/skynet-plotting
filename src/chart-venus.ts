@@ -123,7 +123,7 @@ export function venus(): [Handsontable, Chart] {
                     immutableLabel: true,
                 }
             ],
-            gClass: null
+             
         },
         options: {
             hover: {

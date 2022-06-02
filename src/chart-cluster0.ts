@@ -83,7 +83,7 @@ export function cluster0(): [Handsontable, Chart[], ModelForm, graphScale] {
         immutableLabel: true,
         parsing: {}//This fixes the disappearing issue. Why? What do I look like, a CS major?
       },],
-      gClass: null
+       
     },
     options: {
       hover: { mode: "nearest", },

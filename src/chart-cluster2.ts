@@ -112,7 +112,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           parsing: {}
         },
       ],
-      gClass: null
+       
     },
     options: {
       responsive: true,
@@ -220,7 +220,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           parsing: {}
         },
       ],
-      gClass: null
+       
     },
     options: {
       responsive: true,
