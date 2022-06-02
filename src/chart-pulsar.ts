@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
-import { PulsarMode } from "./types/chart.js";
+import { Mode } from "./types/chart.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 /**
@@ -102,9 +102,10 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-        '<input class="extraoptions" type="number" id="speed" min="0" max="10" placeholder = "Speed" style="width: 52px;">' +
-        '<button id="sonify"/>Sonify</button>' +
-        '<button id="saveSonification";/>Save Sonification</button>' +
+        '<button id="sonify" style = "position: relative; left:92px;"/>Sonify</button>' +
+        '<label style = "position:relative; right:73px;">Speed:</label>' +
+        '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:205px; width: 52px;" >' +        
+        '<button id="saveSonification" style = "position:relative; left:50px;"/>Save Sonification</button>' +
         '</div>\n'
     );
     document.getElementById('axis-label1').style.display = 'inline';
@@ -163,6 +164,7 @@ export function pulsar(): [Handsontable, Chart] {
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
                 pressto: { t: 'Title', x: 'x', y: 'y' },
+                gravity: {t: 'Title', x: 'x', y: 'y'},
                 lastMode: 'lc'
             },
             sonification:
@@ -237,7 +239,8 @@ export function pulsar(): [Handsontable, Chart] {
                     hidden: true,
                     fill: false
                 }
-            ]
+            ],
+            gClass: null
         },
         options: {
             plugins: {
@@ -289,7 +292,7 @@ export function pulsar(): [Handsontable, Chart] {
     const saveSon = document.getElementById("saveSonification") as HTMLInputElement;
 
     pulsarForm.onchange = function () {
-        let mode = pulsarForm.elements["mode"].value as PulsarMode;
+        let mode = pulsarForm.elements["mode"].value as Mode;
         switchMode(myChart, mode);
 
         // This needs to happen after switchMode() since different parts of height
@@ -550,14 +553,14 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
             let fluxstr: string[] = data
-            console.log(fluxstr);
+//           console.log(fluxstr);
             if(data[27].includes("\t")){
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split("\t")[str.split("\t").length-1].trim());
             }
             else{
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
             }
-            console.log(fluxstr);
+//            console.log(fluxstr);
             if(!fluxstr[0].includes("e+")){
                 var fluxes: number[] = fluxstr.map(Number);
             }
@@ -618,7 +621,7 @@ function updatePulsar(myChart: Chart<'line'>) {
  * @param reset         Default is false. If true, will override `mode` and
  *                      set mode to 'lc', and reset Chart and chart-info-form.
  */
-function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = false, clearInter: boolean = true) {
+function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, clearInter: boolean = true) {
     const pulsarForm = document.getElementById("pulsar-form") as PulsarForm;
     const lightCurveForm = document.getElementById('light-curve-form') as LightCurveForm;
     const fourierForm = document.getElementById('fourier-form') as FourierForm;
@@ -705,6 +708,7 @@ function switchMode(myChart: Chart<'line'>, mode: PulsarMode, reset: boolean = f
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
             pressto: { t: 'Title', x: 'x', y: 'y' },
+            gravity: { t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
         myChart.data.datasets[5].label = "Channel 1";
@@ -844,6 +848,7 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
         ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
         pf: { t: 'Title', x: 'x', y: 'y' },
         pressto: { t: 'Title', x: 'x', y: 'y' },
+        gravity: {t: 'Title', x: 'x', y: 'y'},
         lastMode: 'pressto'
     };
 

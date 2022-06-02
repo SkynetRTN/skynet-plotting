@@ -1,4 +1,5 @@
-import { ChartDatasetProperties, ChartType, ScatterDataPoint } from 'chart.js/auto'
+import {ChartType, ScatterDataPoint } from 'chart.js/auto'
+
 
 declare module 'chart.js/auto'{
     interface ChartData<TType extends ChartType, TData, TLabel = unknown> {
@@ -14,8 +15,9 @@ declare module 'chart.js/auto'{
             lc: ModeLabels,
             ft: ModeLabels,
             pf: ModeLabels,
-            pressto: ModeLabels
-            lastMode: PulsarMode
+            pressto: ModeLabels,
+            gravity: ModeLabels,
+            lastMode: Mode
         },
         sonification?:{
             audioContext: AudioContext,
@@ -26,7 +28,7 @@ declare module 'chart.js/auto'{
                 save: HTMLButtonElement,
                 speed?: HTMLInputElement
             },
-        }
+        },
     }
     interface ChartDatasetProperties<TType extends ChartType, TData> {
         immutableLabel?: boolean,
@@ -34,7 +36,7 @@ declare module 'chart.js/auto'{
     }
 }
 
-type PulsarMode = 'lc' | 'ft' | 'pf' | 'pressto' ;
+type Mode = 'lc' | 'ft' | 'pf' | 'pressto' | 'gravity';
 
 interface ModeLabels {
     t: string,
