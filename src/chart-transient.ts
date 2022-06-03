@@ -105,7 +105,8 @@ const shiftMagnitudes = (myChart: TransientChart, form: ChartInfoForm) => {
 
                     // update label for data only
                     if (!label.includes("error") && !label.includes("model")) {
-                        let newLabel = filter + '\+' + String(newShiftVal);
+                        let operation = newShiftVal < 0 ? '' : '\+'; 
+                        let newLabel = filter + operation + String(newShiftVal);
                         myChart.getDataset(i).label = newLabel;
                     }
                 }
@@ -732,6 +733,7 @@ const addChartData = (myChart: TransientChart, datapoints: Map<string, Array<Arr
         let key = dataITR.next().value;
         let dps = datapoints.get(key);
         let magShift = myChart.getMagShift(key) ? myChart.getMagShift(key): 0;
+        let operation = magShift < 0 ? '\-' : '\+';
 
         tmp = [];
         for (let j = 0; j < dps.length; j++) {
@@ -744,7 +746,7 @@ const addChartData = (myChart: TransientChart, datapoints: Map<string, Array<Arr
             key = 'g\''
         }
         myChart.addDataset({
-            label: key+'\+'+String(magShift),
+            label: key+operation+String(magShift),
             data: tmp,
             backgroundColor: FILTERCOLORS[key],
             pointRadius: 6,
