@@ -111,6 +111,7 @@ export function scatter(): [Handsontable, Chart] {
                     immutableLabel: true
                 }
             ],
+             
         },
         options: {
             hover: {

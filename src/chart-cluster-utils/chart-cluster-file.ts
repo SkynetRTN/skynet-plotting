@@ -6,12 +6,12 @@
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
-import {changeOptions, updateLabels, updateTableHeight } from "../util";
+import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
 import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
-import { updateProForm, proFormMinmax, updateChart2 } from "../chart-cluster3";
+import { updateProForm, proFormMinmax, updateChart2, chart2Scale } from "../chart-cluster3";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -126,6 +126,60 @@ export function clusterFileUpload(
     reader.readAsText(file);
 }
 
+
+/**
+ * This function downloads filtered data from Handsontable
+ * DATA FLOW: table -> file
+ * @param {Handsontable} table The table which data is in
+ */
+export function clusterFileDownload(
+    table: Handsontable,
+    myCharts: Chart[],
+    clusterForm: ClusterForm,
+    modelForm: ModelForm,
+    dataSetIndex: number[],
+    graphMaxMin: graphScale,
+    specificChart: number = -1,
+    clusterProForm: ClusterProForm = null,
+
+){
+    let csvRowsStar = [];
+    let starData = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    if (starData.length === 0){
+        alert("Please upload a data file before downloading");
+        return
+    }
+    // let data = [{'V mag': 69},{'V mag': 18}]
+    csvRowsStar.push(Object.keys(starData[0]).join(','));
+
+    for (let i = 0; i < starData.length; i++) {
+        // @ts-ignore
+        let vals = Object.values(starData[i]);
+        csvRowsStar.push(vals);
+    }
+
+
+    let csvRowsHR = ['x,y,chart,segment'];
+    for (let c = 0; c < myCharts.length; c++) {
+        let chart = myCharts[c];
+        let dataSets = Object.assign([chart.data.datasets[1].data, chart.data.datasets[0].data])
+        for (let set = 0; set < dataSets.length; set++) {
+            let dataSet = dataSets[set];
+            if (dataSet.length !== 0) {
+                for (let i = 0; i <dataSet.length; i++) {
+                    dataSet[i]['chart'] = (c + 1).toString()
+                    dataSet[i]['segment'] = (set + 1).toString()
+                    // @ts-ignore
+                    csvRowsHR.push(Object.values(dataSet[i]))
+                }
+            }
+        }
+    }
+    let dateTime = getDateString()
+    csvDownload(csvRowsStar.join('\n'), 'Cluster Pro Scatter Download '+ dateTime + '.csv')
+    csvDownload(csvRowsHR.join('\n'), 'Cluster Pro Model Download '+ dateTime + '.csv')
+}
+
 function updateCharts(
     myCharts: Chart[],
     table: Handsontable,
@@ -186,12 +240,12 @@ function updateCharts(
         columns.push({
             data: filter_i + "ra",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "dec",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "dist",
@@ -201,20 +255,36 @@ function updateCharts(
         columns.push({
             data: filter_i + "pmra",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
         columns.push({
             data: filter_i + "pmdec",
             type: "numeric",
-            numericFormat: {pattern: {mantissa: 2}},
+            numericFormat: {pattern: {mantissa: 5}},
         });
     }
+    headers.push("id")
+    columns.push({
+        data: "id",
+        type: "text",
+        readOnly: true,
+    })
+    headers.push("isValid")
+    columns.push({
+        data: "isValid",
+        type: "text",
+    })
     // filters = newFilter;
     hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
+    hiddenColumns.push(columns.length-1)
+    hiddenColumns.push(columns.length-2)
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
+    let itr = datadict.keys()
     datadict.forEach((src) => {
         const row: { [key: string]: number } = {};
+        row['id'] = itr.next().value;
+        row['isValid'] = "True" as any;
         for (let filterIndex in filters) {
             row[filters[filterIndex]] = src.get(filters[filterIndex]);
             row[filters[filterIndex] + "err"] = src.get(filters[filterIndex] + "err");
@@ -258,7 +328,12 @@ function updateCharts(
                     data: tableData,
                     colHeaders: headers,
                     columns: columns,
-                    hiddenColumns: {columns: hiddenColumns},
+                    hiddenColumns: {
+                        columns: hiddenColumns,
+                        // exclude hidden columns from copying and pasting
+                        //@ts-ignore
+                        copyPasteEnabled: false,
+                    },
                 }); //hide all but the first 3 columns
                 updateTableHeight(table);
                 for (let i = 0; i < chartLength; i++) {
@@ -272,6 +347,7 @@ function updateCharts(
                     let chart = myCharts[myCharts.length-1];
                     updateClusterProScatter(table, chart, modelForm, clusterForm);
                     updateChart2(chart, proForm, proMinMax)
+                    chart2Scale(chart, proMinMax);
                     chart.update();
                 }
                 document.getElementById("standardView").click();
@@ -383,4 +459,27 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
         }
     }
     return [datadict, filters]
+}
+
+function csvDownload(dataString: string, fileName: string){
+    // Creating a Blob for having a csv file format
+    // and passing the data with type
+    const blob = new Blob([dataString], { type: 'text/csv' });
+
+    // Creating an object for downloading url
+    const url = window.URL.createObjectURL(blob);
+
+    // Creating an anchor(a) tag of HTML
+    const a = document.createElement('a');
+
+    // Passing the blob downloading url
+    a.setAttribute('href', url);
+
+    // Setting the anchor tag attribute for downloading
+    // and passing the download file name
+    a.setAttribute('download', fileName);
+
+    a.click();
+
+    a.remove();
 }

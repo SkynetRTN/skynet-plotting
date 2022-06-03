@@ -149,6 +149,18 @@ button {
     line-height: 2em;
     outline: none;
 }
+
+button.clusterRest {
+    line-height: 18px;
+    /* margin-bottom: 8px; */
+    padding: 2px 6px 1px 6px;
+    width: 87px;
+    opacity: 0.7;
+    transition: .2s;
+    color: black;
+    display: flex;
+}
+
 button:focus {
     outline: none;
     opacity: 1;
@@ -161,6 +173,7 @@ button:hover {
 
 button.graphControl {
     width: 42px;
+    display: flex ;
     /* position: relative;
     bottom: -0.13em; */
 }
@@ -171,8 +184,15 @@ button.graphControlAlt {
 }
 /* specificallly the graphControlAlt classes are for the "reset" button in the spectrum section. They control the font size and the position of the button*/
 
+
+
 center.graphControl {
     font-size: 27px;
+}
+
+center.clusterPro{
+    padding: 0;
+    margin: 0;
 }
 
 input {
@@ -189,6 +209,20 @@ input.field {
     outline: none;
     box-shadow: none;
 }
+
+/*For text boxes in extra options*/
+.extraoptions {
+    border: 2px solid #E7E7E7;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    opacity: 0.7;
+    transition: .2s;
+    margin-bottom: .5em;
+    line-height: 2em;
+    outline: none;
+}
+
 input.field:focus {
     background-color: #E7E7E7;
 }
@@ -232,6 +266,21 @@ input[type=number]::-webkit-inner-spin-button {
 input[type=number] {
     -moz-appearance:textfield;
 }
+
+
+/* the following spinboxnum is specifically used in variable period folding Period (days) number box. This specific subclass provide a spin button on the right of the input box. */
+input.spinboxnum[type=number]::-webkit-outer-spin-button,
+input.spinboxnum[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button;
+    opacity: 1;
+    margin: 0;
+}
+input.spinboxnum[type=number] {
+    -moz-appearance:textfield;
+    /* width: 5px; */
+}
+
+
 
 input[type=range] {
     -webkit-appearance: none;
@@ -359,4 +408,14 @@ label.scaleSelection-graphSelection {
     z-index: -1;
     font-size: 60px;
     color: gray;
+}
+
+div.row.clusterPro {
+    margin: 0;
+    padding: 0;
+}
+
+#clusterProPmChartControl {
+    width: auto;
+    padding-right: 0px;
 }

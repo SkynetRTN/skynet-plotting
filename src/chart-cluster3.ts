@@ -6,10 +6,11 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons, clusterProButtonControl } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
+import { clusterFileDownload } from "./chart-cluster-utils/chart-cluster-file";
 
 Chart.register(zoomPlugin);
 /**
@@ -18,13 +19,15 @@ Chart.register(zoomPlugin);
  */
 export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
     insertClusterControls(2);
+    clusterProButtons(true);
     clusterProSliders(true);
     //make graph scaling options visible to users
 
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-  //remove chartTag from 'mychart1' and 'mychart2'
+  //remove chart tags from myChart1 and 2
+  //change the class of chart-div2 to col-lg-4
     document.getElementById('chartTag1').style.display = "None";
     document.getElementById('chartTag2').style.display = "None";
     document.getElementById('chart-div1').style.display = 'block';
@@ -42,8 +45,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     document.getElementById('axisSet1').className = 'col-sm-6';
     document.getElementById('axisSet2').style.display = 'inline';
     document.getElementById("clusterProForm").style.cursor= "auto";
-    document.getElementById("myChart2").style.cursor= "auto";
+    //I don't know why this is necessary, but it is.
+    //document.getElementById("myChart2").style.cursor= "auto";
+    //document.getElementById("myChart3").style.cursor= "auto";
   // Link each slider with corresponding text box
+  // const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
@@ -404,7 +410,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     options: {
       responsive: true,
       //maintainAspectRatio: false,
-      aspectRatio: 2.3,
+      aspectRatio: 1.43,
       hover: {
         mode: "nearest",
       },
@@ -453,8 +459,12 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-
-
+  let frameChart1 = ()=>{document.getElementById('frameChart1').click()};
+  let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
+  document.getElementById('chart-div3').onmousedown = frameChart1;
+  document.getElementById('chart-div4').onmousedown = frameChart2;
+  let minmax = proFormMinmax(hot, modelForm)
+  //myChart3.update();
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
@@ -483,6 +493,11 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
+  //clusterProPmChartControl.onclick = throttle(() => {
+      //clusterProButtonControl(myChart3, minmax);
+      //},
+    //frameTime);
+    clusterProButtonControl(myChart3, hot, modelForm);
   clusterForm.oninput = throttle(
     function () {
       updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm);
@@ -505,9 +520,14 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     });
    }, 100);
 
+  document.getElementById('save-data-button').onclick = ()=>{clusterFileDownload(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, -1, clusterProForm)}
+   //clusterProPmChartControl.oninput = throttle(function () {
+    //clusterProButtonControl(myChart3);
+  //}, 100);
+
+
   //initializing website
   update();
-  let minmax = proFormMinmax(hot, modelForm)
   updateHRModel(modelForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
@@ -520,6 +540,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   myChart2.options.scales["y"].title.text = "y2";
   updateProForm(minmax, clusterProForm)
   updateClusterProScatter(hot, myChart3, modelForm, clusterForm)
+  chart2Scale(myChart3, minmax)
   updateChart2(myChart3, clusterProForm, minmax)
   updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
   updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
@@ -534,6 +555,8 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     myChart2.destroy();
   });
   //console log tabledata
+  //console.log(minmax[8]);
+  //console.log(minmax[4]);
   return [hot, [myChart1, myChart2, myChart3], modelForm, graphMinMax, clusterProForm];
   
 }
@@ -543,49 +566,86 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm )
   let minRa = floatTo1(minmax[1]);
   let maxDec = floatTo1(minmax[2]);
   let minDec = floatTo1(minmax[3]);
-  let avgRa = floatTo1(minmax[4]);
-  let avgDec = floatTo1(minmax[5]);
+  let medRa = floatTo1(minmax[4]);
+  let medDec = floatTo1(minmax[5]);
   let stdRa = floatTo1(minmax[6]);
   let stdDec = floatTo1(minmax[7]);
-  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, avgRa, false, false);
-  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, false);
-  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, avgDec, false, false);
-  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, false);
+  linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, medRa, false, true, -999, 999);
+  linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2*stdRa), 0.1, (2*stdRa), false, true, 0, 999);
+  linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, true, -99, 999);
+  linkInputs(clusterProForm["decrange"], clusterProForm["decrange_num"], 0, (2*stdDec), 0.1, (2*stdDec), false, true, 0, 999);
+  //make sliders precise to the nearest thousandth
+  clusterProForm["ramotion"].step = "0.001";
+  clusterProForm["decmotion"].step = "0.001";
+  clusterProForm["rarange"].step = "0.001";
+  clusterProForm["decrange"].step = "0.001";
+
 }
 
 export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   let tableData2 = hot.getData();
   let columns = hot.getColHeader();
   let blueKey = modelFormKey(1, 'blue');
-  let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
-  let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
-  //find average ra out of all stars
-  let avgRa = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    avgRa += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")];
+  //let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
+  //let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
+  //make an array of all the ra values in numerical order from smallest to largest
+  let raArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
+  //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
+  let raArrayLength = raArray.length;
+  let raArraHalfLength = Math.floor(raArrayLength/2);
+  let medRa = 0;
+  if (raArrayLength % 2 === 0) {
+    medRa = (raArray[raArraHalfLength] + raArray[raArraHalfLength - 1])/2;
+  } else {
+    medRa = raArray[raArraHalfLength];
   }
-  avgRa = avgRa / tableData2.length;
-  //find average dec out of all stars
-  let avgDec = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    avgDec += tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")];
-  }
-  avgDec = avgDec / tableData2.length;
-  //find the standard deviation of the ra out of all stars
-  let stdRa = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    stdRa += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmra")] - avgRa, 2);
-  }
-  stdRa = Math.sqrt(stdRa / tableData2.length);
+  let raArrayAbs = raArray.map(row => Math.abs(row - medRa)).sort((a, b) => a - b);
+  //make an array of all the dec values
+  let decArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
+  //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
+  let decArrayLength = decArray.length;
+  let decArraHalfLength = Math.floor(decArrayLength/2);
+  let medDec = 0;
+    if (decArrayLength % 2 === 0) {
+      medDec = (decArray[decArraHalfLength] + decArray[decArraHalfLength - 1])/2;
+    } else {
+      medDec = decArray[raArraHalfLength];
+    }
+      //make an array of the absolute value of the dec values minus the median
+  let decArrayAbs = decArray.map(row => Math.abs(row - medDec)).sort((a, b) => a - b);
+  //find the 68.3% of values in the dec array
+  let decArray68 = decArrayAbs.slice(Math.floor(decArrayLength*0), Math.ceil(decArrayLength*0.683));
+  //find the mean of this array
+  //let decArray68Mean = decArray68.reduce((a, b) => a + b, 0) / decArray68.length;
   //find the standard deviation of the dec out of all stars
   let stdDec = 0;
-  for (let i = 0; i < tableData2.length; i++) {
-    stdDec += Math.pow(tableData2[i][columns.indexOf(modelForm[blueKey].value + " pmdec")] - avgDec, 2);
+  for (let i = 0; i < decArray68.length; i++) {
+    stdDec += Math.pow(decArray68[i], 2);
   }
-  stdDec = Math.sqrt(stdDec / tableData2.length);
-  let maxRa = avgRa + (2*stdRa);
-  let maxDec = avgDec + (2*stdDec);
-  return [maxRa, minRa, maxDec, minDec, avgRa, avgDec, stdRa, stdDec];
+  stdDec = Math.sqrt(stdDec / decArray68.length);
+  //find the middle 68.3% of values in the ra array
+  let raArray68 = raArrayAbs.slice(Math.floor(raArrayLength*0), Math.ceil(raArrayLength*0.683));
+  //let raArray68Mean = raArray68.reduce((a, b) => a + b, 0) / raArray68.length;
+  //find the standard deviation of the dec out of all stars
+  let stdRa = 0;
+  for (let i = 0; i < raArray68.length; i++) {
+    stdRa += Math.pow(raArray68[i], 2);
+  }
+  stdRa = Math.sqrt(stdRa / raArray68.length);
+  let maxRa = medRa + (2*stdRa);
+  let maxDec = medDec + (2*stdDec);
+  let minRa = medRa - (2*stdRa);
+  let minDec = medDec - (2*stdDec);
+  //report all values to the nearest thousandth
+  maxRa = floatTo1(maxRa);
+  minRa = floatTo1(minRa);
+  maxDec = floatTo1(maxDec);
+  minDec = floatTo1(minDec);
+  medRa = floatTo1(medRa);
+  medDec = floatTo1(medDec);
+  stdRa = floatTo1(stdRa);
+  stdDec = floatTo1(stdDec);
+  return [maxRa, minRa, maxDec, minDec, medRa, medDec, stdRa, stdDec, raArray68.length];
 }
 
 export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, minmax: number[]) {
@@ -597,24 +657,31 @@ export function updateChart2(myChart2: Chart, clusterProForm: ClusterProForm, mi
   let minRa = minmax[1]
   let maxDec = minmax[2]
   let minDec = minmax[3]
-  let avgRa = minmax[4]
-  let avgDec = minmax[5]
-  let stdRa = minmax[6] 
-  let stdDec = minmax[7]
-    //set the scales of the chart to match the new sensitivity fix
-    //change xmax
-    myChart2.options.scales["x"].max = avgRa + (2*stdRa);
-    //change ymax
-    myChart2.options.scales["y"].max = avgDec + (2*stdDec);
   myChart2.data.datasets[0].data = [{x: maxRa+10000, y: decmotion_num}, {x: minRa-10000, y: decmotion_num}];
   myChart2.data.datasets[1].data = [{x: ramotion_num, y: maxDec+10000}, {x: ramotion_num, y: minDec-10000}];
   myChart2.data.datasets[3].data = [{x: ramotion_num-rarange_num, y: maxDec+10000}, {x: ramotion_num-rarange_num, y: minDec-10000}];
   myChart2.data.datasets[4].data = [{x: ramotion_num+rarange_num, y: maxDec+10000}, {x: ramotion_num+rarange_num, y: minDec-10000}];
   myChart2.data.datasets[5].data = [{x: maxRa+10000, y: decmotion_num-decrange_num}, {x: minRa-10000, y: decmotion_num-decrange_num}];
   myChart2.data.datasets[6].data = [{x: maxRa+10000, y: decmotion_num+decrange_num}, {x: minRa-10000, y: decmotion_num+decrange_num}];
+  // chart2Scale(myChart2, minmax);
   myChart2.update();
 }
-
+//create a function that defines constant x and y scale values for the chart
+export function chart2Scale (myChart2: Chart,  minmax: number[]) {
+  let medRa = minmax[4]
+  let medDec = minmax[5]
+  let stdRa = minmax[6] 
+  let stdDec = minmax[7]
+  //make these values precise to the nearest thousandth
+  //set the scales of the chart to match the new sensitivity fix
+    //change xmax
+    myChart2.options.scales["x"].max = medRa + (2*stdRa);
+    //change ymax
+    myChart2.options.scales["y"].max = medDec + (2*stdDec);
+    //right now test with minimum values
+    myChart2.options.scales['x'].min = medRa - (2*stdRa);
+    myChart2.options.scales['y'].min = medDec - (2*stdDec); 
+}
 function floatTo1(num: number){
   return parseFloat(num.toFixed(1))
 }

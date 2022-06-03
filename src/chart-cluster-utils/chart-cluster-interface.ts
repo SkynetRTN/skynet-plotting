@@ -2,6 +2,9 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
+import { Chart } from "chart.js";
+import { chart2Scale, proFormMinmax } from "../chart-cluster3";
+import Handsontable from "handsontable";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -116,6 +119,10 @@ export function insertClusterControls(chartCounts:number = 1) {
 
     htmlContent += "</div>\n" + "</form>\n"
 
+    if (chartCounts === 2) {
+        document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
+        document.getElementById('chart-div2-colControl').style.width = '50%';
+    }
 
     document
         .getElementById("input-div")
@@ -159,6 +166,9 @@ export function clusterProSliders(clusterPro: true = true) {
             "beforeend",
             htmlContent
         );
+    document.getElementById('chart-div2').style.width = '310px'
+    document.getElementById('chart-div2').style.height = '100px'
+    document.getElementById('chart-div2-colControl').style.width = '330px'
 }}
 
 /**
@@ -201,6 +211,7 @@ export function insertGraphControl(chartCount: number = 1){
         '</div>\n'
     document.getElementById("extra-options").insertAdjacentHTML("beforeend", html)
 }
+
 export function rangeCheckControl(clusterChart = true){
     if (clusterChart === true) {
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
@@ -268,6 +279,87 @@ export function clusterProCheckControl (){
           }
         );
 }
+
+export function clusterProButtons(isClusterPro: boolean){
+    if (isClusterPro){
+        document.getElementById('clusterProPmChartControl').style.display = 'block';
+        // document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+        // document.getElementById("chart-pro-options").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-6');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-4');
+        document.getElementById('save-data-button').style.display = 'inline'
+    } else {
+        document.getElementById("clusterProPmChartControl").style.display = "none";
+        document.getElementById('chart-div2-colControl').classList.remove('col-lg-4');
+        document.getElementById('chart-div2-colControl').classList.add('col-lg-6');
+        document.getElementById('save-data-button').style.display = 'none'
+    }
+}
+
+export function clusterProButtonControl(chart: Chart, table: Handsontable, modelForm: ModelForm){
+    //update chart as button is held down
+    //add event listeners that will be used to control the chart based ion the clusterProButtons function
+
+    let panLeft = ()=>{
+        return setInterval( () => {chart.pan(-5, [chart.scales["x"]])}, 40 );
+    }
+
+    let panRight = ()=>{
+        return setInterval( () => {chart.pan(5, [chart.scales["x"]])}, 40 );
+    }
+
+    let panUp = ()=>{
+        return setInterval( () => {chart.pan(-5, [chart.scales["y"]])}, 40 );
+    }
+
+    let panDown = ()=>{
+        return setInterval( () => {chart.pan(5, [chart.scales["y"]])}, 40 );
+    }
+
+    let zoomIn = ()=>{
+        return setInterval( () => {chart.zoom(1.1)}, 40 );
+    }
+
+    let zoomOut = ()=>{
+        return setInterval( () => {chart.zoom(0.9)}, 40 );
+    }
+
+    document.getElementById("panLeftPro").addEventListener("mousedown", ()=>{
+        let interval = panLeft();
+        document.getElementById("panLeftPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("panLeftPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("panRightPro").addEventListener("mousedown", ()=>{
+        let interval = panRight();
+        document.getElementById("panRightPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("panRightPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("panUpPro").addEventListener("mousedown", ()=>{
+        let interval = panUp();
+        document.getElementById("panUpPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("panUpPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("panDownPro").addEventListener("mousedown", ()=>{
+        let interval = panDown();
+        document.getElementById("panDownPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("panDownPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("zoomInPro").addEventListener("mousedown", ()=>{
+        let interval = zoomIn();
+        document.getElementById("zoomInPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("zoomInPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("zoomOutPro").addEventListener("mousedown", ()=>{
+        let interval = zoomOut();
+        document.getElementById("zoomOutPro").addEventListener("mouseup", ()=>{clearInterval(interval);})
+        document.getElementById("zoomOutPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
+    })
+    document.getElementById("ResetPro").addEventListener("click", () => {
+        chart2Scale(chart, proFormMinmax(table, modelForm));
+        chart.update();
+    });
+}
+
 
 //Since cluster Sim is going to be a little different, I'm going to make a separate interface function for it
 export function insertClusterSimControls(chartCounts:number = 1) {

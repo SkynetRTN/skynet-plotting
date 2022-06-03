@@ -73,13 +73,15 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
             try {
                 callback(xmlHttp.responseText);
-            } catch {
+            } catch (e) {
+                console.log(e)
                 console.log(JSON.parse(xmlHttp.responseText))
             }
         } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == ""){
             try {
                 failedCallback(xmlHttp.responseText);
-            } catch {
+            } catch (e) {
+                console.log(e)
                 console.log(JSON.parse(xmlHttp.responseText))
             }
         }

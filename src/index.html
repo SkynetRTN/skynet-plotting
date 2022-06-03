@@ -22,12 +22,13 @@
             <option value="spectrum" title="spectrum">Spectrum</option>
             <option value="dual" title="Dual">Dual</option>
             <option value="gravity" title="Gravity">Gravity</option>  
-            <option value="cluster0" title="Cluster Sim">Cluster Sim</option>
+<!--            <option value="cluster0" title="Cluster Sim">Cluster Sim</option>-->
             <option value="cluster1" title="Cluster One">Cluster One</option>
             <option value="cluster2" title="Cluster Two">Cluster Two</option>
             <option value="cluster3" title="Cluster Pro">Cluster Pro</option>
             <option value="pulsar" title="Pulsar">Pulsar</option>
             <option value="transient" title="Transient">Transient</option>
+            <option value="pulsarTest" title="PulsarTest">PulsarTest</option>
             <option value="variableTest" title="VariableTest">VariableTest</option>
           </select>
         </form>
@@ -44,10 +45,39 @@
                 <div class="chartTag" id = "chartTag1">①</div>
               </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-6" id="chart-div2-colControl">
               <div id="chart-div2" class="clusterCharts" style="cursor: move">
                 <canvas id="myChart2" width="428" height="200"></canvas>
                 <div class="chartTag" id = "chartTag2">②</div>
+              </div>
+            </div>
+            <div class="col-lg-2" id = 'clusterProPmChartControl' style="display: none">
+              <div id="chart-pro-options" style="padding:0px; border:0px;">
+                <div class="row-clusterPro" style="margin-left: 28%">
+                  <button class = "graphControl" id="panUpPro" style="margin-bottom: 1px;">
+                    <center class = "graphControl" style="margin-left: 14%">&#8593;</center>
+                  </button>
+                </div>
+              </div>
+              <div class="row" style="margin: 0;">
+                <button class = "graphControl" id="panLeftPro" style="margin-bottom: 1px;">
+                  <center class = "graphControl" style="margin-left: -40%">&#8592;</center>
+                </button>&nbsp;
+                <button class = "graphControl" id="panRightPro" style="margin-bottom: 1px;">
+                  <center class = "graphControl" style="margin-left: -40%">&#8594;</center>
+                </button>
+              </div>
+              <div class="row-clusterPro" style="margin-left: 28%">
+                <button class = "graphControl" id="panDownPro" style="margin-bottom: 1px; ">
+                  <center class = "graphControl" style="margin-left: 14%">&#8595;</center>
+                </button>
+              </div>
+              <div class="row" style="margin: 0;">
+                <button class = "graphControl" id="zoomInPro" style="margin-bottom: 1px;"><center class = "graphControl">&plus;</center></button>&nbsp;
+                <button class = "graphControl" id="zoomOutPro" style="margin-bottom: 1px;"><center class = "graphControl">&minus;</center></button>
+              </div>
+              <div class="row" style="margin: 0;">
+                <button class = "clusterRest" id="ResetPro" style="margin-bottom: 1px;"><div style="margin-left: 20%">Reset</div></button>
               </div>
             </div>
           </div>
@@ -136,10 +166,11 @@
         <button id="add-row-button">Add Row</button>
         <input type="file" id="file-upload" style="display: none;">
       </div>
-      <div class="col-lg-2" id="below-graph-column">
+      <div class="col-lg-3" id="below-graph-column">
         <button id="save-button" data-bs-toggle="modal" data-bs-target="#honor-pledge-modal">Save Graph</button>
+        <button id="save-data-button" style="display: none">Save Data</button>
       </div>
-      <div class="col-lg-6" id="extra-options" style="padding:0px; border:0px;">
+      <div class="col-lg-5" id="extra-options" style="padding:0px; border:0px;">
       </div>
     </div>
 

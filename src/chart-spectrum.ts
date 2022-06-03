@@ -8,6 +8,7 @@ import { tableCommonOptions, colors } from "./config"
 import { updateLabels, updateTableHeight } from "./util"
 import { round } from "./my-math"
 import { ChartConfiguration } from "chart.js";
+import { insertGraphControl } from "./chart-cluster-utils/chart-cluster-interface";
 
 
 /**
@@ -27,22 +28,19 @@ export function spectrum(): [Handsontable, Chart] {
         '</form>'
     );
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
-//   '<label class="scaleSelection" id="standardViewLabel" style="background-color: #4B9CD3;">\n' +
-//   '<input type="radio" class="scaleSelection" id="standardView" value="Standard View" checked />&nbsp;Standard View&nbsp;</label>\n' +
-
-    //   '<button class = "graphControl" id="panLeft">◀</button>\n' +
-    //   '<button class = "graphControl" id="panRight">▶</button>\n' +
-      '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
-      '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
-      '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
-      '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
-      '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
-    //   '<button type="button" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>\n'+
-    //   '<button class = "scaleSelection" id="Reset"><center class = "ScaleControl">Reset</center></button>\n' +
-    //   '<button class="scaleSelection" id="ResetLabel">\n' +
-    //     '<input type="radio" class="scaleSelection" id="Reset" value="Reset" />&nbsp;Reset&nbsp;</label>\n' +
-  '</div>\n'
+    '<div style="float: right;">\n' +
+        '<div class="row">\n' +
+    '<button class = "graphControl" id="panLeft"><center class = "graphControl">&#8592;</center></button>\n' +
+    '&nbsp;' +
+    '<button class = "graphControl" id="panRight"><center class = "graphControl">&#8594;</center></button>\n' +
+    '&nbsp;' +
+    '<button class = "graphControl" id="zoomIn"><center class = "graphControl">&plus;</center></button>\n' +
+    '&nbsp;' +
+    '<button class = "graphControl" id="zoomOut"><center class = "graphControl">&minus;</center></button>\n' +
+    '&nbsp;' +
+    '<button class = "graphControl" id="Reset" style="width: auto" ><center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+    '<div style="padding:12px 12px"></div>' +
+    '</div>\n'
     )
 
     // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
@@ -165,7 +163,8 @@ export function spectrum(): [Handsontable, Chart] {
                     hidden: true,
 
                 }
-            ]
+            ],
+             
         },
         options: {
             elements: {
@@ -213,6 +212,7 @@ export function spectrum(): [Handsontable, Chart] {
     };
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+    document.getElementById('chart-div').style.cursor = "move";
 
     const update = function () {
         updateSpectrum(hot, myChart);

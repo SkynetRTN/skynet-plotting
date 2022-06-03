@@ -112,6 +112,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           parsing: {}
         },
       ],
+       
     },
     options: {
       responsive: true,
@@ -219,6 +220,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
           parsing: {}
         },
       ],
+       
     },
     options: {
       responsive: true,
@@ -282,8 +284,10 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
   myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
   myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-
-
+  let frameChart1 = ()=>{document.getElementById('frameChart1').click()};
+  let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
+  document.getElementById('chart-div1').onmousedown = frameChart1;
+  document.getElementById('chart-div2').onmousedown = frameChart2;
 
   //Adjust the gradient with the window size
   window.onresize = function () {

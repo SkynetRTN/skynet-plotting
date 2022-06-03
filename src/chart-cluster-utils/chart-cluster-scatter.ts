@@ -46,14 +46,15 @@ export function updateScatter(
         decMotion = parseFloat(clusterProForm['decmotion_num'].value);
         decRange = parseFloat(clusterProForm['decrange_num'].value);
     }
-
+    let tableData = table.getData();
+    let columns = table.getColHeader();
+    // let isValidIndex = columns.indexOf('isValid');
+    let downloadData: { [key: string]: { [key: string]: string } } = {};
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
             
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
-            let tableData = table.getData();
-            let columns = table.getColHeader();
                 
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
@@ -78,17 +79,17 @@ export function updateScatter(
             );
 
             let blueErr =
-                columns.indexOf(modelForm[blueKey].value + "err") < 0
+                columns.indexOf(modelForm[blueKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[blueKey].value + "err"); //checks for supplied err data
+                    : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
             let redErr =
-                columns.indexOf(modelForm[redKey].value + "err") < 0
+                columns.indexOf(modelForm[redKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[redKey].value + "err");
+                    : columns.indexOf(modelForm[redKey].value + " err");
             let lumErr =
-                columns.indexOf(modelForm[lumKey].value + "err") < 0
+                columns.indexOf(modelForm[lumKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[lumKey].value + "err");
+                    : columns.indexOf(modelForm[lumKey].value + " err");
 
             let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
             let distHighLim = (dist+(dist*(range/100)))*1000;
@@ -105,33 +106,59 @@ export function updateScatter(
 
             let start = 0;
             for (let i = 0; i < tableData.length; i++) {
+                let isSkip = false;
+                let id = tableData[i][columns.indexOf('id')]
                 if (
                     typeof (tableData[i][blue]) != 'number' ||
                     typeof (tableData[i][red]) != 'number' ||
-                    typeof (tableData[i][lum]) != 'number'
-                    || (blueErr != null && tableData[i][blueErr] >= err) ||
+                    typeof (tableData[i][lum]) != 'number' ||
+                    (blueErr != null && tableData[i][blueErr] >= err) ||
                     (redErr != null && tableData[i][redErr] >= err) ||
                     (lumErr != null && tableData[i][lumErr] >= err)
                 ) {
-                    continue;
+                    isSkip = true;
                 }
-                let distance: number = tableData[i][blueDist];
-                let isDistNotValid = isNaN(distance) || distance === null
-                if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
-                    continue;
+
+                if (!isSkip){
+                    let distance: number = tableData[i][blueDist];
+                    let isDistNotValid = isNaN(distance) || distance === null
+                    if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
+                        isSkip = true;
+                    }
                 }
-                if (clusterProForm !== null) {
+                if (!isSkip && clusterProForm !== null) {
                     if (isRaRange) {
                         let pmra = tableData[i][bluePmra]
-                        if (pmra > pmraHighLim|| pmra < pmraLowLim)
-                            continue;
+                        if (pmra > pmraHighLim|| pmra < pmraLowLim) {
+                            isSkip = true;
+                        }
                     }
                     if (isDecRange) {
                         let pmdec = tableData[i][bluePmdec]
-                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim)
-                            continue;
+                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim) {
+                            isSkip = true;
+                        }
                     }
                 }
+
+                if (id){
+                    if (!downloadData[id])
+                        downloadData[id] = {}
+                    downloadData[id]['id'] = id
+                    let downloadList: number[] = [blue, blueErr, red, redErr, lum, lumErr]
+                    for (let j = 0; j < downloadList.length; j++) {
+                        if (downloadList[j] !== null)
+                            downloadData[id][columns[downloadList[j]]] = tableData[i][downloadList[j]]
+                    }
+                    downloadData[id]['distance'] = tableData[i][blueDist]
+                    downloadData[id]['pmra'] = tableData[i][bluePmra]
+                    downloadData[id]['pmdec'] = tableData[i][bluePmdec]
+                    downloadData[id]['x_'+ (c+1).toString()] = ""
+                    downloadData[id]['y_' + (c+1).toString()] = ""
+                }
+
+                if (isSkip)
+                    continue
 
 
                 //red-blue,lum
@@ -141,13 +168,20 @@ export function updateScatter(
                 //testing purposes'
                 //let x = tableData[i][blue] - (tableData[i][red]);
                 //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
-    
+
 
                 chart[start++] = {
                     x: x,
                     y: y
                 };
                 scaleLimits = pointMinMax(scaleLimits, x, y);
+
+                if (id){
+                    downloadData[id]['id'] = id;
+                    downloadData[id]['x_'+ (c+1).toString()] = x.toString();
+                    downloadData[id]['y_' + (c+1).toString()] = y.toString();
+                }
+
             }
             while (chart.length !== start) {
                 chart.pop();
@@ -161,6 +195,8 @@ export function updateScatter(
             myChart.update()
         }
     }
+    // @ts-ignore
+    return Object.values(downloadData)
 }
 
 
@@ -749,14 +785,14 @@ export function updateClusterProScatter(
                     proMinMax['minY'] = y;
             }
         }
-        updateProChartScale(proChart, proMinMax)
+       // updateProChartScale(proChart, proMinMax)
         chart = chart.slice(0, start++)
         proChart.update()
     }
-
-function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
-    proChart.options.scales.x.min = minmax['minX'];
-    proChart.options.scales.x.max = minmax['maxX'];
-    proChart.options.scales.y.min = minmax['minY'];
-    proChart.options.scales.y.max = minmax['maxY'];
-}
+//obselete -- new scale code in cluster3.ts
+//function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
+  //  proChart.options.scales.x.min = minmax['minX'];
+    //proChart.options.scales.x.max = minmax['maxX'];
+    //proChart.options.scales.y.min = minmax['minY'];
+    //proChart.options.scales.y.max = minmax['maxY'];
+//}

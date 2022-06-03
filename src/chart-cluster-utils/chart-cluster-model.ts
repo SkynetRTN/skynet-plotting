@@ -52,7 +52,6 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
                     chart.update("none");
             },
             () => {
-                console.trace(generateURL(modelForm, c))
                 callback(c);
                 if (!isChart)
                     chart.update("none");
@@ -71,7 +70,12 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
             hidden.push(parseFloat(col));
         }
     }
-    hot.updateSettings({hiddenColumns: {columns: hidden, indicators: false,}});
+    hot.updateSettings({hiddenColumns: {
+            columns: hidden,
+            // exclude hidden columns from copying and pasting
+            //@ts-ignore
+            copyPasteEnabled: false,
+        }});
 }
 
 /**

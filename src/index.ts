@@ -15,19 +15,20 @@ import { variable, variableFileUpload } from './chart-variable';
 import { variableTest, variableFileUploadTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import {cluster0} from './chart-cluster0';
+import { pulsarTest, pulsarFileUploadTest} from './chart-pulsartest';
+import { cluster0} from './chart-cluster0';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
-import { gravity, gravityFileUpload } from './chart-gravity';
+import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
 import { transient, transientFileUpload } from './chart-transient';
-
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
+import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 
 /**
@@ -155,8 +156,11 @@ function chartType(chart: string) {
 
     document.getElementById('chart-div').style.cursor = "auto"
 
+    clusterProButtons(false);
+
     let objects: [Handsontable, Chart];
     let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    let grav_objects: [Handsontable, Chart, gravityClass]
 
 
     if (chart === 'curve') {
@@ -193,6 +197,12 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
+    } else if (chart === 'pulsarTest') {
+        objects = pulsarTest();
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
+        }
     } else if (chart === 'cluster0') {
         cluster_objects = cluster0();
         objects = [cluster_objects[0], cluster_objects[1][0]]
@@ -226,10 +236,11 @@ function chartType(chart: string) {
         }
 
     }else if (chart === 'gravity') {
-        objects = gravity();
+        grav_objects = gravity();
+        objects = [grav_objects[0], grav_objects[1]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
+            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];

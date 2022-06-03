@@ -1,4 +1,5 @@
 'use strict';
+// zhangjingye
 
 import Chart from "chart.js/auto";
 import { ScatterDataPoint } from "chart.js";
@@ -7,7 +8,7 @@ import Handsontable from "handsontable";
 import { tableCommonOptions, colors } from "./config"
 import {sanitizeTableData, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, floatMod } from "./my-math"
-import { PulsarMode } from "./types/chart.js";
+import { Mode } from "./types/chart.js";
 
 /**
  *  Returns generated table and chart for variable.
@@ -68,6 +69,8 @@ export function variable(): [Handsontable, Chart] {
                 lc: { t: 'Title', x: 'x', y: 'y' },
                 ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
                 pf: { t: 'Title', x: 'x', y: 'y' },
+                pressto: { t: 'Title', x: 'x', y: 'y' },
+                gravity: {t: 'Title', x: 'x', y: 'y' },
                 lastMode: 'lc'
             },
             datasets: [
@@ -117,7 +120,8 @@ export function variable(): [Handsontable, Chart] {
                     // immutableLabel: true,
                     hidden: true,
                 }
-            ]
+            ],
+             
         },
         options: {
             plugins: {
@@ -161,7 +165,7 @@ export function variable(): [Handsontable, Chart] {
 
     const variableForm = document.getElementById("variable-form") as VariableForm;
     variableForm.onchange = function () {
-        const mode: PulsarMode = variableForm.elements["mode"].value as PulsarMode;
+        const mode: Mode = variableForm.elements["mode"].value as Mode;
         if (mode === "lc") {
             showDiv("light-curve-div");
             const lightCurveForm = document.getElementById("light-curve-form");
@@ -302,6 +306,8 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
             lc: { t: 'Title', x: 'x', y: 'y' },
             ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
             pf: { t: 'Title', x: 'x', y: 'y' },
+            pressto: { t: 'Title', x: 'x', y: 'y' },
+            gravity: {t: 'Title', x: 'x', y: 'y' },
             lastMode: 'lc'
         };
 

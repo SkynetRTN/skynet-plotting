@@ -106,7 +106,8 @@ export function curve(): [Handsontable, Chart] {
                     hidden: true,
                     immutableLabel: false,
                 }
-            ]
+            ],
+             
         },
         options: {
             hover: {

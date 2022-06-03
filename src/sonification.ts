@@ -8,6 +8,20 @@
  import { formatTime, getDateString } from "./util"
  import { ArrMath, sfc32 } from "./my-math"
 
+
+ export function check(oldVal: number, myChart:Chart ){
+    let speed: number = +myChart.data.sonification.audioControls.speed.value;
+    if(speed !== oldVal){
+        pause(myChart);
+    }
+}
+
+export function Set2DefaultSpeed(myChart:Chart){
+    myChart.data.sonification.audioControls.speed.setAttribute("value", "1"); 
+    myChart.data.sonification.audioControls.speed.value = "1";   
+}
+
+
  /**
  * This function plays a Chart's sonification (or restarts it if it is already playing).
  * @param myChart The chart to play.
@@ -20,21 +34,41 @@
     }
 
     let sonification = myChart.data.sonification
+    let speed: number = +sonification.audioControls.speed.value;
 
     sonification.audioControls.playPause.innerHTML = "Wait";
     sonification.audioControls.playPause.style.backgroundColor = colors['yellow']
     sonification.audioControls.playPause.style.color = "black";
     setTimeout(() => {//so for some dumb idiot reason, the color of the button doesnt change to yellow until AFTER sonification unless you put a timeout on this
     //audioCtx.resume();
-    if(myChart.data.modeLabels.lastMode === 'lc')
-    {
-        sonification.audioSource = sonify(myChart,0,1,false);
+    if(myChart.data.modeLabels.lastMode == "gravity"){
+        console.log("gravity mode played");
+        sonification.audioSource = sonify(myChart,[0], speed, false);
         sonification.audioSource.onended = () => pause(myChart);
-    };
-    if(myChart.data.modeLabels.lastMode === 'pf')
-        sonification.audioSource = sonify(myChart,5,6,true);
+    } 
+    if(myChart.data.modeLabels.lastMode === 'lc'){
+        sonification.audioSource = sonify(myChart,[0,1], speed, false);
+        sonification.audioSource.onended = () => pause(myChart);
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pf'){
+        sonification.audioSource = sonify(myChart,[5,6], speed);
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pressto'){
+        sonification.audioSource = sonify(myChart,[5,6], speed);
+    }
+
+//    if(speed == 0){
+//        sonification.audioSource.playbackRate.value = 1;
+//    }
+//    else{
+//        sonification.audioSource.playbackRate.value = speed;
+//    }
     sonification.audioSource.start();
+
+    setInterval(check, 500, speed, myChart);
+
     sonification.audioControls.playPause.onclick = () => {pause(myChart)}
+    
 
     sonification.audioControls.playPause.innerHTML = "Stop";
     sonification.audioControls.playPause.style.backgroundColor = colors['red']
@@ -42,11 +76,13 @@
     }, 0);
 }
 
+
+
 /**
  * This function stops a Chart's playing sonification (or does nothing if it isn't playing).
  * @param myChart The chart to stop.
  */
-export function pause(myChart: Chart){
+export function pause(myChart: Chart, clearInter: boolean = true){
     if(!myChart.data.sonification)
     {
         console.error("Chart has no sonification options provided.");
@@ -56,17 +92,26 @@ export function pause(myChart: Chart){
     let sonification = myChart.data.sonification
     sonification.audioControls.playPause.onclick = () => {play(myChart)};
 
+    
     try//If the buffer is already stopped, don't do it again
     {
         sonification.audioSource.stop();
+        sonification.audioControls.playPause.innerHTML = "Sonify";
+        sonification.audioControls.playPause.style.backgroundColor = ''
+        sonification.audioControls.playPause.style.color = "black";
+        if(clearInter){
+            var i = setInterval(function () {}, 100);
+//            console.log(i);
+//            console.log(i-1);
+            clearInterval(i-1);
+            clearInterval(i);
+        }  
     }
     catch (DOMException)
     {}
 
     //change button to normal
-    sonification.audioControls.playPause.innerHTML = "Sonify";
-    sonification.audioControls.playPause.style.backgroundColor = ''
-    sonification.audioControls.playPause.style.color = "black";
+
 }
 
 /**
@@ -84,81 +129,107 @@ export function pause(myChart: Chart){
  */
 export function saveSonify(myChart: Chart){
     let sonification = myChart.data.sonification
-    if(myChart.data.modeLabels.lastMode === 'lc')
-    {
-        if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,0,1)
-        downloadBuffer(sonification.audioSource.buffer)
-    }
+    let speed: number = +sonification.audioControls.speed.value;
 
     
-    if(myChart.data.modeLabels.lastMode === 'pf')
+    if(myChart.data.modeLabels.lastMode == "gravity"){
+        if(!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart,[0], speed, false);
+        downloadBuffer(sonification.audioSource.buffer)
+    }  
+    else if(myChart.data.modeLabels.lastMode === 'lc')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,4,5, true)
+            sonification.audioSource = sonify(myChart,[0,1], speed)
+        downloadBuffer(sonification.audioSource.buffer)
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pf')
+    {
+        if(!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart,[5,6], speed)
+        downloadBuffer(sonification.audioSource.buffer, 60)
+    }
+    else if(myChart.data.modeLabels.lastMode === 'pressto')
+    {
+        if(!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart, [5], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
 }
 
-//May want to add a mono mode. I hate how this function looks but it works
 /**
  * This function creates an audioBuffer using data from the chart
  * @param myChart The chart to be sonified.
- * @param dataSet1 The dataset to sonify as the first stereo channel.
-*  @param dataSet2 The dataset to sonify as the second stereo channel.
+ * @param dataSets A number array containing the numbers of datasets to be converted into channels
  * @param loop Loop audio?
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
-export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop: boolean = true, destination?: AudioNode){
+export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
+    
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
-    let channel0 = myChart.data.datasets[dataSet1].data as ScatterDataPoint[],
-        channel1 = myChart.data.datasets[dataSet2].data as ScatterDataPoint[],
-        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+    let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
+
+
+    console.log(channels);
+
+
+    for (let j = 0; j < channels[0].length; j++){
+        // console.log(channels[i][j]);
+        channels[0][j].x = (channels[0][j].x) / speed;
+        // console.log(channels[i][j]);
+    }
+
     
+
+    let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
+
     if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
     {
-        var first1: ScatterDataPoint = {y:0,x:0};
-        first1.y = channel0[0].y;
-        var first2: ScatterDataPoint = {y:0,x:0};
-        first2.y = channel1[0].y;
-
-        first1.x = channel0[channel0.length-1].x + time/channel0.length;
-        first2.x = channel0[channel0.length-1].x + time/channel0.length;
-
-        channel0 = channel0.concat(first1);
-        channel1 = channel1.concat(first2);
-        time = channel0[channel0.length-1].x - channel0[0].x;//length of the audio buffer
+        for (let i = 0; i < channels.length; i++)
+        {
+            var first: ScatterDataPoint = {x:0,y:0};
+            first.y = channels[i][0].y;
+//            console.log("first.y is " + first.y);
+            first.x = (channels[i][channels[i].length-1].x + time/channels[i].length);
+//            console.log("first.x is " + first.x);
+            channels[i] = channels[i].concat(first);
+        }
+        time = channels[0][channels[0].length - 1].x - channels[0][0].x;
+//        console.log("time is " + time);
+//        console.log("channels length is " + channels.length);
     }
 
-    let norm0 = 1 / ArrMath.max(channel0.map(p => p.y))
-    let norm1 = 1 / ArrMath.max(channel1.map(p => p.y))
+    let norm = channels.map(c => 1 / ArrMath.max(c.map(p => p.y)));
 
     // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
-    var arrayBuffer = ctx.createBuffer(2,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
+    var arrayBuffer = ctx.createBuffer(channels.length,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
 
-    let prev0 = 0;//data point with the greatest time value less than the current time
-    let prev1 = 0;
-    let next0 = 1;//next data point
-    let next1 = 1;
+    for (var c = 0; c < channels.length; c++)
+    {
+        let prev = 0;//data point with the greatest time value less than the current time
+        let next = 1;//next data point
 
-    for (var i = 0; i < arrayBuffer.length; i++) {
-        let x0 = channel0[0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
-        let x1 = channel0[0].x + i/ctx.sampleRate;
-        if(x0 > channel0[next0].x){
-            prev0 = next0;
-            next0++;
+        for (var i = 0; i < arrayBuffer.length; i++) {
+            let x = channels[c][0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
+            if(x > channels[c][next].x){
+                prev = next;
+                next++;
+            }
+
+            arrayBuffer.getChannelData(c)[i] = Math.abs(norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1));
+                ; // Left Channel
+
         }
-        if(x1 > channel1[next1].x){
-            prev1 = next1
-            next1++;
-        }
-
-        arrayBuffer.getChannelData(0)[i] = norm0 * linearInterpolation(channel0[prev0],channel0[next0],x0) * (2*rand()-1); // Left Channel
-        arrayBuffer.getChannelData(1)[i] = norm1 * linearInterpolation(channel1[prev1],channel1[next1],x1) * (2*rand()-1);  //multiply by norm: the maximum y value is 10 in the buffer
     }
-    
+
+    for (let j = 0; j < channels[0].length; j++){
+        // console.log(channels[i][j]);
+        channels[0][j].x = (channels[0][j].x) * speed;
+        // console.log(channels[i][j]);
+    }
+
     // Get an AudioBufferSourceNode to play our buffer.
     const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
     sonifiedChart.loop = loop; //play on repeat?
@@ -168,7 +239,7 @@ export function sonify(myChart: Chart, dataSet1: number, dataSet2: number, loop:
     if(destination)
         sonifiedChart.connect(destination);
     else
-    sonifiedChart.connect(ctx.destination);
+        sonifiedChart.connect(ctx.destination);
     return sonifiedChart;
 
     //accepts x values and returns a y value based on a line between the points immediately before and after the given x value
@@ -191,7 +262,7 @@ function bufferToWav(buf: AudioBuffer, time: number)
         numOfSamples = Math.round(time * buf.sampleRate),
         length = numOfSamples * numOfChan * 4 + 44//add room for metadata
     length = length > 2147483648? 2147483648 : length; //cuts back if the length is beyond 2GB (Hopefully )
-    
+
     var buffer = new ArrayBuffer(length),
         view = new DataView(buffer), //Where we put a da data
         channels = [], 

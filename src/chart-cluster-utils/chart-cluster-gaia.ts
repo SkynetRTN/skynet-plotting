@@ -27,7 +27,11 @@ export function sortStar(dataArray: starData[]): [starData[], any]{
     let sortedStars = mergeSortStar(dataArray);
     //delete the duplicates
     let uniqueStars = [];
-    let lastStar = {id: sortedStars[0].id, ra: sortedStars[0].ra, dec: sortedStars[0].dec};
+    let temp = 0;
+    while(isNaN(sortedStars[temp].ra)) {
+        temp += 1
+    }
+    let lastStar = {id: sortedStars[temp].id, ra: sortedStars[temp].ra, dec: sortedStars[temp].dec};
     let minMax: number[] = [lastStar.ra, lastStar.ra, lastStar.dec, lastStar.dec];
     uniqueStars.push(lastStar);
     for (let i = 1; i < sortedStars.length; i++){
