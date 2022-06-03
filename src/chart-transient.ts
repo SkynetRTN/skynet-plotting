@@ -12,6 +12,9 @@ import { linkInputs, updateTableHeight, sanitizeTableData } from "./util"
 import { calculateLambda, filterWavelength } from "./chart-cluster-utils/chart-cluster-util";
 import { LinearScaleOptions } from "chart.js";
 
+// enables certain print statements when true
+const DEBUG = false;
+
 /*
     HANDLE USER INPUT
 */
@@ -36,7 +39,7 @@ const findDelimiter = (s: string) => {
 
 
 const shiftMagnitudes = (myChart: TransientChart, form: ChartInfoForm) => {
-    console.log('===== Shifting magnitudes =====');
+    if (DEBUG) { console.log(':: SHIFT MAGNITUDES START ::'); }
 
     const unparsedData = form.elements['data'].value.split(',');
     if (unparsedData.length > 500) {
@@ -111,13 +114,13 @@ const shiftMagnitudes = (myChart: TransientChart, form: ChartInfoForm) => {
         myChart.setMagShift(filter, shiftedFilters.get(filter));
         myChart.update();
     }
+    if (DEBUG) { console.log(':: SHIFT MAGNITUDES END ::'); }
     //
 }
 
 // internal
 const updateLabels = (myChart: TransientChart, form: ChartInfoForm) => {
-    console.log('==== Updating Labels ====');
-
+    if (DEBUG) { console.log(':: UPDATE LABELS START ::'); }
     let labels = "";
     for (let i = 0; i < myChart.getDatasets().length; i++) {
         let labelToBeAdded = myChart.getDataset(i).label;
@@ -133,6 +136,8 @@ const updateLabels = (myChart: TransientChart, form: ChartInfoForm) => {
     (myChart.chart.options.scales['x'] as LinearScaleOptions).title.text = form.elements['xAxis'].value;
     (myChart.chart.options.scales['y'] as LinearScaleOptions).title.text = form.elements['yAxis'].value;
     myChart.update();
+
+    if (DEBUG) { console.log(':: UPDATE LABELS END ::'); }
 }
 
 
@@ -158,7 +163,7 @@ const handleDropdownInput = (chart: TransientChart) => {
             disableDropdown('ebv', false);
         }
     }
-};
+}
 
 
 const handleEventTimeInput = (chart: TransientChart) => {
@@ -231,11 +236,14 @@ const updateCurve = (myChart: TransientChart, form: VariableLightCurveForm) => {
     for (let i = 0; i < myChart.getDatasets().length; i++) {
         tempData = [];
         let label = myChart.getDataset(i).label;
-
+        let delim = findDelimiter(label);
+        let filter = label.split(delim)[0];
+        let magShift = myChart.getMagShift(filter) ? myChart.getMagShift(filter): 0;
         if (label.includes("model")) {
+            // let filter = label.split('-')[0];
             for (let j = 0; j < range.length; j++) {
                 let mjd = range[j];
-                let newMag = calculateModel(form, label[0], mjd)+24.+myChart.getMagShift(label[0]);
+                let newMag = calculateModel(form, filter, mjd) + magShift;
                 tempData.push({
                     x: mjd,
                     y: newMag,
@@ -250,7 +258,7 @@ const updateCurve = (myChart: TransientChart, form: VariableLightCurveForm) => {
 
 // 
 function handleTableUpdate(table: Handsontable, myChart: TransientChart) {
-    console.log('Handling update to table..');
+    if (DEBUG) { console.log('Handling update to table..'); }
 
     // can't pass filter col ([2]) to sanitize since is string
     const tableData = sanitizeTableData(table.getData(), [0, 1]);
@@ -467,7 +475,7 @@ const addModel = (data: Map<any, any>, chart: TransientChart) => {
         for (let j = 0; j < range.length; j++) {
             tmp.push({
                 x: range[j],
-                y: calculateModel(parameterForm, key, range[j])+24.+magShift,
+                y: calculateModel(parameterForm, key, range[j])+magShift,
             });
         }
         if (key === 'gprime') {
@@ -498,22 +506,6 @@ const calculateModel = (form: VariableLightCurveForm, filter: string, currentTim
     const refFilter = form["filter"].value;
     const refMagnitude = parseFloat(form["mag_num"].value);
     const eventTime = 0;//parseFloat(form["time"].value);
-
-    if (filter === 'uprime' || filter == 'u') {
-        filter = "u\'";
-    }
-    if (filter === 'rprime' || filter == 'r') {
-        filter = "r\'";
-    }
-    if (filter === 'gprime' || filter == 'g') {
-        filter = "g\'";
-    }
-    if (filter === 'iprime' || filter == 'i') {
-        filter = "i\'";
-    }
-    if (filter === 'zprime' || filter == 'z') {
-        filter = "z\'";
-    }
     
     const f  = filterWavelength[filter];
     const f0 = filterWavelength[refFilter];
@@ -521,25 +513,25 @@ const calculateModel = (form: VariableLightCurveForm, filter: string, currentTim
 
     const FZP0 = ZERO_POINT_VALUES[refFilter];
     const FZP = ZERO_POINT_VALUES[filter];
-    const F0 = FZP0 * 10**((refMagnitude)/2.5);
+    // const F0 = FZP0 * 10**((refMagnitude)/2.5);
     const td = currentTime - eventTime;// is this event - data or t) - data
     const Anu = calculateLambda(Av*Rv, filterWavelength[refFilter]);
 
-    // break into parts
     // const eq1 = Math.log10(F0) - Math.log10(FZP0) + Math.log10(FZP);
-    const eq1 = Math.log10(F0) - Math.log10(FZP);
+    const eq1 = Math.log10(FZP0) - Math.log10(FZP);
     const eq2 = a * (Math.log10(td) - Math.log10(t0));
     const eq3 = b * (Math.log10(f0) - Math.log10(f)); // these are actually wavelengths!
     const eq4 = Anu / 2.5;
 
-    // console.log('Flux term: ', eq1);
-    // console.log('Time term: ', eq2);
-    // console.log('Frequency term: ', eq3);
-    // console.log('Extinction term: ', eq4);
-    // console.log('Combined: ', -2.5 * (eq1 + eq2 + eq3 - eq4));
-    // console.log('-');
-
-    return -2.5 * (eq1 + eq2 + eq3 - eq4);
+    if (DEBUG) {
+        console.log('Flux term: ', eq1);
+        console.log('Time term: ', eq2);
+        console.log('Frequency term: ', eq3);
+        console.log('Extinction term: ', eq4);
+        console.log('Combined: ', refMagnitude - 2.5 * (eq1 + eq2 + eq3 - eq4));
+        console.log('-');
+    }
+    return refMagnitude - (2.5 * (eq1 + eq2 + eq3 - eq4));
 }
 
 // min/max mjd and magnitude
@@ -710,10 +702,8 @@ const resetOnUpload = (myChart: TransientChart) => {
 
 // 
 function pushTableData(tableData: any[], jd: number, mag: number, filter: string) {
-    if (isNaN(jd)) {
-        // Ignore entries with invalid timestamp.
-        return;
-    }
+    if (isNaN(jd)) { return; }
+
     tableData.push({
         'jd': jd,
         'magnitude': isNaN(mag) ? null : mag,
@@ -731,7 +721,7 @@ const addChartData = (myChart: TransientChart, datapoints: Map<string, Array<Arr
     const errorITR = datapoints.keys();
     let tmp: Array<{x: number, y: number}> = [];
     let errors: Array<{x: number, y: number}> = [];
-    console.log(datapoints);
+
     /* These loops can be condensed. I split them up
     because the actual data needed to be the first 
     datasets to work with the undergrads label 

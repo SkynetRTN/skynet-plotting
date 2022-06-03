@@ -233,12 +233,10 @@ function chartType(chart: string) {
         }
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
-        //objects = transient();
         transientObjects = transient();
         objects = [transientObjects[0], transientObjects[1].chart];
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            // transientFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
             transientFileUpload(evt, transientObjects[0], transientObjects[1]);
         }
     }
