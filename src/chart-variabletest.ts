@@ -42,20 +42,27 @@ export function variableTest(): [Handsontable, Chart] {
             'jd': i * 10 + Math.random() * 10 - 5,
             'src1': Math.random() * 20,
             'src2': Math.random() * 20,
+            'err1': 1,
+            'err2': 1,
         };
     }
 
     const container = document.getElementById('table-div');
     const hot = new Handsontable(container, Object.assign({}, tableCommonOptions, {
         data: tableData,
-        colHeaders: ['Julian Date', 'Source1', 'Source2'],
-        maxCols: 3,
+        colHeaders: ['Julian Date', 'Source1', 'Source2', 'Error1', 'Error2'],
+        maxCols: 5,
         columns: [
             { data: 'jd', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'src1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
             { data: 'src2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'err1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            { data: 'err2', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
         ],
     }));
+    // container.style.overflow = 'scroll'
+    
+    // console.log(container.style)
 
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const myChart = new Chart(ctx, {
@@ -221,23 +228,23 @@ export function variableTest(): [Handsontable, Chart] {
         // lower limit error
         err1.push({
             x: tableData[j].jd ,
-            y: tableData[j].src1-1,
+            y: tableData[j].src1-tableData[j].err1,
         });
 
         err2.push({
             x: tableData[j].jd,
-            y: tableData[j].src2-1,
+            y: tableData[j].src2-tableData[j].err2,
         });
 
         // upper limit error
         err1.push({
             x: tableData[j].jd,
-            y: tableData[j].src1+1,
+            y: tableData[j].src1+tableData[j].err1,
         });
 
         err2.push({
             x: tableData[j].jd,
-            y: tableData[j].src2+1,
+            y: tableData[j].src2+tableData[j].err2,
         });
     }
     
@@ -376,7 +383,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         }
 
         table.updateSettings({
-            colHeaders: ['Julian Date', src1, src2],
+            colHeaders: ['Julian Date', src1, src2, src1+'err', src2+'err'],
         })
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
@@ -502,13 +509,15 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     // let orierr2Data = myChart.data.datasets[6].data
     let src1Data = [];
     let src2Data = [];
-    // let err1Data = [];
-    // let err2Data = [];
+    let err1Data = [];
+    let err2Data = [];
     tableData = tableData.sort(sortJdate)
     for (let i = 0; i < tableData.length; i++) {
         let jd = tableData[i][0];
         let src1 = tableData[i][1];
         let src2 = tableData[i][2];
+        let err1 = tableData[i][3];
+        let err2 = tableData[i][4];
 
         myChart.data.minMJD = Math.min(myChart.data.minMJD, jd);
         myChart.data.maxMJD = Math.max(myChart.data.maxMJD, jd);
@@ -521,12 +530,39 @@ function updateVariable(table: Handsontable, myChart: Chart) {
             "x": jd,
             "y": src2,
         })
+
+        err1Data.push({
+            "x": null,
+            "y": null,
+        })
+        err2Data.push({
+            "x": null,
+            "y": null,
+        })
+        err1Data.push({
+            "x": jd,
+            "y": src1-err1,
+        })
+        err2Data.push({
+            "x": jd,
+            "y": src2-err2,
+        })
+        err1Data.push({
+            "x": jd,
+            "y": src1+err1,
+        })
+        err2Data.push({
+            "x": jd,
+            "y": src2+err2,
+        })
     }
 
 
 
     myChart.data.datasets[0].data = src1Data;
     myChart.data.datasets[1].data = src2Data;
+    myChart.data.datasets[5].data = err1Data;
+    myChart.data.datasets[6].data = err2Data;
     let localMin = src1Data[0].x
     if (localMin >= src2Data[0].x){
         localMin = src2Data[0].x
@@ -579,8 +615,8 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
 
     lightCurveForm.oninput = function () {
-        myChart.data.datasets[5].data = err1
-        myChart.data.datasets[6].data = err2
+        // myChart.data.datasets[5].data = err1
+        // myChart.data.datasets[6].data = err2
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1, 5, 6);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
@@ -608,7 +644,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             const ebarData = [];
             const err1Data = [];
             const err2Data = [];
-            const len = Math.min(datasets[0].data.length, datasets[1].data.length);
+            const len = Math.min(datasets[0].data.length, datasets[1].data.length, datasets[5].data.length, datasets[6].data.length);
             let srcDataPoint = 0;
             let refDataPoint = 0;
             let err_var_plus = 0;
@@ -627,12 +663,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
 
                     // updating error bar information
-                    for (let n = 0; n < len; n++){
-                        if (srcData[i]["x"] === (errVar as ScatterDataPoint[])[3*n+1]["x"]){
+                    
                             for (let j = 0; j < 3; j++){
         
         
-                                if (errVar[3*n+j]["y"] === null){
+                                if (errVar[3*i+j]["y"] === null){
                                     ebarData.push({
                                         "x": null,
                                         "y": null,
@@ -648,24 +683,24 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                                 }else if(j === 1 && whetherjd){
                                     srcDataPoint = (srcData as ScatterDataPoint[])[i]["y"]
                                     refDataPoint = (refData as ScatterDataPoint[])[i]["y"]
-                                    err_var_minus = srcDataPoint - (errVar as ScatterDataPoint[])[3*n+j]["y"]
-                                    err_ref_minus = refDataPoint - (errRef as ScatterDataPoint[])[3*n+j]["y"]
+                                    err_var_minus = srcDataPoint - (errVar as ScatterDataPoint[])[3*i+j]["y"]
+                                    err_ref_minus = refDataPoint - (errRef as ScatterDataPoint[])[3*i+j]["y"]
 
 
                                     err1Data.push({
                                         "x": srcData[i]["x"],
-                                        "y": (errVar as ScatterDataPoint[])[3*n+j]["y"],
+                                        "y": (errVar as ScatterDataPoint[])[3*i+j]["y"],
                                     })
                                     err2Data.push({
                                         "x": srcData[i]["x"],
-                                        "y": (errVar as ScatterDataPoint[])[3*n+j]["y"],
+                                        "y": (errVar as ScatterDataPoint[])[3*i+j]["y"],
                                     })
                                     
                                 }else if(j === 2 && whetherjd){
                                     srcDataPoint = (srcData as ScatterDataPoint[])[i]["y"]
                                     refDataPoint = (refData as ScatterDataPoint[])[i]["y"]
-                                    err_var_plus = - srcDataPoint + (errVar as ScatterDataPoint[])[3*n+j]["y"]
-                                    err_ref_plus = - refDataPoint + (errRef as ScatterDataPoint[])[3*n+j]["y"]
+                                    err_var_plus = - srcDataPoint + (errVar as ScatterDataPoint[])[3*i+j]["y"]
+                                    err_ref_plus = - refDataPoint + (errRef as ScatterDataPoint[])[3*i+j]["y"]
                                     // combErr = Math.sqrt(Math.pow(srcDataPoint-erred1,2)+Math.pow(refDataPoint-erred2,2))
                                     ebarData.push({
                                     "x": srcData[i]["x"],
@@ -679,16 +714,15 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
                                     err1Data.push({
                                         "x": srcData[i]["x"],
-                                        "y": (errVar as ScatterDataPoint[])[3*n+j]["y"],
+                                        "y": (errVar as ScatterDataPoint[])[3*i+j]["y"],
                                     })
                                     err2Data.push({
                                         "x": srcData[i]["x"],
-                                        "y": (errVar as ScatterDataPoint[])[3*n+j]["y"],
+                                        "y": (errVar as ScatterDataPoint[])[3*i+j]["y"],
                                     })
                                     
         
-                                }
-                        }
+                                
                     }
                     
                         
@@ -700,8 +734,8 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
             myChart.data.datasets[2].data = lcData;
             myChart.data.datasets[7].data = ebarData;
-            myChart.data.datasets[5].data = err1Data;
-            myChart.data.datasets[6].data = err2Data;
+            // myChart.data.datasets[5].data = err1Data;
+            // myChart.data.datasets[6].data = err2Data;
 
             for (let i = 2; i < 5; i++) {
                 myChart.data.datasets[i].label = "Variable Star Mag + (" + lightCurveForm.mag.value + " - Reference Star Mag)";
@@ -831,7 +865,6 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         
 
     periodFoldingForm.oninput = throttle(function () {
-        console.log('throttle why is triggering')
 
         if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
             step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
@@ -844,7 +877,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
-        },3);
+        },16);
         
     }
 

@@ -374,7 +374,8 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         myChart.update('none');
     }
-    lightCurveForm.oninput = lightCurveOninput, 1000;
+    lightCurveForm.oninput = lightCurveOninput;
+    // lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
     fourierForm.elements['fouriermode'].oninput = function () {
         if (fourierForm.elements['fouriermode'].value === 'p') {
@@ -429,32 +430,6 @@ export function pulsarTest(): [Handsontable, Chart] {
     computeButton.onclick = (...args) => {
         fourierOninput.apply(fourierForm, args);
     }
-
-
-    // let start = (myChart.data.datasets[1].data[myChart.data.datasets[1].data.length-1] as ScatterDataPoint).x;
-    // let end = (myChart.data.datasets[0].data[0] as ScatterDataPoint).x;
-    // let range = Math.abs(start-end);
-    // let step = 10e-5
-        
-    //         // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-    //         //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
-    //         // }
-    // linkInputs(
-    //     periodFoldingForm["period"],
-    //     periodFoldingForm["period_num"],
-    //     parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
-    // );
-
-
-        
-    // linkInputs(
-    //     periodFoldingForm["phase"], 
-    //     periodFoldingForm["phase_num"], 
-    //     0, 
-    //     1, 
-    //     0.01, 
-    //     0
-    // );
 
     periodFoldingForm.doublePeriodMode.onchange = function(){
         this.bins.value = clamp(this.bins.value, 0, 10000);
@@ -531,7 +506,7 @@ export function pulsarTest(): [Handsontable, Chart] {
     }
 
     periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
-    // periodFoldingForm.oninput = periodFoldingOninput;
+    // periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
     
 
