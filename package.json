@@ -29,6 +29,7 @@
   "dependencies": {
     "bootstrap": "^5.1.3",
     "chart.js": "^3.7.0",
+    "chartjs-chart-error-bars": "^3.7.1",
     "chartjs-plugin-zoom": "^1.2.0",
     "file-saver": "^2.0.5",
     "handsontable": "^11.1.0",

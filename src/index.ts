@@ -22,13 +22,14 @@ import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-
+import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
 import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
 import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
+import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 
 /**
  *  Initializing the page when the website loads
@@ -241,6 +242,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
+    } else if (chart === 'transient') {
+        let transientObjects: [Handsontable, TransientChart];
+        transientObjects = transient();
+        objects = [transientObjects[0], transientObjects[1].chart];
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            transientFileUpload(evt, transientObjects[0], transientObjects[1]);
+        }
     }
     updateTableHeight(objects[0]);
     // Update the height of the table when the chart resizes.
@@ -264,9 +273,9 @@ function chartType(chart: string) {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
         
-        } else {
+        } else if (chart !== 'transient') {
             updateChartInfo(objects[1], chartInfoForm);
-        }
+        } 
     };
 
     if(objects[1].data.sonification)
@@ -276,7 +285,6 @@ function chartType(chart: string) {
             chartType(((document.getElementById('chart-type-form') as HTMLFormElement ).elements[0] as HTMLInputElement).value);
         };
     }
-
     objects[1].update('none');
 
 }
