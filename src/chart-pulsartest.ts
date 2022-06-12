@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, debounce, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js/index.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -453,7 +453,7 @@ export function pulsarTest(): [Handsontable, Chart] {
             //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
             // }
         if (periodFoldingForm["period_num"].max != range){
-            linkInputs(
+            linkInputsPuls(
                 periodFoldingForm["period"],
                 periodFoldingForm["period_num"],
                 parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
@@ -473,10 +473,10 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         }
 
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
+        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
+            step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
         }else{
-            step = 10e-5
+            step = 10e-6
         }
         periodFoldingForm["period_num"].step = step
 

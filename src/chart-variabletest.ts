@@ -6,9 +6,9 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 
-import { throttle, updateLabels, updateTableHeight, linkInputs } from "./util"
+import { throttle, updateLabels, updateTableHeight, linkInputs, linkInputsVar } from "./util"
 import { Mode } from "./types/chart.js/index.js";
-import { round, lombScargle, floatMod, lombScargleWithError } from "./my-math"
+import { round, lombScargle, floatMod, lombScargleWithError, clamp } from "./my-math"
 // import { PulsarMode } from "./types/chart.js/index.js";
 import { valueAccordingPercent } from "handsontable/helpers";
 
@@ -279,7 +279,7 @@ export function variableTest(): [Handsontable, Chart] {
         myChart.options.scales['y'].title.text = myChart.data.modeLabels[mode].y;
         myChart.update('none');
         // myChart.update()
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
 
         updateTableHeight(hot);
     }
@@ -763,8 +763,26 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
     document.getElementById("fourier-div").innerHTML = fHTML;
     const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
-    fourierForm.oninput = function () {
+
+
+    fourierForm.start.oninput = debounce(()=> {
+        let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(starting-ending);
+        fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+    }, 1000)
+
+    fourierForm.oninput = function() {
+        let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(starting-ending);
+
+        // debounce(()=> {
+        // fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+        // }, 1000)
         let start = parseFloat(fourierForm.start.value);
+
+        fourierForm.stop.value = clamp(parseFloat(fourierForm.stop.value),start,range)
         let stop = parseFloat(fourierForm.stop.value);
         if (start > stop) {
             // alert("Please make sure the stop value is greater than the start value.");
@@ -785,7 +803,6 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                 errOriginal[3*i+2]-yArray[i]
             )
         }
-        // console.log(error)
 
         fDataWError = lombScargleWithError(tArray, yArray, error, start,stop, 2000)
         myChart.data.datasets[3].data = fDataWError;
@@ -803,11 +820,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         myChart.options.scales['x'].max = stop;
         updateChart(myChart, 3);
     }
+    // },1000)
 
     const pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         "</div>\n" +
         '<div class="row">\n' +
+        "</div>\n" +
+        '<div class="row">\n' + 
         '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode" checked></div>\n'+
         '<div class="col-sm-5">Show Two Periods</div>\n' +
         '</div>\n' +
@@ -844,11 +864,12 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
         //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
         // }
-        linkInputs(
+        linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
             parseFloat(fourierForm.start.value), range, 0.01, range, true
         );
+        periodFoldingForm["period"].step = 0.001
 
 
         
@@ -861,25 +882,42 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             0
         );
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
+        console.log('part1')
         
-        
 
-    periodFoldingForm.oninput = throttle(function () {
+        periodFoldingForm.oninput = throttle(function () {
+            console.log('part2')
 
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
-        }else{
-            step = 10e-5
-        }
-        periodFoldingForm["period_num"].step = step
+            // step = round((periodFoldingForm.period_num.value)*0.001, 4)
+            if ((periodFoldingForm.period_num.value)*0.01 > 10e-5){
+                // step = round((periodFoldingForm.period_num.value/range)*0.01, 4)
+                step = round((periodFoldingForm.period_num.value)*0.01, 4)
+            }else{
+                step = 10e-5
+            }
+            
+            if (periodFoldingForm["period"].min != Math.log(parseFloat(fourierForm.start.value)).toString()){
+                periodFoldingForm["period"].min = Math.log(parseFloat(fourierForm.start.value)).toString()
+                periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
+            } 
 
-        // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
+            // periodFoldingForm["period_num"].min = fourierForm.start.value
+            // debounce(()=> {
+            // periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
+            // console.log('debounced')
+            // },1000),
+            console.log(periodFoldingForm["period_num"].value,parseFloat(fourierForm.start.value), range)
+            
+            periodFoldingForm["period_num"].step = step
+            // periodFoldingForm["period"].step = step
 
-        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
+            // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
 
-        },16);
-        
-    }
+            updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
+
+        },3);
+            
+    };
 
 
     }
