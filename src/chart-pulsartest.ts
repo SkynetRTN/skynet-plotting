@@ -386,7 +386,9 @@ export function pulsarTest(): [Handsontable, Chart] {
             document.getElementById("frequency-div").hidden = false;
         }
     }
+    // if(parseFloat(this.pstart.value)<){
 
+    // }
     const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
 
@@ -473,8 +475,8 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         }
 
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-6){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 6)
+        if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
+            step = round(periodFoldingForm.period_num.value*10e-4, 6)
         }else{
             step = 10e-6
         }
@@ -629,6 +631,7 @@ export function pulsarFileUploadTest(evt: Event, table: Handsontable, myChart: C
             let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
 
             const fourierForm = document.getElementById('fourier-form') as FourierForm;
+
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 

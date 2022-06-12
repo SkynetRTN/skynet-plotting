@@ -763,23 +763,35 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
 
     document.getElementById("fourier-div").innerHTML = fHTML;
     const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
-
+    let initial = true
 
     fourierForm.start.oninput = debounce(()=> {
         let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(starting-ending);
-        fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+        if(range < 0.1){
+            fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),range/10,range)
+        }else{
+            fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+        }
     }, 1000)
 
     fourierForm.oninput = function() {
         let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(starting-ending);
+        if(initial === true){
+            if(range < 0.1){
+                fourierForm.start.value = range/10
+            }else{
+                fourierForm.start.value = 0.1
+            }
+            initial = false
+        }
 
-        // debounce(()=> {
-        // fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
-        // }, 1000)
+        debounce(()=> {
+        fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+        }, 1000)
         let start = parseFloat(fourierForm.start.value);
 
         fourierForm.stop.value = clamp(parseFloat(fourierForm.stop.value),start,range)
@@ -906,7 +918,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             // periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
             // console.log('debounced')
             // },1000),
-            console.log(periodFoldingForm["period_num"].value,parseFloat(fourierForm.start.value), range)
+            // console.log(periodFoldingForm["period_num"].value,parseFloat(fourierForm.start.value), range)
             
             periodFoldingForm["period_num"].step = step
             // periodFoldingForm["period"].step = step

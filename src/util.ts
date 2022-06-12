@@ -36,6 +36,8 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
  *  @param form:        The form to be updated.
  */
 export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum:number = 0, changeDataQMark = true) {
+
+    if(changeDataQMark = true){
     let labels = "";
     for (let i = 0; i < myChart.data.datasets.length; i++) {
         if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel && myChart.data.datasets[i].label !== "error-bar") {
@@ -46,6 +48,7 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
         }
     }
     form.elements['data'].value = labels;
+    }
 
     if (myChart.options.plugins.title.text) {
         form.elements['title'].value = myChart.options.plugins.title.text as string;
