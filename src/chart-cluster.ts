@@ -27,6 +27,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   const modelForm = document.getElementById("model-form") as ModelForm;
 
   // Link each slider with corresponding text box
+  linkInputs(clusterForm['err'], clusterForm["err_num"], 0, 1, 0.05, 1, false, true, 0, 999)
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
