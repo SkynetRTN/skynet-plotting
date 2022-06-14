@@ -901,11 +901,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             console.log('part2')
 
             // step = round((periodFoldingForm.period_num.value)*0.001, 4)
-            if ((periodFoldingForm.period_num.value)*0.01 > 10e-5){
+            if ((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range > 10e-6){
                 // step = round((periodFoldingForm.period_num.value/range)*0.01, 4)
-                step = round((periodFoldingForm.period_num.value)*0.01, 4)
+                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 6)
             }else{
-                step = 10e-5
+                step = 10e-6
             }
             
             if (periodFoldingForm["period"].min != Math.log(parseFloat(fourierForm.start.value)).toString()){

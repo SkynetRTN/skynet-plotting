@@ -258,9 +258,19 @@ input[type=checkbox].range{
     cursor: pointer;
 }
 
-input[type=number]::-webkit-outer-spin-button,
+/* input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+} */
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button;
+    opacity: 1;
     margin: 0;
 }
 input[type=number] {
