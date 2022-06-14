@@ -161,11 +161,11 @@ button.clusterRest {
     display: flex;
 }
 
-button:focus {
-    outline: none;
-    opacity: 1;
-    /*background-color: #E7E7E7;*/
-}
+/*button:focus {*/
+/*    outline: none;*/
+/*    opacity: 1;*/
+/*    !*background-color: #E7E7E7;*!*/
+/*}*/
 button:hover {
     opacity: 1;
     background-color: #E7E7E7;
