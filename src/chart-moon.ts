@@ -17,22 +17,22 @@ export function moon(): [Handsontable, Chart] {
         '<div class="row">\n' +
         '<div class="col-sm-3 des">a ("):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="a" name="a"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="a" name="a_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="a" name="a_num" class="spinboxnum field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">P (d):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="P" name="p"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="P" name="p_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="P" name="p_num" class="spinboxnum field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">Phase (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Phase" name="phase"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="spinboxnum field"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-3 des">Tilt (°):</div>\n' +
         '<div class="col-sm-6 range"><input type="range" title="Tilt" name="tilt"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Tilt" name="tilt_num" class="spinboxnum field"></div>\n' +
         '</div>\n' +
         '</form>\n');
     document.getElementById('axis-label1').style.display = 'inline';
@@ -46,7 +46,9 @@ export function moon(): [Handsontable, Chart] {
     linkInputs(moonForm.elements['p'], moonForm.elements['p_num'], 0.5, 20, 0.01, 10, false, true, 0.5, Number.POSITIVE_INFINITY);
     linkInputs(moonForm.elements['phase'], moonForm.elements['phase_num'], 0, 360, 1, 0);
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt_num'], 0, 90, 1, 0);
-
+    moonForm.elements['a_num'].oninput = throttle(function () {
+        moonForm.elements['a_num'].step = (parseFloat(moonForm.elements['a_num'].value)*0.1).toString()
+    },16)
     const tableData = generateMoonData();
 
     // create table

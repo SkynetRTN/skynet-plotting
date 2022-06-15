@@ -37,17 +37,18 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
  */
 export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum:number = 0, changeDataQMark = true) {
 
-    if(changeDataQMark = true){
-    let labels = "";
-    for (let i = 0; i < myChart.data.datasets.length; i++) {
-        if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel && myChart.data.datasets[i].label !== "error-bar") {
-            if (labels !== "") {
-                labels += ", ";
-            };
-            labels += myChart.data.datasets[i].label;
+    if(changeDataQMark === true){
+        console.log(true)
+        let labels = "";
+        for (let i = 0; i < myChart.data.datasets.length; i++) {
+            if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel && myChart.data.datasets[i].label !== "error-bar") {
+                if (labels !== "") {
+                    labels += ", ";
+                };
+                labels += myChart.data.datasets[i].label;
+            }
         }
-    }
-    form.elements['data'].value = labels;
+        form.elements['data'].value = labels;
     }
 
     if (myChart.options.plugins.title.text) {
@@ -176,13 +177,13 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
             // number.value = clamp(round(Math.exp(parseFloat(slider.value)), 4), min, max);
             number.value = round((Math.exp(parseFloat(slider.value))), 4).toString();
         };
-        // number.oninput = debounce(()=> {
-        number.oninput = function(){
+        number.oninput = debounce(()=> {
+        // number.oninput = function(){
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 4).toString();
-        }
-        // }, debounceTime)
+        // }
+        }, debounceTime)
     }
 }
 
@@ -212,8 +213,8 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
             slider.value = clamp(number.value, min, max);
         }, debounceTime);
     } else {
-        slider.min = Math.log(min * 0.999).toString();
-        slider.max = Math.log(max * 1.001).toString();
+        slider.min = Math.log(min * 1).toString();
+        slider.max = Math.log(max * 1).toString();
         slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
         slider.value = Math.log(value).toString();
         slider.oninput = function () {
@@ -221,18 +222,18 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
              * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
              * The reason is that the slider has min and max values defined for log. Also this is
              * clamped to min and max instead of numMin and numMax, because the slider logically
-             * still correspond to min and max, even though the implementation changed to accomodate
+             * still correspond to min and max, even though the implementation changed to accommodate
              * the log behavior.
-            */
+            */ 
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 6), min, max);
         };
-        // number.oninput = debounce(()=> {
-        number.oninput = function(){
+        number.oninput = debounce(()=> {
+        // number.oninput = function(){
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 6).toString();
-        }
-        // }, debounceTime)
+        // }
+        }, debounceTime)
     }
 }
 

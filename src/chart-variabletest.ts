@@ -287,6 +287,7 @@ export function variableTest(): [Handsontable, Chart] {
     myChart.options.plugins.title.text = "Title";
     myChart.options.scales['x'].title.text = "x";
     myChart.options.scales['y'].title.text = "y";
+    
     updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
 
     updateVariable(hot, myChart);
@@ -405,7 +406,7 @@ export function variableFileUploadTest(evt: Event, table: Handsontable, myChart:
         myChart.options.plugins.title.text = "Title";
         myChart.options.scales['x'].title.text = "x";
         myChart.options.scales['y'].title.text = "y";
-        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
 
 
 
@@ -613,13 +614,18 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
     document.getElementById('light-curve-div').innerHTML = lcHTML;
     const variableForm = document.getElementById('variableTest-form') as VariableForm;
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
-
+    lightCurveForm.mag.onchange = function(){
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+    }
+    lightCurveForm.source.onchange = function(){
+        updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+    }
     lightCurveForm.oninput = function () {
         // myChart.data.datasets[5].data = err1
         // myChart.data.datasets[6].data = err2
         if (lightCurveForm.source.value === "none") {
             updateChart(myChart, 0, 1, 5, 6);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
             variableForm.mode[1].disabled = true;
             variableForm.mode[2].disabled = true;
         } else {
@@ -744,7 +750,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             myChart.options.scales['x'].max = lcData[lcData.length-1].x;
             
             updateChart(myChart, 2, 7);
-            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+            updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
 
         }
     }
@@ -1019,7 +1025,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
 
 
     updateChart(myChart, 4, 8);
-    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
+    updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
 }
 
 
