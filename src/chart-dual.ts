@@ -81,6 +81,7 @@ export function dual(): [Handsontable, Chart] {
                     immutableLabel: false,
                 }
             ],
+            gClass: null
         },
         options: {
             hover: {

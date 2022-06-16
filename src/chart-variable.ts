@@ -121,6 +121,7 @@ export function variable(): [Handsontable, Chart] {
                     hidden: true,
                 }
             ],
+            gClass: null
         },
         options: {
             plugins: {

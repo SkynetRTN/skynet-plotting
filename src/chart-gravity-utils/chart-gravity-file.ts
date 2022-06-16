@@ -10,13 +10,21 @@ export function clean_data_server(file: File, callback: Function){
     req.onreadystatechange = function () {
         if (req.readyState == 4 && req.status == 200){
             try {
-                callback(req.responseText);
+                if (!req.responseText.includes("err")){
+                    callback(req.responseText);
+                }
+                else{
+                    alert(JSON.parse(req.responseText)['err'])
+                    console.log(JSON.parse(req.responseText))
+                }
             } catch (e) {
                 console.log(e)
                 console.log(JSON.parse(req.responseText))
             }
         } else if (req.status != 200 && req.readyState == 4 && req.response == ""){
             console.log("Failure to load a *.hdf5 file")
+            console.log(req.responseText)
+            console.log(JSON.parse(req.responseText))
         }
     }
     req.open("POST", uploadUrl, true);

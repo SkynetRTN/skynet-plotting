@@ -240,6 +240,7 @@ export function pulsar(): [Handsontable, Chart] {
                     fill: false
                 }
             ],
+            gClass: null
         },
         options: {
             plugins: {

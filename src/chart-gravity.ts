@@ -333,8 +333,10 @@ export function gravityFileUpload(
   // File type validation
   if (
     !file.name.match(".*.hdf5")
+       // !file.name.match("16") ||
+       // !file.name.match("32")
   ) {
-    alert("Please upload a .hdf5 file.");
+    alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
     return;
   }
 
@@ -343,11 +345,10 @@ export function gravityFileUpload(
     let data = json['data'];
     let [min, max] = updateTable(table, data);
     let midpoint = (min + max) / 2
-    let view_buffer = (max - min) * 0.0075
-    let merger_time_buffer = (max - min) * 0.05
+    let view_buffer = (max - min) * 0.20
     gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    linkInputs(gravityForm["merge"], gravityForm["merge_num"], midpoint-merger_time_buffer, midpoint+merger_time_buffer, 0.0005, midpoint);
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
 
     updateDataPlot(table, myChart);
     gravClass.fitChartToBounds(myChart);

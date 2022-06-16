@@ -88,6 +88,7 @@ export function moon(): [Handsontable, Chart] {
                     immutableLabel: true,
                 }
             ],
+            gClass: null
         },
         options: {
             hover: {
