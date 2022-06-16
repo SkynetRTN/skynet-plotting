@@ -41,20 +41,23 @@ export function Set2DefaultSpeed(myChart:Chart){
     sonification.audioControls.playPause.style.color = "black";
     setTimeout(() => {//so for some dumb idiot reason, the color of the button doesnt change to yellow until AFTER sonification unless you put a timeout on this
     //audioCtx.resume();
-    if(myChart.data.modeLabels.lastMode == "gravity"){
+
+    let mode = myChart.data.modeLabels.lastMode;
+    console.log(mode);
+    if(mode == "gravity"){
         console.log("gravity mode played");
-        sonification.audioSource = sonify(myChart,[0], speed, false);
+        sonification.audioSource = sonify(mode, myChart,[0], speed, false);
         sonification.audioSource.onended = () => pause(myChart);
     } 
-    if(myChart.data.modeLabels.lastMode === 'lc'){
-        sonification.audioSource = sonify(myChart,[0,1], speed, false);
+    if(mode === 'lc'){
+        sonification.audioSource = sonify(mode, myChart,[0,1], speed, false);
         sonification.audioSource.onended = () => pause(myChart);
     }
-    else if(myChart.data.modeLabels.lastMode === 'pf'){
-        sonification.audioSource = sonify(myChart,[5,6], speed);
+    else if(mode === 'pf'){
+        sonification.audioSource = sonify(mode, myChart,[5,6], speed);
     }
-    else if(myChart.data.modeLabels.lastMode === 'pressto'){
-        sonification.audioSource = sonify(myChart,[5,6], speed);
+    else if(mode === 'pressto'){
+        sonification.audioSource = sonify(mode, myChart,[5,6], speed);
     }
 
 //    if(speed == 0){
@@ -131,28 +134,29 @@ export function saveSonify(myChart: Chart){
     let sonification = myChart.data.sonification
     let speed: number = +sonification.audioControls.speed.value;
 
+    let mode = myChart.data.modeLabels.lastMode;
     
-    if(myChart.data.modeLabels.lastMode == "gravity"){
+    if(mode == "gravity"){
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,[0], speed, false);
+            sonification.audioSource = sonify(mode, myChart,[0], speed, false);
         downloadBuffer(sonification.audioSource.buffer)
     }  
-    else if(myChart.data.modeLabels.lastMode === 'lc')
+    else if(mode === 'lc')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,[0,1], speed)
+            sonification.audioSource = sonify(mode,myChart,[0,1], speed)
         downloadBuffer(sonification.audioSource.buffer)
     }
-    else if(myChart.data.modeLabels.lastMode === 'pf')
+    else if(mode === 'pf')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart,[5,6], speed)
+            sonification.audioSource = sonify(mode, myChart,[5,6], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
-    else if(myChart.data.modeLabels.lastMode === 'pressto')
+    else if(mode === 'pressto')
     {
         if(!sonification.audioSource.buffer)
-            sonification.audioSource = sonify(myChart, [5], speed)
+            sonification.audioSource = sonify(mode, myChart, [5,6], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
 }
@@ -164,24 +168,33 @@ export function saveSonify(myChart: Chart){
  * @param loop Loop audio?
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
-export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
+export function sonify(lastMode: String, myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
     
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
     let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
+    
+    console.log(channels.length);
 
-
-    console.log(channels);
-
-
-    for (let j = 0; j < channels[0].length; j++){
+    if(lastMode == "pressto"){
+        for (let j = 0; j < channels[0].length; j++){
         // console.log(channels[i][j]);
-        channels[0][j].x = (channels[0][j].x) / speed;
+            channels[0][j].x = (channels[0][j].x) / speed;
         // console.log(channels[i][j]);
+        }
+    }
+    else{
+        for (let i = 0; i < channels.length; i++){
+            for (let j = 0; j < channels[i].length; j++){
+            // console.log(channels[i][j]);
+                channels[i][j].x = (channels[i][j].x) / speed;
+            // console.log(channels[i][j]);
+            }
+        }
     }
 
-    
+    console.log(channels);
 
     let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
 
@@ -224,11 +237,29 @@ export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, lo
         }
     }
 
-    for (let j = 0; j < channels[0].length; j++){
-        // console.log(channels[i][j]);
-        channels[0][j].x = (channels[0][j].x) * speed;
-        // console.log(channels[i][j]);
+      if(lastMode == "pressto"){
+         for (let j = 0; j < channels[0].length; j++){
+         // console.log(channels[i][j]);
+             channels[0][j].x = (channels[0][j].x) * speed;
+         // console.log(channels[i][j]);
+        }
     }
+    else{
+        for (let i = 0; i < channels.length; i++){
+            for (let j = 0; j < channels[i].length; j++){
+            // console.log(channels[i][j]);
+                channels[i][j].x = (channels[i][j].x) * speed;
+            // console.log(channels[i][j]);
+            }
+        }
+    }
+
+
+    // for (let j = 0; j < channels[0].length; j++){
+    //     // console.log(channels[i][j]);
+    //     channels[0][j].x = (channels[0][j].x) * speed;
+    //     // console.log(channels[i][j]);
+    // }
 
     // Get an AudioBufferSourceNode to play our buffer.
     const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
