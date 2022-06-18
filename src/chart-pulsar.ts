@@ -143,8 +143,8 @@ export function pulsar(): [Handsontable, Chart] {
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     //Audio Context
     const audioCtx = new AudioContext();
-    var audioSource = new AudioBufferSourceNode(audioCtx);
-    var audioControls = {
+    const audioSource = new AudioBufferSourceNode(audioCtx);
+    const audioControls = {
         speed: document.getElementById("speed") as HTMLInputElement,
         playPause: document.getElementById("sonify") as HTMLButtonElement,
         save: document.getElementById("saveSonification") as HTMLButtonElement
