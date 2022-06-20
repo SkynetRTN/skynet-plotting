@@ -65,7 +65,7 @@ export function Set2DefaultSpeed(myChart:Chart){
 //    }
     sonification.audioSource.start();
 
-    setInterval(check, 500, speed, myChart);
+    // setInterval(check, 500, speed, myChart);
 
     sonification.audioControls.playPause.onclick = () => {pause(myChart)}
     
@@ -99,16 +99,19 @@ export function pause(myChart: Chart, clearInter: boolean = true){
         sonification.audioControls.playPause.innerHTML = "Sonify";
         sonification.audioControls.playPause.style.backgroundColor = ''
         sonification.audioControls.playPause.style.color = "black";
-        if(clearInter){
-            var i = setInterval(function () {}, 100);
-//            console.log(i);
-//            console.log(i-1);
-            clearInterval(i-1);
-            clearInterval(i);
-        }  
+        // sonification.audioSource = null;
+//         if(clearInter){
+//             var i = setInterval(function () {}, 100);
+// //            console.log(i);
+// //            console.log(i-1);
+//             clearInterval(i-1);
+//             clearInterval(i);
+//         }
     }
     catch (DOMException)
-    {}
+    {
+        // console.trace(DOMException)
+    }
 
     //change button to normal
 
@@ -155,6 +158,7 @@ export function saveSonify(myChart: Chart){
             sonification.audioSource = sonify(myChart, [5], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
+
 }
 
 /**
@@ -164,69 +168,82 @@ export function saveSonify(myChart: Chart){
  * @param loop Loop audio?
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
-export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode) {
-    console.trace(speed, loop, destination)
-    let rand = sfc32(2, 3, 5, 7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
+export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
+
+    let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
-    let channels = (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
-    let norm = channels.map(c => 1 / ArrMath.max(c.map(p => p.y)));
-    // Get an AudioBufferSourceNode to play our buffer.
-    let time = 0;
-    let arrayBuffer;
+    let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
 
-    // loop through all datasets (channels)
-    for (let i = 0; i < channels.length; i++) {
 
-        // scale data based on speed
-        for (let j = 0; j < channels[i].length; j++) {
+    // console.log(channels);
+
+    for (let i = 0; i < channels.length; i++)
+        for (let j = 0; j < channels[i].length; j++){
             // console.log(channels[i][j]);
             channels[i][j].x = (channels[i][j].x) / speed;
             // console.log(channels[i][j]);
         }
 
-        if (loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
-        {
-            let first: ScatterDataPoint = {x: 0, y: 0};
-            first.y = channels[i][0].y;
-            first.x = (channels[i][channels[i].length - 1].x + time / channels[i].length);
-            channels[i] = channels[i].concat(first);
-            channels[i] = channels[i];
-            time = channels[i][channels[i].length - 1].x - channels[i][0].x;
-        } else {
-            time = (channels[i][channels[i].length - 1].x - channels[i][0].x);
-        }
-        if (i == 0)
-            arrayBuffer = ctx.createBuffer(channels.length, ctx.sampleRate * time, ctx.sampleRate);//lasts as long as time
 
+
+    let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
+
+    if(loop)//This smooths out the looping by adding an extra point with the same y value as the first on the end
+    {
+        for (let i = 0; i < channels.length; i++)
+        {
+            var first: ScatterDataPoint = {x:0,y:0};
+            first.y = channels[i][0].y;
+//            console.log("first.y is " + first.y);
+            first.x = (channels[i][channels[i].length-1].x + time/channels[i].length);
+//            console.log("first.x is " + first.x);
+            channels[i] = channels[i].concat(first);
+        }
+        time = channels[0][channels[0].length - 1].x - channels[0][0].x;
+//        console.log("time is " + time);
+//        console.log("channels length is " + channels.length);
+    }
+
+    let norm = channels.map(c => 1 / ArrMath.max(c.map(p => p.y)));
+
+    // Create an empty stereo buffer at the sample rate of the AudioContext. First channel is channel 1, second is channel 2.
+    var arrayBuffer = ctx.createBuffer(channels.length,ctx.sampleRate*time, ctx.sampleRate);//lasts as long as time
+
+    for (var c = 0; c < channels.length; c++)
+    {
         let prev = 0;//data point with the greatest time value less than the current time
         let next = 1;//next data point
-        for (let b = 0; b < arrayBuffer.length; b++) {
-            let x = channels[i][0].x + b / ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
-            if (x > channels[i][next].x) {
+
+        for (var i = 0; i < arrayBuffer.length; i++) {
+            let x = channels[c][0].x + i/ctx.sampleRate;//channel0[0].x + i/ctx.sampleRate is the time on the chart the sample is
+            if(x > channels[c][next].x){
                 prev = next;
                 next++;
             }
-            arrayBuffer.getChannelData(i)[b] = Math.abs(norm[i] * linearInterpolation(channels[i][prev], channels[i][next], x) * (2 * rand() - 1));
+
+            arrayBuffer.getChannelData(c)[i] = Math.abs(norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1));
+            ; // Left Channel
+
         }
-        for (let j = 0; j < channels[i].length; j++) {
+    }
+    for (let i = 0; i < channels.length; i++)
+        for (let j = 0; j < channels[i].length; j++){
             // console.log(channels[i][j]);
             channels[i][j].x = (channels[i][j].x) * speed;
             // console.log(channels[i][j]);
         }
 
-
-    }
-    let sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
+    // Get an AudioBufferSourceNode to play our buffer.
+    const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const
     sonifiedChart.loop = loop; //play on repeat?
     sonifiedChart.buffer = arrayBuffer
     // connect the AudioBufferSourceNode to the
     // destination so we can hear the sound
-    if (destination)
+    if(destination)
         sonifiedChart.connect(destination);
     else
         sonifiedChart.connect(ctx.destination);
-    myChart.update();
     return sonifiedChart;
 
     //accepts x values and returns a y value based on a line between the points immediately before and after the given x value
