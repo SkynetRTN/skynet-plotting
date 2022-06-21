@@ -17,6 +17,6 @@
         emptyOutDir: true,
         chunkSizeWarningLimit: 2048
     }
-  }
-  
-  export default config
+}
+
+export default config
