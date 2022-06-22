@@ -65,7 +65,7 @@ export function Set2DefaultSpeed(myChart:Chart){
 //    }
     sonification.audioSource.start();
 
-    setInterval(check, 500, speed, myChart);
+    // setInterval(check, 500, speed, myChart);
 
     sonification.audioControls.playPause.onclick = () => {pause(myChart)}
     
@@ -99,16 +99,19 @@ export function pause(myChart: Chart, clearInter: boolean = true){
         sonification.audioControls.playPause.innerHTML = "Sonify";
         sonification.audioControls.playPause.style.backgroundColor = ''
         sonification.audioControls.playPause.style.color = "black";
-        if(clearInter){
-            var i = setInterval(function () {}, 100);
-//            console.log(i);
-//            console.log(i-1);
-            clearInterval(i-1);
-            clearInterval(i);
-        }  
+        // sonification.audioSource = null;
+//         if(clearInter){
+//             var i = setInterval(function () {}, 100);
+// //            console.log(i);
+// //            console.log(i-1);
+//             clearInterval(i-1);
+//             clearInterval(i);
+//         }
     }
     catch (DOMException)
-    {}
+    {
+        // console.trace(DOMException)
+    }
 
     //change button to normal
 
@@ -155,6 +158,7 @@ export function saveSonify(myChart: Chart){
             sonification.audioSource = sonify(myChart, [5], speed)
         downloadBuffer(sonification.audioSource.buffer, 60)
     }
+
 }
 
 /**
@@ -165,23 +169,23 @@ export function saveSonify(myChart: Chart){
  * @param destination node to link the audioBuffer to. links to the contxt's destination by default.
  */
 export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, loop: boolean = true, destination?: AudioNode){
-    
+
     let rand = sfc32(2,3,5,7);// We actually WANT the generator seeded the same every time- that way the resulting buffer is always the same with repeated playbacks
     let ctx = myChart.data.sonification.audioContext
 
     let channels =  (dataSets.map(d => myChart.data.datasets[d].data as ScatterDataPoint[]));
 
 
-    console.log(channels);
+    // console.log(channels);
+
+    for (let i = 0; i < channels.length; i++)
+        for (let j = 0; j < channels[i].length; j++){
+            // console.log(channels[i][j]);
+            channels[i][j].x = (channels[i][j].x) / speed;
+            // console.log(channels[i][j]);
+        }
 
 
-    for (let j = 0; j < channels[0].length; j++){
-        // console.log(channels[i][j]);
-        channels[0][j].x = (channels[0][j].x) / speed;
-        // console.log(channels[i][j]);
-    }
-
-    
 
     let time = (channels[0][channels[0].length - 1].x - channels[0][0].x);
 
@@ -219,16 +223,16 @@ export function sonify(myChart: Chart, dataSets: number[], speed: number = 1, lo
             }
 
             arrayBuffer.getChannelData(c)[i] = Math.abs(norm[c] * linearInterpolation(channels[c][prev],channels[c][next],x) * (2*rand()-1));
-                ; // Left Channel
+            ; // Left Channel
 
         }
     }
-
-    for (let j = 0; j < channels[0].length; j++){
-        // console.log(channels[i][j]);
-        channels[0][j].x = (channels[0][j].x) * speed;
-        // console.log(channels[i][j]);
-    }
+    for (let i = 0; i < channels.length; i++)
+        for (let j = 0; j < channels[i].length; j++){
+            // console.log(channels[i][j]);
+            channels[i][j].x = (channels[i][j].x) * speed;
+            // console.log(channels[i][j]);
+        }
 
     // Get an AudioBufferSourceNode to play our buffer.
     const sonifiedChart = ctx.createBufferSource();//Note to self: see if this works if not a const

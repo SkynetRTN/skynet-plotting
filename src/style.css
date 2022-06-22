@@ -161,11 +161,11 @@ button.clusterRest {
     display: flex;
 }
 
-button:focus {
-    outline: none;
-    opacity: 1;
-    /*background-color: #E7E7E7;*/
-}
+/*button:focus {*/
+/*    outline: none;*/
+/*    opacity: 1;*/
+/*    !*background-color: #E7E7E7;*!*/
+/*}*/
 button:hover {
     opacity: 1;
     background-color: #E7E7E7;
@@ -266,6 +266,16 @@ input[type=number]::-webkit-inner-spin-button {
 input[type=number] {
     -moz-appearance:textfield;
 }
+
+/* input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: inner-spin-button;
+    opacity: 1;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance:textfield;
+} */
 
 
 /* the following spinboxnum is specifically used in variable period folding Period (days) number box. This specific subclass provide a spin button on the right of the input box. */

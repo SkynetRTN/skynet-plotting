@@ -27,7 +27,7 @@ export function updateScatter(
     clusterProForm: ClusterProForm = null,) {
 
     let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
-    let err = 0.312347;
+    let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
     let dist = parseFloat(clusterForm["d_num"].value);
     //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
     let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
@@ -747,18 +747,33 @@ export function updateClusterProScatter(
         let columns = table.getColHeader();
 
         let blueKey = modelFormKey(0, 'blue')
+        let redKey = modelFormKey(0, 'red')
+        let lumKey = modelFormKey(0, 'lum')
 
         //Identify the column the selected filter refers to
         let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
         let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
         let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
 
+        let blueErr =
+            columns.indexOf(modelForm[blueKey].value + " err") < 0
+                ? null
+                : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
+        let redErr =
+            columns.indexOf(modelForm[redKey].value + " err") < 0
+                ? null
+                : columns.indexOf(modelForm[redKey].value + " err");
+        let lumErr =
+            columns.indexOf(modelForm[lumKey].value + " err") < 0
+                ? null
+                : columns.indexOf(modelForm[lumKey].value + " err");
+
+        let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
         let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
         let dist = parseFloat(clusterForm["d_num"].value);
         let range = parseFloat(clusterForm["distrange_num"].value);
         let distHighLim = (dist+(dist*(range/100)))*1000;
         let distLowLim =   (dist-(dist*(range/100)))*1000;
-
         let proMinMax: { [key: string]: number } = { minX: 0, maxX: 0, minY: 0, maxY: 0, };
         let start = 0;
         for (let i = 0; i < tableData.length; i++) {
@@ -767,9 +782,13 @@ export function updateClusterProScatter(
             let distance: number = tableData[i][blueDist];
             let isDistNotValid = isNaN(distance) || distance === null
             if (!(
-                typeof (x) != 'number' || typeof (y) != 'number'
+                    typeof (x) != 'number' || typeof (y) != 'number'
                 ||
-                (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim))
+                    ((blueErr != null && tableData[i][blueErr] > err || tableData[i][blueErr] == "") ||
+                    (redErr != null && tableData[i][redErr] > err || tableData[i][redErr] == "") ||
+                    (lumErr != null && tableData[i][lumErr] > err || tableData[i][lumErr] == ""))
+                ||
+                    (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim))
                 )){
                 chart[start++] = {
                     x: x,
@@ -786,7 +805,8 @@ export function updateClusterProScatter(
             }
         }
        // updateProChartScale(proChart, proMinMax)
-        chart = chart.slice(0, start++)
+        chart = chart.slice(0, start++);
+        proChart.data.datasets[2].data = chart;
         proChart.update()
     }
 //obselete -- new scale code in cluster3.ts

@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, debounce, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js/index.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -386,7 +386,9 @@ export function pulsarTest(): [Handsontable, Chart] {
             document.getElementById("frequency-div").hidden = false;
         }
     }
+    // if(parseFloat(this.pstart.value)<){
 
+    // }
     const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
 
@@ -453,7 +455,7 @@ export function pulsarTest(): [Handsontable, Chart] {
             //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
             // }
         if (periodFoldingForm["period_num"].max != range){
-            linkInputs(
+            linkInputsPuls(
                 periodFoldingForm["period"],
                 periodFoldingForm["period_num"],
                 parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
@@ -473,10 +475,10 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         }
 
-        if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-            step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
+        if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
+            step = round(periodFoldingForm.period_num.value*10e-4, 6)
         }else{
-            step = 10e-5
+            step = 10e-6
         }
         periodFoldingForm["period_num"].step = step
 
@@ -629,6 +631,7 @@ export function pulsarFileUploadTest(evt: Event, table: Handsontable, myChart: C
             let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
 
             const fourierForm = document.getElementById('fourier-form') as FourierForm;
+
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 

@@ -6,7 +6,7 @@ import { tableCommonOptions, colors } from "./config"
 import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js";
-import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
+import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -121,6 +121,8 @@ export function pulsar(): [Handsontable, Chart] {
         };
     }
 
+    document.getElementById('speed').oninput = ()=>{pause(myChart, true)};
+
     const container = document.getElementById('table-div');
           // unhide table whenever interface is selected
   document.getElementById("chart-type-form").addEventListener("click", () => {
@@ -143,8 +145,8 @@ export function pulsar(): [Handsontable, Chart] {
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     //Audio Context
     const audioCtx = new AudioContext();
-    var audioSource = new AudioBufferSourceNode(audioCtx);
-    var audioControls = {
+    const audioSource = new AudioBufferSourceNode(audioCtx);
+    const audioControls = {
         speed: document.getElementById("speed") as HTMLInputElement,
         playPause: document.getElementById("sonify") as HTMLButtonElement,
         save: document.getElementById("saveSonification") as HTMLButtonElement
@@ -468,8 +470,12 @@ export function pulsar(): [Handsontable, Chart] {
  */
 export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("pulsarFileUpload called");
-    pause(myChart);
-    Set2DefaultSpeed(myChart);
+    try {
+        pause(myChart);
+    }
+    finally {
+        Set2DefaultSpeed(myChart);
+    }
 
     let file = (evt.target as HTMLInputElement).files[0];
 
@@ -480,7 +486,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
     for (let i in myChart.data.datasets)//empty data on upload
         myChart.data.datasets[i].data = [];
-    myChart.data.sonification.audioSource.buffer = null;
+    // myChart.data.sonification.audioSource.buffer = null;
 
 
     var type: string;

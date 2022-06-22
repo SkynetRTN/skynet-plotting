@@ -5,7 +5,7 @@ import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
+import { updateTableHeight, getDateString, dataURLtoBlob, formatTime, updateLabels } from './util';
 import { curve } from './chart-curve';
 import { dual } from './chart-dual';
 import { moon } from './chart-moon';
