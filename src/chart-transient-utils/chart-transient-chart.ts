@@ -187,8 +187,17 @@ export class TransientChart {
         this.updateDataFromDataset([], idx);
     }
 
-    clearDatasets() {
-        this.chart.data.datasets = [];
+    clearDatasets(type?: string) {
+        if (type) {
+            const range = this.getDatasets().length;
+            for (let i = 0; i < range; i++) {
+                if (this.getDataset(i).label.includes(type)) {
+                    this.clearDataFromDataset(i);
+                }
+            }
+        } else {
+            this.chart.data.datasets = [];
+        }
     }
 
     addDataset(dataset: ChartDataset) {
