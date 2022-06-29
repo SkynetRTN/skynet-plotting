@@ -5,7 +5,7 @@ import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 import { updateLine, updateLabels, updateTableHeight, linkInputs, throttle } from "./util"
-import {sqr, rad } from "./my-math"
+import {sqr, rad, round } from "./my-math"
 
 /**
  *  This function is for the moon of a planet.
@@ -42,13 +42,11 @@ export function moon(): [Handsontable, Chart] {
 
     // Link each slider with corresponding text box
     const moonForm = document.getElementById("moon-form") as MoonForm;
-    linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.01, 30, true);
+    linkInputs(moonForm.elements['a'], moonForm.elements['a_num'], 1, 750, 0.03, 30, true);
     linkInputs(moonForm.elements['p'], moonForm.elements['p_num'], 0.5, 20, 0.01, 10, false, true, 0.5, Number.POSITIVE_INFINITY);
     linkInputs(moonForm.elements['phase'], moonForm.elements['phase_num'], 0, 360, 1, 0);
     linkInputs(moonForm.elements['tilt'], moonForm.elements['tilt_num'], 0, 90, 1, 0);
-    moonForm.elements['a_num'].oninput = throttle(function () {
-        moonForm.elements['a_num'].step = (parseFloat(moonForm.elements['a_num'].value)*0.1).toString()
-    },16)
+
     const tableData = generateMoonData();
 
     // create table
@@ -89,8 +87,7 @@ export function moon(): [Handsontable, Chart] {
                     fill: false,
                     immutableLabel: true,
                 }
-            ],
-             
+            ]
         },
         options: {
             hover: {
@@ -128,7 +125,15 @@ export function moon(): [Handsontable, Chart] {
     const throttledUpdateFormula = throttle(updateFormula, frameTime);
     moonForm.oninput = function () {
         throttledUpdateFormula(tableData, moonForm, myChart);
+        if(moonForm.elements['a_num'].step != round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()){
+        moonForm.elements['a_num'].step = round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()
+        }
     };
+
+    // moonForm['a'].onchange = function () {
+    //     moonForm.elements['a_num'].step = (parseFloat(moonForm.elements['a_num'].value)*0.01).toString()
+    //     moonForm.elements['a'].step = '0.01'
+    // };
 
     updateLine(tableData, myChart);
     updateFormula(tableData, moonForm, myChart);

@@ -900,11 +900,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             0
         );
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
-        console.log('part1')
+        // console.log('part1')
         
-
+        
         periodFoldingForm.oninput = throttle(function () {
-            console.log('part2')
+            // console.log('part2')
 
             // step = round((periodFoldingForm.period_num.value)*0.001, 4)
             if ((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range > 10e-6){
