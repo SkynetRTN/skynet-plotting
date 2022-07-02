@@ -126,7 +126,7 @@ export function moon(): [Handsontable, Chart] {
     moonForm.oninput = function () {
         throttledUpdateFormula(tableData, moonForm, myChart);
         if(moonForm.elements['a_num'].step != round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()){
-        moonForm.elements['a_num'].step = round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()
+            moonForm.elements['a_num'].step = round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()
         }
     };
 

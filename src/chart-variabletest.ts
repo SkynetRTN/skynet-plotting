@@ -589,7 +589,8 @@ function updateVariable(table: Handsontable, myChart: Chart) {
  * DATA FLOW: chart[0], chart[1] -> chart[2]
  * @param myChart The chart object
  */
-function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataPoint[]) {
+function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataPoint[]) { // error is stored here but not in use anymore, but saved for possible usage
+
     let lcHTML =
         '<form title="Light Curve" id="light-curve-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
         '<div class="row">\n' +
@@ -806,7 +807,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             // alert("Please make sure the stop value is greater than the start value.");
             return;
         }
-        let fData = [];
+        let fData = []; // this is the original one without error bar
         let fDataWError = [];
 
         let lcData = myChart.data.datasets[2].data as ScatterDataPoint[];
@@ -885,7 +886,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, 0.01, range, true
+            parseFloat(fourierForm.start.value), range, 1, range, true
         );
         periodFoldingForm["period"].step = 0.001
 
@@ -907,9 +908,15 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             // console.log('part2')
 
             // step = round((periodFoldingForm.period_num.value)*0.001, 4)
+            var i = periodFoldingForm["period_num"].step
+            var I = 0
+            while(i >= 1){
+                i = i/10
+                I ++
+            }
             if ((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range > 10e-6){
                 // step = round((periodFoldingForm.period_num.value/range)*0.01, 4)
-                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 6)
+                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 6-I)
             }else{
                 step = 10e-6
             }
@@ -925,8 +932,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             // console.log('debounced')
             // },1000),
             // console.log(periodFoldingForm["period_num"].value,parseFloat(fourierForm.start.value), range)
+
+            if(periodFoldingForm["period_num"].step != step){
+                periodFoldingForm["period_num"].step = step
+            }
+
+            periodFoldingForm["period_num"].value = round(parseFloat(periodFoldingForm["period_num"].value),4).toString()
             
-            periodFoldingForm["period_num"].step = step
+            // periodFoldingForm["period_num"].step = step
             // periodFoldingForm["period"].step = step
 
             // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
@@ -993,9 +1006,9 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         myChart.data.datasets[8].data = ebarData
         myChart.options.scales['x'].min = 0;
         if (doubleMode == true){
-            myChart.options.scales['x'].max = (period)*2
+            myChart.options.scales['x'].max = round((period)*2,1)
         }else{
-        myChart.options.scales['x'].max = (period);
+            myChart.options.scales['x'].max = round((period),1);
         }
         
     } else {
