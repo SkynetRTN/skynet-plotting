@@ -5,12 +5,8 @@
 
 import { Chart, Color } from "chart.js";
 
-
-export const baseUrl:string = "http://localhost:5000"//local testing url
-// "http://152.2.18.8:8080" //testing server url
-// "http://192.168.128.196:8080" //GBO temp testing server url
-// export const baseUrl:string = "https://skynet.unc.edu/graph-api" //production url
-
+// @ts-ignore
+export const baseUrl: string = import.meta.env.VITE_API_URL
 
 /**
  * This function returns a paired key-value of filters corresponding to the function needed to claculate magnitude.
@@ -67,17 +63,17 @@ export const filterWavelength: { [key: string]: number } = {
  * @param {function} callback -function to execute with http response
  * @param {function} failedCallback -function to execute when http request failed
  */
-export function httpGetAsync(theUrl: string, callback: Function, failedCallback: Function=()=>{}) {
+export function httpGetAsync(theUrl: string, callback: Function, failedCallback: Function = () => { }) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             try {
                 callback(xmlHttp.responseText);
             } catch (e) {
                 console.log(e)
                 console.log(JSON.parse(xmlHttp.responseText))
             }
-        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == ""){
+        } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
             try {
                 failedCallback(xmlHttp.responseText);
             } catch (e) {
@@ -93,7 +89,7 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
 export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {  // Function to be called when the request is completed
-        if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != ""){
+        if (xmlHttp.status == 200 && xmlHttp.readyState == 4 && xmlHttp.response != "") {
             try {
                 callback(xmlHttp.responseText);
             } catch {
@@ -115,19 +111,19 @@ export function httpPostAsync(theUrl: string, data: any, callback: Function, fai
 
 
 export function modelFormKey(chartNum: number, color: string) {
-        return chartNum > 0 ? (color + (chartNum+1).toString()) : color
+    return chartNum > 0 ? (color + (chartNum + 1).toString()) : color
 }
 
 export function modelFormKeys(chartNum: number, form: ModelForm) {
-        function getFilter(key: string): string {
-                return form[key].value
-        }
-        let returnArray = []
-        let filterList = ['blue', 'red', 'lum']
-        for (let i = 0; i< filterList.length; i++) {
-                returnArray.push(getFilter(modelFormKey(chartNum, filterList[i])))
-        }
-        return returnArray
+    function getFilter(key: string): string {
+        return form[key].value
+    }
+    let returnArray = []
+    let filterList = ['blue', 'red', 'lum']
+    for (let i = 0; i < filterList.length; i++) {
+        returnArray.push(getFilter(modelFormKey(chartNum, filterList[i])))
+    }
+    return returnArray
 }
 
 /**
@@ -138,7 +134,7 @@ export function modelFormKeys(chartNum: number, form: ModelForm) {
  */
 export function pointMinMax(scaleLimits: { [key: string]: number }, x: number, y: number) {
     let newLimits = scaleLimits;
-    if (isNaN(newLimits["minX"])||isNaN(newLimits["maxX"])||isNaN(newLimits["minY"])||isNaN(newLimits["maxY"])) {
+    if (isNaN(newLimits["minX"]) || isNaN(newLimits["maxX"]) || isNaN(newLimits["minY"]) || isNaN(newLimits["maxY"])) {
         newLimits["minX"] = x;
         newLimits["maxX"] = x;
         newLimits["minY"] = y;
