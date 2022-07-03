@@ -5,17 +5,15 @@ import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime, updateLabels } from './util';
+import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
 import { curve } from './chart-curve';
 import { dual } from './chart-dual';
 import { moon } from './chart-moon';
 import { scatter } from './chart-scatter';
 import { venus } from './chart-venus';
 import { variable, variableFileUpload } from './chart-variable';
-import { variableTest, variableFileUploadTest } from './chart-variabletest';
 import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { pulsarTest, pulsarFileUploadTest} from './chart-pulsartest';
 import { cluster0} from './chart-cluster0';
 import { cluster1 } from './chart-cluster';
 import { cluster2 } from './chart-cluster2';
@@ -178,13 +176,7 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }     
-    } else if (chart === 'variableTest') {
-        objects = variableTest();
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            variableFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
-        }    
+        }
     } else if (chart === 'spectrum') {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -196,12 +188,6 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }
-    } else if (chart === 'pulsarTest') {
-        objects = pulsarTest();
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'cluster0') {
         cluster_objects = cluster0();
@@ -326,6 +312,7 @@ function setChartDefaults() {
  *  DATA FLOW: chart-info-form -> Chart
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
+ * @param chartNum
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
@@ -373,7 +360,7 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     }
     } else if (chartNum === 1) {
         const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
-        const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
+        // const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
         // Create a dummy canvas
             // Create a dummy canvas
     const destCanvas = document.createElement('canvas');
@@ -386,10 +373,10 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     destCtx.fillStyle = '#FFFFFF';
     destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
 
-    // Draw the original canvas onto the destination canvas
-    let compile = destCtx.drawImage(canvas, 0, 0);
-    //draw canvas 2 onto the destination canvas
-    compile = destCtx.drawImage(canvas2, canvas.width, 0);
+    // // Draw the original canvas onto the destination canvas
+    // let compile = destCtx.drawImage(canvas, 0, 0);
+    // //draw canvas 2 onto the destination canvas
+    // compile = destCtx.drawImage(canvas2, canvas.width, 0);
 
 
     // Download the dummy canvas
@@ -403,7 +390,7 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     }
     }   else if (chartNum === 2) {
         const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
-        const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
+        // const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
         // Create a dummy canvas
             // Create a dummy canvas
     const destCanvas = document.createElement('canvas');
@@ -417,9 +404,9 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
 
     // Draw the original canvas onto the destination canvas
-    let compile = destCtx.drawImage(canvas, 0, 0);
+    // let compile = destCtx.drawImage(canvas, 0, 0);
     //draw canvas 2 onto the destination canvas
-    compile = destCtx.drawImage(canvas2, canvas.width, 0);
+    // compile = destCtx.drawImage(canvas2, canvas.width, 0);
 
 
     // Download the dummy canvas
