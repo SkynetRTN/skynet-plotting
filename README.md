@@ -9,20 +9,15 @@ Now you can start a testing server that will automatically reload as you make ch
 ```bash
 $ npm start
 ```
-To build the site, please double check in the file`./src/chart-cluster-utils/chart-cluster-util.ts`, the API url is the production one
-
-```js
-//production url
-export const baseUrl:string = "https://skynet.unc.edu/graph-api"
-```
-
-then run
+To build the site for production
 ```bash
 $ npm run build
 ```
 which will place the bundled files in the `./dist` directory.
 
-To use the Cluster mode, check out [@finnsjames](https://github.com/finnsjames)'s [skynet-plotting-server](https://github.com/finnsjames/skynet-plotting-server).
+_The API urls are different for development and production. The switch is handled automatically by vite environment variable._
+
+To use functionalities that require our backend server, for example in Cluster and Gravity, check out [@RuideFu](https://github.com/RuideFu)'s [skynet-plotting-server](https://github.com/UNC-Skynet/skynet-plotting-server), forked from [@finnsjames](https://github.com/finnsjames)'s [skynet-plotting-server](https://github.com/finnsjames/skynet-plotting-server).
 
 *Note: `npm start` is a shortcut for `npm run start`. Any `npm run <your-script-name>` command (like the two we used here) is defined in the `scripts` section of `package.json`. Take a look by yourself! In other words, these are not some magic commands that npm has built-in, but rather some convenient "scripts" that we have defined.*
 
