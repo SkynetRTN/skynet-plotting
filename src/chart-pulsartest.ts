@@ -502,8 +502,8 @@ export function pulsarTest(): [Handsontable, Chart] {
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
         let eqaulizer = parseFloat(polarizationForm.eq_num.value);
 
-        myChart.data.datasets[5].data = periodFolding(myChart, 0,  period, bins, phase, whetherDouble)
-        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  period, bins, phase, whetherDouble)
+        myChart.data.datasets[5].data = periodFolding(myChart, 0,  parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
+        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({ x: point.x, y: point.y * eqaulizer })
         );

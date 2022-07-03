@@ -916,13 +916,16 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             }
             if ((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range > 10e-6){
                 // step = round((periodFoldingForm.period_num.value/range)*0.01, 4)
-                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 6-I)
+                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 5-I)
             }else{
                 step = 10e-6
             }
             
-            if (periodFoldingForm["period"].min != Math.log(parseFloat(fourierForm.start.value)).toString()){
+            if (periodFoldingForm["period"].min != Math.log(parseFloat(fourierForm.start.value)).toString() || periodFoldingForm["period"].max != Math.log(parseFloat(fourierForm.stop.value)).toString()){
                 periodFoldingForm["period"].min = Math.log(parseFloat(fourierForm.start.value)).toString()
+                periodFoldingForm["period"].max = Math.log(parseFloat(fourierForm.stop.value)).toString()
+                periodFoldingForm["period_num"].min = fourierForm.start.value
+                periodFoldingForm["period_num"].max = fourierForm.stop.value
                 periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
             } 
 
@@ -937,14 +940,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                 periodFoldingForm["period_num"].step = step
             }
 
-            periodFoldingForm["period_num"].value = round(parseFloat(periodFoldingForm["period_num"].value),4).toString()
+            // periodFoldingForm["period_num"].value = round(parseFloat(periodFoldingForm["period_num"].value),4).toString()
             
             // periodFoldingForm["period_num"].step = step
             // periodFoldingForm["period"].step = step
 
             // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
 
-            updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
+            updatePeriodFolding(myChart, parseFloat(clamp(periodFoldingForm["period_num"].value, periodFoldingForm["period_num"].min, periodFoldingForm["period_num"].max)), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
         },3);
             
