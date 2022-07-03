@@ -3,16 +3,16 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
-import { Mode } from "./types/chart.js";
-import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
+import { Mode } from "./types/chart.js/index.js";
+import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 /**
  *  Returns generated table and chart for pulsar.
  *  @returns {[Handsontable, Chart]} Returns the table and the chart object.
  */
-export function pulsar(): [Handsontable, Chart] {
+export function pulsarTest(): [Handsontable, Chart] {
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
         '<form title="Pulsar" id="pulsar-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
@@ -77,14 +77,41 @@ export function pulsar(): [Handsontable, Chart] {
 
     document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',
         '<form title="Folding Period" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
+        // '<div class="row">\n' +
+        // '<div class="col-sm-7">Folding Period: </div>\n' +
+        // '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
+        // '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Folding Period: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="pf" title="Folding Period" value=0></input></div>\n' +
+        '<div class="col-sm-1"><input type="checkbox" class="range" name="doublePeriodMode" value="0" id="doublePeriodMode" checked></div>\n'+
+        '<div class="col-sm-5">Show Two Periods</div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Bins: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
         '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Period (days):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" StringFormat={}{0:N2} step="0.001"></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="phase" name="phase"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="phase_num" name="phase_num" class="field"></div>\n' +
+
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Bins:</div>\n' +
+        '<div class="col-sm-4 range"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Bins" name="bins" class="field" value=100 step="0.001"></div>\n' +
+        '<div class="row">\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '</div>\n' +
+
+        // '<div class="row">\n' +
+        // '<div class="col-sm-3 des">Bins: </div>\n' +
+        // '<div class="col-sm-7 range"></div>\n' +
+        // '<div class="col-sm-3 text"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
+        // '</div>\n' +
         '</form>\n' +
 
         '<form title="Polarization Detection" id="polarization-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -102,10 +129,9 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-        '<button id="sonify" style = "position: relative; left:92px;"/>Sonify</button>' +
-        '<label style = "position:relative; right:73px;">Speed:</label>' +
-        '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:205px; width: 52px;" >' +        
-        '<button id="saveSonification" style = "position:relative; left:50px;"/>Save Sonification</button>' +
+        '<input class="extraoptions" type="number" id="speed" min="0" max="10" placeholder = "Speed" style="width: 52px;">' +
+        '<button id="sonify"/>Sonify</button>' +
+        '<button id="saveSonification";/>Save Sonification</button>' +
         '</div>\n'
     );
     document.getElementById('axis-label1').style.display = 'inline';
@@ -120,8 +146,6 @@ export function pulsar(): [Handsontable, Chart] {
             'chn2': (Math.random() / 20) + 28.98,
         };
     }
-
-    document.getElementById('speed').oninput = ()=>{pause(myChart, true)};
 
     const container = document.getElementById('table-div');
           // unhide table whenever interface is selected
@@ -145,8 +169,8 @@ export function pulsar(): [Handsontable, Chart] {
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     //Audio Context
     const audioCtx = new AudioContext();
-    const audioSource = new AudioBufferSourceNode(audioCtx);
-    const audioControls = {
+    var audioSource = new AudioBufferSourceNode(audioCtx);
+    var audioControls = {
         speed: document.getElementById("speed") as HTMLInputElement,
         playPause: document.getElementById("sonify") as HTMLButtonElement,
         save: document.getElementById("saveSonification") as HTMLButtonElement
@@ -241,11 +265,22 @@ export function pulsar(): [Handsontable, Chart] {
                     hidden: true,
                     fill: false
                 }
-            ],
-             
+            ]
         },
         options: {
             plugins: {
+                // zoom: {
+                //     pan: {
+                //       enabled: true,
+                //       mode: 'x',
+                //     },
+                //     zoom: {
+                //       wheel: {
+                //         enabled: true,
+                //       },
+                //       mode: 'x',
+                //     },
+                //   },
                 legend: {
                     labels: {
                         filter: function (legendItem) {
@@ -348,7 +383,8 @@ export function pulsar(): [Handsontable, Chart] {
 
         myChart.update('none');
     }
-    lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
+    lightCurveForm.oninput = lightCurveOninput;
+    // lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
     fourierForm.elements['fouriermode'].oninput = function () {
         if (fourierForm.elements['fouriermode'].value === 'p') {
@@ -359,7 +395,9 @@ export function pulsar(): [Handsontable, Chart] {
             document.getElementById("frequency-div").hidden = false;
         }
     }
+    // if(parseFloat(this.pstart.value)<){
 
+    // }
     const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
 
@@ -404,16 +442,68 @@ export function pulsar(): [Handsontable, Chart] {
         fourierOninput.apply(fourierForm, args);
     }
 
+    periodFoldingForm.doublePeriodMode.onchange = function(){
+        this.bins.value = clamp(this.bins.value, 0, 10000);
+        let period = parseFloat(periodFoldingForm.period_num.value);
+        let bins = parseInt(this.bins.value);
+        let phase = parseFloat(periodFoldingForm.phase_num.value);
+        let whetherDouble = periodFoldingForm.doublePeriodMode.checked
+
+        // console.log(periodFoldingForm.doublePeriodMode.checked)
+        myChart.data.datasets[5].data = periodFolding(myChart, 0,  period, bins, phase, whetherDouble)
+        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  period, bins, phase, whetherDouble)
+    }
 
     const periodFoldingOninput = function () {
-        this.pf.value = clamp(this.pf.value,0, NaN);
+        let end = (myChart.data.datasets[1].data[myChart.data.datasets[1].data.length-1] as ScatterDataPoint).x;
+        let start = (myChart.data.datasets[0].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(start-end);
+        let step = 10e-5
+        
+            // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
+            //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
+            // }
+        if (periodFoldingForm["period_num"].max != range){
+            linkInputsPuls(
+                periodFoldingForm["period"],
+                periodFoldingForm["period_num"],
+                parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
+            );
+    
+    
+            
+            linkInputs(
+                periodFoldingForm["phase"], 
+                periodFoldingForm["phase_num"], 
+                0, 
+                1, 
+                0.01, 
+                0
+            );
+        }else{
+
+        }
+
+        if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
+            step = round(periodFoldingForm.period_num.value*10e-4, 6)
+        }else{
+            step = 10e-6
+        }
+        periodFoldingForm["period_num"].step = step
+
+        // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
+
+        // this.pf.value = clamp(this.pf.value,0, NaN);
         this.bins.value = clamp(this.bins.value, 0, 10000);
 
-        let period = parseFloat(this.pf.value);
+        let period = parseFloat(periodFoldingForm.period_num.value);
         let bins = parseInt(this.bins.value);
+        let phase = parseFloat(periodFoldingForm.phase_num.value);
+        let whetherDouble = periodFoldingForm.doublePeriodMode.checked
         let eqaulizer = parseFloat(polarizationForm.eq_num.value);
-        myChart.data.datasets[5].data = periodFolding(myChart, 0, period, bins);
-        myChart.data.datasets[6].rawData = periodFolding(myChart, 1, period, bins);
+
+        myChart.data.datasets[5].data = periodFolding(myChart, 0,  period, bins, phase, whetherDouble)
+        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  period, bins, phase, whetherDouble)
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({ x: point.x, y: point.y * eqaulizer })
         );
@@ -422,8 +512,14 @@ export function pulsar(): [Handsontable, Chart] {
             myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.update('none');
+
+        periodFoldingForm.oninput
     }
-    periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
+
+    periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
+    // periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
+
+    
 
     linkInputs(
         polarizationForm.eq,
@@ -468,14 +564,10 @@ export function pulsar(): [Handsontable, Chart] {
  * @param table     The table to be updated
  * @param myChart
  */
-export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
+export function pulsarFileUploadTest(evt: Event, table: Handsontable, myChart: Chart<'line'>) {
     // console.log("pulsarFileUpload called");
-    try {
-        pause(myChart);
-    }
-    finally {
-        Set2DefaultSpeed(myChart);
-    }
+    pause(myChart);
+    Set2DefaultSpeed(myChart);
 
     let file = (evt.target as HTMLInputElement).files[0];
 
@@ -486,7 +578,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
     for (let i in myChart.data.datasets)//empty data on upload
         myChart.data.datasets[i].data = [];
-    // myChart.data.sonification.audioSource.buffer = null;
+    myChart.data.sonification.audioSource.buffer = null;
 
 
     var type: string;
@@ -548,6 +640,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
             let nyquist = 1.0 / (2.0 * (ArrMath.max(ts) - ArrMath.min(ts)) / ts.length);
 
             const fourierForm = document.getElementById('fourier-form') as FourierForm;
+
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
 
@@ -559,14 +652,14 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         {
             let period = parseFloat(data[15].split(' ').filter(str => str!='')[4])/1000; 
             let fluxstr: string[] = data
-//           console.log(fluxstr);
+            console.log(fluxstr);
             if(data[27].includes("\t")){
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split("\t")[str.split("\t").length-1].trim());
             }
             else{
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length!=0)).map(str => str.split(" ")[str.split(" ").length-1].trim());
             }
-//            console.log(fluxstr);
+            console.log(fluxstr);
             if(!fluxstr[0].includes("e+")){
                 var fluxes: number[] = fluxstr.map(Number);
             }
@@ -696,10 +789,12 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         document.getElementById('period-div').hidden = false;
         document.getElementById('frequency-div').hidden = true;
 
-        periodFoldingForm.pf.value = 0;
+        // periodFoldingForm.pf.value = 0;
+        periodFoldingForm['period_num'].value = 0
         periodFoldingForm.bins.value = 100;
 
-        periodFoldingForm.elements["pf"].disabled      = false;
+        // periodFoldingForm.elements["pf"].disabled      = false;
+        periodFoldingForm['period_num'].value = 0
         periodFoldingForm.elements["bins"].disabled    = false;
         polarizationForm.hidden                        = false;
         pulsarForm.mode[0].disabled                    = false;
@@ -755,7 +850,7 @@ function showDiv(id: string) {
     }
 }
 
-function periodFolding(myChart: Chart, src: number, period: number, bins: number): ScatterDataPoint[] {
+function periodFolding(myChart: Chart, src: number, period: number, bins: number, phase: number, whetherDouble: boolean): ScatterDataPoint[] {
     const data = myChart.data.datasets[src].data as ScatterDataPoint[];
     if (period === 0) {
         return data;
@@ -806,18 +901,33 @@ function periodFolding(myChart: Chart, src: number, period: number, bins: number
 
     const pfData: ScatterDataPoint[] = [];
 
+    let temp_x = 0
+    period = Math.abs(time_b[0]-time_b[time_b.length-1])
     for (let i = 0; i < bins; i++) {
+        temp_x = phase*period + floatMod(time_b[i], period);
+        if(temp_x >= period){
+            temp_x -= period
+        };
+
         pfData.push({
-            "x": time_b[i],
+            "x": temp_x,
             "y": flux_b[i]
         })
     }
-    for (let i = 0; i < bins; i++) {
-        pfData.push({
-            "x": time_b[i] + period,
-            "y": flux_b[i]
-        })
+    if (whetherDouble === true){
+        for (let i = 0; i < bins; i++) {
+            temp_x = phase*period + floatMod(time_b[i], period);
+            if(temp_x >= period){
+                temp_x -= period
+            };
+
+            pfData.push({
+                "x": temp_x + period,
+                "y": flux_b[i]
+            })
+        }
     }
+    pfData.sort((a, b) => a.x - b.x);
     return pfData;
 }
 
