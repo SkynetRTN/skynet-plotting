@@ -126,10 +126,12 @@ interface ClusterForm extends HTMLFormElement {
     distrange: HTMLInputElement,
     err: HTMLInputElement,
     red: HTMLInputElement,
+    rv: HTMLInputElement
     d_num: HTMLInputElement,
     distrange_num: HTMLInputElement,
     err_num: HTMLInputElement,
     red_num: HTMLInputElement,
+    rv_num: HTMLInputElement
     distScatter: HTMLInputElement,
     distScatter_num: HTMLInputElement,
     redScatter: HTMLInputElement,

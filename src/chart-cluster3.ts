@@ -18,7 +18,7 @@ Chart.register(zoomPlugin);
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
 export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, ClusterProForm] {
-    insertClusterControls(2);
+    insertClusterControls(2, true);
     clusterProButtons(true);
     clusterProSliders(true);
     //make graph scaling options visible to users
@@ -58,6 +58,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["rv"], clusterForm["rv_num"], 0, 6, 0.01, 3.1, false, true, 0, 100000000);
   linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
   
   //when table data changes, change the maxes and mins of the sliders and number boxes
