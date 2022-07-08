@@ -335,12 +335,14 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
     reader.onload = () => {
         let data = (reader.result as string).split("\n");
         data = data.filter(str => (str !== null && str !== undefined && str !== ""));
-        var theFrequencyInfoString = data.filter(str => str.slice(0,14)== '#      OBSFREQ')[0];
-        // console.log(theFrequencyInfoString);
+        //console.log(data)
+        var theFrequencyInfoString = data.filter(str => str.slice(0,14)== '# Actual_FREQ1')[0];
+        //console.log(theFrequencyInfoString);
 
         data = data.filter(str => (str[0] !== '#'));
+        //console.log(data)
         var theFrequencyInfo = parseFloat(theFrequencyInfoString.slice(15, theFrequencyInfoString.length));
-        // console.log(theFrequencyInfo);
+        //console.log(theFrequencyInfo);
         const tableData = [];
         var whetherObtical = 0;
         if (300000000 <= theFrequencyInfo && theFrequencyInfo<= 800000000){
