@@ -5,6 +5,9 @@
     font-family: 'Lato';
     src: url(./assets/Lato-Regular.ttf);
 }
+#myBrowser{
+    zoom: 100%;
+    }
 
 .handsontable {
     font-family: 'Lato', sans-serif;
