@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, debounce, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js/index.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -96,13 +96,22 @@ export function pulsarTest(): [Handsontable, Chart] {
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="phase" name="phase"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="phase_num" name="phase_num" class="field"></div>\n' +
+
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Bins:</div>\n' +
+        '<div class="col-sm-4 range"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Bins" name="bins" class="field" value=100 step="0.001"></div>\n' +
+        '<div class="row">\n' +
+        '</div>\n' +
         '<div class="row">\n' +
         '</div>\n' +
 
-        '<div class="row">\n' +
-        '<div class="col-sm-7">Bins: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
-        '</div>\n' +
+        // '<div class="row">\n' +
+        // '<div class="col-sm-3 des">Bins: </div>\n' +
+        // '<div class="col-sm-7 range"></div>\n' +
+        // '<div class="col-sm-3 text"><input class="field" type="number" step="0.001" name="bins" title="Bins" value=100></input></div>\n' +
+        // '</div>\n' +
         '</form>\n' +
 
         '<form title="Polarization Detection" id="polarization-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -493,8 +502,8 @@ export function pulsarTest(): [Handsontable, Chart] {
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
         let eqaulizer = parseFloat(polarizationForm.eq_num.value);
 
-        myChart.data.datasets[5].data = periodFolding(myChart, 0,  period, bins, phase, whetherDouble)
-        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  period, bins, phase, whetherDouble)
+        myChart.data.datasets[5].data = periodFolding(myChart, 0,  parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
+        myChart.data.datasets[6].rawData = periodFolding(myChart, 1,  parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({ x: point.x, y: point.y * eqaulizer })
         );
