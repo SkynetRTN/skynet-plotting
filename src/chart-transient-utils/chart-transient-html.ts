@@ -69,15 +69,22 @@ export const initHTML = () => {
 
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-            '<button class = "graphControl" id="panLeft">'  + 
-            '<center class = "graphControl">&#8592;</center></button>\n' +
-            '<button class = "graphControl" id="panRight">' +
-            '<center class = "graphControl">&#8594;</center></button>\n' +
-            '<button class = "graphControl" id="zoomIn">'   +
-            '<center class = "graphControl">&plus;</center></button>\n'  +
-            '<button class = "graphControl" id="zoomOut">'  +
-            '<center class = "graphControl">&minus;</center></button>\n' +
-            '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
+            '<div class="row">\n' +
+                '<button class = "graphControl" id="panLeft">'  + 
+                '<center class = "graphControl">&#8592;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="panRight">' +
+                '<center class = "graphControl">&#8594;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="zoomIn">'   +
+                '<center class = "graphControl">&plus;</center></button>\n'  +
+                '&nbsp;' +
+                '<button class = "graphControl" id="zoomOut">'  +
+                '<center class = "graphControl">&minus;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="Reset" style="width: auto" >' +
+                '<center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+            '</div>\n' +    
         '</div>\n'
     )
 
