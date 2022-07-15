@@ -132,10 +132,11 @@ export class TransientChart {
     /* MODEL METHODS */
     updateModel(form: VariableLightCurveForm) {
         let tempData: Array<{x: number, y: number}> = [];
-        const visibleMin = this.getVisibleRange()[0];
-        const visibleMax = this.getVisibleRange()[1];
+        // currently using min/max data, not visible
+        const visibleMin = this.getMinMJD();//this.getVisibleRange()[0];
+        const visibleMax = this.getMaxMJD();//this.getVisibleRange()[1];
         const buffer = (visibleMax - visibleMin)*0.5;
-        const range = [Math.max(visibleMin - 10., 0.1), visibleMax + buffer];
+        const range = [Math.max(visibleMin - buffer, 0.1), visibleMax + buffer];
 
         const model = new Model(form);
         for (let i = 0; i < this.getDatasets().length; i++) {
@@ -165,16 +166,8 @@ export class TransientChart {
         const itr = data.keys();
     
         /* USE VISIBLE RANGES FOR MODEL */
-        // let buffer = (chart.getMaxMJD() - chart.getMinMJD())*0.5;
-        // let range = [Math.min(lowerBound, 0.1), chart.getMaxMJD() + buffer];
-        let lowerBound = 0.1;
-        const visibleMin = this.getVisibleRange()[0];
-        const visibleMax = this.getVisibleRange()[1];
-        if (this.getMinMJD() > 0) {
-            lowerBound = visibleMin;
-        }
-        let buffer = (visibleMax - visibleMin)*0.5;
-        let range = [Math.min(lowerBound, 0.1), visibleMax + buffer];
+        let buffer = (this.getMaxMJD() - this.getMinMJD())*0.5;
+        let range = [Math.max(this.getMinMJD() - buffer, 0.1), this.getMaxMJD() + buffer];
         this.chart.options.scales["x"].max = range[1];
     
         let model = new Model(modelForm);
