@@ -4,7 +4,9 @@ import Chart from "chart.js/auto";
 import "chartjs-chart-error-bars";
 import { CategoryScale, ChartDataset, LinearScale, registerables } from "chart.js";
 import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
-import { round } from "./../my-math"
+import { round } from "./../my-math";
+import { Model } from "./chart-transient-model";
+import { findDelimiter, FILTERCOLORS } from "./chart-transient-util";
 
 export class TransientChart {
 
@@ -127,38 +129,151 @@ export class TransientChart {
         }
     }
 
-    /* DATA MANIPULATION */
+    /* MODEL METHODS */
+    updateModel(form: VariableLightCurveForm) {
+        let tempData: Array<{x: number, y: number}> = [];
+        const visibleMin = this.getVisibleRange()[0];
+        const visibleMax = this.getVisibleRange()[1];
+        const buffer = (visibleMax - visibleMin)*0.5;
+        const range = [Math.max(visibleMin - 10., 0.1), visibleMax + buffer];
 
-    setBoundaries(data: any[]) {
-        // reset old bounds first
-        this.setMinMJD(Number.POSITIVE_INFINITY);
-        this.minMag = Number.POSITIVE_INFINITY;
-        this.setMaxMJD(0);
-        this.maxMag = 0;
-
-        // find new bounds
-        let min = this.getMinMJD();
-        let max = this.getMaxMJD();
-        let minMag = this.minMag;
-        let maxMag = this.maxMag;
-
-        for (let i = 0; i < data.length; i++) {
-            min = Math.min(min, data[i][0]);
-            max = Math.max(max, data[i][0]);
-            minMag = Math.min(minMag, data[i][1]);
-            maxMag = Math.max(maxMag, data[i][1]);
+        const model = new Model(form);
+        for (let i = 0; i < this.getDatasets().length; i++) {
+            tempData = [];
+            let label = this.getDataset(i).label;
+            let delim = findDelimiter(label);
+            let filter = label.split(delim)[0];
+            let magShift = this.getMagShift(filter) ? this.getMagShift(filter): 0;
+            if (label.includes("model")) {
+                for (let j = 0; j < range.length; j++) {
+                    let mjd = range[j];
+                    let newMag = model.calculate(filter, mjd) + magShift;
+                    tempData.push({
+                        x: mjd,
+                        y: newMag,
+                    });
+                }
+                this.clearDataFromDataset(i);
+                this.updateDataFromDataset(tempData, i);
+            }
+            this.update();
         }
-        this.setMinMJD(min);
-        this.setMaxMJD(max);
-        this.minMag = minMag;
-        this.maxMag = maxMag;
+    }
+
+    addModel(data: Map<any, any>, modelForm: VariableLightCurveForm) {
+        let tmp: Array<{x: number, y: number}> = [];
+        const itr = data.keys();
+    
+        /* USE VISIBLE RANGES FOR MODEL */
+        // let buffer = (chart.getMaxMJD() - chart.getMinMJD())*0.5;
+        // let range = [Math.min(lowerBound, 0.1), chart.getMaxMJD() + buffer];
+        let lowerBound = 0.1;
+        const visibleMin = this.getVisibleRange()[0];
+        const visibleMax = this.getVisibleRange()[1];
+        if (this.getMinMJD() > 0) {
+            lowerBound = visibleMin;
+        }
+        let buffer = (visibleMax - visibleMin)*0.5;
+        let range = [Math.min(lowerBound, 0.1), visibleMax + buffer];
+        this.chart.options.scales["x"].max = range[1];
+    
+        let model = new Model(modelForm);
+        for (let i = 0; i < data.size; i++) {
+            let key = itr.next().value;
+    
+            tmp = [];
+            let magShift = this.getMagShift(key) ? this.getMagShift(key): 0;
+            for (let j = 0; j < range.length; j++) {
+                tmp.push({
+                    x: range[j],
+                    y: model.calculate(key, range[j]) + magShift,
+                });
+            }
+            this.addDataset({
+                label: key+"-model",
+                data: tmp,
+                backgroundColor: FILTERCOLORS[key],
+                borderColor: FILTERCOLORS[key],
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                pointBorderWidth: 0,
+                hidden: false,
+                showLine:true,
+                spanGaps: false,
+                parsing: {},
+            });
+        }
+    }
+
+    /* NON-MODEL METHODS */
+    addData(datapoints: Map<string, Array<Array<number>>>, xShift:number) {
+        const dataITR = datapoints.keys();
+        const errorITR = datapoints.keys();
+        let tmp: Array<{x: number, y: number}> = [];
+        let errors: Array<{x: number, y: number}> = [];
+
+        this.clearDatasets();
+        // add data
+        for (let i = 0; i < datapoints.size; i++) {
+            let key = dataITR.next().value;
+            let dps = datapoints.get(key);
+            let magShift = this.getMagShift(key) ? this.getMagShift(key): 0;
+            let operation = magShift < 0 ? '\-' : '\+';
+
+            tmp = [];
+            for (let j = 0; j < dps.length; j++) {
+                tmp.push({
+                    x: dps[j][0] - xShift,
+                    y: dps[j][1],
+                });
+            }
+            this.addDataset({
+                label: key+operation+String(magShift),
+                data: tmp,
+                backgroundColor: FILTERCOLORS[key],
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBorderWidth: 2,
+                showLine: false,
+                hidden: false,
+                parsing: {},
+            });
+        }
+
+        // add corresponding errors
+        for (let i = 0; i < datapoints.size; i++) {
+            let key = errorITR.next().value;
+            let dps = datapoints.get(key);
+
+            errors = [];
+            for (let j = 0; j < dps.length; j++) {
+                errors.push({x:null, y:null});
+                errors.push({
+                    x: dps[j][0] - xShift,
+                    y: dps[j][1]-1,
+                });
+                errors.push({
+                    x: dps[j][0] - xShift,
+                    y: dps[j][1] + 1,
+                });
+            }
+            this.addDataset({
+                label: "error-bar-" + String(key),
+                data: errors,
+                borderColor: "black",
+                borderWidth: 1,
+                pointRadius: 0,
+                showLine:true,
+                spanGaps: false,
+                parsing: {}
+            });
+        }
     }
 
     shiftData(axis:string, shift: number) {
         // shift           // new input 
         // this.eventShift // previous input
         // this.timeShift  // scale shift using min/max values
-
         let data = {};
         let tmp = [];
         let tmpX: number;
@@ -187,6 +302,31 @@ export class TransientChart {
             this.updateDataFromDataset(tmp, i);
         }
         if (axis === "x") { this.eventShift = shift; }
+    }
+
+    setBoundaries(data: any[]) {
+        // reset old bounds first
+        this.setMinMJD(Number.POSITIVE_INFINITY);
+        this.minMag = Number.POSITIVE_INFINITY;
+        this.setMaxMJD(0);
+        this.maxMag = 0;
+
+        // find new bounds
+        let min = this.getMinMJD();
+        let max = this.getMaxMJD();
+        let minMag = this.minMag;
+        let maxMag = this.maxMag;
+
+        for (let i = 0; i < data.length; i++) {
+            min = Math.min(min, data[i][0]);
+            max = Math.max(max, data[i][0]);
+            minMag = Math.min(minMag, data[i][1]);
+            maxMag = Math.max(maxMag, data[i][1]);
+        }
+        this.setMinMJD(min);
+        this.setMaxMJD(max);
+        this.minMag = minMag;
+        this.maxMag = maxMag;
     }
 
     clearDataFromDataset(idx: number) {
@@ -222,7 +362,6 @@ export class TransientChart {
         if (this.chart.data.datasets.length >= idx) {
             this.chart.data.datasets[idx].data = data;
         }
-        //this.update();
     }
 
     /* GETTERS */
@@ -268,7 +407,6 @@ export class TransientChart {
         return this.chart.data.datasets;
     }
 
-
     /* SETTERS */
     set minMag(min: number) {
         this._minMag = min;
@@ -288,8 +426,6 @@ export class TransientChart {
 
     setMagShift(filter: string, shift: number) 
     {
-        // console.log(filter, shift);
-        // console.log(this.filterShift);
         this.filterShift.set(filter, shift);   
         this.update();     
     }
@@ -323,35 +459,5 @@ export class TransientChart {
             this.chart.options.scales['x'].type = 'logarithmic'; // default
         }
         this.chart.update();
-    }
-    
-    /* OTHER */
-
-    // add to tranisent-utils    
-    getColorMap(){
-        let filterColorArray = [
-            ['U', '#8601AF'],
-            ['B', '#0247FE'],
-            ['V', '#66B032'],
-            ['R', '#FE2712'],
-            ['I', '#4424D6'],
-            ['Y', '#347C98'],
-            ['J', '#66B032'],
-            ['H', '#FC600A'],
-            ['K', '#FE2712'],
-            ['uprime', '#4424D6'],
-            ['gprime', '#347C98'],
-            ['rprime', '#FC600A'],
-            ['iprime', '#8601AF'],
-            ['zprime', '#0247FE'],
-        ]; // colors hand picked by Dan himself!
-    
-        let colorMap = new Map();
-    
-        for (let i = 0; i < filterColorArray.length; i++) {
-            colorMap.set(filterColorArray[i][0], filterColorArray[i][1]);
-        }
-    
-        return colorMap;
     }
 }

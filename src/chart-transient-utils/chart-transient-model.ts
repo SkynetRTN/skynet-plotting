@@ -1,4 +1,4 @@
-import { formatFilterName } from "../chart-transient";
+import { formatFilterName, ZERO_POINT_VALUES } from "./chart-transient-util";
 import { filterWavelength } from "../chart-cluster-utils/chart-cluster-util";
 import { calculateLambda } from "../chart-cluster-utils/chart-cluster-util";
 import { baseUrl } from "../chart-cluster-utils/chart-cluster-util";
@@ -144,12 +144,12 @@ export class NonLinearRegression extends Model {
         super(form);
 
         if (!range) {
-            range = [Number.NEGATIVE_INFINITY , Number.POSITIVE_INFINITY]
+            range = [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY]
         }
 
         for (let i = 0; i < data.length; i++) {
             // move this to main driver file. no need to do here.
-            if (data[i][0] > range[0] && data[i][0] < range[1]) {
+            if (data[i][0] - eventTime > range[0] && data[i][0] - eventTime < range[1]) {
                 this.xdata.push(data[i][0] - eventTime);
                 this.ydata.push(data[i][1]);
                 this.filters[(data[i][0] - eventTime)] = formatFilterName(data[i][2]);
@@ -226,23 +226,4 @@ export class NonLinearRegression extends Model {
     async leastSquaresMethod() {
         return await this.LSMServerRequest();    
     }
-}
-
-
-/* UTILS */
-// move this to a transient-util file
-const ZERO_POINT_VALUES: { [key: string]: number } = {
-    'U' : 1.790,
-    'B' : 4.063,
-    'V' : 3.636,
-    'R' : 3.064,
-    'I' : 2.416,
-    'J' : 1.589,
-    'H' : 1.021,
-    'K' : 0.640,
-    "u\'": 3.680,
-    "g\'": 3.643,
-    "r\'": 3.648,
-    "i\'": 3.644,
-    "z\'": 3.631,
 }
