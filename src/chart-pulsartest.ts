@@ -410,6 +410,7 @@ export function pulsarTest(): [Handsontable, Chart] {
             stop = parseFloat(this.pstop.value);
 
             myChart.options.scales['x'].title.text = "Period (sec)";
+            myChart.options.scales['x'].type = 'logarithmic';
         } else {
             //frequency mode
             document.getElementById('period-div').hidden = true;
@@ -418,6 +419,7 @@ export function pulsarTest(): [Handsontable, Chart] {
             stop = parseFloat(this.fstop.value);
 
             myChart.options.scales['x'].title.text = "Frequency (Hz)";
+            myChart.options.scales['x'].type = 'linear';
         }
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
@@ -748,6 +750,7 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         showDiv("light-curve-div");
         myChart.data.datasets[0].hidden = false;
         myChart.data.datasets[1].hidden = false;
+        myChart.options.scales['x'].type = 'linear';
 
         document.getElementById("extra-options").style.display = 'block';
 
@@ -764,7 +767,11 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         myChart.data.datasets[3].hidden = false;
 
         document.getElementById("extra-options").style.display = 'none';
-
+        if (fourierForm.fouriermode.value === 'p') {
+            myChart.options.scales['x'].type = 'logarithmic';
+        }else{
+            myChart.options.scales['x'].type = 'linear';
+        }
     } 
     else {
         if (modified.periodFoldingChanged) {
@@ -775,7 +782,7 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         myChart.data.datasets[5].hidden = false;
         myChart.data.datasets[6].hidden = false;
         myChart.data.datasets[4].hidden = !polarizationForm.diff.checked;
-
+        myChart.options.scales['x'].type = 'linear';
         document.getElementById("extra-options").style.display = 'block';
     }
 
