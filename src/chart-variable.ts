@@ -10,6 +10,7 @@ import { throttle, updateLabels, updateTableHeight, linkInputs, linkInputsVar } 
 import { Mode } from "./types/chart.js/index.js";
 import { round, lombScargle, floatMod, lombScargleWithError, clamp } from "./my-math"
 // import { PulsarMode } from "./types/chart.js/index.js";
+import { valueAccordingPercent } from "handsontable/helpers";
 
 
 
@@ -574,6 +575,8 @@ function updateVariable(table: Handsontable, myChart: Chart) {
     }
     myChart.options.scales['x'].min = localMin;
     myChart.options.scales['x'].max = localMax;
+    myChart.options.scales['x'].type = 'linear';
+
 
     updateChart(myChart, 0, 1, 5, 6);
 
@@ -748,6 +751,8 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             }
             myChart.options.scales['x'].min = lcData[0].x;
             myChart.options.scales['x'].max = lcData[lcData.length-1].x;
+            myChart.options.scales['x'].type = 'linear';
+
             
             updateChart(myChart, 2, 7);
             updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, false, false, false, false, 0, false);
@@ -837,6 +842,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         myChart.options.scales['x'].min = start;
         myChart.options.scales['x'].max = stop;
         updateChart(myChart, 3);
+        myChart.options.scales['x'].type = 'logarithmic';
     }
     // },1000)
 
@@ -915,14 +921,17 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             }
             if ((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range > 10e-6){
                 // step = round((periodFoldingForm.period_num.value/range)*0.01, 4)
-                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 6-I)
+                step = round((periodFoldingForm.period_num.value)*(periodFoldingForm.period_num.value)*0.01/range, 5-I)
             }else{
                 step = 10e-6
             }
             
-            if (periodFoldingForm["period"].min != Math.log(parseFloat(fourierForm.start.value)).toString()){
+            if (periodFoldingForm["period"].min !== Math.log(parseFloat(fourierForm.start.value)).toString() || periodFoldingForm["period"].max !== Math.log(parseFloat(fourierForm.stop.value)).toString()){
                 periodFoldingForm["period"].min = Math.log(parseFloat(fourierForm.start.value)).toString()
-                periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
+                // periodFoldingForm["period"].max = Math.log(parseFloat(fourierForm.stop.value)).toString()
+                periodFoldingForm["period_num"].min = fourierForm.start.value
+                // periodFoldingForm["period_num"].max = range
+                // periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
             } 
 
             // periodFoldingForm["period_num"].min = fourierForm.start.value
@@ -936,14 +945,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                 periodFoldingForm["period_num"].step = step
             }
 
-            periodFoldingForm["period_num"].value = round(parseFloat(periodFoldingForm["period_num"].value),4).toString()
+            // periodFoldingForm["period_num"].value = round(parseFloat(periodFoldingForm["period_num"].value),4).toString()
             
             // periodFoldingForm["period_num"].step = step
             // periodFoldingForm["period"].step = step
 
             // periodFoldingForm["phase_num"].step = 0.01*periodFoldingForm["phase_num"].value/range
 
-            updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
+            updatePeriodFolding(myChart, parseFloat(clamp(periodFoldingForm["period_num"].value, periodFoldingForm["period_num"].min, periodFoldingForm["period_num"].max)), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
         },3);
             
@@ -1004,13 +1013,35 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         myChart.data.datasets[4].data = pfData;
         myChart.data.datasets[8].data = ebarData
         myChart.options.scales['x'].min = 0;
+        let p = 0
         if (doubleMode == true){
-            myChart.options.scales['x'].max = round((period)*2,1)
+            p = round((period)*2,1)
         }else{
-            myChart.options.scales['x'].max = round((period),1);
+            p = round((period),1);
         }
+
+        let delta = 0
+        if(p > 0.5){
+            delta = 0.1
+        }else if(p > 0.05){
+            delta = 0.01
+        }else if(p > 0.005){
+            delta = 0.001
+        }else if(p > 0.0005){
+            delta = 0.0001
+        }else if(p > 0.00005){
+            delta = 0.00001
+        }else{
+            delta = 0.000001
+        }
+
+        if(p - parseInt(p.toString()) < delta){
+            p = parseInt(p.toString())+delta
+        }
+
+        myChart.options.scales['x'].max = p
         
-    } else {
+    } else if(period !== 0){
         for (let i = 0; i < datasets[2].data.length; i++) {
             pfData.push({
                 "x": 0, 
@@ -1026,7 +1057,11 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         }
         myChart.data.datasets[4].data = pfData;
         myChart.data.datasets[8].data = ebarData;
+    }else{
+
     }
+    myChart.options.scales['x'].type = 'linear';
+
 
     // let error = myChart.data.datasets[7].data
     // console.log((datasets[5].data[0] as ScatterDataPoint).y)
