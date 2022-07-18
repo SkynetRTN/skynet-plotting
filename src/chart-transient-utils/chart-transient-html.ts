@@ -35,7 +35,7 @@ const addSliderWithInput = (label: string, title: string, id: string) => {
 
 
 const addInput = (title: string, id:string) => {
-    return '<div class="col-sm-3 text"><input type="number"' + 
+    return '<div class="col-sm-3 text"><input step="any" type="number"' + 
            'title="'+ title +'" name="'+ title +'_num"' + 
            'class="field" id="'+ id +'"></div>\n' +
            '</div>\n' + '<div class="row">\n' + '</div>\n';
@@ -69,15 +69,22 @@ export const initHTML = () => {
 
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-            '<button class = "graphControl" id="panLeft">'  + 
-            '<center class = "graphControl">&#8592;</center></button>\n' +
-            '<button class = "graphControl" id="panRight">' +
-            '<center class = "graphControl">&#8594;</center></button>\n' +
-            '<button class = "graphControl" id="zoomIn">'   +
-            '<center class = "graphControl">&plus;</center></button>\n'  +
-            '<button class = "graphControl" id="zoomOut">'  +
-            '<center class = "graphControl">&minus;</center></button>\n' +
-            '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
+            '<div class="row">\n' +
+                '<button class = "graphControl" id="panLeft">'  + 
+                '<center class = "graphControl">&#8592;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="panRight">' +
+                '<center class = "graphControl">&#8594;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="zoomIn">'   +
+                '<center class = "graphControl">&plus;</center></button>\n'  +
+                '&nbsp;' +
+                '<button class = "graphControl" id="zoomOut">'  +
+                '<center class = "graphControl">&minus;</center></button>\n' +
+                '&nbsp;' +
+                '<button class = "graphControl" id="Reset" style="width: auto" >' +
+                '<center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+            '</div>\n' +    
         '</div>\n'
     )
 
@@ -110,6 +117,13 @@ export const initHTML = () => {
     HTML += addSliderWithInput('t<sub>0</sub>', 'referenceTime', 't');
     HTML += addSliderWithInput('mag<sub>0</sub>', 'magnitude', 'mag');
     HTML += addSliderWithInput('a', 'extinction', 'a');
+
+    HTML += 
+    '<div class="row">' +
+        '<div style="width: 100%">' +
+            '<button id="best-fit" style="width: 100%">Find Best Fit Parameters Algorithmically</button>'+
+        '</div>' +
+    '</div>'
 
     document.getElementById('transient-div').innerHTML = HTML;
     (document.getElementById("ebv_num") as HTMLInputElement).disabled = true;
