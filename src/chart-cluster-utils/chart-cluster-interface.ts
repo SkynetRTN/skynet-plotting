@@ -10,7 +10,7 @@ import Handsontable from "handsontable";
  *  This function insert the clusterform and modelform into the website
  *  @param chartCounts: how many charts need to be controlled
  */
-export function insertClusterControls(chartCounts:number = 1) {
+export function insertClusterControls(chartCounts:number = 1, isPro = false) {
     let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
@@ -33,8 +33,16 @@ export function insertClusterControls(chartCounts:number = 1) {
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-        "</div>\n" +
-        "</form>\n" +
+        "</div>\n"
+
+    if (isPro)
+        htmlContent += '<div class="row">\n' +
+        '<div class="col-sm-6 des">R – V Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
+        "</div>\n"
+
+    htmlContent += "</form>\n" +
         '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
@@ -50,6 +58,7 @@ export function insertClusterControls(chartCounts:number = 1) {
         '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         "</div>\n" +
         '<div class="row">\n'
+
     if (chartCounts === 1) {
         for (let i = 0; i < chartCounts; i++) {
             let num = ""
@@ -125,6 +134,7 @@ export function insertClusterControls(chartCounts:number = 1) {
     htmlContent += "</div>\n" + "</form>\n"
 
     if (chartCounts === 2) {
+        // @ts-ignore
         document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
         document.getElementById('chart-div2-colControl').style.width = '50%';
     }

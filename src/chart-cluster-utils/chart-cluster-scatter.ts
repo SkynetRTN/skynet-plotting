@@ -31,6 +31,7 @@ export function updateScatter(
     let dist = parseFloat(clusterForm["d_num"].value);
     //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
     let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+    let rv = clusterProForm != null ? parseFloat(clusterForm["rv_num"].value) : 3.1;
     let range = parseFloat(clusterForm["distrange_num"].value);
     let isRaRange =  null;
     let isDecRange =  null;
@@ -65,18 +66,9 @@ export function updateScatter(
             let red = columns.indexOf(modelForm[redKey].value + " Mag");
             let lum = columns.indexOf(modelForm[lumKey].value + " Mag");
 
-            let A_v1 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[blueKey].value]
-            );
-            let A_v2 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[redKey].value]
-            );
-            let A_v3 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[lumKey].value]
-            );
+            let A_v1 = calculateLambda(reddening, rv, filterWavelength[modelForm[blueKey].value]);
+            let A_v2 = calculateLambda(reddening, rv, filterWavelength[modelForm[redKey].value]);
+            let A_v3 = calculateLambda(reddening, rv, filterWavelength[modelForm[lumKey].value]);
 
             let blueErr =
                 columns.indexOf(modelForm[blueKey].value + " err") < 0
@@ -163,8 +155,8 @@ export function updateScatter(
 
                 //red-blue,lum
 
-                let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
-                let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+                let x = (tableData[i][blue] - A_v1) - (tableData[i][red] - A_v2);
+                let y = (tableData[i][lum] - A_v3) - 5 * Math.log10(dist / 0.01);
                 //testing purposes'
                 //let x = tableData[i][blue] - (tableData[i][red]);
                 //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
@@ -700,9 +692,8 @@ function chartRescale(myCharts: Chart[],
  * @param A_v The reddening value based on user input
  * @param filterlambda the wavelength of the filter in meter
  */
-export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
+export function calculateLambda(A_v: number, R_v: number, filterlambda = 10 ** -6) {
     let lambda = filterlambda;
-    let R_v = 3.1;
     let x = (lambda / 1) ** -1;
     let y = x - 1.82;
     let a = 0;
