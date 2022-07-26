@@ -17,12 +17,12 @@ export function scatter(): [Handsontable, Chart] {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (kpc): </div>\n' +
         '<div class="col-sm-4 range"><input type="range" name="x" title="Center (X)" value="0"></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x_num" class="field" value="0"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Center (x)" name="x_num" class="spinboxnum field" value="0"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Diameter (kpc): </div>\n' +
         '<div class="col-sm-4 range"><input type="range" name="d" title="Diameter" value="10"></input></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d_num" class="field" value="10"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Diameter" name="d_num" class="spinboxnum field" value="10"></div>\n' +
         '</div>\n' +
         '</form>\n'
     );
