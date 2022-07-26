@@ -6,27 +6,14 @@ import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
 import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
-import { curve } from './chart-curve';
-import { dual } from './chart-dual';
-import { moon } from './chart-moon';
-import { scatter } from './chart-scatter';
-import { venus } from './chart-venus';
 import { variableTest, variableFileUploadTest } from './chart-variable';
-import { spectrum, spectrumFileUpload } from './chart-spectrum';
 import { pulsarTest, pulsarFileUploadTest} from './chart-pulsar';
-import { cluster0} from './chart-cluster0';
-import { cluster1 } from './chart-cluster';
-import { cluster2 } from './chart-cluster2';
-import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
-import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
-import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 
 /**
@@ -154,34 +141,16 @@ function chartType(chart: string) {
 
     document.getElementById('chart-div').style.cursor = "auto"
 
-    clusterProButtons(false);
 
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
     let grav_objects: [Handsontable, Chart, gravityClass]
 
 
-    if (chart === 'curve') {
-        objects = curve();
-    } else if (chart === 'moon') {
-        objects = moon();
-    } else if (chart === 'scatter') {
-        objects = scatter();
-    } else if (chart === 'venus') {
-        objects = venus();
-    } else if (chart === 'dual') {
-        objects = dual();
-    } else if (chart === 'variable') {
+    if (chart === 'variable') {
         objects = variableTest();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
-        }    
-    } else if (chart === 'spectrum') {
-        objects = spectrum();
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            spectrumFileUpload(evt, objects[0]);
         }
     } else if (chart === 'pulsar') {
         objects = pulsarTest();
@@ -189,38 +158,6 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
         }
-    } else if (chart === 'cluster0') {
-        cluster_objects = cluster0();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-    }
-    } else if (chart === 'cluster1') {
-        cluster_objects = cluster1();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
-    } else if (chart === 'cluster2') {
-        cluster_objects = cluster2();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
-
-
-    } else if (chart === 'cluster3') {
-        let result = cluster3()
-        cluster_objects = [result[0], result[1], result[2], result[3]];
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
-        }
-
     }else if (chart === 'gravity') {
         grav_objects = gravity();
         objects = [grav_objects[0], grav_objects[1]]
@@ -253,16 +190,6 @@ function chartType(chart: string) {
         objects[0].alter('insert_row');
     };
 
-    const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
-    chartInfoForm.oninput = function () {
-        if (chart === 'cluster2' || chart === 'cluster3') {
-            updateChartInfo(cluster_objects[1][0], chartInfoForm)
-            updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
-        
-        } else if (chart !== 'transient') {
-            updateChartInfo(objects[1], chartInfoForm);
-        } 
-    };
 
     if(objects[1].data.sonification)
     {
