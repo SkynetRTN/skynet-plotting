@@ -79,9 +79,14 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
     // xVal is what we iterate through & push to result. It will either be frequency or
     // period, depending on the mode.
     let spectralPowerDensity = [];
+    let i = 0
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        let frequency = freqMode ? xVal : 1 / xVal;
+
+        let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
+
+        // let frequency = freqMode ? xVal : 1 / xVal;
+        let frequency = freqMode ? logXVal : 1 / logXVal;
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -89,12 +94,13 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: xVal,
+            x: logXVal,
             y: (Math.pow(ArrMath.errordot(hResidue, error, ArrMath.cos(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.cos(omegaTMinusTau)) +
                 Math.pow(ArrMath.errordot(hResidue, error, ArrMath.sin(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.sin(omegaTMinusTau))) / twoVarOfY,
         });
+        i++
     }
 
     return spectralPowerDensity;
@@ -126,9 +132,16 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
     // xVal is what we iterate through & push to result. It will either be frequency or
     // period, depending on the mode.
     let spectralPowerDensity = [];
+    let i = 0;
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        let frequency = freqMode ? xVal : 1 / xVal;
+
+        let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
+        let frequency = freqMode ? logXVal : 1 / logXVal;
+        if(freqMode === true){
+            frequency = freqMode ? xVal : 1 / xVal;
+            logXVal = xVal
+        }
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -136,12 +149,13 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: xVal,
+            x: logXVal,
             y: (Math.pow(ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.cos(omegaTMinusTau)) +
                 Math.pow(ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.sin(omegaTMinusTau))) / twoVarOfY,
         });
+        i++;
     }
 
     return spectralPowerDensity;
