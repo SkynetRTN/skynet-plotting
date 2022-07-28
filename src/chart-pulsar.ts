@@ -7,6 +7,7 @@ import { chartDataDiff, linkInputs, linkInputsPuls, sanitizeTableData, throttle,
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js/index.js";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
+import {csvDownload} from "./chart-cluster-utils/chart-cluster-file";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -165,7 +166,7 @@ export function pulsarTest(): [Handsontable, Chart] {
         ],
     };
     const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-
+    document.getElementById('save-data-button').onclick= () => { pulsarFileDownload(hot) };
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     //Audio Context
     const audioCtx = new AudioContext();
@@ -988,3 +989,11 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
     myChart.update()
 
 }
+
+export function pulsarFileDownload(table: Handsontable){
+    let csvRows: string[] = [];
+    csvRows.push(table.getColHeader().join(','));
+    table.getData().forEach((row) => {csvRows.push(row.join(','))})
+    csvDownload(csvRows.join('\n'), 'Pulsar Data');
+}
+

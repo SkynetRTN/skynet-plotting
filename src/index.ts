@@ -140,7 +140,7 @@ function chartType(chart: string) {
     document.getElementById('add-row-button').hidden = false;
 
     document.getElementById('chart-div').style.cursor = "auto"
-
+    document.getElementById('save-data-button').style.display = 'none';
 
     let objects: [Handsontable, Chart];
     let grav_objects: [Handsontable, Chart, gravityClass]
@@ -155,6 +155,7 @@ function chartType(chart: string) {
     } else if (chart === 'pulsar') {
         objects = pulsarTest();
         document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('save-data-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
         }
