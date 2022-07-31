@@ -487,7 +487,7 @@ export function pulsarTest(): [Handsontable, Chart] {
         }
 
         if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
-            step = round(periodFoldingForm.period_num.value*10e-4, 6)
+            step = round(periodFoldingForm.period_num.value*periodFoldingForm.period_num.value*10e-4/range, 6)
         }else{
             step = 10e-6
         }
@@ -514,7 +514,8 @@ export function pulsarTest(): [Handsontable, Chart] {
             myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.update('none');
-
+        
+        
         periodFoldingForm.oninput
     }
 

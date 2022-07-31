@@ -926,13 +926,17 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
                 step = 10e-6
             }
             
-            if (periodFoldingForm["period"].min !== Math.log(parseFloat(fourierForm.start.value)).toString() || periodFoldingForm["period"].max !== Math.log(parseFloat(fourierForm.stop.value)).toString()){
+            if (periodFoldingForm["period"].min !== Math.log(parseFloat(fourierForm.start.value)).toString() || periodFoldingForm["period"].max !== Math.log(parseFloat(fourierForm.stop.value)).toString() || periodFoldingForm["period_num"].min !== fourierForm.start.value ){
                 periodFoldingForm["period"].min = Math.log(parseFloat(fourierForm.start.value)).toString()
                 // periodFoldingForm["period"].max = Math.log(parseFloat(fourierForm.stop.value)).toString()
                 periodFoldingForm["period_num"].min = fourierForm.start.value
                 // periodFoldingForm["period_num"].max = range
                 // periodFoldingForm["period_num"].value = clamp(periodFoldingForm["period_num"].value, parseFloat(fourierForm.start.value), range)
+                // debounce(()=> {
+                // periodFoldingForm["period"].value = Math.log(parseFloat(clamp(periodFoldingForm["period"].value, periodFoldingForm["period"].min, periodFoldingForm["period"].value.max))).toString();
+                // },1000)
             } 
+
 
             // periodFoldingForm["period_num"].min = fourierForm.start.value
             // debounce(()=> {
@@ -1013,15 +1017,13 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         myChart.data.datasets[4].data = pfData;
         myChart.data.datasets[8].data = ebarData
         myChart.options.scales['x'].min = 0;
-        let p = 0
-        if (doubleMode == true){
-            p = round((period)*2,1)
-        }else{
-            p = round((period),1);
-        }
+        let p = period
+        
 
         let delta = 0
-        if(p > 0.5){
+        if(p > 4.95){
+            delta = 0.15
+        }else if(p > 0.5){
             delta = 0.1
         }else if(p > 0.05){
             delta = 0.01
@@ -1037,6 +1039,12 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
 
         if(p - parseInt(p.toString()) < delta){
             p = parseInt(p.toString())+delta
+        }
+        
+        if (doubleMode == true){
+            p = round((p)*2,1)
+        }else{
+            p = round((p),1);
         }
 
         myChart.options.scales['x'].max = p

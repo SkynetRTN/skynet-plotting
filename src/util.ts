@@ -179,7 +179,11 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         };
         number.oninput = debounce(()=> {
         // number.oninput = function(){
+            numMin = parseFloat(number.min)
+            numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
+            min = parseFloat(slider.min)
+            max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 4).toString();
         // }
@@ -229,7 +233,11 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
         };
         number.oninput = debounce(()=> {
         // number.oninput = function(){
+            numMin = parseFloat(number.min)
+            numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
+            min = parseFloat(slider.min)
+            max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 6).toString();
         // }
