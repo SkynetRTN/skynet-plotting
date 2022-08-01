@@ -3,6 +3,7 @@
 import Chart from "chart.js/auto";
 import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
+import { backgroundPlugin } from "./chart-gravity-utils/background-image-plugin";
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
@@ -17,6 +18,7 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
+
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -158,9 +160,19 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
 
 
 
-  // create table
+  document.getElementById('myChart').remove();
+  //document.getElementById('myChart3').remove();
+  //document.getElementById('myChart4').remove();
+  document.getElementById('chart-div1').style.display = 'block';
+  document.getElementById('chart-div2').style.display = 'block';
   document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label2').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('axis-label4').style.display = 'inline';
+  document.getElementById('axisSet1').className = 'col-sm-6';
+  document.getElementById('axisSet2').style.display = 'inline';
+  document.getElementById('chartTag1').style.display = "inline";
+  document.getElementById('chartTag2').style.display = "inline";
   document.getElementById('xAxisPrompt').innerHTML = "X Axis";
   document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   const container = document.getElementById("table-div");
@@ -229,14 +241,6 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
           audioSource: audioSource,
           audioControls: audioControls
       },
-      modeLabels: {
-        lc: { t: 'Title', x: 'x', y: 'y' },
-        ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
-        pf: { t: 'Title', x: 'x', y: 'y' },
-        pressto: { t: 'Title', x: 'x', y: 'y' },
-        gravity: {t: 'Title', x: 'x', y: 'y'},
-        lastMode: 'gravity'
-      },
     },
     options: {
       hover: {
@@ -290,6 +294,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
         },
       ],
     },
+    plugins: [backgroundPlugin],
     options: {
       hover: {
         mode: "nearest",
@@ -318,7 +323,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
             },
             mode: 'x',
           },
-        },},
+        },
+      },
     },
   };
 
