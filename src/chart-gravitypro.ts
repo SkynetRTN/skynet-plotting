@@ -17,13 +17,12 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
-import {get_grav_strain_server} from "./chart-gravity-utils/chart-gravity-file";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
- *  @returns {[Handsontable, Chart[]]}:
+ *  @returns {[Handsontable, Chart]}:
  */
-export function gravity(): [Handsontable, Chart[], gravityClass] {
+export function gravityPro(): [Handsontable, Chart[], gravityClass] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
@@ -191,8 +190,8 @@ export function gravity(): [Handsontable, Chart[], gravityClass] {
     })
   );
   // create chart
-  const ctx = (
-    document.getElementById("myChart") as HTMLCanvasElement
+  const ctx1 = (
+    document.getElementById("myChart1") as HTMLCanvasElement
   ).getContext("2d");
 
   const chartOptions: ChartConfiguration = {
@@ -271,7 +270,62 @@ export function gravity(): [Handsontable, Chart[], gravityClass] {
     },
   };
 
-  const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+  const myChart = new Chart(ctx1, chartOptions) as Chart<'line'>;
+
+  const spectoOptions: ChartConfiguration = {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: 'Model',
+          data: [],
+          borderColor: colors['black'],
+          backgroundColor: colors['white'],
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.1,
+          fill: false,
+          hidden: false,
+          immutableLabel: true,
+        },
+      ],
+    },
+    options: {
+      hover: {
+        mode: "nearest",
+      },
+      scales: {
+        x: {
+          //label: 'time',
+          type: "linear",
+          position: "bottom",
+        },
+        y: {
+          //label: 'grav stuff',
+          reverse: false,
+          suggestedMin: 0,
+        },
+      },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x',
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            mode: 'x',
+          },
+        },},
+    },
+  };
+
+  const ctx2 = (
+    document.getElementById("myChart2") as HTMLCanvasElement
+  ).getContext("2d");
+  const mySpecto = new Chart(ctx2, spectoOptions) as Chart<'line'>;
 
   document.getElementById('chart-div').style.cursor = "move";
   const update = function () {
@@ -313,49 +367,8 @@ export function gravity(): [Handsontable, Chart[], gravityClass] {
   sonificationButton.onclick = () => play(myChart);
   saveSon.onclick = () => saveSonify(myChart);
 
-  return [hot, [myChart], gravClass];
+  return [hot, [myChart, mySpecto], gravClass];
 }
-//remember later to change the file type to .hdf5
-
-export function gravityFileUpload(
-  evt: Event,
-  table: Handsontable,
-  myChart: Chart<"line">,
-  gravClass: gravityClass
-) 
-{
-  const file = (evt.target as HTMLInputElement).files[0];
-
-  if (file === undefined) {
-    return;
-  }
-
-  // File type validation
-  if (
-    !file.name.match(".*.hdf5")
-       // !file.name.match("16") ||
-       // !file.name.match("32")
-  ) {
-    alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
-    return;
-  }
-
-  get_grav_strain_server(file, (response: string) => {
-    let json = JSON.parse(response);
-    let data = json['data'];
-    let [min, max] = updateTable(table, data);
-    let midpoint = (min + max) / 2
-    let view_buffer = (max - min) * 0.20
-    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
-    const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
-
-    updateDataPlot(table, myChart);
-    gravClass.fitChartToBounds(myChart);
-    gravClass.updateModelPlot(myChart, gravityForm);
-  }) 
-}
-
 
 function updateTable(table: Handsontable, data: number[][]){
   //table.populateFromArray(1, 1, data)
