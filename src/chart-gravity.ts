@@ -17,7 +17,7 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
-import {clean_data_server} from "./chart-gravity-utils/chart-gravity-file";
+import {get_grav_strain_server} from "./chart-gravity-utils/chart-gravity-file";
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
@@ -340,7 +340,7 @@ export function gravityFileUpload(
     return;
   }
 
-  clean_data_server(file, (response: string) => {
+  get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
     let data = json['data'];
     let [min, max] = updateTable(table, data);
