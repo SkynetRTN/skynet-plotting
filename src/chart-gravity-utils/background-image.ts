@@ -1,23 +1,33 @@
-import { Chart } from "chart.js"
+import { Chart, Plugin } from "chart.js"
+import { AnyObject } from "chart.js/types/basic";
 
-export const image = new Image();
-image.src = 'pics/specplot_3.png';
+export const drReichart = new Image();
+drReichart.src = 'https://www.nasa.gov/images/content/133199main_Daniel_Reichart_photo.jpg';
 
-export const backgroundPlugin = {
-  id: 'custom_canvas_background_image',
-  beforeDraw: (chart: Chart) => {
-    if (image.complete) {
-      const ctx = chart.ctx;
-      const {top, left, width, height} = chart.chartArea;
-      const x = left + width / 2 - image.width / 2;
-      const y = top + height / 2 - image.height / 2;
-      ctx.drawImage(image, x, y);
-    } else {
-      image.onload = () => chart.draw();
+declare module 'chart.js' {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface PluginOptionsByType<TType extends ChartType> {
+      background: BackgroundOptions;
     }
-  }
+  
+    enum UpdateModeEnum {
+      background = 'backgroundPlugin'
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-var
+}
+
+export const backgroundPlugin: Plugin = {
+  id: 'background',
+  beforeDraw: (chart: Chart, args, options: BackgroundOptions) => {
+    if (options.image.complete) {
+      const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+      ctx.drawImage(options.image, left, top, width, height);
+    } else {
+      options.image.onload = () => chart.draw();
+    }
+  },
 };
 
-export interface BackgroundOptions {
-  backgroundImage: HTMLImageElement
+interface BackgroundOptions extends AnyObject{
+  image: HTMLImageElement
 }

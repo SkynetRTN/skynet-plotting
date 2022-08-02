@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { backgroundPlugin } from "./chart-gravity-utils/background-image-plugin";
+import { backgroundPlugin, drReichart } from "./chart-gravity-utils/background-image";
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
@@ -76,6 +76,20 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
   '<button id="saveSonification" style = "position:relative; right:40px;"/>Save Sonification</button>' +
   '</div>\n'
   );
+
+  document
+    .getElementById("chart-div")
+    .innerHTML = 
+    '<div class="row">\n'+
+    '<div id="chart-div1" class="clusterCharts" style="cursor: move;display: block">\n'+
+    '<canvas id="myChart1" width="428" height="200"></canvas>\n'+
+    '</div>\n'+
+    '</div>'+
+    '<div class="row">\n'+
+    '<div id="chart-div1" class="clusterCharts" style="cursor: move;display: block">\n'+
+    '<canvas id="myChart2" width="428" height="200"></canvas>\n'+
+    '</div>\n'+
+    '</div>'
 
   const audioCtx = new AudioContext();
   var audioSource = new AudioBufferSourceNode(audioCtx);
@@ -159,20 +173,14 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1,10,0.1,1, true);
 
 
-
-  document.getElementById('myChart').remove();
   //document.getElementById('myChart3').remove();
   //document.getElementById('myChart4').remove();
-  document.getElementById('chart-div1').style.display = 'block';
-  document.getElementById('chart-div2').style.display = 'block';
   document.getElementById('axis-label1').style.display = 'inline';
   document.getElementById('axis-label2').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
   document.getElementById('axis-label4').style.display = 'inline';
   document.getElementById('axisSet1').className = 'col-sm-6';
   document.getElementById('axisSet2').style.display = 'inline';
-  document.getElementById('chartTag1').style.display = "inline";
-  document.getElementById('chartTag2').style.display = "inline";
   document.getElementById('xAxisPrompt').innerHTML = "X Axis";
   document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   const container = document.getElementById("table-div");
@@ -323,6 +331,9 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
             },
             mode: 'x',
           },
+        },
+        background: {
+          image: drReichart
         },
       },
     },
