@@ -37,28 +37,42 @@ export function get_grav_spectrogram_server(file: File, callback: Function){
     let uploadUrl = baseUrl + "/gravprofile"
     let formData = new FormData();
     formData.append("file", file)
+    req.responseType["blob"]
     // Need to change this code to use an image response
+
     req.onreadystatechange = function () {
-        if (req.readyState == 4 && req.status == 200){
-            try {
-                if (!req.responseText.includes("err")){
-                    callback(req);
-                }
-                else{
-                    alert(JSON.parse(req.responseText)['err'])
-                    console.log(JSON.parse(req.responseText))
-                }
-            } catch (e) {
-                console.log(e)
-                console.log(JSON.parse(req.responseText))
-            }
-        } else if (req.status != 200 && req.readyState == 4 && req.response == ""){
-            console.log("Failure to load a *.hdf5 file")
-            console.log(req.responseText)
-            console.log(JSON.parse(req.responseText))
+        if (req.readyState == 4 && req.status == 200) {
+            console.log("trying callback")
+            console.log(req.response)
+            console.log(typeof (req.response))
+            callback(req.response);
         }
     }
+
     req.open("POST", uploadUrl, true);
     req.setRequestHeader("Content-Encoding", "multipart/form-data")
     req.send(formData);
 }
+
+//
+//     if (req.readyState == 4 && req.status == 201){
+//         try {
+//             if (!req.responseText.includes("err")){
+//                 console.log("trying callback")
+//                 console.log(typeof(req.response))
+//                 callback(req.response);
+//             }
+//             else{
+//                 alert(JSON.parse(req.responseText)['err'])
+//                 console.log(JSON.parse(req.responseText))
+//             }
+//         } catch (e) {
+//             console.log(e)
+//             console.log(JSON.parse(req.responseText))
+//         }
+//     } else if (req.status != 200 && req.readyState == 4 && req.response == ""){
+//         console.log("Failure to load a *.hdf5 file")
+//         console.log(req.responseText)
+//         console.log(JSON.parse(req.responseText))
+//     }
+// }

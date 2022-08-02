@@ -439,7 +439,7 @@ function updateDataPlot(
   myChart.update()
 }
 
-export function gravityFileUpload(
+export function gravityProFileUpload(
   evt: Event,
   table: Handsontable,
   myChart: Chart<"line">,

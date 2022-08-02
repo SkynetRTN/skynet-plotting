@@ -22,7 +22,7 @@ import { cluster2 } from './chart-cluster2';
 import { cluster3 } from './chart-cluster3';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-import { gravityPro } from './chart-gravitypro';
+import { gravityPro, gravityProFileUpload } from './chart-gravitypro';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -248,7 +248,7 @@ function chartType(chart: string) {
         objects = [grav_objects[0], grav_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
+            gravityProFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
