@@ -19,15 +19,26 @@ declare module 'chart.js' {
 export const backgroundPlugin: Plugin = {
   id: 'background',
   beforeDraw: (chart: Chart, args, options: BackgroundOptions) => {
-    if (options.image.complete) {
-      const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
-      ctx.drawImage(options.image, left, top, width, height);
+    let bg: HTMLImageElement;
+    if(options.image instanceof Blob)
+    {
+        var url = URL.createObjectURL(options.image)
+        bg.src = url;
+    }
+    else  
+    {
+        bg = options.image;
+    }
+
+    if (bg.complete) {
+    const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+    ctx.drawImage(bg, left, top, width, height);
     } else {
-      options.image.onload = () => chart.draw();
+    bg.onload = () => chart.draw();
     }
   },
 };
 
 interface BackgroundOptions extends AnyObject{
-  image: HTMLImageElement
+  image: HTMLImageElement | Blob;
 }
