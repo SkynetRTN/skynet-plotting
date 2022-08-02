@@ -4,6 +4,7 @@ import Chart from "chart.js/auto";
 import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { backgroundPlugin, drReichart } from "./chart-gravity-utils/background-image";
+import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
@@ -18,6 +19,7 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
+import { chart2Scale } from "./chart-cluster3";
 
 Chart.register(zoomPlugin);
 /**
@@ -322,12 +324,12 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
       plugins: {
         zoom: {
           pan: {
-            enabled: true,
+            enabled: false,
             mode: 'x',
           },
           zoom: {
             wheel: {
-              enabled: true,
+              enabled: false,
             },
             mode: 'x',
           },
@@ -437,7 +439,50 @@ function updateDataPlot(
   myChart.update()
 }
 
+export function gravityFileUpload(
+  evt: Event,
+  table: Handsontable,
+  myChart: Chart<"line">,
+  gravClass: gravityClass
+) 
+{
+  const file = (evt.target as HTMLInputElement).files[0];
 
+  if (file === undefined) {
+    return;
+  }
+
+  // File type validation
+  if (
+    !file.name.match(".*.hdf5")
+       // !file.name.match("16") ||
+       // !file.name.match("32")
+  ) {
+    alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
+    return;
+  }
+
+  get_grav_spectrogram_server(file, (response: HTMLImageElement) => {
+    myChart.options.plugins.background.image = response;
+    myChart.update
+  })
+
+
+  get_grav_strain_server(file, (response: string) => {
+    let json = JSON.parse(response);
+    let data = json['data'];
+    let [min, max] = updateTable(table, data);
+    let midpoint = (min + max) / 2
+    let view_buffer = (max - min) * 0.20
+    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
+
+    updateDataPlot(table, myChart);
+    gravClass.fitChartToBounds(myChart);
+    gravClass.updateModelPlot(myChart, gravityForm);
+  }) 
+}
 
 export class gravityClass{
   currentModelData : number[][];
