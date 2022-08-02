@@ -1,9 +1,11 @@
+import { Chart } from "chart.js"
+
 export const image = new Image();
 image.src = 'pics/specplot_3.png';
 
 export const backgroundPlugin = {
   id: 'custom_canvas_background_image',
-  beforeDraw: (chart) => {
+  beforeDraw: (chart: Chart) => {
     if (image.complete) {
       const ctx = chart.ctx;
       const {top, left, width, height} = chart.chartArea;
