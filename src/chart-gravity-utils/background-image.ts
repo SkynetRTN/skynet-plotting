@@ -1,5 +1,6 @@
 import { Chart, Plugin } from "chart.js"
 import { AnyObject } from "chart.js/types/basic";
+import {ChartType} from "chart.js/auto";
 
 export const drReichart = new Image();
 drReichart.src = 'https://www.nasa.gov/images/content/133199main_Daniel_Reichart_photo.jpg';
@@ -19,7 +20,9 @@ declare module 'chart.js' {
 export const backgroundPlugin: Plugin = {
   id: 'background',
   beforeDraw: (chart: Chart, args, options: BackgroundOptions) => {
-    let bg: HTMLImageElement;
+
+    var bg = new Image();
+
     if(options.image instanceof Blob)
     {
         var url = URL.createObjectURL(options.image)

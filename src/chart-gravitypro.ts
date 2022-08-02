@@ -462,7 +462,7 @@ export function gravityProFileUpload(
     return;
   }
 
-  get_grav_spectrogram_server(file, (response: HTMLImageElement) => {
+  get_grav_spectrogram_server(file, (response: Blob) => {
     myChart.options.plugins.background.image = response;
     myChart.update
   })
