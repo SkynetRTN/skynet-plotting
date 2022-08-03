@@ -7,7 +7,7 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
     httpGetAsync(generateURL(totalMass, ratioMass), (response: string) => {
         let json = JSON.parse(response);
-        let dataTable = json['data'];
+        let dataTable = json['strain_model'];
         updateChartCallback(dataTable, totalMassDivGridMass)}, () => {})
 }
 
