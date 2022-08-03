@@ -76,21 +76,16 @@ window.onload = function () {
             document.getElementById('no-signature-alert').style.display = 'none';
             // NO MORE JQUERY BYE BYE xD
             // $('#honor-pledge-modal').modal('hide');
-            saveImage(0, signature, true, 1.0);
-        
-        
-        } 
-        else if ('myChart4' in window) {
+            saveImage([], signature, true, 1.0);
+        }
+        // for cluster two
+        else if ('myChart1' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide')
-            if ('myChart1' in window) {
-                saveImage(1, signature, true, 1.0);
-            }
-            else {
-                saveImage(2, signature, true, 1.0);
-            }
-
+            saveImage([1, 2], signature, true, 1.0);
+        // for cluster pro
+        } else if ('myChart3' in window){
+            document.getElementById('no-signature-alert').style.display = 'none';
+            saveImage([3, 4, 2], signature, true, 1.0);
         }
     };
 
@@ -332,22 +327,30 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
     myChart.update('none');
 }
 
-function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.0) {
-    if (chartNum === 0) {
-        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
-            // Create a dummy canvas
+function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0) {
     const destCanvas = document.createElement('canvas');
-    destCanvas.width = canvas.width;
-    destCanvas.height = canvas.height;
+    destCanvas.width = 0;
+    destCanvas.height = 0;
+    chartNums = chartNums.length === 0 ? [''] : chartNums;
+    const canvases: HTMLCanvasElement[] = [];
+    for (let c = 0; c < chartNums.length; c++){
+        const graphName = 'myChart' + chartNums[c].toString();
+        const canvas = document.getElementById(graphName) as HTMLCanvasElement;
+        destCanvas.width += canvas.width;
+        destCanvas.height = destCanvas.height < canvas.height ? canvas.height: destCanvas.height;
+        canvases.push(canvas);
+    }
 
     const destCtx = destCanvas.getContext('2d');
-
     // Create a rectangle with the desired color
     destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    destCtx.drawImage(canvas, 0, 0);
+    destCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
+    let dx = 0;
+    canvases.forEach((canvas)=>{
+        // Draw the original canvas onto the destination canvas
+        destCtx.drawImage(canvas, dx, 0);
+        dx += canvas.width;
+    })
 
     // Download the dummy canvas
     const time = getDateString();
@@ -358,67 +361,93 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
     } else {
         console.log('Only jpg export is supported for EXIF info.');
     }
-    } else if (chartNum === 1) {
-        const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
-        // const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
-        // Create a dummy canvas
-            // Create a dummy canvas
-    const destCanvas = document.createElement('canvas');
-    destCanvas.width = 2 * canvas.width;
-    destCanvas.height = canvas.height;
 
-    const destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-
+    // if (chartNum === 0) {
+    //
+    //         // Create a dummy canvas
+    // const destCanvas = document.createElement('canvas');
+    // destCanvas.width = canvas.width;
+    // destCanvas.height = canvas.height;
+    //
+    // const destCtx = destCanvas.getContext('2d');
+    //
+    // // Create a rectangle with the desired color
+    // destCtx.fillStyle = '#FFFFFF';
+    // destCtx.fillRect(0, 0, canvas.width, canvas.height);
+    //
     // // Draw the original canvas onto the destination canvas
-    // let compile = destCtx.drawImage(canvas, 0, 0);
+    // destCtx.drawImage(canvas, 0, 0);
+    //
+    // // Download the dummy canvas
+    // const time = getDateString();
+    // if (jpg) {
+    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+    //     //create image
+    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    // } else {
+    //     console.log('Only jpg export is supported for EXIF info.');
+    // }
+    // } else if (chartNum === 1) {
+    //     const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
+    //     // const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
+    //     // Create a dummy canvas
+    //         // Create a dummy canvas
+    // const destCanvas = document.createElement('canvas');
+    // destCanvas.width = 2 * canvas.width;
+    // destCanvas.height = canvas.height;
+    //
+    // const destCtx = destCanvas.getContext('2d');
+    //
+    // // Create a rectangle with the desired color
+    // destCtx.fillStyle = '#FFFFFF';
+    // destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
+    //
+    // // // Draw the original canvas onto the destination canvas
+    // // let compile = destCtx.drawImage(canvas, 0, 0);
+    // // //draw canvas 2 onto the destination canvas
+    // // compile = destCtx.drawImage(canvas2, canvas.width, 0);
+    //
+    //
+    // // Download the dummy canvas
+    // const time = getDateString();
+    // if (jpg) {
+    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+    //     //create image
+    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    // } else {
+    //     console.log('Only jpg export is supported for EXIF info.');
+    // }
+    // }   else if (chartNum === 2) {
+    //     const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
+    //     // const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
+    //     // Create a dummy canvas
+    //         // Create a dummy canvas
+    // const destCanvas = document.createElement('canvas');
+    // destCanvas.width = 2 * canvas.width;
+    // destCanvas.height = canvas.height;
+    //
+    // const destCtx = destCanvas.getContext('2d');
+    //
+    // // Create a rectangle with the desired color
+    // destCtx.fillStyle = '#FFFFFF';
+    // destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
+    //
+    // // Draw the original canvas onto the destination canvas
+    // // let compile = destCtx.drawImage(canvas, 0, 0);
     // //draw canvas 2 onto the destination canvas
-    // compile = destCtx.drawImage(canvas2, canvas.width, 0);
-
-
-    // Download the dummy canvas
-    const time = getDateString();
-    if (jpg) {
-        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-        //create image
-        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    } else {
-        console.log('Only jpg export is supported for EXIF info.');
-    }
-    }   else if (chartNum === 2) {
-        const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
-        // const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
-        // Create a dummy canvas
-            // Create a dummy canvas
-    const destCanvas = document.createElement('canvas');
-    destCanvas.width = 2 * canvas.width;
-    destCanvas.height = canvas.height;
-
-    const destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    // let compile = destCtx.drawImage(canvas, 0, 0);
-    //draw canvas 2 onto the destination canvas
-    // compile = destCtx.drawImage(canvas2, canvas.width, 0);
-
-
-    // Download the dummy canvas
-    const time = getDateString();
-    if (jpg) {
-        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-        //create image
-        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    } else {
-        console.log('Only jpg export is supported for EXIF info.');
-    }
-    }
+    // // compile = destCtx.drawImage(canvas2, canvas.width, 0);
+    //
+    //
+    // // Download the dummy canvas
+    // const time = getDateString();
+    // if (jpg) {
+    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
+    //     //create image
+    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
+    // } else {
+    //     console.log('Only jpg export is supported for EXIF info.');
+    // }
+    // }
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
