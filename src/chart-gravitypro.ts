@@ -223,8 +223,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
         {
           label: 'Model',
           data: [],
-          borderColor: colors['blue'],
-          backgroundColor: colors['blue'],
+          borderColor: colors['orange'],
+          backgroundColor: colors['orange'],
           pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
@@ -235,8 +235,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
         {
           label: 'Data',
           data: [],
-          borderColor: colors['red'],
-          backgroundColor: colors['red'],
+          borderColor: colors['purple'],
+          backgroundColor: colors['purple'],
           pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
@@ -320,6 +320,22 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
           reverse: false,
           suggestedMin: 0,
         },
+        z: {
+          type: "linear",
+          position: "right",
+          suggestedMin: 0,
+          suggestedMax: 8,
+          weight: 100,
+          grid: {
+            display: false
+          },
+          ticks: {
+            //we have to move the ticks over
+            callback: function(value, index, ticks) {
+                return '\t\t ' + value;
+            }
+          },
+        }
       },
       plugins: {
         zoom: {
@@ -439,10 +455,10 @@ function updateDataPlot(
   myChart.update()
 }
 
-export function gravityFileUpload(
+export function gravityProFileUpload(
   evt: Event,
   table: Handsontable,
-  myChart: Chart<"line">,
+  myCharts: Chart<"line">[],
   gravClass: gravityClass
 ) 
 {
@@ -462,9 +478,9 @@ export function gravityFileUpload(
     return;
   }
 
-  get_grav_spectrogram_server(file, (response: HTMLImageElement) => {
-    myChart.options.plugins.background.image = response;
-    myChart.update
+  get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
+    myCharts[1].options.plugins.background.image = response.response;
+    myCharts[1].update()
   })
 
 
@@ -478,9 +494,9 @@ export function gravityFileUpload(
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
     linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
 
-    updateDataPlot(table, myChart);
-    gravClass.fitChartToBounds(myChart);
-    gravClass.updateModelPlot(myChart, gravityForm);
+    updateDataPlot(table, myCharts[0]);
+    gravClass.fitChartToBounds(myCharts[0]);
+    gravClass.updateModelPlot(myCharts[0], gravityForm);
   }) 
 }
 

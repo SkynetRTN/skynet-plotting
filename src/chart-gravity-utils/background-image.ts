@@ -19,22 +19,25 @@ declare module 'chart.js' {
 export const backgroundPlugin: Plugin = {
   id: 'background',
   beforeDraw: (chart: Chart, args, options: BackgroundOptions) => {
-    let bg: HTMLImageElement;
-    if(options.image instanceof Blob)
+    if(!(options.image instanceof HTMLImageElement))
     {
-        var url = URL.createObjectURL(options.image)
-        bg.src = url;
-    }
-    else  
-    {
-        bg = options.image;
+      var url = URL.createObjectURL(options.image);
+      options.image = new Image();
+      options.image.src = url;
     }
 
-    if (bg.complete) {
-    const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
-    ctx.drawImage(bg, left, top, width, height);
-    } else {
-    bg.onload = () => chart.draw();
+    if (options.image.complete) {
+      const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
+      //how much to scale the color bar
+      let scaling = height/473;
+      //draw spectogram
+      ctx.drawImage(options.image, 121, 61, 958, 460, left, top, width, height);
+      //draw color bar
+      ctx.drawImage(options.image,1090, 60, 12, 462, right+5, top, 12, height)
+    } 
+    
+    else {
+      options.image.onload = () => chart.draw();
     }
   },
 };
