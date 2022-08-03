@@ -491,7 +491,7 @@ export function gravityProFileUpload(
     let strarr = response.getResponseHeader('bounds').split(" ")
     for(let i in strarr)
     {
-      strarr[i] = strarr[i].replace("(", "")
+      strarr[i] = strarr[i].replace("/\D/g", "")
       console.log(strarr[i])
     }
 
