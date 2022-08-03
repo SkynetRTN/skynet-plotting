@@ -1,5 +1,6 @@
 import { Chart, Plugin } from "chart.js"
 import { AnyObject } from "chart.js/types/basic";
+import {ChartType} from "chart.js/auto";
 
 export const drReichart = new Image();
 drReichart.src = 'https://www.nasa.gov/images/content/133199main_Daniel_Reichart_photo.jpg';
