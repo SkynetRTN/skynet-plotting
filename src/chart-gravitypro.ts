@@ -213,7 +213,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
   );
   // create chart
   const ctx1 = (
-    document.getElementById("myChart1") as HTMLCanvasElement
+    document.getElementById("myChart2") as HTMLCanvasElement
   ).getContext("2d");
 
   const chartOptions: ChartConfiguration = {
@@ -314,11 +314,20 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
           //label: 'time',
           type: "linear",
           position: "bottom",
+          grid:
+          {
+            color: colors["gray"]
+          }
         },
         y: {
           //label: 'grav stuff',
+          type: "logarithmic",
           reverse: false,
           suggestedMin: 0,
+          grid:
+          {
+            color: colors["gray"]
+          }
         },
         z: {
           type: "linear",
@@ -358,7 +367,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityClass] {
   };
 
   const ctx2 = (
-    document.getElementById("myChart2") as HTMLCanvasElement
+    document.getElementById("myChart1") as HTMLCanvasElement
   ).getContext("2d");
   const mySpecto = new Chart(ctx2, spectoOptions) as Chart<'line'>;
 
@@ -479,6 +488,17 @@ export function gravityProFileUpload(
   }
 
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
+    let strarr = response.getResponseHeader('bounds').split(" ")
+    for(let i in strarr)
+    {
+      strarr[i] = strarr[i].replace("(", "")
+      console.log(strarr[i])
+    }
+
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0])
+    myCharts[1].options.scales.x.max = parseFloat(strarr[1])
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2])
+    myCharts[1].options.scales.y.max = parseFloat(strarr[3])
     myCharts[1].options.plugins.background.image = response.response;
     myCharts[1].update()
   })
