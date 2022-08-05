@@ -10,6 +10,7 @@ import { variableTest, variableFileUploadTest } from './chart-variable';
 import { pulsarTest, pulsarFileUploadTest} from './chart-pulsar';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
+import { gravityPro, gravityProClass, gravityProFileUpload } from './chart-gravitypro';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -120,6 +121,7 @@ function chartType(chart: string) {
             document.getElementById(divId).style.display = 'none';
         }
     }
+    document.getElementById("grav-charts").style.display = "none";
 
     if (document.getElementById('clusterProForm') != null)
         document.getElementById('clusterProForm').remove()
@@ -144,6 +146,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let grav_objects: [Handsontable, Chart, gravityClass]
+    let gravpro_objects: [Handsontable, Chart[], gravityClass]
 
 
     if (chart === 'variable') {
@@ -165,6 +168,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
+    }else if (chart === 'gravityPro') {
+        let grav_pro_objects = gravityPro();
+        objects = [grav_pro_objects[0], grav_pro_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            gravityProFileUpload(evt, grav_pro_objects[0], grav_pro_objects[1] as Chart<'line'>[], grav_pro_objects[2]);
+        }
+
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
         transientObjects = transient();

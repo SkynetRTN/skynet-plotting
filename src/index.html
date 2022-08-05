@@ -15,7 +15,8 @@
         <form title="input" id="chart-type-form">
           <select name="chart" title="select chart">
             <option value="variable" title="Variable">Variable</option>
-            <option value="gravity" title="Gravity">Gravity</option>
+<!--            <option value="gravity" title="Gravity">Gravity</option>-->
+            <option value="gravityPro" title="Gravity Pro">Gravity Pro</option>
             <option value="pulsar" title="Pulsar">Pulsar</option>
             <option value="transient" title="Transient">Transient</option>
           </select>
@@ -146,6 +147,19 @@
             </div>
           </div>
         </form>
+        <!-- Grav Charts -->
+        <div id="grav-charts" style="display: none">
+          <div class="row">
+            <div id="grav-div1" class="clusterCharts" style="cursor: move;display: block">
+              <canvas id="myGrav1" width="428" height="200"></canvas>
+            </div>
+          </div>
+          <div class="row">
+            <div id="grav-div2" class="clusterCharts" style="cursor: move;display: block">
+              <canvas id="myGrav2" width="428" height="200"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="row" id="button-row">
@@ -161,6 +175,8 @@
       <div class="col-lg-5" id="extra-options" style="padding:0px; border:0px;">
       </div>
     </div>
+
+
 
     <!-- Modal -->
     <div class="modal fade" id="honor-pledge-modal" tabindex="-1" aria-labelledby="honor-pledge-title"

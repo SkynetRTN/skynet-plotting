@@ -3,6 +3,8 @@
 import Chart from "chart.js/auto";
 import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
+import { backgroundPlugin } from "./chart-gravity-utils/background-image";
+import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
 import { tableCommonOptions, colors } from "./config";
@@ -17,13 +19,14 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
-import {get_grav_strain_server} from "./chart-gravity-utils/chart-gravity-file";
+import { chart2Scale } from "./chart-cluster3";
+
 Chart.register(zoomPlugin);
 /**
  *  This function is for the moon of a planet.
- *  @returns {[Handsontable, Chart]}:
+ *  @returns {[Handsontable, Chart[], gravityProClass]}:
  */
-export function gravity(): [Handsontable, Chart, gravityClass] {
+export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   document
     .getElementById("input-div")
     .insertAdjacentHTML(
@@ -132,7 +135,7 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
  // const filterForm = document.getElementById("filter-form") as ModelForm;
  
   const tableData = dummyData;
-  let gravClass = new gravityClass();
+  let gravClass = new gravityProClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
   let defaultMerge = (gravClass.getXbounds()[1] + gravClass.getXbounds()[0]) / 2;
 
@@ -148,7 +151,7 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
     gravityForm["merge"].value = '' + midpoint
     gravClass.fitChartToBounds(myChart);
     myChart.update();
-    gravClass.updateModelPlot(myChart, gravityForm)
+    gravClass.updateModelPlot(myChart, mySpecto, gravityForm)
   }
 
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.0005, defaultMerge);
@@ -157,11 +160,14 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1,10,0.1,1, true);
 
-
-
-  // create table
+  document.getElementById('myChart').hidden = true;
+  document.getElementById('grav-charts').style.display = 'inline';
   document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label2').style.display = 'inline';
   document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('axis-label4').style.display = 'inline';
+  document.getElementById('axisSet1').className = 'col-sm-6';
+  document.getElementById('axisSet2').style.display = 'inline';
   document.getElementById('xAxisPrompt').innerHTML = "X Axis";
   document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   const container = document.getElementById("table-div");
@@ -191,8 +197,8 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
     })
   );
   // create chart
-  const ctx = (
-    document.getElementById("myChart") as HTMLCanvasElement
+  const ctx1 = (
+    document.getElementById("myGrav2") as HTMLCanvasElement
   ).getContext("2d");
 
   const chartOptions: ChartConfiguration = {
@@ -202,8 +208,8 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
         {
           label: 'Model',
           data: [],
-          borderColor: colors['blue'],
-          backgroundColor: colors['blue'],
+          borderColor: colors['orange'],
+          backgroundColor: colors['orange'],
           pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
@@ -214,8 +220,8 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
         {
           label: 'Data',
           data: [],
-          borderColor: colors['red'],
-          backgroundColor: colors['red'],
+          borderColor: colors['purple'],
+          backgroundColor: colors['purple'],
           pointRadius: 0,
           borderWidth: 2,
           tension: 0.1,
@@ -229,14 +235,6 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
           audioContext: audioCtx,
           audioSource: audioSource,
           audioControls: audioControls
-      },
-      modeLabels: {
-        lc: { t: 'Title', x: 'x', y: 'y' },
-        ft: { t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum' },
-        pf: { t: 'Title', x: 'x', y: 'y' },
-        pressto: { t: 'Title', x: 'x', y: 'y' },
-        gravity: {t: 'Title', x: 'x', y: 'y'},
-        lastMode: 'gravity'
       },
     },
     options: {
@@ -267,20 +265,112 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
             },
             mode: 'x',
           },
-        },},
+        },
+        title:
+        {
+          display: false,
+        },
+      },
     },
   };
 
-  const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
+  const myChart = new Chart(ctx1, chartOptions) as Chart<'line'>;
+
+  const spectoOptions: ChartConfiguration = {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: 'Model',
+          data: [],
+          borderColor: colors['bright'],
+          backgroundColor: colors['white'],
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.1,
+          fill: false,
+          hidden: false,
+          immutableLabel: true,
+        },
+      ],
+    },
+    plugins: [backgroundPlugin],
+    options: {
+      hover: {
+        mode: "nearest",
+      },
+      scales: {
+        x: {
+          //label: 'time',
+          type: "linear",
+          position: "bottom",
+          grid:
+          {
+            color: colors["gray"]
+          }
+        },
+        y: {
+          //label: 'grav stuff',
+          type: "logarithmic",
+          reverse: false,
+          suggestedMin: 0,
+          grid:
+          {
+            color: colors["gray"]
+          }
+        },
+        z: {
+          type: "linear",
+          position: "right",
+          suggestedMin: 0,
+          suggestedMax: 25,
+          weight: 100,
+          grid: {
+            display: false
+          },
+          ticks: {
+            //we have to move the ticks over
+            callback: function(value, index, ticks) {
+                return '\t\t ' + value;
+            }
+          },
+        }
+      },
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: false,
+            mode: 'x',
+          },
+          zoom: {
+            wheel: {
+              enabled: false,
+            },
+            mode: 'x',
+          },
+        },
+        background: {
+          image: null
+        },
+      },
+    },
+  };
+
+  const ctx2 = (
+    document.getElementById("myGrav1") as HTMLCanvasElement
+  ).getContext("2d");
+  const mySpecto = new Chart(ctx2, spectoOptions) as Chart<'line'>;
 
   document.getElementById('chart-div').style.cursor = "move";
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) =>
-        gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid))
+    updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
+        gravClass.plotNewModel(myChart, mySpecto, gravityForm, strainData, freqData, totalMassDivGrid)
+      })
     gravClass.fitChartToBounds(myChart)
+    console.log(mySpecto.data.datasets[0])
   };
 
   //link chart to table
@@ -291,71 +381,44 @@ export function gravity(): [Handsontable, Chart, gravityClass] {
   });
 
   gravityModelForm.oninput = throttle(
-    function () {updateGravModelData(gravityModelForm, (modelData : number[][], totalMassDivGrid : number) => gravClass.plotNewModel(myChart, gravityForm, modelData, totalMassDivGrid));},
+    function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
+      gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));},
      200);
 
-  gravityForm.oninput = throttle(function () {gravClass.updateModelPlot(myChart, gravityForm)}, 100)
+  gravityForm.oninput = throttle(function () {
+    gravClass.updateModelPlot(myChart, mySpecto, gravityForm)}, 100)
+  
 
 
   update();
-  myChart.options.plugins.title.text = "Title";
   myChart.options.scales["x"].title.text = "x";
   myChart.options.scales["y"].title.text = "y";
+  mySpecto.options.plugins.title.text = "Title";
+  mySpecto.options.scales["x"].title.text = "x";
+  mySpecto.options.scales["y"].title.text = "y";
   updateLabels(
-    myChart,
+    mySpecto,
     document.getElementById("chart-info-form") as ChartInfoForm,
     false,
     false,
     false,
     false
   );
+  updateLabels(
+    myChart,
+    document.getElementById("chart-info-form") as ChartInfoForm,
+    false,
+    false,
+    false,
+    false,
+    1
+  );
 
   sonificationButton.onclick = () => play(myChart);
   saveSon.onclick = () => saveSonify(myChart);
 
-  return [hot, myChart, gravClass];
+  return [hot, [myChart, mySpecto], gravClass];
 }
-//remember later to change the file type to .hdf5
-
-export function gravityFileUpload(
-  evt: Event,
-  table: Handsontable,
-  myChart: Chart<"line">,
-  gravClass: gravityClass
-) 
-{
-  const file = (evt.target as HTMLInputElement).files[0];
-
-  if (file === undefined) {
-    return;
-  }
-
-  // File type validation
-  if (
-    !file.name.match(".*.hdf5")
-       // !file.name.match("16") ||
-       // !file.name.match("32")
-  ) {
-    alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
-    return;
-  }
-
-  get_grav_strain_server(file, (response: string) => {
-    let json = JSON.parse(response);
-    let data = json['data'];
-    let [min, max] = updateTable(table, data);
-    let midpoint = (min + max) / 2
-    let view_buffer = (max - min) * 0.20
-    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
-    const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
-
-    updateDataPlot(table, myChart);
-    gravClass.fitChartToBounds(myChart);
-    gravClass.updateModelPlot(myChart, gravityForm);
-  }) 
-}
-
 
 function updateTable(table: Handsontable, data: number[][]){
   //table.populateFromArray(1, 1, data)
@@ -407,25 +470,79 @@ function updateDataPlot(
   myChart.update()
 }
 
+export function gravityProFileUpload(
+  evt: Event,
+  table: Handsontable,
+  myCharts: Chart<"line">[],
+  gravClass: gravityProClass
+) 
+{
+  const file = (evt.target as HTMLInputElement).files[0];
+
+  if (file === undefined) {
+    return;
+  }
+
+  // File type validation
+  if (
+    !file.name.match(".*.hdf5")
+       // !file.name.match("16") ||
+       // !file.name.match("32")
+  ) {
+    alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
+    return;
+  }
+
+  get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
+    let strarr = response.getResponseHeader('bounds').split(" ")
+
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0])
+    myCharts[1].options.scales.x.max = parseFloat(strarr[1])
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2])
+    myCharts[1].options.scales.y.max = parseFloat(strarr[3])
+    myCharts[1].options.plugins.background.image = response.response;
+    myCharts[1].update()
+  })
 
 
-export class gravityClass{
+  get_grav_strain_server(file, (response: string) => {
+    let json = JSON.parse(response);
+    let data = json['data'];
+    console.log(json);
+    let [min, max] = updateTable(table, data);
+    let midpoint = (min + max) / 2
+    let view_buffer = (max - min) * 0.20
+    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
+
+    updateDataPlot(table, myCharts[0]);
+    gravClass.fitChartToBounds(myCharts[0]);
+    gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
+  }) 
+}
+
+export class gravityProClass {
   currentModelData : number[][];
+  currentFreqData : number[][];
   totalMassDivGridMass : number;
   minX : number;
   maxX : number;
   xBuffer : number;
   constructor(){
     this.currentModelData = defaultModelData;
+    this.currentFreqData = defaultModelData;
     this.totalMassDivGridMass = 1;
   }
 
   public updateModelPlot(
       myChart: Chart,
+      mySpecto: Chart,
       gravityForm: GravityForm) {
     let inc = parseFloat(gravityForm["inc_num"].value);
     let dist = parseFloat(gravityForm["dist_num"].value);
     let merge = parseFloat(gravityForm["merge_num"].value);
+
 
     //default d0 for now
     let d0 = 100;
@@ -433,6 +550,7 @@ export class gravityClass{
     let start = 0;
     //model data stored in chart 0
     let modelChart = myChart.data.datasets[0].data;
+    let freqChart = mySpecto.data.datasets[0].data;
 
     for (let i = 0; i < this.currentModelData.length; i++) {
       if ((this.currentModelData[i][0] === null) || (this.currentModelData[i][1] === null)) {
@@ -446,8 +564,24 @@ export class gravityClass{
     while (modelChart.length !== start) {
       modelChart.pop();
     }
+
+    start = 0;
+
+    for (let i = 0; i < this.currentFreqData.length; i++) {
+      if ((this.currentFreqData[i][0] === null) || (this.currentFreqData[i][1] === null)) {
+        continue;
+      }
+      freqChart[start++] = {
+        x: this.currentFreqData[i][0] + merge,
+        y: this.currentFreqData[i][1]
+      };
+    }
+    while (freqChart.length !== start) {
+      freqChart.pop();
+    }
    // this.fitChartToBounds(myChart);
     myChart.update("none")
+    mySpecto.update("none")
   }
 
 
@@ -467,10 +601,12 @@ export class gravityClass{
   }
 
   public plotNewModel(myChart: Chart,
+                        mySpecto: Chart,
                         gravityForm: GravityForm,
-                        modelData: number[][], totalMassRatio: number){
+                        modelData: number[][], freqData: number[][], totalMassRatio: number){
     this.currentModelData = modelData
+    this.currentFreqData = freqData
     this.totalMassDivGridMass = totalMassRatio
-    this.updateModelPlot(myChart, gravityForm)
+    this.updateModelPlot(myChart, mySpecto, gravityForm)
   }
 }
