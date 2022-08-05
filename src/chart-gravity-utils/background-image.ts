@@ -20,6 +20,11 @@ declare module 'chart.js' {
 export const backgroundPlugin: Plugin = {
   id: 'background',
   beforeDraw: (chart: Chart, args, options: BackgroundOptions) => {
+    if(options.image === null)
+    {
+      return;
+    }
+
     if(!(options.image instanceof HTMLImageElement))
     {
       var url = URL.createObjectURL(options.image);
@@ -29,8 +34,6 @@ export const backgroundPlugin: Plugin = {
 
     if (options.image.complete) {
       const {ctx, chartArea: {top, bottom, left, right, width, height}} = chart;
-      //how much to scale the color bar
-      let scaling = height/473;
       //draw spectogram
       ctx.drawImage(options.image, 121, 61, 958, 460, left, top, width, height);
       //draw color bar

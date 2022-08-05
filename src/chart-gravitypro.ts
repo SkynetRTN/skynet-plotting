@@ -3,7 +3,7 @@
 import Chart from "chart.js/auto";
 import { ChartConfiguration} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
-import { backgroundPlugin, drReichart } from "./chart-gravity-utils/background-image";
+import { backgroundPlugin } from "./chart-gravity-utils/background-image";
 import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
@@ -350,7 +350,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           },
         },
         background: {
-          image: drReichart
+          image: null
         },
       },
     },
