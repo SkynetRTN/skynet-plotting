@@ -7,6 +7,8 @@ import { chartDataDiff, debounce, linkInputs, sanitizeTableData, throttle, updat
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js";
 import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
+import {zoom} from "chartjs-plugin-zoom";
+import {TransientChart} from "./chart-transient-utils/chart-transient-chart";
 
 /**
  *  Returns generated table and chart for pulsar.
@@ -102,12 +104,29 @@ export function pulsar(): [Handsontable, Chart] {
     //create sonification options
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
+        '<div class="row" style = "position: absolute; left: 55%">\n' +
+        '<button class = "graphControl" id="panLeft">'  +
+        '<center class = "graphControl">&#8592;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="panRight">' +
+        '<center class = "graphControl">&#8594;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomIn">'   +
+        '<center class = "graphControl">&plus;</center></button>\n'  +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomOut">'  +
+        '<center class = "graphControl">&minus;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="Reset" style="width: auto" >' +
+        '<center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+        '</div>\n' +
         '<button id="sonify" style = "position: relative; left:92px;"/>Sonify</button>' +
         '<label style = "position:relative; right:73px;">Speed:</label>' +
         '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:205px; width: 52px;" >' +        
         '<button id="saveSonification" style = "position:relative; left:50px;"/>Save Sonification</button>' +
         '</div>\n'
     );
+
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";
@@ -263,18 +282,31 @@ export function pulsar(): [Handsontable, Chart] {
                         },
                     },
                 },
+                zoom: {
+                    pan: {
+                        enabled: true,
+                        mode: "x",
+                    },
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                        },
+                        mode: 'x',
+                    }
+                }
             },
             scales: {
                 x: {
                     type: 'linear',
                     position: 'bottom'
                 }
-            }
+            },
+
         }
     };
 
     const myChart = new Chart(ctx, chartOptions) as Chart<'line'>;
-
+    handleChartZoomOptions(myChart);
     const update = function () {
         updatePulsar(myChart);
         updateTableHeight(hot);
@@ -301,6 +333,18 @@ export function pulsar(): [Handsontable, Chart] {
         // updates during switching.
         if (mode === 'lc') {
             updateTableHeight(hot);
+        }
+
+        //enable zoom on x-axis in light curve and period folding mode
+        if (mode === 'lc' || mode === 'pf'){
+            myChart.resetZoom();
+            myChart.options.plugins.zoom.pan.enabled = true;
+            myChart.options.plugins.zoom.zoom.wheel.enabled = true;
+        } else {
+            myChart.resetZoom();
+            myChart.options.plugins.zoom.pan.enabled = false;
+            myChart.options.plugins.zoom.zoom.wheel.enabled = false;
+
         }
     }
 
@@ -870,4 +914,46 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
 
     myChart.update()
 
+}
+
+const handleChartZoomOptions = (myChart: Chart) => {
+    let Reset = document.getElementById("Reset") as HTMLInputElement;
+    let panLeft = document.getElementById("panLeft") as HTMLInputElement;
+    let panRight = document.getElementById("panRight") as HTMLInputElement;
+    let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
+    let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
+
+    let pan: number;
+
+    panLeft.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(5)}, 20 )
+    }
+    panLeft.onmouseup = panLeft.onmouseleave = function() {
+        clearInterval(pan);
+    }
+    panRight.onmousedown = function() {
+        pan = setInterval( () => {myChart.pan(-5)}, 20 )
+    }
+    panRight.onmouseup = panRight.onmouseleave = function() {
+        clearInterval(pan);
+    }
+
+    Reset.onclick = function(){
+        myChart.resetZoom();
+        myChart.update();
+    }
+
+    let zoom: number;
+    zoomIn.onmousedown = function () {
+        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);;
+    }
+    zoomIn.onmouseup = zoomIn.onmouseleave = function () {
+        clearInterval(zoom);
+    }
+    zoomOut.onmousedown = function () {
+        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);
+    }
+    zoomOut.onmouseup = zoomOut.onmouseleave = function () {
+        clearInterval(zoom);
+    }
 }
