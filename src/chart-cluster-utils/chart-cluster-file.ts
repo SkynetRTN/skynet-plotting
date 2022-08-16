@@ -70,10 +70,10 @@ export function clusterFileUpload(
         if (isCluster3)
             clusterProCheckControl()
 
-        const data: string[] = (reader.result as string)
+        // @ts-ignore
+        const data: string[] = (reader.result as string).replaceAll(' ', '')
             .split("\n")
-            .filter((str) => str !== null && str !== undefined && str !== "");
-
+            .filter((str: string) => str !== null && str !== undefined && str !== "" && str !== "\r");
         //let stars: starData[] =[];
 
         // find value index in database
@@ -109,16 +109,33 @@ export function clusterFileUpload(
             (result: string)=>{
                 let gaia = JSON.parse(result)
                 if (!result.includes('error')) {
-                    let [dict, filters] = generateDatadictGaia(sortedData, gaia)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
+                    try{
+                        let [dict, filters] = generateDatadictGaia(sortedData, gaia);
+                        updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax);
+                    }
+                    catch (e) {
+                        alert('GAIA data matched successfully! Unable to plot the data file: ' + e);
+                    }
                 } else {
-                    let [dict, filters] = generateDatadict(sortedData)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
+                    try{
+                        alert("Fail to load GAIA catalog, double check your file!");
+                        let [dict, filters] = generateDatadict(sortedData);
+                        updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
+                    }
+                    catch (e) {
+                        alert('File Format Error: ' + e);
+                    }
                 }
             },
-            ()=>{
-                let [dict, filters] = generateDatadict(sortedData)
-                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
+            (serverMsg: string)=>{
+                try{
+                    alert(serverMsg);
+                    let [dict, filters] = generateDatadict(sortedData);
+                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
+                }
+                catch (e) {
+                    alert('File Format Error: ' + e);
+                }
             }
         )
     };

@@ -591,7 +591,7 @@ export function proFormMinmax(hot: Handsontable, modelForm: ModelForm){
   //let minRa = Math.min(...tableData2.map(row=> row[columns.indexOf(modelForm[blueKey].value + " pmra")]));
   //let minDec = Math.min(...tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmdec")]));
   //make an array of all the ra values in numerical order from smallest to largest
-  let raArray = tableData2.map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
+  let raArray = tableData2.filter((numList) => numList[0] !== null).map(row => row[columns.indexOf(modelForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
   //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
   let raArrayLength = raArray.length;
   let raArraHalfLength = Math.floor(raArrayLength/2);
