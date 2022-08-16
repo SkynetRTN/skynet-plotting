@@ -70,7 +70,7 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
             try {
                 callback(xmlHttp.responseText);
             } catch (e) {
-                console.log(e)
+                console.trace(e)
                 console.log(JSON.parse(xmlHttp.responseText))
             }
         } else if (xmlHttp.status != 200 && xmlHttp.readyState == 4 && xmlHttp.response == "") {
