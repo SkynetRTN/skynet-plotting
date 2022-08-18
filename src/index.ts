@@ -16,6 +16,9 @@ import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/au
 import Handsontable from 'handsontable';
 import { pause } from './sonification';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
+import {cluster3} from "./chart-cluster3";
+import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
+import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 
 /**
  *  Initializing the page when the website loads
@@ -146,6 +149,7 @@ function chartType(chart: string) {
 
     let objects: [Handsontable, Chart];
     let grav_objects: [Handsontable, Chart, gravityClass]
+    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
     let gravpro_objects: [Handsontable, Chart[], gravityClass]
 
 
@@ -161,6 +165,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
         }
+    } else if (chart === 'cluster3') {
+            let result = cluster3()
+            cluster_objects = [result[0], result[1], result[2], result[3]];
+            objects = [cluster_objects[0], cluster_objects[1][0]]
+            document.getElementById('file-upload-button').style.display = 'inline';
+            document.getElementById('file-upload').onchange = function (evt) {
+                clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
+            }
     }else if (chart === 'gravity') {
         grav_objects = gravity();
         objects = [grav_objects[0], grav_objects[1]]
