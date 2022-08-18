@@ -40,6 +40,7 @@ export function filterMags(): { [key: string]: Function[] } {
 
 /**
  * Constant of the value of wavelength each filter has
+ * in micrometer
  */
 export const filterWavelength: { [key: string]: number } = {
     U: 0.364,
@@ -56,6 +57,13 @@ export const filterWavelength: { [key: string]: number } = {
     H: 1.65,
     K: 2.15,
     Ks: 2.15,
+    W1: 3.4,
+    W2: 4.6,
+    W3: 12,
+    W4: 22,
+    G: 0.673,
+    GBP: 0.532,
+    GRP: 0.797,
 };
 
 /**Get http request asynchronously
