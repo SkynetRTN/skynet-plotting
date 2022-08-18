@@ -93,14 +93,17 @@ export function clusterFileUpload(
         let stars: starData[] = []
         for (let row of data) {
             let items = row.trim().split(",");
-            let src = items[keyIndex['id']]
-            let filter = items[keyIndex['filter']];
-            let calibratedMag = parseFloat(items[keyIndex['calibrated_mag\\r']]);
-            let ra = parseFloat(items[keyIndex['ra_hours']])*15;
-            let dec = parseFloat(items[keyIndex['dec_degs']]);
-            let mag = items[keyIndex['mag']];
-            let err = parseFloat(items[keyIndex['mag_error']]);
-            stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
+            if (items[0] !== "" && items[1] !==""){
+                let src = items[keyIndex['id']]
+                let filter = items[keyIndex['filter']];
+                let calibratedMag = parseFloat(items[keyIndex['calibrated_mag\\r']]);
+                let ra = parseFloat(items[keyIndex['ra_hours']])*15;
+                let dec = parseFloat(items[keyIndex['dec_degs']]);
+                let mag = items[keyIndex['mag']];
+                let err = parseFloat(items[keyIndex['mag_error']]);
+                if (src && ra && dec && calibratedMag && filter)
+                    stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
+            }
         }
         let cleanedup = sortStar(stars)
         let url: string = baseUrl + "/gaia"
