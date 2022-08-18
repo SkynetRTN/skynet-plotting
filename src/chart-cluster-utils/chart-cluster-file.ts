@@ -5,7 +5,7 @@
 
 import { Chart } from "chart.js";
 import Handsontable from "handsontable";
-import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
+import {baseUrl, filterWavelength, httpPostAsync, modelFormKey} from "./chart-cluster-util";
 import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
@@ -217,7 +217,7 @@ function updateCharts(
 
     //order filters by temperature
     // const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
-    const knownFilters = ["U", "u\'", "B", "g\'", "V", "r\'", "R", "i\'", "I", "z\'", "Y", "J", "H", "Ks", "K",];
+    const knownFilters = Object.keys(filterWavelength);
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
     //if it ain't known ignore it

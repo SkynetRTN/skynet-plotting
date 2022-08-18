@@ -42,11 +42,16 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
         reveal = reveal.concat(modelFormKeys(c, modelForm));
         httpGetAsync(generateURL(modelForm, c),
             (response: string) => {
-                let json = JSON.parse(response);
-                let dataTable: number[][] = json['data'];
-                let filteredModel = modelFilter(dataTable, json['iSkip'])
-                chart.data.datasets[0].data = filteredModel[0];
-                chart.data.datasets[1].data = filteredModel[1];
+                if (!response.includes('err')){
+                    let json = JSON.parse(response);
+                    let dataTable: number[][] = json['data'];
+                    let filteredModel = modelFilter(dataTable, json['iSkip'])
+                    chart.data.datasets[0].data = filteredModel[0];
+                    chart.data.datasets[1].data = filteredModel[1];
+                } else {
+                    chart.data.datasets[0].data = [];
+                    chart.data.datasets[1].data = [];
+                }
                 callback(c);
                 if (!isChart)
                     chart.update("none");
