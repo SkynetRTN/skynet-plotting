@@ -307,7 +307,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           grid:
           {
             color: colors["gray"]
-          }
+          },
+          
         },
         y: {
           //label: 'grav stuff',
@@ -322,8 +323,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         z: {
           type: "linear",
           position: "right",
-          suggestedMin: 0,
-          suggestedMax: 25,
+          min: 0,
+          max: 25,
           weight: 100,
           grid: {
             display: false
@@ -367,9 +368,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
     updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
-        console.log("EEEEEEEEEEEEEEEEEEEEEE")
         gravClass.plotNewModel(myChart, mySpecto, gravityForm, strainData, freqData, totalMassDivGrid);
-        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
       })
     gravClass.fitChartToBounds(myChart)
     console.log(mySpecto.data.datasets[0])
@@ -498,9 +497,9 @@ export function gravityProFileUpload(
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
     let strarr = response.getResponseHeader('bounds').split(" ")
 
-    myCharts[1].options.scales.x.min = parseFloat(strarr[0])
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
     myCharts[1].options.scales.x.max = parseFloat(strarr[1])
-    myCharts[1].options.scales.y.min = parseFloat(strarr[2])
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3])
     myCharts[1].options.plugins.background.image = response.response;
     myCharts[1].update()
