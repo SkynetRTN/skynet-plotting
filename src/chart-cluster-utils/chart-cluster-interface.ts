@@ -30,14 +30,14 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
-        '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
+        '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         "</div>\n"
 
     if (isPro)
         htmlContent += '<div class="row">\n' +
-        '<div class="col-sm-6 des">R – V Reddening (mag):</div>\n' +
+        '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
         "</div>\n"
