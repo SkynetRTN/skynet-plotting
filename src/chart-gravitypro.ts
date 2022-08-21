@@ -496,9 +496,9 @@ export function gravityProFileUpload(
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
     let strarr = response.getResponseHeader('bounds').split(" ")
 
-    myCharts[1].options.scales.x.min = parseFloat(strarr[0])
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
     myCharts[1].options.scales.x.max = parseFloat(strarr[1])
-    myCharts[1].options.scales.y.min = parseFloat(strarr[2])
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3])
     myCharts[1].options.plugins.background.image = response.response;
     myCharts[1].update()
