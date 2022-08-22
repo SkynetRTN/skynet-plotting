@@ -55,7 +55,7 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
   linkInputs(clusterForm['err'], clusterForm["err_num"], 0, 1, 0.05, 1, false, true, 0, 999)
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
+  linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 30, false, false);
   linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.2, 0.01, 6.6);
   linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
   linkInputs(clusterForm["rv"], clusterForm["rv_num"], 0, 6, 0.01, 3.1, false, true, 0, 100000000);

@@ -58,13 +58,13 @@ export function clusterFileUpload(
         modelForm["age"].value = "6.6";
         clusterForm["red"].value = "0";
         modelForm["metal"].value = "-3.4";
-        clusterForm["distrange"].value = "100";
+        clusterForm["distrange"].value = "30";
         //clusterForm["err_num"].value = "1";
         clusterForm["d_num"].value = "3";
         modelForm["age_num"].value = "6.6";
         clusterForm["red_num"].value = "0";
-        modelForm["metal_num"].value = "-3.4";
-        clusterForm["distrange_num"].value = "100";
+        modelForm["metal_num"].value = "-2.2";
+        clusterForm["distrange_num"].value = "30";
         rangeCheckControl()
         let proMinMax: number[] = null;
         if (isCluster3)
