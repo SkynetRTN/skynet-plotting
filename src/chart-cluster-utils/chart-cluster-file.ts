@@ -10,7 +10,7 @@ import {changeOptions, getDateString, updateLabels, updateTableHeight } from "..
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
-import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
+import {clusterProCheckControl, rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
 import { updateProForm, proFormMinmax, updateChart2, chart2Scale } from "../chart-cluster3";
 
 /**
@@ -368,6 +368,7 @@ function updateCharts(
                     updateChart2(chart, proForm, proMinMax)
                     chart2Scale(chart, proMinMax);
                     chart.update();
+                    updateClusterProDefaultLabels([myCharts[0], myCharts[1]]);
                 }
                 document.getElementById("standardView").click();
             }

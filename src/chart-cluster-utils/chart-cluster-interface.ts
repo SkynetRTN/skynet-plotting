@@ -2,9 +2,10 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
-import { Chart } from "chart.js";
+import {Chart, LinearScaleOptions} from "chart.js";
 import { chart2Scale, proFormMinmax } from "../chart-cluster3";
 import Handsontable from "handsontable";
+import {modelFormKey} from "./chart-cluster-util";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -493,4 +494,32 @@ export function insertClusterSimControls(chartCounts:number = 1) {
             "beforeend",
             htmlContent
         );
+}
+
+export function setClusterProDefaultLabels(charts: Chart[]){
+    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    chartInfoForm.style.display = 'None';
+    updateClusterProDefaultLabels(charts)
+}
+
+export function updateClusterProDefaultLabels(charts: Chart[]) {
+    charts[0].options.plugins.title.text = "HR Diagram"
+    for (let i = 0; i < charts.length; i++) {
+        const chart = charts[i];
+        (chart.options.scales['x'] as LinearScaleOptions).title.text = clusterProXaxis(i);
+        (chart.options.scales['y'] as LinearScaleOptions).title.text = clusterProYaxis(i);
+    }
+}
+
+function clusterProXaxis(chartNum: number): string{
+    const modelForm = document.getElementById("model-form") as ModelForm;
+    const result = modelForm[modelFormKey(chartNum, 'blue')].value
+        + '-' + modelForm[modelFormKey(chartNum, 'red')].value
+    return result
+}
+
+function clusterProYaxis(chartNum: number): string{
+    const modelForm = document.getElementById("model-form") as ModelForm;
+    const result = 'M_' + modelForm[modelFormKey(chartNum, 'lum')].value
+    return result
 }

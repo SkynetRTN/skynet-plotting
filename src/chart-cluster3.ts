@@ -6,7 +6,15 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter, updateClusterProScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, clusterProSliders, rangeCheckControl, clusterProCheckControl, clusterProButtons, clusterProButtonControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {
+  insertClusterControls,
+  clusterProSliders,
+  rangeCheckControl,
+  clusterProCheckControl,
+  clusterProButtons,
+  clusterProButtonControl,
+  setClusterProDefaultLabels, updateClusterProDefaultLabels
+} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -516,9 +524,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   // link chart to model form (slider + text)
   // modelForm.oninput=
   modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart1, myChart2], (chartNum: number) => {
-      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);
-      updateClusterProScatter(hot, myChart3, modelForm, clusterForm)
+      updateHRModel(modelForm, hot, [myChart1, myChart2], (chartNum: number) => {
+        updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, chartNum, clusterProForm);
+        updateClusterProScatter(hot, myChart3, modelForm, clusterForm);
+        updateClusterProDefaultLabels([myChart1, myChart2]);
     });
    }, 100);
 
@@ -544,8 +553,10 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
   updateClusterProScatter(hot, myChart3, modelForm, clusterForm)
   chart2Scale(myChart3, minmax)
   updateChart2(myChart3, clusterProForm, minmax)
-  updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
-  updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
+  // let chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+  // updateLabels(myChart1, chartInfoForm, false, false, false, false, 0);
+  // updateLabels(myChart2, chartInfoForm, false, false, false, false, 1);
+  setClusterProDefaultLabels([myChart1, myChart2])
   const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
   document.getElementById('rarangeCheck').click()
   document.getElementById('rarangeCheck').click()
