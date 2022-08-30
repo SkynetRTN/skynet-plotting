@@ -37,7 +37,7 @@ export function get_grav_spectrogram_server(file: File, callback: Function){
     let uploadUrl = baseUrl + "/gravprofile"
     let formData = new FormData();
     formData.append("file", file)
-    req.responseType = "blob"
+    req.responseType = "json"
     // Need to change this code to use an image response
 
     req.onreadystatechange = function () {
@@ -46,12 +46,12 @@ export function get_grav_spectrogram_server(file: File, callback: Function){
                 callback(req);
             } catch (e) {
                 console.log(e)
-                console.log(JSON.parse(req.response))
+                console.log(req.response)
             }
         } else if (req.status != 200 && req.readyState == 4 && req.response == ""){
             console.log("Failure to load a *.hdf5 file")
             console.log(req.statusText)
-            console.log(JSON.parse(req.response))
+            console.log(req.response)
         }
     }
 
