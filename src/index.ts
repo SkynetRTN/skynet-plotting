@@ -19,6 +19,7 @@ import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 import {cluster3} from "./chart-cluster3";
 import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
 import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
 
 /**
  *  Initializing the page when the website loads
@@ -212,6 +213,17 @@ function chartType(chart: string) {
         objects[0].alter('insert_row');
     };
 
+    const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
+    chartInfoForm.oninput = function () {
+        if (chart === 'cluster2') {
+            updateChartInfo(cluster_objects[1][0], chartInfoForm)
+            updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
+        } else if (chart === 'cluster3'){
+            updateClusterProLabels([cluster_objects[1][0], cluster_objects[1][1]])
+        } else if (chart !== 'transient') {
+            updateChartInfo(objects[1], chartInfoForm);
+        }
+    };
 
     if(objects[1].data.sonification)
     {
@@ -271,6 +283,12 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
     // @ts-ignore
     (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y'+key+'Axis'].value;
     myChart.options.plugins.title.text = elements['title'].value;
+    updateChartDataLabel(myChart, form);
+    myChart.update('none');
+}
+
+export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement){
+    const elements = form.elements as ChartInfoFormElements;
     const labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
@@ -278,7 +296,6 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    myChart.update('none');
 }
 
 function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0) {

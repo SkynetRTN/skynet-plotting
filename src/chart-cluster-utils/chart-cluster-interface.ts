@@ -6,6 +6,7 @@ import {Chart, LinearScaleOptions} from "chart.js";
 import { chart2Scale, proFormMinmax } from "../chart-cluster3";
 import Handsontable from "handsontable";
 import {modelFormKey} from "./chart-cluster-util";
+import {updateChartDataLabel} from "../index";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -13,11 +14,6 @@ import {modelFormKey} from "./chart-cluster-util";
  */
 export function insertClusterControls(chartCounts:number = 1, isPro = false) {
     let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-        '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
@@ -31,6 +27,11 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
+        '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
         '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
@@ -43,7 +44,9 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
         "</div>\n"
 
-    htmlContent += "</form>\n" +
+    htmlContent += "</form>\n";
+
+    htmlContent +=
         '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
@@ -496,14 +499,59 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         );
 }
 
+
+export function clusterProLayoutSetups(){
+    //remove chart tags from myChart1 and 2
+    //change the class of chart-div2 to col-lg-4
+    document.getElementById('chartTag1').style.display = "None";
+    document.getElementById('chartTag2').style.display = "None";
+    document.getElementById('chart-div1').style.display = 'block';
+    document.getElementById('chart-div2').style.display = 'block';
+    document.getElementById('chart-div3').style.display = 'block';
+    document.getElementById('chart-div4').style.display = 'block';
+
+    //change cluster pro form cursor behavior from graph to auto
+    document.getElementById("clusterProForm").style.cursor= "auto";
+
+    //configure bottom forms layout
+    document.getElementById('chart-info-form-div').className = 'col-sm-4';
+    document.getElementById('axis-col').style.display = 'none';
+    document.getElementById("title-data-col").className = 'col-sm-12'
+    document.getElementById('cluster-scraper-form-div').style.display = 'inline';
+    document.getElementById('cluster-scraper-form-div').className = 'col-sm-8';
+
+}
+
+
 export function setClusterProDefaultLabels(charts: Chart[]){
-    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
-    chartInfoForm.style.display = 'None';
+    // const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    // chartInfoForm.style.display = 'None';
     updateClusterProDefaultLabels(charts)
 }
 
 export function updateClusterProDefaultLabels(charts: Chart[]) {
-    charts[0].options.plugins.title.text = "HR Diagram"
+    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    chartInfoForm.elements['data'].value = "Data";
+    updateClusterProLabels(charts, "HR Diagram");
+}
+
+export function updateClusterProLabels(charts: Chart[], title: string = null) {
+    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    updateClusterProAxis(charts);
+    for (const chart of charts) {
+        updateChartDataLabel(chart, chartInfoForm)
+        if (title) {
+            chartInfoForm.elements["title"].value = title;
+            chart.options.plugins.title.text = title;
+        } else {
+            chart.options.plugins.title.text = chartInfoForm.elements["title"].value
+        }
+        chart.update('none');
+    }
+
+}
+
+function updateClusterProAxis(charts: Chart[]){
     for (let i = 0; i < charts.length; i++) {
         const chart = charts[i];
         (chart.options.scales['x'] as LinearScaleOptions).title.text = clusterProXaxis(i);

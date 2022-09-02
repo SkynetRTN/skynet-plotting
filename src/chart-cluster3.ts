@@ -13,7 +13,7 @@ import {
   clusterProCheckControl,
   clusterProButtons,
   clusterProButtonControl,
-  setClusterProDefaultLabels, updateClusterProDefaultLabels
+  setClusterProDefaultLabels, updateClusterProDefaultLabels, clusterProLayoutSetups
 } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow, modelFormKey } from "./chart-cluster-utils/chart-cluster-util";
@@ -29,35 +29,12 @@ export function cluster3(): [Handsontable, Chart[], ModelForm, graphScale, Clust
     insertClusterControls(2, true);
     clusterProButtons(true);
     clusterProSliders(true);
-    //make graph scaling options visible to users
+    clusterProLayoutSetups();
 
   //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-  //remove chart tags from myChart1 and 2
-  //change the class of chart-div2 to col-lg-4
-    document.getElementById('chartTag1').style.display = "None";
-    document.getElementById('chartTag2').style.display = "None";
-    document.getElementById('chart-div1').style.display = 'block';
-    document.getElementById('chart-div2').style.display = 'block';
-    document.getElementById('chart-div3').style.display = 'block';
-    document.getElementById('chart-div4').style.display = 'block';
-    document.getElementById('axis-label1').style.display = 'inline';
-    document.getElementById('axis-label2').style.display = 'inline';
-    document.getElementById('axis-label3').style.display = 'inline';
-    document.getElementById('axis-label4').style.display = 'inline';
-    //document.getElementById('axis-label5').style.display = 'inline';
-    //document.getElementById('axis-label6').style.display = 'inline';
-    document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
-    document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
-    document.getElementById('axisSet1').className = 'col-sm-6';
-    document.getElementById('axisSet2').style.display = 'inline';
-    document.getElementById("clusterProForm").style.cursor= "auto";
-    //I don't know why this is necessary, but it is.
-    //document.getElementById("myChart2").style.cursor= "auto";
-    //document.getElementById("myChart3").style.cursor= "auto";
-  // Link each slider with corresponding text box
-  // const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
+
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
   const modelForm = document.getElementById("model-form") as ModelForm;
   const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;

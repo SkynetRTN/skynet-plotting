@@ -86,68 +86,81 @@
             </div>
           </div>
         </div>
-        <form id="chart-info-form" class="text">
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="row">
-                <div class="col-sm-3 des">Title</div>
-                <div class="col-sm-9"><input type="text" title="Title" name="title" value="Title" class="field"></div>
-              </div>
-              <div class="row">
-                <div class="col-sm-3 des">Data</div>
-                <div class="col-sm-9"><input type="text" title="Data" name="data" value="Data" class="field"></div>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="row">
-                <div class="col-sm-12" id="axisSet1">
-                  <div id = "axis-label1">
+        <div id = "bottom=forms-div">
+          <div class = "row">
+            <div id = "chart-info-form-div" class="col-sm-6">
+              <form id="chart-info-form" class="text">
+                <div class="row">
+                  <div id = "title-data-col" class="col-sm-6">
                     <div class="row">
-                      <div class="col-sm-4 des" id="xAxisPrompt">X Axis</div>
-                      <div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="x" class="field"></div>
+                      <div class="col-sm-3 des">Title</div>
+                      <div class="col-sm-9"><input type="text" title="Title" name="title" value="Title" class="field"></div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-3 des">Data</div>
+                      <div class="col-sm-9"><input type="text" title="Data" name="data" value="Data" class="field"></div>
                     </div>
                   </div>
-                  <div id = "axis-label3">
+                  <div id = "axis-col" class="col-sm-6">
                     <div class="row">
-                      <div class="col-sm-4 des" id="yAxisPrompt">Y Axis</div>
-                      <div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="y" class="field"></div>
+                      <div class="col-sm-12" id="axisSet1">
+                        <div id = "axis-label1">
+                          <div class="row">
+                            <div class="col-sm-4 des" id="xAxisPrompt">X Axis</div>
+                            <div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="x" class="field"></div>
+                          </div>
+                        </div>
+                        <div id = "axis-label3">
+                          <div class="row">
+                            <div class="col-sm-4 des" id="yAxisPrompt">Y Axis</div>
+                            <div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="y" class="field"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-6" id="axisSet2" style="display: none">
+                        <div id = "axis-label2">
+                          <div class="row">
+                            <div class="col-sm-4 des">X<sub>2</sub> Axis</div>
+                            <div class="col-sm-8"><input type="text" title="X2 Axis" name="x1Axis" value="x" class="field"></div>
+                          </div>
+                        </div>
+                        <div id = "axis-label4">
+                          <div class="row">
+                            <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
+                            <div class="col-sm-8"><input type="text" title="Y2 Axis" name="y1Axis" value="y" class="field"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div class="col-sm-6" id="axisSet2" style="display: none">
-                  <div id = "axis-label2">
-                    <div class="row">
-                      <div class="col-sm-4 des">X<sub>2</sub> Axis</div>
-                      <div class="col-sm-8"><input type="text" title="X2 Axis" name="x1Axis" value="x" class="field"></div>
-                    </div>
-                  </div>
-                  <div id = "axis-label4">
-                    <div class="row">
-                      <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
-                      <div class="col-sm-8"><input type="text" title="Y2 Axis" name="y1Axis" value="y" class="field"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-                <div class="col-sm-6" id="axisSet3" style="display: none">
-                  <div id = "axis-label5">
-                    <div class="row">
-                      <div class="col-sm-4 des">
-                      <div class="col-sm-8"><input type="text" title="MotionX Axis" name="MotionXaxis" value="x" class="field"></div>
-                    </div>
-                  </div>
-                  <div id = "axis-label6">
-                    <div class="row">
-                      <div class="col-sm-4 des">
-                      <div class="col-sm-8"><input type="text" title="MotionY Axis" name="MotionYaxis" value="y" class="field"></div>
+                    <div class="col-sm-6" id="axisSet3" style="display: none">
+                      <div id = "axis-label5">
+                        <div class="row">
+                          <div class="col-sm-4 des">
+                            <div class="col-sm-8"><input type="text" title="MotionX Axis" name="MotionXaxis" value="x" class="field"></div>
+                          </div>
+                        </div>
+                        <div id = "axis-label6">
+                          <div class="row">
+                            <div class="col-sm-4 des">
+                              <div class="col-sm-8"><input type="text" title="MotionY Axis" name="MotionYaxis" value="y" class="field"></div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </form>
+            </div>
+            <div id="cluster-scraper-form-div" class="col-sm"
+                 style="border-style: double; border-bottom-color: #0c4128; border-width: thick">
+              [fancy buttons for scraper]
+              <br>
+              [Drum Roll]
             </div>
           </div>
-        </form>
+        </div>
+
         <!-- Grav Charts -->
         <div id="grav-charts" style="display: none">
           <div class="row">

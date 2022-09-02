@@ -494,7 +494,11 @@ export function defaultLayout(){
         document.getElementById('clusterProForm').remove()
 
     //expand the size of axisSet1 and hide axisSet2 for all interfaces
+    document.getElementById('chart-info-form-div').className = 'col-sm-12';
+    document.getElementById('axis-col').style.display = 'inline';
+    document.getElementById("title-data-col").className = 'col-sm-6'
     document.getElementById('axisSet1').className = 'col-sm-12';
+    document.getElementById('axisSet1').style.display = 'inline';
     document.getElementById('axisSet2').style.display = 'none';
     document.getElementById('file-upload-button').style.display = 'none';
     document.getElementById('extra-options').innerHTML = '';
@@ -504,6 +508,8 @@ export function defaultLayout(){
             document.getElementById('axis-label'+i.toString()).style.display = 'none';
         }
     }
+    // hide cluster-scraper-form
+    document.getElementById('cluster-scraper-form-div').style.display = 'none';
     // document.getElementById('extra-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
