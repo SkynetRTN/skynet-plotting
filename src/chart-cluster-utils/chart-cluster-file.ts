@@ -55,7 +55,7 @@ export function clusterFileUpload(
         clusterForm["err"].value = "1";
         clusterForm["err_num"].value = "1";
         clusterForm["age"].value = "6.6";
-        clusterForm["red"].value = "0";
+        clusterForm["bv"].value = "0";
         clusterForm["metal"].value = "-3.4";
         clusterForm["distrange"].value = "30";
         //clusterForm["err_num"].value = "1";
@@ -64,6 +64,8 @@ export function clusterFileUpload(
         clusterForm["red_num"].value = "0";
         clusterForm["metal_num"].value = "-2.2";
         clusterForm["distrange_num"].value = "30";
+        clusterForm["rv"].value = "3.1";
+        clusterForm["rv_num"].value = "3.1";
         rangeCheckControl()
         let proMinMax: number[] = null;
         if (isCluster3)
