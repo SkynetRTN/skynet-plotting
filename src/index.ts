@@ -77,7 +77,7 @@ window.onload = function () {
         // for cluster pro
         } else if ('myChart3' in window){
             document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0, document.getElementById('clusterProForm') as ClusterProForm);
+            saveImage([3, 4, 2], signature, true, 1.0, true);
         }
     };
 
@@ -298,7 +298,7 @@ export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement){
     }
 }
 
-function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, proMotionForm: ClusterProForm = null) {
+function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3: boolean = false) {
     const destCanvas = document.createElement('canvas');
     destCanvas.width = 0;
     destCanvas.height = 0;
@@ -323,12 +323,20 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         dx += canvas.width;
     })
 
-    if (proMotionForm) {
-        let texts = ["Motion info:"]
-        texts.push("RA: " + proMotionForm['ramotion_num'].value
-            + " ±" + proMotionForm['rarange_num'].value + "%")
-        texts.push("DEC: " + proMotionForm['decmotion_num'].value
-            + " ±" + proMotionForm['decrange_num'].value + "%")
+    if (isCluster3) {
+        const proMotionForm = document.getElementById('clusterProForm') as ClusterProForm;
+        const clusterForm = document.getElementById('cluster-form') as ClusterForm;
+        let texts = [];
+        texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
+            + " mas/yr ±" + proMotionForm['rarange_num'].value + "%");
+        texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
+            + " mas/yr ±" + proMotionForm['decrange_num'].value + "%");
+        texts.push("Distance: " + clusterForm['d_num'].value
+            + " kpc ±" + clusterForm['distrange'].value + "%");
+        texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
+        texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
+        texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
+        texts.push("R_V: " + clusterForm['rv_num'].value)
 
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
@@ -336,7 +344,7 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         destCtx.fillStyle = 'black'
         for (const text of texts) {
             dy += 30
-            destCtx.fillText(text, dx, dy);
+            destCtx.fillText(text, dx + 20, dy);
         }
     }
 
