@@ -51,19 +51,18 @@ export function clusterFileUpload(
     const reader = new FileReader();
     reader.onload = () => {
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-        const modelForm = document.getElementById("model-form") as ModelForm;
         clusterForm["d"].value = Math.log(3).toString();
         clusterForm["err"].value = "1";
         clusterForm["err_num"].value = "1";
-        modelForm["age"].value = "6.6";
+        clusterForm["age"].value = "6.6";
         clusterForm["red"].value = "0";
-        modelForm["metal"].value = "-3.4";
+        clusterForm["metal"].value = "-3.4";
         clusterForm["distrange"].value = "30";
         //clusterForm["err_num"].value = "1";
         clusterForm["d_num"].value = "3";
-        modelForm["age_num"].value = "6.6";
+        clusterForm["age_num"].value = "6.6";
         clusterForm["red_num"].value = "0";
-        modelForm["metal_num"].value = "-2.2";
+        clusterForm["metal_num"].value = "-2.2";
         clusterForm["distrange_num"].value = "30";
         rangeCheckControl()
         let proMinMax: number[] = null;
@@ -114,7 +113,7 @@ export function clusterFileUpload(
                 if (!result.includes('error')) {
                     try{
                         let [dict, filters] = generateDatadictGaia(sortedData, gaia);
-                        updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax);
+                        updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax);
                     }
                     catch (e) {
                         alert('GAIA data matched successfully! Unable to plot the data file: ' + e);
@@ -123,7 +122,7 @@ export function clusterFileUpload(
                     try{
                         alert("Fail to load GAIA catalog, double check your file!");
                         let [dict, filters] = generateDatadict(sortedData);
-                        updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
+                        updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
                     }
                     catch (e) {
                         alert('File Format Error: ' + e);
@@ -134,7 +133,7 @@ export function clusterFileUpload(
                 try{
                     alert(serverMsg);
                     let [dict, filters] = generateDatadict(sortedData);
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
+                    updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax);
                 }
                 catch (e) {
                     alert('File Format Error: ' + e);
@@ -155,7 +154,6 @@ export function clusterFileDownload(
     table: Handsontable,
     myCharts: Chart[],
     clusterForm: ClusterForm,
-    modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
     specificChart: number = -1,
@@ -163,7 +161,7 @@ export function clusterFileDownload(
 
 ){
     let csvRowsStar = [];
-    let starData = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    let starData = updateScatter(table, myCharts, clusterForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
     if (starData.length === 0){
         alert("Please upload a data file before downloading");
         return
@@ -203,7 +201,6 @@ function updateCharts(
     myCharts: Chart[],
     table: Handsontable,
     datadict: Map<string, Map<string, number>>,
-    modelForm: ModelForm,
     clusterForm: ClusterForm,
     filters: string[],
     graphMaxMin: graphScale,
@@ -211,9 +208,9 @@ function updateCharts(
     proForm: ClusterProForm,
     proMinMax: number[],
     ) {
-    let blue = modelForm[modelFormKey(0, 'blue')];
-    let red = modelForm[modelFormKey(0, 'red')];
-    let lum = modelForm[modelFormKey(0, 'lum')];
+    let blue = clusterForm[modelFormKey(0, 'blue')];
+    let red = clusterForm[modelFormKey(0, 'red')];
+    let lum = clusterForm[modelFormKey(0, 'lum')];
 
     //order filters by temperature
     // const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
@@ -325,9 +322,9 @@ function updateCharts(
         updateLabels(myChart, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, c);
 
         //Change filter options to match file
-        blue = modelForm[modelFormKey(c, 'blue')];
-        red = modelForm[modelFormKey(c, 'red')];
-        lum = modelForm[modelFormKey(c, 'lum')];
+        blue = clusterForm[modelFormKey(c, 'blue')];
+        red = clusterForm[modelFormKey(c, 'red')];
+        lum = clusterForm[modelFormKey(c, 'lum')];
 
         //Change the options in the drop downs to the file's filters
         //blue and lum are most blue by default, red is set to most red
@@ -340,7 +337,7 @@ function updateCharts(
         red.value = filters[1];
         lum.value = filters[1];
     }
-    updateHRModel(modelForm, table, queryCharts,
+    updateHRModel(clusterForm, table, queryCharts,
         (c: number) => {
             if (c === chartLength-1){
                 table.updateSettings({
@@ -357,14 +354,14 @@ function updateCharts(
                 updateTableHeight(table);
                 for (let i = 0; i < chartLength; i++) {
                     graphMaxMin.updateMode('auto', i);
-                    updateScatter(table, [myCharts[i]], clusterForm, modelForm, [2], graphMaxMin);
+                    updateScatter(table, [myCharts[i]], clusterForm, [2], graphMaxMin);
                     myCharts[i].update()
                 }
                 if (isCluster3){
-                    proMinMax = proFormMinmax(table, modelForm)
+                    proMinMax = proFormMinmax(table, clusterForm)
                     updateProForm(proMinMax, proForm)
                     let chart = myCharts[myCharts.length-1];
-                    updateClusterProScatter(table, chart, modelForm, clusterForm);
+                    updateClusterProScatter(table, chart, clusterForm);
                     updateChart2(chart, proForm, proMinMax)
                     chart2Scale(chart, proMinMax);
                     chart.update();

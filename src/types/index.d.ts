@@ -125,7 +125,7 @@ interface ClusterForm extends HTMLFormElement {
     d: HTMLInputElement,
     distrange: HTMLInputElement,
     err: HTMLInputElement,
-    red: HTMLInputElement,
+    bv: HTMLInputElement,
     rv: HTMLInputElement
     d_num: HTMLInputElement,
     distrange_num: HTMLInputElement,
@@ -136,9 +136,6 @@ interface ClusterForm extends HTMLFormElement {
     distScatter_num: HTMLInputElement,
     redScatter: HTMLInputElement,
     redScatter_num: HTMLInputElement,
-}
-
-interface ModelForm extends HTMLFormElement {
     age: HTMLInputElement,
     age_num: HTMLInputElement,
     metal: HTMLInputElement,
@@ -160,6 +157,7 @@ interface ModelForm extends HTMLFormElement {
     blue4: HTMLInputElement,
     lum4: HTMLInputElement,
 }
+
 interface ClusterProForm extends HTMLFormElement {
     ramotion: HTMLInputElement,
     ramotion_num: HTMLInputElement,

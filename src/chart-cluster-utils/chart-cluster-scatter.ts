@@ -12,7 +12,6 @@ import { insertGraphControl } from "./chart-cluster-interface";
  *  This function updates scatter data and the boudning scale of the graph
  *  @param table:         handsontable containing the data
  *  @param myCharts:      array of chart.js objects, depends on how many you have
- *  @param modelForm:     modelform that provides filter information
  *  @param dataSetIndex:  the dataset index in chart declaration: order need to be consistent with myCharts param
  *  @param graphMaxMin:   the graphScale object that contains chart bounding information
  */
@@ -20,7 +19,6 @@ export function updateScatter(
     table: Handsontable,
     myCharts: Chart[],
     clusterForm: ClusterForm,
-    modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
     specificChart: number = -1,
@@ -62,33 +60,33 @@ export function updateScatter(
             let lumKey = modelFormKey(c, 'lum')
 
             //Identify the column the selected filter refers to
-            let blue = columns.indexOf(modelForm[blueKey].value + " Mag");
-            let red = columns.indexOf(modelForm[redKey].value + " Mag");
-            let lum = columns.indexOf(modelForm[lumKey].value + " Mag");
+            let blue = columns.indexOf(clusterForm[blueKey].value + " Mag");
+            let red = columns.indexOf(clusterForm[redKey].value + " Mag");
+            let lum = columns.indexOf(clusterForm[lumKey].value + " Mag");
 
-            let A_v1 = calculateLambda(reddening, rv, filterWavelength[modelForm[blueKey].value]);
-            let A_v2 = calculateLambda(reddening, rv, filterWavelength[modelForm[redKey].value]);
-            let A_v3 = calculateLambda(reddening, rv, filterWavelength[modelForm[lumKey].value]);
+            let A_v1 = calculateLambda(reddening, rv, filterWavelength[clusterForm[blueKey].value]);
+            let A_v2 = calculateLambda(reddening, rv, filterWavelength[clusterForm[redKey].value]);
+            let A_v3 = calculateLambda(reddening, rv, filterWavelength[clusterForm[lumKey].value]);
 
             let blueErr =
-                columns.indexOf(modelForm[blueKey].value + " err") < 0
+                columns.indexOf(clusterForm[blueKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
+                    : columns.indexOf(clusterForm[blueKey].value + " err"); //checks for supplied err data
             let redErr =
-                columns.indexOf(modelForm[redKey].value + " err") < 0
+                columns.indexOf(clusterForm[redKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[redKey].value + " err");
+                    : columns.indexOf(clusterForm[redKey].value + " err");
             let lumErr =
-                columns.indexOf(modelForm[lumKey].value + " err") < 0
+                columns.indexOf(clusterForm[lumKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[lumKey].value + " err");
+                    : columns.indexOf(clusterForm[lumKey].value + " err");
 
-            let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
+            let blueDist = columns.indexOf(clusterForm[blueKey].value + " dist");
             let distHighLim = (dist+(dist*(range/100)))*1000;
             let distLowLim =   (dist-(dist*(range/100)))*1000;
 
-            let bluePmra = columns.indexOf(modelForm[blueKey].value + " pmra");
-            let bluePmdec = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let bluePmra = columns.indexOf(clusterForm[blueKey].value + " pmra");
+            let bluePmdec = columns.indexOf(clusterForm[blueKey].value + " pmdec");
             let pmraHighLim = raMotion + raRange;
             let pmraLowLim = raMotion - raRange;
             let pmdecHighLim = decMotion + decRange;
@@ -180,9 +178,9 @@ export function updateScatter(
             }
             graphMaxMin.updateDataLimit(c, scaleLimits);
             myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-                modelForm[redKey].value, modelForm[blueKey].value)
+                clusterForm[redKey].value, clusterForm[blueKey].value)
             if (graphMaxMin.getMode(c) !== null) {
-                chartRescale([myChart], modelForm, graphMaxMin,null, [c]);
+                chartRescale([myChart], clusterForm, graphMaxMin,null, [c]);
             }
             myChart.update()
         }
@@ -284,7 +282,7 @@ export class ChartScaleControl {
     zoomOut: HTMLInputElement;
     charts: Chart [];
     chartCount: number;
-    modelForm: ModelForm;
+    clusterForm: ClusterForm;
     chartScale: graphScale;
     chartRadios: HTMLInputElement[] = [];
     chartLabels: HTMLLabelElement[] = [];
@@ -293,13 +291,13 @@ export class ChartScaleControl {
     /**
      * Construct an object to control chart using control buttons and mouse pan/zoom
      * @param charts array of charts need to be controlled
-     * @param modelForm the modelForm of parameters
+     * @param clusterForm the clusterForm of parameters
      * @param chartScale the graphScale object that specifies how the charts are framed
      * @constructor
      */
-    constructor(charts: Chart [], modelForm: ModelForm, chartScale: graphScale) {
+    constructor(charts: Chart [], clusterForm: ClusterForm, chartScale: graphScale) {
         this.charts = charts;
-        this.modelForm = modelForm;
+        this.clusterForm = clusterForm;
         this.chartScale = chartScale;
         this.chartCount = charts.length;
         insertGraphControl(this.chartCount);
@@ -355,7 +353,7 @@ export class ChartScaleControl {
                 } else if (this.chartScale.getMode(i) === 'data') {
                     this.frameOnDataLabel.click();
                 } else {
-                    this.zoompanDeactivate(this.modelForm, i);
+                    this.zoompanDeactivate(this.clusterForm, i);
                 }
             };
             this.charts[i].options.onClick = ()=>{label.click()}
@@ -504,7 +502,7 @@ export class ChartScaleControl {
         otherRadio.checked = false;
         this.setRadioLabelColor(otherRadio, false)
         graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data", chartNum)
-        chartRescale([this.charts[chartNum]], this.modelForm, this.chartScale, null, [chartNum]);
+        chartRescale([this.charts[chartNum]], this.clusterForm, this.chartScale, null, [chartNum]);
         this.recoloring()
     }
 
@@ -564,17 +562,17 @@ export class ChartScaleControl {
         for (let i = 0; i < this.chartCount; i++) {
             let chart = this.charts[i];
             chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                this.modelForm[modelFormKey(i, "red")].value, this.modelForm[modelFormKey(i, "blue")].value)
+                this.clusterForm[modelFormKey(i, "red")].value, this.clusterForm[modelFormKey(i, "blue")].value)
         }
     }
 
 
     /**
      * Unchecked and reset both radio buttons to white background
-     * @param modelForm modelForm of parameters
+     * @param clusterForm clusterForm of parameters
      * @param chartNum the chart need to be updated, starting from 0
      */
-    zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
+    zoompanDeactivate(clusterForm: ClusterForm, chartNum: number = 0): any {
         this.chartScale.updateMode(null, chartNum);
         if (this.onControl[chartNum]) {
             this.standardViewRadio.checked = false;
@@ -586,7 +584,7 @@ export class ChartScaleControl {
             let chart = this.charts[i];
             setTimeout(function () {
                 chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                    modelForm[modelFormKey(i, "red")].value, modelForm[modelFormKey(i, "blue")].value)
+                    clusterForm[modelFormKey(i, "red")].value, clusterForm[modelFormKey(i, "blue")].value)
                 chart.update()
             }, 5)
         }
@@ -596,12 +594,12 @@ export class ChartScaleControl {
 /**
  *  This function rescale the chart
  *  @param myCharts:    array of charts that need to be rescaled
- *  @param modelForm:   modelform that provides filter information
+ *  @param clusterForm:   clusterForm that provides filter information
  *  @param graphMaxMin: the graphScale object
  *  @param option: overwrite the existing zooming option
  */
 function chartRescale(myCharts: Chart[],
-                             modelForm: ModelForm,
+                             clusterForm: ClusterForm,
                              graphMaxMin: graphScale,
                              option: string = null,
                              scaleIndexOverride: number[] = []) {
@@ -617,9 +615,9 @@ function chartRescale(myCharts: Chart[],
             if (frameOn === "auto") {
                 let magList: string[] = ['red', 'blue', 'bright'];
                 let filters: string[] = [
-                    modelForm[modelFormKey(adjustedC, 'red')].value,
-                    modelForm[modelFormKey(adjustedC, 'blue')].value,
-                    modelForm[modelFormKey(adjustedC, 'lum')].value];
+                    clusterForm[modelFormKey(adjustedC, 'red')].value,
+                    clusterForm[modelFormKey(adjustedC, 'blue')].value,
+                    clusterForm[modelFormKey(adjustedC, 'lum')].value];
                 let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
                 let magIndex: number[] = [0, 0, 0];
                 for (let i = 0; i < magList.length; i++) {
@@ -682,7 +680,7 @@ function chartRescale(myCharts: Chart[],
         myChart.options.scales["x"].type = "linear"
 
         myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-            modelForm[modelFormKey(adjustedC, 'red')].value, modelForm[modelFormKey(adjustedC, 'blue')].value)
+            clusterForm[modelFormKey(adjustedC, 'red')].value, clusterForm[modelFormKey(adjustedC, 'blue')].value)
         myChart.update()
     }
 }
@@ -730,7 +728,6 @@ export function calculateLambda(A_v: number, R_v: number, filterlambda = 10 ** -
 export function updateClusterProScatter(
     table: Handsontable,
     proChart: Chart,
-    modelForm: ModelForm,
     clusterForm: ClusterForm
     ) {
         let chart = proChart.data.datasets[2].data;
@@ -742,22 +739,22 @@ export function updateClusterProScatter(
         let lumKey = modelFormKey(0, 'lum')
 
         //Identify the column the selected filter refers to
-        let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
-        let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
-        let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
+        let bluera = columns.indexOf(clusterForm[blueKey].value + " pmra");
+        let bluedec = columns.indexOf(clusterForm[blueKey].value + " pmdec");
+        let blueDist = columns.indexOf(clusterForm[blueKey].value + " dist");
 
         let blueErr =
-            columns.indexOf(modelForm[blueKey].value + " err") < 0
+            columns.indexOf(clusterForm[blueKey].value + " err") < 0
                 ? null
-                : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
+                : columns.indexOf(clusterForm[blueKey].value + " err"); //checks for supplied err data
         let redErr =
-            columns.indexOf(modelForm[redKey].value + " err") < 0
+            columns.indexOf(clusterForm[redKey].value + " err") < 0
                 ? null
-                : columns.indexOf(modelForm[redKey].value + " err");
+                : columns.indexOf(clusterForm[redKey].value + " err");
         let lumErr =
-            columns.indexOf(modelForm[lumKey].value + " err") < 0
+            columns.indexOf(clusterForm[lumKey].value + " err") < 0
                 ? null
-                : columns.indexOf(modelForm[lumKey].value + " err");
+                : columns.indexOf(clusterForm[lumKey].value + " err");
 
         let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
         let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked

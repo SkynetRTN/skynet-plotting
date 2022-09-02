@@ -10,7 +10,7 @@ import { variableTest, variableFileUploadTest } from './chart-variable';
 import { pulsarTest, pulsarFileUploadTest} from './chart-pulsar';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-import { gravityPro, gravityProClass, gravityProFileUpload } from './chart-gravitypro';
+import { gravityPro, gravityProFileUpload } from './chart-gravitypro';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -100,7 +100,7 @@ function chartType(chart: string) {
     defaultLayout()
     let objects: [Handsontable, Chart];
     let grav_objects: [Handsontable, Chart, gravityClass]
-    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    let cluster_objects: [Handsontable, Chart[], ClusterForm, graphScale]
     // let gravpro_objects: [Handsontable, Chart[], gravityClass]
 
     if (chart === 'variable') {

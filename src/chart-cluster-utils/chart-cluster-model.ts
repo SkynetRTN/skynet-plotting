@@ -16,7 +16,7 @@ import {baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "
  *  @param chart:     The Chartjs object to be updated.
  *  @param callback:  callback function asynchronously execute stuff after model is updated
  */
-export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
+export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
     function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
         let form: ScatterDataPoint[] = [] //the array containing all model points
         let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
@@ -28,7 +28,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
             form.push(row);
         }
         iSkip = iSkip > 0? iSkip : 0;
-        let age = parseFloat(modelForm['age_num'].value);
+        let age = parseFloat(clusterForm['age_num'].value);
         if (age < 6.6)
             age = 6.6;
         else if (age > 10.3)
@@ -39,8 +39,8 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
     let reveal: string[] = [];
     for (let c = 0; c < charts.length; c++) {
         let chart = charts[c];
-        reveal = reveal.concat(modelFormKeys(c, modelForm));
-        httpGetAsync(generateURL(modelForm, c),
+        reveal = reveal.concat(modelFormKeys(c, clusterForm));
+        httpGetAsync(generateURL(clusterForm, c),
             (response: string) => {
                 if (!response.includes('err')){
                     let json = JSON.parse(response);
@@ -88,7 +88,7 @@ export function updateHRModel(modelForm: ModelForm, hot: Handsontable, charts: C
  * @param form
  * @param chartNum
  */
-export function generateURL(form: ModelForm, chartNum: number) {
+export function generateURL(form: ClusterForm, chartNum: number) {
     let blueKey = modelFormKey(chartNum, 'blue');
     let redKey = modelFormKey(chartNum, 'red');
     let lumKey = modelFormKey(chartNum, 'lum');

@@ -33,7 +33,7 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         "</div>\n"
 
@@ -44,10 +44,10 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
         "</div>\n"
 
-    htmlContent += "</form>\n";
+    // htmlContent += "</form>\n";
 
     htmlContent +=
-        '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
+        // '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
@@ -315,7 +315,7 @@ export function clusterProButtons(isClusterPro: boolean){
     }
 }
 
-export function clusterProButtonControl(chart: Chart, table: Handsontable, modelForm: ModelForm){
+export function clusterProButtonControl(chart: Chart, table: Handsontable, clusterform: ClusterForm){
     //update chart as button is held down
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
 
@@ -374,7 +374,7 @@ export function clusterProButtonControl(chart: Chart, table: Handsontable, model
         document.getElementById("zoomOutPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
     })
     document.getElementById("ResetPro").addEventListener("click", () => {
-        chart2Scale(chart, proFormMinmax(table, modelForm));
+        chart2Scale(chart, proFormMinmax(table, clusterform));
         chart.update();
     });
 }
@@ -407,7 +407,7 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
@@ -566,14 +566,14 @@ function updateClusterProAxis(charts: Chart[]){
 }
 
 function clusterProXaxis(chartNum: number): string{
-    const modelForm = document.getElementById("model-form") as ModelForm;
-    const result = modelForm[modelFormKey(chartNum, 'blue')].value
-        + '-' + modelForm[modelFormKey(chartNum, 'red')].value
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const result = clusterForm[modelFormKey(chartNum, 'blue')].value
+        + '-' + clusterForm[modelFormKey(chartNum, 'red')].value
     return result
 }
 
 function clusterProYaxis(chartNum: number): string{
-    const modelForm = document.getElementById("model-form") as ModelForm;
-    const result = 'M_' + modelForm[modelFormKey(chartNum, 'lum')].value
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const result = 'M_' + clusterForm[modelFormKey(chartNum, 'lum')].value
     return result
 }

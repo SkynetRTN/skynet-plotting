@@ -122,7 +122,7 @@ export function modelFormKey(chartNum: number, color: string) {
     return chartNum > 0 ? (color + (chartNum + 1).toString()) : color
 }
 
-export function modelFormKeys(chartNum: number, form: ModelForm) {
+export function modelFormKeys(chartNum: number, form: ClusterForm) {
     function getFilter(key: string): string {
         return form[key].value
     }
