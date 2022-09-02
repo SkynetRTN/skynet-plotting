@@ -30,34 +30,9 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-        "</div>\n"
-
-    if (isPro)
-        htmlContent += '<div class="row">\n' +
-        '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
-        "</div>\n"
-
-    // htmlContent += "</form>\n";
+        '</div>\n'
 
     htmlContent +=
-        // '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
-        "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         "</div>\n" +
@@ -133,9 +108,36 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
                 '<option value="R" title="R filter">R</option></select></div>\n'
         }
     }
+    htmlContent += "</div>\n"
+
+    htmlContent +=
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+        "</div>\n"
+
+    htmlContent +=
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+        "</div>\n"
+
+    if (isPro)
+        htmlContent += '<div class="row">\n' +
+            '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
+            '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
+            '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
+            "</div>\n"
 
 
-    htmlContent += "</div>\n" + "</form>\n"
+    htmlContent += "</form>\n"
 
     if (chartCounts === 2) {
         // @ts-ignore
