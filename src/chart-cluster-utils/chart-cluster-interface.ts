@@ -519,7 +519,13 @@ export function clusterProLayoutSetups(){
     document.getElementById("title-data-col").className = 'col-sm-12'
     document.getElementById('cluster-scraper-form-div').style.display = 'inline';
     document.getElementById('cluster-scraper-form-div').className = 'col-sm-8';
-
+    /**
+        // possible hack model form
+        const modelFormStyle = document.getElementById('model-form').style;
+        modelFormStyle.position = 'absolute';
+        modelFormStyle.zIndex = '1';
+        modelFormStyle.width = document.getElementById('cluster-form').style.width;
+     **/
 }
 
 
