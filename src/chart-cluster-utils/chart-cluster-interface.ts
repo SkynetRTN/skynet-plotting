@@ -514,6 +514,8 @@ export function clusterProLayoutSetups(){
     //change the class of chart-div2 to col-lg-4
     document.getElementById('chartTag1').style.display = "None";
     document.getElementById('chartTag2').style.display = "None";
+    document.getElementById('chartTag3').style.display = "block";
+    document.getElementById('chartTag4').style.display = "block";
     document.getElementById('chart-div1').style.display = 'block';
     document.getElementById('chart-div2').style.display = 'block';
     document.getElementById('chart-div3').style.display = 'block';
