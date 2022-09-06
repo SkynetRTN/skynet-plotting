@@ -5,7 +5,7 @@ import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import {updateTableHeight, getDateString, dataURLtoBlob, formatTime, defaultLayout} from './util';
+import {updateTableHeight, getDateString, dataURLtoBlob, formatTime, defaultLayout, percentToAbsolute} from './util';
 import { variableTest, variableFileUploadTest } from './chart-variable';
 import { pulsarTest, pulsarFileUploadTest} from './chart-pulsar';
 import { round } from './my-math';
@@ -327,12 +327,15 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         const proMotionForm = document.getElementById('clusterProForm') as ClusterProForm;
         const clusterForm = document.getElementById('cluster-form') as ClusterForm;
         let texts = [];
-        texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
-            + " mas/yr ±" + proMotionForm['rarange_num'].value + "%");
-        texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
-            + " mas/yr ±" + proMotionForm['decrange_num'].value + "%");
-        texts.push("Distance: " + clusterForm['d_num'].value
-            + " kpc ±" + clusterForm['distrange'].value + "%");
+        if (JSON.parse(proMotionForm['rarangeCheck'].checked))
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
+                + " ± " + proMotionForm['rarange_num'].value + " mas/yr");
+        if (JSON.parse(proMotionForm['decrangeCheck'].checked))
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
+                + " ± " + proMotionForm['decrange_num'].value + " mas/yr");
+        if (JSON.parse(clusterForm['distrangeCheck'].checked))
+            texts.push("Distance: " + clusterForm['d_num'].value
+                + " ± " + percentToAbsolute(clusterForm['d_num'].value, clusterForm['distrange'].value) + " kpc");
         texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
         texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
         texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');

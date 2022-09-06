@@ -515,3 +515,9 @@ export function defaultLayout(){
     document.getElementById('add-row-button').hidden = false;
     document.getElementById('chart-div').style.cursor = "auto"
 }
+
+export function percentToAbsolute(value: string, percent: string): string{
+    let valueNum = parseFloat(value);
+    let percentNum = parseFloat(percent);
+    return Math.abs(valueNum*percentNum/100).toFixed(2).toString()
+}
