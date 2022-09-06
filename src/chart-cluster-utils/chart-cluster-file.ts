@@ -8,10 +8,16 @@ import Handsontable from "handsontable";
 import {baseUrl, filterWavelength, httpPostAsync, modelFormKey} from "./chart-cluster-util";
 import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
 import { updateHRModel } from "./chart-cluster-model";
-import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
+import { graphScale, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
 import {clusterProCheckControl, rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
-import { updateProForm, proFormMinmax, updateChart2, chart2Scale } from "../chart-cluster3";
+import {
+    chart2Scale,
+    proFormMinmax,
+    updateChart2,
+    updateClusterProScatter,
+    updateProForm
+} from "./chart-cluster-pro-util";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file

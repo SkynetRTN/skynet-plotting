@@ -19,7 +19,7 @@ import {
 
 import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
-import { chart2Scale } from "./chart-cluster3";
+import {chart2Scale} from "./chart-cluster-utils/chart-cluster-pro-util";
 
 Chart.register(zoomPlugin);
 /**

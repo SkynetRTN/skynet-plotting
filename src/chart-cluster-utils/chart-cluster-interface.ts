@@ -3,10 +3,10 @@
  */
 
 import {Chart, LinearScaleOptions} from "chart.js";
-import { chart2Scale, proFormMinmax } from "../chart-cluster3";
 import Handsontable from "handsontable";
 import {modelFormKey} from "./chart-cluster-util";
 import {updateChartDataLabel} from "../index";
+import {chart2Scale, proFormMinmax} from "./chart-cluster-pro-util";
 
 /**
  *  This function insert the clusterform and modelform into the website
@@ -271,8 +271,6 @@ export function rangeCheckControl(clusterChart = true){
 
 export function clusterProCheckControl (){
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
-        (document.getElementById("rarangeCheck") as HTMLInputElement).checked = false;
-        (document.getElementById("decrangeCheck") as HTMLInputElement).checked = false;
         clusterProForm["rarange"].disabled = true;
         clusterProForm["rarange_num"].disabled = true;
         clusterProForm["decrange"].disabled = true;
@@ -292,7 +290,7 @@ export function clusterProCheckControl (){
               rangeSlider.style.opacity = "0.4";
             }
           });
-            decrangeCheckbox.addEventListener("change", () => {
+        decrangeCheckbox.addEventListener("change", () => {
             let rangeSlider = clusterProForm["decrange"]
             let rangeNum = clusterProForm["decrange_num"]
             if (decrangeCheckbox.checked) {
@@ -306,6 +304,12 @@ export function clusterProCheckControl (){
             }
           }
         );
+        if (rarangeCheckbox.checked){
+            rarangeCheckbox.click();
+        }
+        if (decrangeCheckbox.checked){
+            decrangeCheckbox.click();
+        }
 }
 
 export function clusterProButtons(isClusterPro: boolean){

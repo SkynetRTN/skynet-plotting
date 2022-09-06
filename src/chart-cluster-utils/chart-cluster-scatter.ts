@@ -3,11 +3,10 @@
  */
 
 
-import { Chart } from "chart.js";
+import {Chart} from "chart.js";
 import Handsontable from "handsontable";
-import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
-import { insertGraphControl } from "./chart-cluster-interface";
-import {CellValue} from "handsontable/common";
+import {filterMags, filterWavelength, HRrainbow, modelFormKey, pointMinMax} from "./chart-cluster-util";
+import {insertGraphControl} from "./chart-cluster-interface";
 
 /**
  *  This function updates scatter data and the boudning scale of the graph
@@ -738,82 +737,3 @@ export function calculateLambda(A_v: number, R_v: number, filterlambda = 10 ** -
 
     return Number(A_v) * (a + b / R_v);
 }
-export function updateClusterProScatter(
-    table: Handsontable,
-    proChart: Chart,
-    clusterForm: ClusterForm
-    ) {
-        let chart = proChart.data.datasets[2].data;
-        let tableData = table.getData();
-        let columns = table.getColHeader();
-
-        let blueKey = modelFormKey(0, 'blue')
-        let redKey = modelFormKey(0, 'red')
-        let lumKey = modelFormKey(0, 'lum')
-
-        //Identify the column the selected filter refers to
-        let bluera = columns.indexOf(clusterForm[blueKey].value + " pmra");
-        let bluedec = columns.indexOf(clusterForm[blueKey].value + " pmdec");
-        let blueDist = columns.indexOf(clusterForm[blueKey].value + " dist");
-
-        let blueErr =
-            columns.indexOf(clusterForm[blueKey].value + " err") < 0
-                ? null
-                : columns.indexOf(clusterForm[blueKey].value + " err"); //checks for supplied err data
-        let redErr =
-            columns.indexOf(clusterForm[redKey].value + " err") < 0
-                ? null
-                : columns.indexOf(clusterForm[redKey].value + " err");
-        let lumErr =
-            columns.indexOf(clusterForm[lumKey].value + " err") < 0
-                ? null
-                : columns.indexOf(clusterForm[lumKey].value + " err");
-
-        let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
-        let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
-        let dist = parseFloat(clusterForm["d_num"].value);
-        let range = parseFloat(clusterForm["distrange_num"].value);
-        let distHighLim = (dist+(dist*(range/100)))*1000;
-        let distLowLim =   (dist-(dist*(range/100)))*1000;
-        let proMinMax: { [key: string]: number } = { minX: 0, maxX: 0, minY: 0, maxY: 0, };
-        let start = 0;
-        for (let i = 0; i < tableData.length; i++) {
-            let x = tableData[i][bluera];
-            let y = tableData[i][bluedec];
-            let distance: number = tableData[i][blueDist];
-            let isDistNotValid = isNaN(distance) || distance === null
-            if (!(
-                    typeof (x) != 'number' || typeof (y) != 'number'
-                ||
-                    ((blueErr != null && tableData[i][blueErr] > err || tableData[i][blueErr] == "") ||
-                    (redErr != null && tableData[i][redErr] > err || tableData[i][redErr] == "") ||
-                    (lumErr != null && tableData[i][lumErr] > err || tableData[i][lumErr] == ""))
-                ||
-                    (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim))
-                )){
-                chart[start++] = {
-                    x: x,
-                    y: y
-                };
-                if (x > proMinMax['maxX'])
-                    proMinMax['maxX'] = x;
-                else if (x < proMinMax['minX'])
-                    proMinMax['minX'] = x;
-                if (y > proMinMax['maxY'])
-                    proMinMax['maxY'] = y;
-                else if (y < proMinMax['minY'])
-                    proMinMax['minY'] = y;
-            }
-        }
-       // updateProChartScale(proChart, proMinMax)
-        chart = chart.slice(0, start++);
-        proChart.data.datasets[2].data = chart;
-        proChart.update()
-    }
-//obselete -- new scale code in cluster3.ts
-//function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
-  //  proChart.options.scales.x.min = minmax['minX'];
-    //proChart.options.scales.x.max = minmax['maxX'];
-    //proChart.options.scales.y.min = minmax['minY'];
-    //proChart.options.scales.y.max = minmax['maxY'];
-//}
