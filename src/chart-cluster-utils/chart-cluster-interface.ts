@@ -146,11 +146,11 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
 
     htmlContent += "</form>\n"
 
-    if (chartCounts === 2) {
-        // @ts-ignore
-        document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
-        document.getElementById('chart-div2-colControl').style.width = '50%';
-    }
+    // if (chartCounts === 2) {
+    //     // @ts-ignore
+    //     // document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
+    //     // document.getElementById('chart-div2-colControl').style.width = '50%';
+    // }
 
     document
         .getElementById("input-div")
@@ -194,9 +194,9 @@ export function clusterProSliders(clusterPro: true = true) {
             "beforeend",
             htmlContent
         );
-    document.getElementById('chart-div2').style.width = '310px'
-    document.getElementById('chart-div2').style.height = '100px'
-    document.getElementById('chart-div2-colControl').style.width = '330px'
+    // document.getElementById('chart-div2').style.width = '310px'
+    // document.getElementById('chart-div2').style.height = '100px'
+    // document.getElementById('chart-div2-colControl').style.width = '330px'
 }}
 
 /**
