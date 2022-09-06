@@ -7,6 +7,7 @@ import { Chart } from "chart.js";
 import Handsontable from "handsontable";
 import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
 import { insertGraphControl } from "./chart-cluster-interface";
+import {CellValue} from "handsontable/common";
 
 /**
  *  This function updates scatter data and the boudning scale of the graph
@@ -22,7 +23,9 @@ export function updateScatter(
     dataSetIndex: number[],
     graphMaxMin: graphScale,
     specificChart: number = -1,
-    clusterProForm: ClusterProForm = null,) {
+    clusterProForm: ClusterProForm = null,
+    isDiscard: boolean = false
+    ) {
 
     let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
     let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
@@ -47,7 +50,7 @@ export function updateScatter(
     }
     let tableData = table.getData();
     let columns = table.getColHeader();
-    // let isValidIndex = columns.indexOf('isValid');
+    let keptDataIndex: number[] = [];
     let downloadData: { [key: string]: { [key: string]: string } } = {};
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
@@ -149,7 +152,8 @@ export function updateScatter(
 
                 if (isSkip)
                     continue
-
+                else
+                    keptDataIndex.push(i)
 
                 //red-blue,lum
 
@@ -184,6 +188,15 @@ export function updateScatter(
             }
             myChart.update()
         }
+    }
+    if (isDiscard){
+        keptDataIndex = [...new Set(keptDataIndex)];
+        let newTableData = [];
+        const tableSource = table.getSourceData();
+        for (const kepti of keptDataIndex) {
+            newTableData.push(tableSource[kepti]);
+        }
+        table.updateData(newTableData);
     }
     // @ts-ignore
     return Object.values(downloadData)

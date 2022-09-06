@@ -508,9 +508,10 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
    }, 100);
 
   document.getElementById('save-data-button').onclick = ()=>{clusterFileDownload(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm)}
-   //clusterProPmChartControl.oninput = throttle(function () {
-    //clusterProButtonControl(myChart3);
-  //}, 100);
+
+  document.getElementById('discardData').onclick = ()=>{
+    updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm, true);
+  }
 
 
   //initializing website
