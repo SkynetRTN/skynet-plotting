@@ -188,14 +188,18 @@ export function updateScatter(
             myChart.update()
         }
     }
-    if (isDiscard){
+    if (clusterProForm) {
         keptDataIndex = [...new Set(keptDataIndex)];
-        let newTableData = [];
         const tableSource = table.getSourceData();
-        for (const kepti of keptDataIndex) {
-            newTableData.push(tableSource[kepti]);
+        document.getElementById("data-count").innerHTML =
+            keptDataIndex.length.toString() + '/' + tableSource.length.toString() + ' Data Plotted'
+        if (isDiscard) {
+            let newTableData = [];
+            for (const kepti of keptDataIndex) {
+                newTableData.push(tableSource[kepti]);
+            }
+            table.updateData(newTableData);
         }
-        table.updateData(newTableData);
     }
     // @ts-ignore
     return Object.values(downloadData)
