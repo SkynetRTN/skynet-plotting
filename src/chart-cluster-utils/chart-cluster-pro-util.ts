@@ -84,7 +84,6 @@ export function updateProForm(minmax: number[], clusterProForm: ClusterProForm) 
     let medDec = floatTo1(minmax[5]);
     let stdRa = floatTo1(minmax[6]);
     let stdDec = floatTo1(minmax[7]);
-    console.log(medRa)
     linkInputs(clusterProForm["ramotion"], clusterProForm["ramotion_num"], minRa, maxRa, 0.1, medRa, false, true, -999, 999);
     linkInputs(clusterProForm["rarange"], clusterProForm["rarange_num"], 0, (2 * stdRa), 0.1, (2 * stdRa), false, true, 0, 999);
     linkInputs(clusterProForm["decmotion"], clusterProForm["decmotion_num"], minDec, maxDec, 0.1, medDec, false, true, -99, 999);
