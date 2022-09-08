@@ -28,6 +28,7 @@ import {
   updateClusterProScatter,
   updateProForm
 } from "./chart-cluster-utils/chart-cluster-pro-util";
+import {updateScrapeFormOnclick} from "./chart-cluster-utils/chart-cluster-scraper";
 
 Chart.register(zoomPlugin);
 /**
@@ -39,6 +40,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     clusterProButtons(true);
     clusterProSliders(true);
     clusterProLayoutSetups();
+    updateScrapeFormOnclick();
 
   //setup two charts
     document.getElementById('myChart').remove();
@@ -527,6 +529,10 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     updateChart2(myChart3, clusterProForm, proMinMax);
     chart2Scale(myChart3, proMinMax);
     myChart3.update();
+  }
+
+  document.getElementById('computeCenter').onclick = ()=>{
+    updateScrapeFormOnclick(hot);
   }
 
 

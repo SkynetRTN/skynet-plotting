@@ -154,7 +154,7 @@
             </div>
             <div id="cluster-scraper-form-div" class="col-sm">
 <!--                 style="border-style: double; border-bottom-color: #0c4128; border-width: thick">-->
-              <form id="cluster-scraper" type="text">
+
                 <div class="row">
                   <div class="col-sm-2">
                     <div class="row-sm" style="text-align: center">
@@ -164,59 +164,71 @@
                       <button class="scraper" id="discardData" type="button" style="margin-top: 13px">Discard</button>
                     </div>
                   </div>
-                  <div class="col-sm-10">
-                    <div class="row" style="margin-bottom: 5px">
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-4">RA</div>
-                          <div class="col-sm-8"><input type="text" name="ra" class="field"></div>
+                  <div class="col-sm-8">
+                    <form id="cluster-scraper" type="text">
+                      <div class="row" style="margin-bottom: 5px">
+                        <div class="col-sm-3">
+                          <div class="row">
+                            <div class="col-sm-4">RA</div>
+                            <div class="col-sm-8" style="padding-left: 5px; padding-right: 0px">
+                              <input type="text" name="ra" class="field scrape" value="">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-sm-3">
+                          <div class="row">
+                            <div class="col-sm-4">Dec</div>
+                            <div class="col-sm-8" style="padding-left: 8px; padding-right: 0px">
+                              <input type="text" name="dec" class="field scrape" value="">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-sm-3">
+                          <div class="row">
+                            <div class="col-sm-2">R</div>
+                            <div class="col-sm-9" style="padding-left: 5px; padding-right: 0px">
+                              <input type="text" name="radius" class="field scrape" value="">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-sm-3">
+                          <div class="row">
+                            <div class="col-sm-4">Obj</div>
+                            <div class="col-sm-8"><input type="text" name="object" class="field scrape" value=""></div>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-4">DEC</div>
-                          <div class="col-sm-8"><input type="text" name="dec" class="field"></div>
+                      <div class="row" style="margin-bottom: 5px">
+                        <div class="col-sm-4">
+                          <div class="row">
+                            <div class="col-sm-3"><input type="checkbox" class="range" name="isGaia"></div>
+                            <div class="col-sm-9">GAIA</div>
+                          </div>
+                        </div>
+                        <div class="col-sm-4">
+                          <div class="row">
+                            <div class="col-sm-3"><input type="checkbox" class="range" name="isVerzier"></div>
+                            <div class="col-sm-9">Verzier</div>
+                          </div>
+                        </div>
+                        <div class="col-sm-4">
+                          <div class="row" id="isOriginalRow">
+                            <div class="col-sm-3"><input type="checkbox" class="range" name="isOriginal"></div>
+                            <div class="col-sm-9">Original</div>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-4">R</div>
-                          <div class="col-sm-8"><input type="text" name="radius" class="field"></div>
-                        </div>
-                      </div>
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-4">Obj</div>
-                          <div class="col-sm-8"><input type="text" name="object" class="field"></div>
-                        </div>
-                      </div>
+                    </form>
+                  </div>
+                  <div class="col-sm-2">
+                    <div class="row">
+                      <button class="scraper" id="computeCenter" type="button" style="">Compute</button>
                     </div>
-                    <div class="row" style="margin-bottom: 5px">
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-3"><input type="checkbox" class="range" name="isGaia"></div>
-                          <div class="col-sm-9">GAIA</div>
-                        </div>
-                      </div>
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-3"><input type="checkbox" class="range" name="isVerzier"></div>
-                          <div class="col-sm-9">Verzier</div>
-                        </div>
-                      </div>
-                      <div class="col-sm-3">
-                        <div class="row">
-                          <div class="col-sm-3"><input type="checkbox" class="range" name="isOriginal"></div>
-                          <div class="col-sm-9">Original</div>
-                        </div>
-                      </div>
-                      <div class="col-sm-3">
-                        <button class="scraper" id="fetchData" type="button" style="margin-top: -40px">Fetch Data</button>
-                      </div>
+                    <div class="row">
+                      <button class="scraper" id="fetchData" type="button" style="margin-top: -8px">Fetch Data</button>
                     </div>
                   </div>
                 </div>
-              </form>
             </div>
           </div>
         </div>

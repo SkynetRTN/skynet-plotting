@@ -75,7 +75,7 @@ function mergeSortStar(dataArray: starData[]): starData[]{
 }
 
 
-function maxMinRaDec(star: starData, minMax: number[]){
+export function maxMinRaDec(star: starData, minMax: number[]){
     let maxRa = minMax[0];
     let minRa = minMax[1];
     let maxDec = minMax[2];
@@ -95,7 +95,7 @@ function maxMinRaDec(star: starData, minMax: number[]){
     return [maxRa, minRa, maxDec, minDec]
 }
 
-function getClusterCenter(minMax: number[], stars: any[]){
+export function getClusterCenter(minMax: number[], stars: any[]){
     let maxRa = minMax[0];
     let minRa = minMax[1];
     let maxDec = minMax[2];

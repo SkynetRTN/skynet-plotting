@@ -241,6 +241,11 @@ input.field:disabled {
     opacity: 0.7;
 }
 
+input.field.scrape{
+    padding-left: 2px;
+    padding-right: 0px;
+}
+
 input[type=radio].table {
     position: absolute;
     cursor: pointer;
