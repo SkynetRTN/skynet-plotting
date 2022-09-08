@@ -202,3 +202,13 @@ interface ClusterSimForm extends HTMLFormElement {
     noise: HTMLInputElement,
     noise_num: HTMLInputElement,
 }
+
+interface ClusterScraperForm extends HTMLFormElement {
+    ra: HTMLInputElement,
+    dec: HTMLInputElement,
+    radius: HTMLInputElement,
+    object: HTMLInputElement,
+    isGaia: HTMLInputElement,
+    isVerzier: HTMLInputElement,
+    isOriginal: HTMLInputElement,
+}

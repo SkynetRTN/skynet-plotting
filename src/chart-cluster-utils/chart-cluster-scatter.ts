@@ -192,7 +192,7 @@ export function updateScatter(
         keptDataIndex = [...new Set(keptDataIndex)];
         const tableSource = table.getSourceData();
         document.getElementById("data-count").innerHTML =
-            keptDataIndex.length.toString() + '/' + tableSource.length.toString() + ' Data Plotted'
+            keptDataIndex.length.toString() + '/' + tableSource.length.toString()
         if (isDiscard) {
             let newTableData = [];
             for (const kepti of keptDataIndex) {

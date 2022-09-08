@@ -155,6 +155,12 @@ button {
     outline: none;
 }
 
+button.scraper {
+    line-height: inherit;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 button.clusterRest {
     line-height: 18px;
     /* margin-bottom: 8px; */
