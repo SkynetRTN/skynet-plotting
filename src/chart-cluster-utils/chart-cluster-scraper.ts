@@ -1,17 +1,23 @@
 import Handsontable from "handsontable";
 import {getClusterCenter, maxMinRaDec, starData} from "./chart-cluster-gaia";
+import {baseUrl, httpGetAsync} from "./chart-cluster-util";
 
 export function updateScrapeFormOnclick(table: Handsontable=null){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     if (table){
-        const stars = tableDataToStars(table)
-        const range = getClusterCenter(stars[1], stars[0]);
-        // @ts-ignore
-        updateScrapeFormRange(range['ra'], range['dec'], range['r']);
+        if (scrapeForm.object.value){
+            queryObjectLocation(scrapeForm.object.value);
+        } else {
+            const stars = tableDataToStars(table)
+            const range = getClusterCenter(stars[1], stars[0]);
+            // @ts-ignore
+            updateScrapeFormRange(range['ra'], range['dec'], range['r']);
+        }
     } else {
         scrapeForm.ra.value = '';
         scrapeForm.dec.value = '';
         scrapeForm.radius.value = '';
+        scrapeForm.object.value = '';
         scrapeForm.isGaia.checked = false;
         scrapeForm.isVerzier.checked = false;
         scrapeForm.isOriginal.checked = false;
@@ -27,8 +33,11 @@ export function updateScrapeFormOnupload(ra: number, dec: number, r: number){
     document.getElementById('isOriginalRow').style.opacity = '1';
 }
 
-function updateScrapeFormRange(ra: number, dec: number, r: number){
+function updateScrapeFormRange(ra: number|string, dec: number|string, r: number|string){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+    ra = typeof('ra') === 'number' ? ra as number: parseFloat(ra as string);
+    dec = typeof('dec') === 'number' ? dec as number: parseFloat(dec as string);
+    r = typeof('r') === 'number' ? r as number: parseFloat(r as string);
     scrapeForm.ra.value = ra.toFixed(2).toString();
     scrapeForm.dec.value = dec.toFixed(2).toString();
     scrapeForm.radius.value = r.toFixed(3).toString();
@@ -49,4 +58,20 @@ function tableDataToStars(table: Handsontable): [starData[], number[]]{
         minMax = maxMinRaDec(star, minMax)
     }
     return [result, minMax]
+}
+
+function queryObjectLocation(object: string){
+    let url = baseUrl + "/location-query?object=" + object
+    httpGetAsync(url,
+        (result: string)=>{
+            result = JSON.parse(result);
+            // @ts-ignore
+            updateScrapeFormRange(result['RA'], result['DEC'], result['Range']);
+        },
+        ()=>{
+            alert('Object query failed, check your input!');
+            const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+            scrapeForm.object.value = '';
+        }
+        )
 }
