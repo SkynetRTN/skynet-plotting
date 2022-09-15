@@ -209,6 +209,6 @@ interface ClusterScraperForm extends HTMLFormElement {
     radius: HTMLInputElement,
     object: HTMLInputElement,
     isGaia: HTMLInputElement,
-    isVerzier: HTMLInputElement,
+    isVizieR: HTMLInputElement,
     isOriginal: HTMLInputElement,
 }
