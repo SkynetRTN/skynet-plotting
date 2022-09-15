@@ -26,11 +26,25 @@ export function updateScrapeFormOnclick(table: Handsontable=null){
     }
 }
 
+export function updateComputeLookupButton(isEmptyObj: boolean = false){
+    const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+    if (isEmptyObj) {
+        scrapeForm.object.value = '';
+    }
+    if (scrapeForm.object.value){
+        document.getElementById('computeCenter').innerHTML = 'Look up'; //my roommate said look up is two words
+    } else {
+        document.getElementById('computeCenter').innerHTML = 'Compute';
+    }
+}
+
 export function updateScrapeFormOnupload(ra: number, dec: number, r: number){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     updateScrapeFormRange(ra, dec, r);
     scrapeForm.isOriginal.disabled = false;
     document.getElementById('isOriginalRow').style.opacity = '1';
+    scrapeForm.object.value = '';
+    updateComputeLookupButton(true);
 }
 
 function updateScrapeFormRange(ra: number|string, dec: number|string, r: number|string){
