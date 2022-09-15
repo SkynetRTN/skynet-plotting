@@ -41,6 +41,7 @@ export function sortStar(dataArray: starData[]): [starData[], any]{
             minMax = maxMinRaDec(sortedStars[i], minMax);
         }
     }
+    console.log(minMax)
     let query = {'data': uniqueStars, 'range': getClusterCenter(minMax, uniqueStars)}
     return [sortedStars, query]
 }
@@ -80,16 +81,16 @@ export function maxMinRaDec(star: starData, minMax: number[]){
     let minRa = minMax[1];
     let maxDec = minMax[2];
     let minDec = minMax[3];
-    if (star.ra > maxRa){
+    if (star.ra > maxRa || isNaN(maxRa)){
         maxRa = star.ra;
     }
-    if (star.ra < minRa){
+    if (star.ra < minRa || isNaN(minRa)){
         minRa = star.ra;
     }
-    if (star.dec > maxDec){
+    if (star.dec > maxDec || isNaN(maxDec)){
         maxDec = star.dec;
     }
-    if (star.dec < minDec){
+    if (star.dec < minDec || isNaN(minDec)){
         minDec = star.dec;
     }
     return [maxRa, minRa, maxDec, minDec]

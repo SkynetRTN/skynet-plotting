@@ -10,6 +10,7 @@ export function updateScrapeFormOnclick(table: Handsontable=null){
         } else {
             const stars = tableDataToStars(table)
             const range = getClusterCenter(stars[1], stars[0]);
+            console.log(range)
             // @ts-ignore
             updateScrapeFormRange(range['ra'], range['dec'], range['r']);
         }
@@ -60,16 +61,26 @@ function updateScrapeFormRange(ra: number|string, dec: number|string, r: number|
 function tableDataToStars(table: Handsontable): [starData[], number[]]{
     let tableDict = table.getSourceData();
     let result: starData[] = [];
-    const clusterForm = document.getElementById('cluster-form') as ClusterForm;
-    const filter = clusterForm.red.value
+    let keys = Object.keys(tableDict[0]);
+    if (keys[0] == 'id'){
+        keys = keys.splice(2);
+    }
+    let filters:string[] = [];
+    for (let i = 0; i < keys.length; i+=7){
+        filters.push(keys[i]);
+    }
     // @ts-ignore
-    let minMax = [tableDict[0][filter+'ra'], tableDict[0][filter+'ra'], tableDict[0][filter+'dec'], tableDict[0][filter+'dec']]
-    for (const entry of tableDict) {
-        let star = new starData(null, null, null, null, null,
-            // @ts-ignore
-            entry[filter+'ra'], entry[filter+'dec'], null, [null, null])
-        result.push(star)
-        minMax = maxMinRaDec(star, minMax)
+    let minMax = [NaN, NaN, NaN, NaN]
+    for (const filter of filters) {
+        for (const entry of tableDict) {
+            let star = new starData(null, null, null, null, null,
+                // @ts-ignore
+                entry[filter+'ra'], entry[filter+'dec'], null, [null, null])
+            if (star.ra && star.dec){
+                result.push(star);
+                minMax = maxMinRaDec(star, minMax);
+            }
+        }
     }
     return [result, minMax]
 }
