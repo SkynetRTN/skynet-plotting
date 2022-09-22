@@ -11,6 +11,7 @@ import { tableCommonOptions, colors } from "./config";
 import { pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
 
 import {
+  b64toBlob,
   linkInputs,
   throttle,
   updateLabels,
@@ -62,6 +63,10 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         "</div>\n" +
         "</form>"
     );
+      document.getElementById("below-table-column").insertAdjacentHTML("beforeend",
+      '<button id="extract-data-button">Extract Data</button>'
+      )
+
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div class = "row" style="float: right;">\n' +
       '<button class = "graphControl" id="panLeft" style = "position:relative; right:5px;"><class = "graphControl">&#8592;</></button>\n' +
@@ -418,6 +423,13 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   sonificationButton.onclick = () => play(myChart);
   saveSon.onclick = () => saveSonify(myChart);
 
+  document.getElementById('chart-type-form').addEventListener("change" , function () {
+    //destroy the chart
+    //testing a bunch of creating charts and destroying them to make the thing work
+    mySpecto.destroy();
+    myChart.destroy();
+  });
+
   return [hot, [myChart, mySpecto], gravClass];
 }
 
@@ -495,14 +507,15 @@ export function gravityProFileUpload(
   }
 
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
-    let strarr = response.getResponseHeader('bounds').split(" ")
-
+    let strarr = response.response.bounds.split(" ")
     myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
     myCharts[1].options.scales.x.max = parseFloat(strarr[1])
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3])
-    myCharts[1].options.plugins.background.image = response.response;
+    //console.log("Implementing background")
+    myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
     myCharts[1].update()
+    //console.log("background complete")
   })
 
 
@@ -608,7 +621,6 @@ export class gravityProClass {
     this.currentModelData = modelData
     this.currentFreqData = freqData
     this.totalMassDivGridMass = totalMassRatio
-    console.log("we did it!")
     this.updateModelPlot(myChart, mySpecto, gravityForm)
   }
 }
