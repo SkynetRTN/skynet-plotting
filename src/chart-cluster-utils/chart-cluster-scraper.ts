@@ -18,6 +18,9 @@ export function updateScrapeFormOnclick(table: Handsontable=null){
         scrapeForm.ra.value = '';
         scrapeForm.dec.value = '';
         scrapeForm.radius.value = '';
+        // scrapeForm.ra.value = '115.44';
+        // scrapeForm.dec.value = '-14.80';
+        // scrapeForm.radius.value = '0.177';
         scrapeForm.object.value = '';
         scrapeForm.isGaia.checked = false;
         scrapeForm.isVizieR.checked = false;
@@ -100,3 +103,30 @@ function queryObjectLocation(object: string){
         }
         )
 }
+
+export function queryVizieR(table: Handsontable){
+    const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+    const ra = scrapeForm.ra.value;
+    const dec = scrapeForm.dec.value;
+    const r = scrapeForm.radius.value;
+    if (!(ra && dec && r)){
+        alert('RA, DEC, and Radius have to be provided for query!');
+        return
+    }
+    let url = baseUrl + "/vizier-query?ra=" + ra + "&dec=" + dec + "&r=" + r
+    httpGetAsync(url,
+        (result: string)=>{
+            result = JSON.parse(result);
+            console.log(result);
+            try{
+                table.updateData(result)
+            } catch (e){
+                console.log(e)
+            }
+        },
+        ()=>{
+            alert('VizieR query failed, check your input!');
+        }
+    )
+}
+
