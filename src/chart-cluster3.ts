@@ -28,7 +28,11 @@ import {
   updateClusterProScatter,
   updateProForm
 } from "./chart-cluster-utils/chart-cluster-pro-util";
-import {updateComputeLookupButton, updateScrapeFormOnclick} from "./chart-cluster-utils/chart-cluster-scraper";
+import {
+  queryVizieR,
+  updateComputeLookupButton,
+  updateScrapeFormOnclick
+} from "./chart-cluster-utils/chart-cluster-scraper";
 
 Chart.register(zoomPlugin);
 /**
@@ -537,6 +541,10 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
 
   document.getElementById('cluster-scraper').oninput = ()=>{
     updateComputeLookupButton();
+  }
+
+  document.getElementById('fetchData').onclick = ()=>{
+    queryVizieR(hot);
   }
 
 

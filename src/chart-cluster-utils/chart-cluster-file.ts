@@ -18,7 +18,7 @@ import {
     updateClusterProScatter,
     updateProForm
 } from "./chart-cluster-pro-util";
-import {updateScrapeFormOnclick, updateScrapeFormOnupload, updateScrapeFormRange} from "./chart-cluster-scraper";
+import {updateScrapeFormOnclick, updateScrapeFormOnupload} from "./chart-cluster-scraper";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -57,6 +57,7 @@ export function clusterFileUpload(
 
     const reader = new FileReader();
     reader.onload = () => {
+        // reset clusterForm input values to default
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
         clusterForm["d"].value = Math.log(3).toString();
         clusterForm["err"].value = "1";
@@ -73,16 +74,16 @@ export function clusterFileUpload(
         clusterForm["distrange_num"].value = "30";
         clusterForm["rv"].value = "3.1";
         clusterForm["rv_num"].value = "3.1";
-        rangeCheckControl()
-        let proMinMax: number[] = null;
+        rangeCheckControl() // uncheck checkbox in clusterForm
+        // uncheck checkboxes for pm chart
         if (isCluster3)
             clusterProCheckControl()
-
-        // @ts-ignore
+        let proMinMax: number[] = null;
+        // @ts-ignore Read in raw string from file
         const data: string[] = (reader.result as string).replaceAll(' ', '')
             .split("\n")
             .filter((str: string) => str !== null && str !== undefined && str !== "" && str !== "\r");
-        //let stars: starData[] =[];
+
 
         // find value index in database
         let keys = (data.splice(0, 1) as string[])[0].split(',');
