@@ -292,7 +292,7 @@ export function dataURLtoBlob(dataurl: string) {
 export function getDateString() {
     let date = new Date();
     let year = '' + date.getFullYear();
-    let month = dateAppendZero(date.getMonth());
+    let month = dateAppendZero(date.getMonth()+1); //Date.getMonth() gives you month from 0 to 11!
     let days = dateAppendZero(date.getDate());
 
     let hour = dateAppendZero(date.getHours());
