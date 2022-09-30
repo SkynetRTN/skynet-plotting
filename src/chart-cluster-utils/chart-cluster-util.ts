@@ -61,8 +61,8 @@ export const filterWavelength: { [key: string]: number } = {
     W2: 4.6,
     W3: 12,
     W4: 22,
-    G: 0.673,
     GBP: 0.532,
+    G: 0.673,
     GRP: 0.797,
 };
 

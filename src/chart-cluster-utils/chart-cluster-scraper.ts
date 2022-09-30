@@ -1,6 +1,9 @@
 import Handsontable from "handsontable";
 import {getClusterCenter, maxMinRaDec, starData} from "./chart-cluster-gaia";
 import {baseUrl, httpGetAsync} from "./chart-cluster-util";
+import {updateClusterOnNewData} from "./chart-cluster-file-beta";
+import {Chart} from "chart.js";
+import {graphScale} from "./chart-cluster-scatter";
 
 export function updateScrapeFormOnclick(table: Handsontable=null){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
@@ -104,7 +107,7 @@ function queryObjectLocation(object: string){
         )
 }
 
-export function queryVizieR(table: Handsontable){
+export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin : graphScale){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     const ra = scrapeForm.ra.value;
     const dec = scrapeForm.dec.value;
@@ -116,9 +119,9 @@ export function queryVizieR(table: Handsontable){
     let url = baseUrl + "/vizier-query?ra=" + ra + "&dec=" + dec + "&r=" + r
     httpGetAsync(url,
         (result: string)=>{
-            let data = JSON.parse(result) as any[][];
+            let data = JSON.parse(result) as any;
             try{
-                table.updateData(data)
+                updateClusterOnNewData(table, mycharts, graphMaxMin, data['data'], data['filters'])
             } catch (e){
                 console.log(e)
             }

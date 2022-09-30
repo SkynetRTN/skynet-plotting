@@ -544,7 +544,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
   }
 
   document.getElementById('fetchData').onclick = ()=>{
-    queryVizieR(hot);
+    queryVizieR(hot, [myChart1, myChart2], graphMinMax);
   }
 
 
