@@ -120,6 +120,11 @@ function chartType(chart: string) {
     if (document.getElementById('myChart') != null) {
         document.getElementById('myChart').remove();
     }
+    //reset my -Grav and -Specto objects
+    document.getElementById('myGrav1').innerHTML = '';
+    document.getElementById('myGrav2').innerHTML = '';
+
+    
     document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
     //remove display of 4 charts
     for (let i = 1; i < 5; i++) {
@@ -137,6 +142,9 @@ function chartType(chart: string) {
         }
     }
     document.getElementById("grav-charts").style.display = "none";
+    
+    if(document.getElementById("extract-data-button") != null)
+        document.getElementById("extract-data-button").remove();
 
     if (document.getElementById('clusterProForm') != null)
         document.getElementById('clusterProForm').remove()

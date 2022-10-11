@@ -1,7 +1,7 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import { ChartConfiguration} from "chart.js";
+import { ChartConfiguration, ScatterDataPoint} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { backgroundPlugin } from "./chart-gravity-utils/background-image";
 import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
@@ -18,7 +18,7 @@ import {
   updateTableHeight,
 } from "./util";
 
-import {updateGravModelData} from "./chart-gravity-utils/chart-gravity-model";
+import {updateGravModelData, extract_strain_model} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 import { chart2Scale } from "./chart-cluster3";
 
@@ -506,18 +506,6 @@ export function gravityProFileUpload(
     return;
   }
 
-  get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
-    let strarr = response.response.bounds.split(" ")
-    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
-    myCharts[1].options.scales.x.max = parseFloat(strarr[1])
-    myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
-    myCharts[1].options.scales.y.max = parseFloat(strarr[3])
-    //console.log("Implementing background")
-    myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
-    myCharts[1].update()
-    //console.log("background complete")
-  })
-
 
   get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
@@ -534,6 +522,27 @@ export function gravityProFileUpload(
     gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
   }) 
+
+
+  get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
+    //define graph bounds
+    let r = response.response;
+    let strarr = r.bounds.split(" ")
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
+    myCharts[1].options.scales.x.max = parseFloat(strarr[1])
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
+    myCharts[1].options.scales.y.max = parseFloat(strarr[3])
+    myCharts[0].data.datasets[0].data =
+    extract_strain_model(r.spec_array, 
+      myCharts[1].data.datasets[0].data as ScatterDataPoint[],
+      parseFloat(r.x0), parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
+    
+    //console.log("Implementing background")
+    //decode the spectogram
+    myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
+    myCharts[1].update()
+    //console.log("background complete")
+  })
 }
 
 export class gravityProClass {

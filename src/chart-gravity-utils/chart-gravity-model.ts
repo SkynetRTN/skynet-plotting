@@ -1,4 +1,5 @@
 
+import { ScatterDataPoint } from "chart.js";
 import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
 
@@ -13,6 +14,34 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
         
 }
 
+//Extract strain model from the yellow model plotted over the spectogram :)
+export function extract_strain_model(specto: number[][], model: ScatterDataPoint[] , x0: number, dx: number,y0: number,dy: number)
+: ScatterDataPoint[] 
+{
+    var strain_model: ScatterDataPoint[] = [];
+    model.forEach(value => {
+        //find the approx.strain magnitude at this point from the spectogram
+        let mag = get_Magnitude(value)
+        //Make a cool NEW point and add it to our model. It's freq vs. time.
+        strain_model.push( {x: value.x, y: mag*(10000000000000000) } as ScatterDataPoint )
+    })
+
+    //all done :)
+    console.log(strain_model)
+    return strain_model;
+
+    function get_Magnitude(p: ScatterDataPoint): number{
+        var addressX = Math.round((p.x - x0) / dx)
+        var addressY = Math.round((p.y - y0) / dy)
+        try{
+            return specto[addressY][addressX]
+        }
+        catch (err){
+            console.log("oopsies\n" + err);
+            return 0;
+        }
+    }
+}
 
 /**
  * generate url for Gravity Model data fetching
