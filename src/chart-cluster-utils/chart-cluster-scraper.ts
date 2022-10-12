@@ -132,7 +132,8 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         let currTableDataKeys: string[] = [];
         if (scrapeForm.isOriginal.checked) {
             currTableData = table.getData();
-            currTableDataKeys = Object.keys(table.getSourceData()[0]);
+            currTableDataKeys = table.getColHeader() as string[];
+            // currTableDataKeys = Object.keys(table.getSourceData()[0]);
         }
         const query = {'ra': ra, 'dec': dec, 'r': r,
             'catalog': catalog.concat(','),
