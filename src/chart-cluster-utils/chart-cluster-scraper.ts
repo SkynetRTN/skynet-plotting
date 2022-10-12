@@ -1,6 +1,6 @@
 import Handsontable from "handsontable";
 import {getClusterCenter, maxMinRaDec, starData} from "./chart-cluster-gaia";
-import {baseUrl, httpGetAsync} from "./chart-cluster-util";
+import {baseUrl, httpGetAsync, httpPostAsync} from "./chart-cluster-util";
 import {updateClusterOnNewData} from "./chart-cluster-file-beta";
 import {Chart} from "chart.js";
 import {graphScale} from "./chart-cluster-scatter";
@@ -21,12 +21,9 @@ export function updateScrapeFormOnclick(table: Handsontable=null){
         scrapeForm.ra.value = '';
         scrapeForm.dec.value = '';
         scrapeForm.radius.value = '';
-        // scrapeForm.ra.value = '115.44';
-        // scrapeForm.dec.value = '-14.80';
-        // scrapeForm.radius.value = '0.177';
         scrapeForm.object.value = '';
         scrapeForm.isGaia.checked = false;
-        scrapeForm.isVizieR.checked = false;
+        scrapeForm.is2Mass.checked = false;
         scrapeForm.isOriginal.checked = false;
         scrapeForm.isOriginal.disabled = true;
         document.getElementById('isOriginalRow').style.opacity = '0.4';
@@ -107,7 +104,7 @@ function queryObjectLocation(object: string){
         )
 }
 
-export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin : graphScale){
+export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin : graphScale, proChart: Chart){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     const ra = scrapeForm.ra.value;
     const dec = scrapeForm.dec.value;
@@ -116,19 +113,45 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         alert('RA, DEC, and Radius have to be provided for query!');
         return
     }
-    let url = baseUrl + "/vizier-query?ra=" + ra + "&dec=" + dec + "&r=" + r
-    httpGetAsync(url,
-        (result: string)=>{
-            let data = JSON.parse(result) as any;
-            try{
-                updateClusterOnNewData(table, mycharts, graphMaxMin, data['data'], data['filters'])
-            } catch (e){
-                console.log(e)
-            }
-        },
-        ()=>{
-            alert('VizieR query failed, check your input!');
+    let url = baseUrl + "/vizier-query";
+    let catalog: string[] = [];
+    if (scrapeForm.isGaia.checked){
+        catalog.push('gaia')
+    }
+    if (scrapeForm.is2Mass.checked) {
+        catalog.push('twomass')
+    }
+    if (scrapeForm.isWise.checked) {
+        catalog.push('wise')
+    }
+    if (catalog.length === 0) {
+        alert('Please Select a Database to Query');
+        return
+    } else {
+        let currTableData: any[][] = [[]];
+        let currTableDataKeys: string[] = [];
+        if (scrapeForm.isOriginal.checked) {
+            currTableData = table.getData();
+            currTableDataKeys = Object.keys(table.getSourceData()[0]);
         }
-    )
+        const query = {'ra': ra, 'dec': dec, 'r': r,
+            'catalog': catalog.concat(','),
+            'keys': currTableDataKeys,
+            'data': currTableData};
+        httpPostAsync(url,
+            query,
+            (result: string)=>{
+                let data = JSON.parse(result) as any;
+                try{
+                    updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart)
+                } catch (e){
+                    console.log(e)
+                }
+            },
+            ()=>{
+                alert('VizieR query failed, check your input!');
+            }
+        )
+    }
 }
 

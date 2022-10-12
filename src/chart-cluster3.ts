@@ -450,7 +450,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
       }
       }
     },
-  );
+  ) as Chart;
 
   //pull the proper motion ra and dec values from the table
   //change the default font size of myChart2
@@ -544,7 +544,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
   }
 
   document.getElementById('fetchData').onclick = ()=>{
-    queryVizieR(hot, [myChart1, myChart2], graphMinMax);
+    queryVizieR(hot, [myChart1, myChart2], graphMinMax, myChart3);
   }
 
 

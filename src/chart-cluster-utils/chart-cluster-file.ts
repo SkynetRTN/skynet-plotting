@@ -19,6 +19,7 @@ import {
     updateProForm
 } from "./chart-cluster-pro-util";
 import {updateScrapeFormOnclick, updateScrapeFormOnupload} from "./chart-cluster-scraper";
+import {resetClusterFormValue} from "./chart-cluster-file-beta";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -59,22 +60,7 @@ export function clusterFileUpload(
     reader.onload = () => {
         // reset clusterForm input values to default
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-        clusterForm["d"].value = Math.log(3).toString();
-        clusterForm["err"].value = "1";
-        clusterForm["err_num"].value = "1";
-        clusterForm["age"].value = "6.6";
-        clusterForm["bv"].value = "0";
-        clusterForm["metal"].value = "-3.4";
-        clusterForm["distrange"].value = "30";
-        //clusterForm["err_num"].value = "1";
-        clusterForm["d_num"].value = "3";
-        clusterForm["age_num"].value = "6.6";
-        clusterForm["red_num"].value = "0";
-        clusterForm["metal_num"].value = "-2.2";
-        clusterForm["distrange_num"].value = "30";
-        clusterForm["rv"].value = "3.1";
-        clusterForm["rv_num"].value = "3.1";
-        rangeCheckControl() // uncheck checkbox in clusterForm
+        resetClusterFormValue(true);
         // uncheck checkboxes for pm chart
         if (isCluster3)
             clusterProCheckControl()
@@ -352,6 +338,7 @@ function updateCharts(
     updateHRModel(clusterForm, table, queryCharts,
         (c: number) => {
             if (c === chartLength-1){
+                //@ts-ignore
                 table.updateSettings({
                     data: tableData,
                     colHeaders: headers,

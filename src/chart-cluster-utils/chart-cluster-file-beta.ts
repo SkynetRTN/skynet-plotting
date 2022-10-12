@@ -1,10 +1,17 @@
 import Handsontable from "handsontable";
-import {rangeCheckControl} from "./chart-cluster-interface";
+import {rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
 import {filterWavelength, modelFormKey} from "./chart-cluster-util";
 import {changeOptions, updateTableHeight} from "../util";
 import {Chart} from "chart.js";
 import {updateHRModel} from "./chart-cluster-model";
 import {graphScale, updateScatter} from "./chart-cluster-scatter";
+import {
+    chart2Scale,
+    proFormMinmax,
+    updateChart2,
+    updateClusterProScatter,
+    updateProForm
+} from "./chart-cluster-pro-util";
 
 // export function clusterFileUploadBeta(
 //     evt: Event,
@@ -43,7 +50,13 @@ import {graphScale, updateScatter} from "./chart-cluster-scatter";
 //     reader.readAsText(file);
 // }
 
-export function updateClusterOnNewData(table: Handsontable, myCharts: Chart[], graphMaxMin : graphScale, tableData: { [key: string]: number }[], filters: string[]){
+export function updateClusterOnNewData(table: Handsontable,
+                                       tableData: { [key: string]: number }[],
+                                       filters: string[],
+                                       myCharts: Chart[],
+                                       graphMaxMin : graphScale,
+                                       pmChart: Chart = null,
+                                       ){
     const knownFilters = Object.keys(filterWavelength);
     // knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
@@ -54,31 +67,41 @@ export function updateClusterOnNewData(table: Handsontable, myCharts: Chart[], g
     }
 
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
     const chartCounts = myCharts.length;
     updateHRModel(clusterForm, table, myCharts,
         (c: number) =>{
             if (c === chartCounts-1){
                 for (let i = 0; i < chartCounts; i++) {
                     graphMaxMin.updateMode('auto', i);
-                    updateScatter(table, [myCharts[i]], clusterForm, [2], graphMaxMin);
+                    updateScatter(table, [myCharts[i]], clusterForm, [2], graphMaxMin, -1, clusterProForm);
                     myCharts[i].update();
+                }
+                if (pmChart){
+                    const proMinMax = proFormMinmax(table, clusterForm);
+                    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
+                    updateProForm(proMinMax, clusterProForm);
+                    updateClusterProScatter(table, pmChart, clusterForm);
+                    updateChart2(pmChart, clusterProForm, proMinMax);
+                    chart2Scale(pmChart, proMinMax);
+                    pmChart.update();
+                    updateClusterProDefaultLabels(myCharts);
                 }
                 document.getElementById("standardView").click();
             }
-
-        })
+        }, true)
 }
 
 
 function clusterWriteHandsonTable(table: Handsontable, tableData: { [key: string]: number }[], filters: string[]){
     const headerNColumn = filtersToLists(filters);
+    // @ts-ignore
     table.updateSettings({
         data: tableData,
         colHeaders: headerNColumn.headers,
         columns: headerNColumn.columns,
         hiddenColumns: {
             columns: [],
-            //@ts-ignore
             copyPasteEnabled: false, // exclude hidden columns from copying and pasting
         }
     })
@@ -151,7 +174,7 @@ function filtersToLists(filters: string[]): {headers: any[], columns: any[], opt
  *
  * @param isRangeReset: if true, uncheck and reset range checkbox
  */
-function resetClusterFormValue(isRangeReset: boolean){
+export function resetClusterFormValue(isRangeReset: boolean){
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     clusterForm["d"].value = Math.log(3).toString();
     clusterForm["err"].value = "1";
