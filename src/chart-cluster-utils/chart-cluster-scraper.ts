@@ -106,6 +106,9 @@ function queryObjectLocation(object: string){
 
 export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin : graphScale, proChart: Chart){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
+
     const ra = scrapeForm.ra.value;
     const dec = scrapeForm.dec.value;
     const r = scrapeForm.radius.value;
@@ -113,7 +116,7 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         alert('RA, DEC, and Radius have to be provided for query!');
         return
     }
-    let url = baseUrl + "/vizier-query";
+
     let catalog: string[] = [];
     if (scrapeForm.isGaia.checked){
         catalog.push('gaia')
@@ -130,15 +133,43 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
     } else {
         let currTableData: any[][] = [[]];
         let currTableDataKeys: string[] = [];
+
         if (scrapeForm.isOriginal.checked) {
             currTableData = table.getData();
             currTableDataKeys = table.getColHeader() as string[];
             // currTableDataKeys = Object.keys(table.getSourceData()[0]);
         }
+
+        let queryRestriction = {
+                'distance': {'min': null, 'max': null},
+                'pmra': {'min': null, 'max': null},
+                'pmdec': {'min': null, 'max': null},
+            };
+
+        if (clusterForm.distrangeCheck.checked) {
+            const dist_range_abs = parseFloat(clusterForm.d_num.value) * parseFloat(clusterForm.distrange_num.value);
+            queryRestriction.distance.min = 1000 * (parseFloat(clusterForm.d_num.value) - dist_range_abs);
+            queryRestriction.distance.max = 1000 * (parseFloat(clusterForm.d_num.value) + dist_range_abs);
+        }
+
+        if (clusterProForm.rarangeCheck.checked) {
+            queryRestriction.pmra.min = parseFloat(clusterProForm.ramotion_num.value) - parseFloat(clusterProForm.rarange_num.value);
+            queryRestriction.pmra.max = parseFloat(clusterProForm.ramotion_num.value) + parseFloat(clusterProForm.rarange_num.value);
+        }
+
+        if (clusterProForm.decrangeCheck.checked) {
+            queryRestriction.pmdec.min = (parseFloat(clusterProForm.decmotion_num.value) - parseFloat(clusterProForm.decrange_num.value));
+            queryRestriction.pmdec.max = parseFloat(clusterProForm.decmotion_num.value) + parseFloat(clusterProForm.decrange_num.value);
+        }
+
         const query = {'ra': ra, 'dec': dec, 'r': r,
             'catalog': catalog.concat(','),
             'keys': currTableDataKeys,
-            'data': currTableData};
+            'data': currTableData,
+            'constrain': queryRestriction,
+        };
+
+        const url = baseUrl + "/vizier-query";
         httpPostAsync(url,
             query,
             (result: string)=>{
