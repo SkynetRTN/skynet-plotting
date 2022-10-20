@@ -4,6 +4,7 @@ import {baseUrl, httpGetAsync, httpPostAsync} from "./chart-cluster-util";
 import {updateClusterOnNewData} from "./chart-cluster-file-beta";
 import {Chart} from "chart.js";
 import {graphScale} from "./chart-cluster-scatter";
+import {proFormMinmax, updateProForm} from "./chart-cluster-pro-util";
 
 export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOriginal: boolean){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
@@ -28,10 +29,11 @@ export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOrigin
         document.getElementById("isWiseRow").style.opacity = "1";
     }
     if (isOriginal) {
-        scrapeForm.isOriginal.checked = isOriginal;
+        scrapeForm.isOriginal.checked = true;
         scrapeForm.object.disabled = true;
         document.getElementById("objRow").style.opacity = "0.6"
     } else {
+        scrapeForm.isOriginal.checked = false;
         scrapeForm.object.disabled = false;
         document.getElementById("objRow").style.opacity = "1"
     }
@@ -201,6 +203,16 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
                 let data = JSON.parse(result) as any;
                 try{
                     updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart);
+
+                    if (!scrapeForm.isGaia.disabled &&
+                        !scrapeForm.isApass.disabled &&
+                        !scrapeForm.is2Mass.disabled &&
+                        !scrapeForm.isWise.disabled &&
+                        !scrapeForm.isOriginal.checked) {
+                        const proMinMax = proFormMinmax(table, clusterForm);
+                        updateProForm(proMinMax, clusterProForm);
+                    }
+
                     if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked){
                         scrapeForm.isGaia.disabled = true;
                         document.getElementById("isGaiaRow").style.opacity = "0.6";
