@@ -29,9 +29,8 @@ import {
   updateProForm
 } from "./chart-cluster-utils/chart-cluster-pro-util";
 import {
-  queryVizieR,
-  updateComputeLookupButton,
-  updateScrapeFormOnclick
+  queryVizieR, resetScraperForm,
+  updateComputeLookupButton, updateScraperParameters
 } from "./chart-cluster-utils/chart-cluster-scraper";
 
 Chart.register(zoomPlugin);
@@ -40,11 +39,11 @@ Chart.register(zoomPlugin);
  *  @returns {[Handsontable, Chart, clusterForm, graphScale]}:
  */
 export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, ClusterProForm] {
-    insertClusterControls(2, true);
-    clusterProButtons(true);
-    clusterProSliders(true);
-    clusterProLayoutSetups();
-    updateScrapeFormOnclick();
+  insertClusterControls(2, true);
+  clusterProButtons(true);
+  clusterProSliders(true);
+  clusterProLayoutSetups();
+  resetScraperForm(true, true, false);
 
   //setup two charts
     document.getElementById('myChart').remove();
@@ -536,7 +535,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
   }
 
   document.getElementById('computeCenter').onclick = ()=>{
-    updateScrapeFormOnclick(hot);
+    updateScraperParameters(hot);
   }
 
   document.getElementById('cluster-scraper').oninput = ()=>{

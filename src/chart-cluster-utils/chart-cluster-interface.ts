@@ -21,7 +21,7 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
         '<div class="row">\n' +
         '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         "</div>\n" +
-        '<div class="row">\n'
+        '<div class="row" style="margin-bottom: 0px">\n'
 
     if (chartCounts === 1) {
         for (let i = 0; i < chartCounts; i++) {
@@ -35,7 +35,7 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
                 '<div class="col-sm-4">Red:</div>\n' +
                 '<div class="col-sm-4">Luminosity:</div>\n' +
                 "</div>\n" +
-                '<div class="row">\n' +
+                '<div class="row" style="margin-top: 5px">\n' +
                 '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
@@ -76,18 +76,18 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
                 num = (i+1).toString()
             }
             //add a number that corresponds what graph each row of drop down boxes controls
-            htmlContent += '<div class="col-sm-1" style="font-size: 20px;">' + logo + '</div>\n' +
-                '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
+            htmlContent += '<div class="col-sm-1" style="font-size: 20px; margin-top: 5px">' + logo + '</div>\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
-                '<div class="col-sm-3"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
-                '<div class="col-sm-3"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n'
@@ -96,7 +96,7 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
     htmlContent += "</div>\n"
 
     htmlContent +=
-        '<div class="row">\n' +
+        '<div class="row" style="margin-top: 15px">\n' +
         '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
@@ -529,11 +529,11 @@ export function clusterProLayoutSetups(){
     document.getElementById("clusterProForm").style.cursor= "auto";
 
     //configure bottom forms layout
-    document.getElementById('chart-info-form-div').className = 'col-sm-4';
+    document.getElementById('chart-info-form-div').className = 'col-sm-2';
     document.getElementById('axis-col').style.display = 'none';
     document.getElementById("title-data-col").className = 'col-sm-12'
     document.getElementById('cluster-scraper-form-div').style.display = 'inline';
-    document.getElementById('cluster-scraper-form-div').className = 'col-sm-8';
+    document.getElementById('cluster-scraper-form-div').className = 'col-sm-10';
     /**
         // possible hack model form
         const modelFormStyle = document.getElementById('model-form').style;
@@ -553,7 +553,7 @@ export function setClusterProDefaultLabels(charts: Chart[]){
 export function updateClusterProDefaultLabels(charts: Chart[]) {
     const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
     chartInfoForm.elements['data'].value = "Data";
-    updateClusterProLabels(charts, "HR Diagram");
+    updateClusterProLabels(charts, "Title");
 }
 
 export function updateClusterProLabels(charts: Chart[], title: string = null) {

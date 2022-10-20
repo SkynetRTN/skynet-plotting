@@ -10,7 +10,7 @@ import {changeOptions, getDateString, updateLabels, updateTableHeight } from "..
 import { updateHRModel } from "./chart-cluster-model";
 import { graphScale, updateScatter } from "./chart-cluster-scatter";
 import {starData, sortStar} from "./chart-cluster-gaia";
-import {clusterProCheckControl, rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
+import {clusterProCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
 import {
     chart2Scale,
     proFormMinmax,
@@ -18,8 +18,9 @@ import {
     updateClusterProScatter,
     updateProForm
 } from "./chart-cluster-pro-util";
-import {updateScrapeFormOnclick, updateScrapeFormOnupload} from "./chart-cluster-scraper";
+import {resetScraperForm, updateScrapeFormOnupload} from "./chart-cluster-scraper";
 import {resetClusterFormValue} from "./chart-cluster-file-beta";
+import {transformRequest} from "vite/dist/node/server/transformRequest";
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -367,7 +368,7 @@ function updateCharts(
                     updateClusterProDefaultLabels([myCharts[0], myCharts[1]]);
                     updateScrapeFormOnupload(range['ra'], range['dec'], range['r']);
                 } else {
-                    updateScrapeFormOnclick();
+                    resetScraperForm(true, true, false);
                 }
                 document.getElementById("standardView").click();
             }

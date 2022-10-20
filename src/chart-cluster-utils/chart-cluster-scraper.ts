@@ -5,28 +5,41 @@ import {updateClusterOnNewData} from "./chart-cluster-file-beta";
 import {Chart} from "chart.js";
 import {graphScale} from "./chart-cluster-scatter";
 
-export function updateScrapeFormOnclick(table: Handsontable=null){
+export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOriginal: boolean){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
-    if (table){
-        if (scrapeForm.object.value){
-            queryObjectLocation(scrapeForm.object.value);
-        } else {
-            const stars = tableDataToStars(table)
-            const range = getClusterCenter(stars[1], stars[0]);
-            console.log(range)
-            // @ts-ignore
-            updateScrapeFormRange(range['ra'], range['dec'], range['r']);
-        }
-    } else {
+    if (isCoord){
         scrapeForm.ra.value = '';
         scrapeForm.dec.value = '';
         scrapeForm.radius.value = '';
-        scrapeForm.object.value = '';
+    }
+    scrapeForm.object.value = '';
+    if (isCheckbox) {
+        scrapeForm.isGaia.disabled = false;
+        document.getElementById("isGaiaRow").style.opacity = "1";
         scrapeForm.isGaia.checked = false;
+        scrapeForm.isApass.disabled = false;
+        scrapeForm.isApass.checked = false;
+        document.getElementById("isApassRow").style.opacity = "1";
+        scrapeForm.is2Mass.disabled = false;
         scrapeForm.is2Mass.checked = false;
-        scrapeForm.isOriginal.checked = false;
-        scrapeForm.isOriginal.disabled = true;
-        document.getElementById('isOriginalRow').style.opacity = '0.4';
+        document.getElementById("is2MassRow").style.opacity = "1";
+        scrapeForm.isWise.disabled = false;
+        scrapeForm.isWise.checked = false;
+        document.getElementById("isWiseRow").style.opacity = "1";
+    }
+    scrapeForm.isOriginal.checked = isOriginal;
+
+}
+
+export function updateScraperParameters(table: Handsontable){
+    const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
+    if (scrapeForm.object.value){
+        queryObjectLocation(scrapeForm.object.value);
+    } else {
+        const stars = tableDataToStars(table)
+        const range = getClusterCenter(stars[1], stars[0]);
+        // @ts-ignore
+        updateScrapeFormRange(range['ra'], range['dec'], range['r']);
     }
 }
 
@@ -38,16 +51,13 @@ export function updateComputeLookupButton(isEmptyObj: boolean = false){
     if (scrapeForm.object.value){
         document.getElementById('computeCenter').innerHTML = 'Look up'; //my roommate said look up is two words
     } else {
-        document.getElementById('computeCenter').innerHTML = 'Compute';
+        document.getElementById('computeCenter').innerHTML = 'Measure';
     }
 }
 
 export function updateScrapeFormOnupload(ra: number, dec: number, r: number){
-    const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     updateScrapeFormRange(ra, dec, r);
-    scrapeForm.isOriginal.disabled = false;
-    document.getElementById('isOriginalRow').style.opacity = '1';
-    scrapeForm.object.value = '';
+    resetScraperForm(false, true, true);
     updateComputeLookupButton(true);
 }
 
@@ -108,7 +118,6 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
-
     const ra = scrapeForm.ra.value;
     const dec = scrapeForm.dec.value;
     const r = scrapeForm.radius.value;
@@ -118,13 +127,16 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
     }
 
     let catalog: string[] = [];
-    if (scrapeForm.isGaia.checked){
+    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked){
         catalog.push('gaia')
     }
-    if (scrapeForm.is2Mass.checked) {
+    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked){
+        catalog.push('apass')
+    }
+    if (!scrapeForm.is2Mass.disabled && scrapeForm.is2Mass.checked) {
         catalog.push('twomass')
     }
-    if (scrapeForm.isWise.checked) {
+    if (!scrapeForm.isWise.disabled && scrapeForm.isWise.checked) {
         catalog.push('wise')
     }
     if (catalog.length === 0) {
@@ -134,7 +146,11 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         let currTableData: any[][] = [[]];
         let currTableDataKeys: string[] = [];
 
-        if (scrapeForm.isOriginal.checked) {
+        if (scrapeForm.isGaia.disabled
+            || scrapeForm.isApass.disabled
+            || scrapeForm.is2Mass.disabled
+            || scrapeForm.isWise.disabled
+            || scrapeForm.isOriginal.checked) {
             currTableData = table.getData();
             currTableDataKeys = table.getColHeader() as string[];
             // currTableDataKeys = Object.keys(table.getSourceData()[0]);
@@ -175,7 +191,24 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
             (result: string)=>{
                 let data = JSON.parse(result) as any;
                 try{
-                    updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart)
+                    updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart);
+                    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked){
+                        scrapeForm.isGaia.disabled = true;
+                        document.getElementById("isGaiaRow").style.opacity = "0.6";
+                    }
+                    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked){
+                        scrapeForm.isApass.disabled = true;
+                        document.getElementById("isApassRow").style.opacity = "0.6";
+                    }
+                    if (!scrapeForm.is2Mass.disabled && scrapeForm.is2Mass.checked) {
+                        scrapeForm.is2Mass.disabled = true;
+                        document.getElementById("is2MassRow").style.opacity = "0.6";
+                    }
+                    if (!scrapeForm.isWise.disabled && scrapeForm.isWise.checked) {
+                        scrapeForm.isWise.disabled = true;
+                        document.getElementById("isWiseRow").style.opacity = "0.6";
+                    }
+
                 } catch (e){
                     console.log(e)
                 }
