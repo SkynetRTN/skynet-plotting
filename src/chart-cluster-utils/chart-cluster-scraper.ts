@@ -27,7 +27,16 @@ export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOrigin
         scrapeForm.isWise.checked = false;
         document.getElementById("isWiseRow").style.opacity = "1";
     }
-    scrapeForm.isOriginal.checked = isOriginal;
+    if (isOriginal) {
+        scrapeForm.isOriginal.checked = isOriginal;
+        scrapeForm.object.disabled = true;
+        document.getElementById("objRow").style.opacity = "0.6"
+    } else {
+        scrapeForm.object.disabled = false;
+        document.getElementById("objRow").style.opacity = "1"
+    }
+
+
 
 }
 

@@ -60,7 +60,7 @@ export function updateClusterOnNewData(table: Handsontable,
     const knownFilters = Object.keys(filterWavelength);
     // knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
-    resetClusterFormValue(true);
+    // resetClusterFormValue(true);
     clusterWriteHandsonTable(table, tableData, filters);
     for (let c = 0; c < 2; c++) {
         setFilterForClusterform(c, filters);
@@ -80,7 +80,7 @@ export function updateClusterOnNewData(table: Handsontable,
                 if (pmChart){
                     const proMinMax = proFormMinmax(table, clusterForm);
                     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
-                    updateProForm(proMinMax, clusterProForm);
+                    // updateProForm(proMinMax, clusterProForm);
                     updateClusterProScatter(table, pmChart, clusterForm);
                     updateChart2(pmChart, clusterProForm, proMinMax);
                     chart2Scale(pmChart, proMinMax);
