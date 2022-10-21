@@ -20,7 +20,7 @@ import {
 } from "./chart-cluster-pro-util";
 import {resetScraperForm, updateScrapeFormOnupload} from "./chart-cluster-scraper";
 import {resetClusterFormValue} from "./chart-cluster-file-beta";
-import {transformRequest} from "vite/dist/node/server/transformRequest";
+
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
