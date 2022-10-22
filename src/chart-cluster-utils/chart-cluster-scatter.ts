@@ -4,7 +4,7 @@
 
 
 import {Chart} from "chart.js";
-import Handsontable from "handsontable";
+import Handsontable, {numeric} from "handsontable";
 import {filterMags, filterWavelength, HRrainbow, modelFormKey, pointMinMax} from "./chart-cluster-util";
 import {insertGraphControl} from "./chart-cluster-interface";
 
@@ -629,36 +629,51 @@ function chartRescale(myCharts: Chart[],
         for (let key in adjustScale) {
             let frameOn: string = option === null ? graphMaxMin.getMode(adjustedC) : graphMaxMin.updateMode(option, adjustedC);
             if (frameOn === "auto") {
-                let magList: string[] = ['red', 'blue', 'bright'];
-                let filters: string[] = [
-                    clusterForm[modelFormKey(adjustedC, 'red')].value,
-                    clusterForm[modelFormKey(adjustedC, 'blue')].value,
-                    clusterForm[modelFormKey(adjustedC, 'lum')].value];
-                let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
-                let magIndex: number[] = [0, 0, 0];
-                for (let i = 0; i < magList.length; i++) {
-                    x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
-                    if ("UBVRI".includes(filters[i])) {
-                        magIndex[i] = Number(0);
-                    } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
-                        magIndex[i] = Number(1);
-                    } else if ("JHKs".includes(filters[i])) {
-                        magIndex[i] = Number(2);
-                    }
+                let filters: {[key: string]: string} = {
+                    'red': clusterForm[modelFormKey(adjustedC, 'red')].value,
+                    'blue': clusterForm[modelFormKey(adjustedC, 'blue')].value,
+                    'lum': clusterForm[modelFormKey(adjustedC, 'lum')].value
                 }
 
-                let mags: { [key: string]: Function[] } = filterMags()
+                const mags: {[key: string]: {[key: string]: number}} = {
+                    "U":{"red":11.72,"faint":11.72,"blue":-4.49,"bright":-10.57},
+                    "B":{"red":10.72,"faint":10.72,"blue":-3.34,"bright":-10.6},
+                    "V":{"red":9.38,"faint":9.38,"blue":-3.04,"bright":-10.67},
+                    "R":{"red":8.45,"faint":8.45,"blue":-2.92,"bright":-10.88},
+                    "I":{"red":7.69,"faint":7.69,"blue":-2.75,"bright":-11.25},
+                    "u'":{"red":12.55,"faint":12.55,"blue":-3.78,"bright":-9.66},
+                    "g'":{"red":10.13,"faint":10.13,"blue":-3.36,"bright":-10.74},
+                    "r'":{"red":8.8,"faint":8.8,"blue":-2.84,"bright":-10.68},
+                    "i'":{"red":8.26,"faint":8.26,"blue":-2.47,"bright":-10.79},
+                    "z'":{"red":7.93,"faint":7.93,"blue":-2.13,"bright":-10.87},
+                    "J":{"red":6.67,"faint":6.67,"blue":-2.42,"bright":-11.82},
+                    "H":{"red":6.1,"faint":6.1,"blue":-2.28,"bright":-12.18},
+                    "K":{"red":5.92,"faint":5.92,"blue":-2.19,"bright":-12.24},
+                    "W1":{"red":5.7,"faint":5.7,"blue":-2.11,"bright":-12.3},
+                    "W2":{"red":5.58,"faint":5.58,"blue":-2.07,"bright":-12.33},
+                    "W3":{"red":5.52,"faint":5.52,"blue":-3.31,"bright":-12.31},
+                    "W4":{"red":5.19,"faint":5.19,"blue":-3.13,"bright":-12.62},
+                    "BP":{"red":8.73,"faint":8.73,"blue":-3.13,"bright":-10.76},
+                    "G":{"red":9.57,"faint":9.57,"blue":-3.3,"bright":-10.67},
+                    "RP":{"red":7.83,"faint":7.83,"blue":-2.82,"bright":-11.18},
+                }
 
-                let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-                let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
+
+                // let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
+                // let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
+
+                let color_red: number = mags[filters['blue']]['red'] - mags[filters['red']]['red'];
+                let color_blue: number = mags[filters['blue']]['blue'] - mags[filters['red']]['blue'];
 
                 let minX = color_blue - (color_red - color_blue) / 8;
                 let maxX = color_red + (color_red - color_blue) / 8;
                 adjustScale = {
                     'minX': minX <= maxX ? minX : maxX,
                     'maxX': maxX >= minX ? maxX: minX,
-                    'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
-                    'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
+                    'minY': mags[filters['lum']]['bright'] + (mags[filters['lum']]['bright'] - mags[filters['red']]['faint'])/8,
+                    'maxY': mags[filters['lum']]['faint'] + (mags[filters['lum']]['bright'] - mags[filters['lum']]['faint'])/8,
+                    // 'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
+                    // 'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
                 };
             } else {
                 if (frameOn === "both") {
