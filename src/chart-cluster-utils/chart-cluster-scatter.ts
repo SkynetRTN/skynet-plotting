@@ -653,14 +653,10 @@ function chartRescale(myCharts: Chart[],
                     "W2":{"red":5.58,"faint":5.58,"blue":-2.07,"bright":-12.33},
                     "W3":{"red":5.52,"faint":5.52,"blue":-3.31,"bright":-12.31},
                     "W4":{"red":5.19,"faint":5.19,"blue":-3.13,"bright":-12.62},
-                    "BP":{"red":8.73,"faint":8.73,"blue":-3.13,"bright":-10.76},
-                    "G":{"red":9.57,"faint":9.57,"blue":-3.3,"bright":-10.67},
+                    "BP":{"red":9.57,"faint":9.57,"blue":-3.3,"bright":-10.67},
+                    "G":{"red":8.73,"faint":8.73,"blue":-3.13,"bright":-10.76},
                     "RP":{"red":7.83,"faint":7.83,"blue":-2.82,"bright":-11.18},
                 }
-
-
-                // let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-                // let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
 
                 let color_red: number = mags[filters['blue']]['red'] - mags[filters['red']]['red'];
                 let color_blue: number = mags[filters['blue']]['blue'] - mags[filters['red']]['blue'];
@@ -671,9 +667,8 @@ function chartRescale(myCharts: Chart[],
                     'minX': minX <= maxX ? minX : maxX,
                     'maxX': maxX >= minX ? maxX: minX,
                     'minY': mags[filters['lum']]['bright'] + (mags[filters['lum']]['bright'] - mags[filters['red']]['faint'])/8,
-                    'maxY': mags[filters['lum']]['faint'] + (mags[filters['lum']]['bright'] - mags[filters['lum']]['faint'])/8,
-                    // 'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
-                    // 'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
+                    'maxY': mags[filters['lum']]['faint'] - (mags[filters['lum']]['bright'] - mags[filters['lum']]['faint'])/8,
+
                 };
             } else {
                 if (frameOn === "both") {
