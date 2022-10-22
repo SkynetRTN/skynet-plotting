@@ -11,7 +11,7 @@ import {
   clusterProButtons,
   clusterProCheckControl,
   clusterProLayoutSetups,
-  clusterProSliders,
+  clusterProSliders, deActivateInterfaceOnFetch,
   insertClusterControls,
   rangeCheckControl,
   setClusterProDefaultLabels,
@@ -543,6 +543,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
   }
 
   document.getElementById('fetchData').onclick = ()=>{
+
     queryVizieR(hot, [myChart1, myChart2], graphMinMax, myChart3);
   }
 

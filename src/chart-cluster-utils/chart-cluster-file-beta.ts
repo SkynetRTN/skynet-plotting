@@ -1,5 +1,5 @@
 import Handsontable from "handsontable";
-import {rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
+import {deActivateInterfaceOnFetch, rangeCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
 import {filterWavelength, modelFormKey} from "./chart-cluster-util";
 import {changeOptions, updateTableHeight} from "../util";
 import {Chart} from "chart.js";
@@ -88,6 +88,8 @@ export function updateClusterOnNewData(table: Handsontable,
                     updateClusterProDefaultLabels(myCharts);
                 }
                 document.getElementById("standardView").click();
+
+                deActivateInterfaceOnFetch(true);
             }
         }, true)
 }

@@ -5,6 +5,7 @@ import {updateClusterOnNewData} from "./chart-cluster-file-beta";
 import {Chart} from "chart.js";
 import {graphScale} from "./chart-cluster-scatter";
 import {proFormMinmax, updateProForm} from "./chart-cluster-pro-util";
+import {deActivateInterfaceOnFetch} from "./chart-cluster-interface";
 
 export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOriginal: boolean){
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
@@ -133,6 +134,7 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
     const dec = scrapeForm.dec.value;
     const r = scrapeForm.radius.value;
     if (!(ra && dec && r)){
+
         alert('RA, DEC, and Radius have to be provided for query!');
         return
     }
@@ -197,9 +199,19 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         };
 
         const url = baseUrl + "/vizier-query";
+        deActivateInterfaceOnFetch(false);
         httpPostAsync(url,
             query,
             (result: string)=>{
+                if (result.includes('failure')){
+                    const error = JSON.parse(result) as any;
+                    deActivateInterfaceOnFetch(true);
+                    if (error['failure'].includes('Object input invalid type')){
+                        alert('VizieR query failed, your input for coordinates needs to be numbers!');
+                    } else if (error['failure'].includes('Radius too big')){
+                        alert('VizieR query failed, too many stars to process! Please reduce your radius');
+                    }
+                }
                 let data = JSON.parse(result) as any;
                 try{
                     updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart);
@@ -231,10 +243,13 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
                     }
 
                 } catch (e){
+                    deActivateInterfaceOnFetch(true);
                     console.log(e)
                 }
             },
-            ()=>{
+            (result: string)=>{
+                console.log(result)
+                deActivateInterfaceOnFetch(true);
                 alert('VizieR query failed, check your input!');
             }
         )

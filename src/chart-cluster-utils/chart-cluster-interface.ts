@@ -592,3 +592,25 @@ function clusterProYaxis(chartNum: number): string{
     const result = 'M_' + clusterForm[modelFormKey(chartNum, 'lum')].value
     return result
 }
+
+export function deActivateInterfaceOnFetch(activate: boolean){
+    const opacity = activate ? "1" : "0.6";
+    document.getElementById('cluster-form').style.opacity = opacity;
+    document.getElementById('clusterProForm').style.opacity = opacity;
+    document.getElementById('clusterProPmChartControl').style.opacity = opacity;
+    document.getElementById('bottom=forms-div').style.opacity = opacity;
+    document.getElementById('button-row').style.opacity = opacity;
+    const fetchDataButton = document.getElementById('fetchData') as HTMLInputElement;
+    if (activate){
+        fetchDataButton.style.backgroundColor = 'white';
+        fetchDataButton.style.color = 'black';
+        fetchDataButton.innerHTML = 'Fetch Data';
+        fetchDataButton.disabled = false;
+    } else {
+        fetchDataButton.style.backgroundColor = 'yellow';
+        fetchDataButton.style.color = 'red';
+        fetchDataButton.innerHTML = 'Fetching';
+        fetchDataButton.disabled = true;
+    }
+
+}
