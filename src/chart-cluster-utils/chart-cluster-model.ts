@@ -33,7 +33,7 @@ export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, chart
             age = 6.6;
         else if (age > 10.3)
             age = 10.3;
-        let iEnd =  Math.round(((-25.84 * age + 451.77) + (-17.17*age**2+264.30*age-753.93))/2)
+        let iEnd = Math.round(-14.324*age**2 + 227.43*age -666.25);
         return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
     }
     let reveal: string[] = [];
