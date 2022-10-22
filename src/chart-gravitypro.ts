@@ -1,7 +1,7 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import { ChartConfiguration, ScatterDataPoint} from "chart.js";
+import { ChartConfiguration, Filler, ScatterDataPoint} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { backgroundPlugin } from "./chart-gravity-utils/background-image";
 import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
@@ -23,6 +23,7 @@ import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodel
 import { chart2Scale } from "./chart-cluster3";
 
 Chart.register(zoomPlugin);
+Chart.register(Filler);
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart[], gravityProClass]}:
@@ -47,6 +48,11 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         '<div class="col-sm-5 des">Inclination (°):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Inclination" name="inc"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-5 des">Range:</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Range" name="rng"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Range" name="rng_num" class="field"></div>\n' +
         "</div>\n" +
         "</form>\n" +
 
@@ -162,6 +168,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.0005, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
+  linkInputs(gravityForm["rng"],gravityForm["rng_num"],0,0.1,0.001,0,false,true,0,10);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1,10,0.1,1, true);
 
@@ -234,6 +241,18 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           hidden: false,
           immutableLabel: false,
         },
+        {
+          label: 'Magnitude',
+          data: [],
+          borderColor: colors['red'],
+          backgroundColor: colors['red'],
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.1,
+          fill: false,
+          hidden: true,
+          immutableLabel: false,
+        },
       ],
       sonification:
       {
@@ -280,26 +299,58 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   };
 
   const myChart = new Chart(ctx1, chartOptions) as Chart<'line'>;
-
+console.log(colors['bright'])
   const spectoOptions: ChartConfiguration = {
     type: "line",
     data: {
       datasets: [
         {
           label: 'Model',
+          data: [] as {x: number, y: number}[], //define data format here so we can use it later
+          borderColor: 'rgba(255, 238, 81, 0.5)',
+          backgroundColor: 'rgba(255, 238, 81, 0.5)',
+          pointRadius: 0,
+          borderWidth: 0,
+          tension: 0.1,
+          hidden: false,
+          immutableLabel: true,
+        },
+        {
+          label: 'upper',
           data: [],
           borderColor: colors['bright'],
-          backgroundColor: colors['white'],
+          backgroundColor: 'rgba(255, 238, 81, 0.5)',
           pointRadius: 0,
-          borderWidth: 2,
+          borderWidth: 0.5,
           tension: 0.1,
-          fill: false,
+          fill: 2,
+          hidden: false,
+          immutableLabel: true,
+        },
+        {
+          label: 'lower',
+          data: [],
+          borderColor: colors['bright'],
+          backgroundColor: 'rgba(255, 238, 81, 0.5)',
+          pointRadius: 0,
+          borderWidth: 0.5,
+          tension: 0.1,
           hidden: false,
           immutableLabel: true,
         },
       ],
     },
-    plugins: [backgroundPlugin],
+    plugins: [backgroundPlugin, {id: 'callback', beforeUpdate: (chart,args,options) => 
+    {
+      let rng = parseFloat((document.getElementById("gravity-form") as GravityForm)["rng_num"].value)/2;
+      chart.data.datasets[1].data = []
+      chart.data.datasets[2].data = []
+        chart.data.datasets[0].data.forEach( (p: ScatterDataPoint) => {
+          //create upper and lower bounds
+          chart.data.datasets[1].data.push( {x: p.x, y: (p.y*Math.pow(10,rng))} as ScatterDataPoint);
+          chart.data.datasets[2].data.push( {x: p.x, y: (p.y*Math.pow(10,-rng))} as ScatterDataPoint);
+        })
+  }}],
     options: {
       hover: {
         mode: "nearest",
@@ -343,6 +394,19 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         }
       },
       plugins: {
+        legend: {
+          labels: {
+            //We don't want "upper" and "lower" in the legend. this hides.
+            filter(item, data) {
+              if(item.text.includes('upper') || item.text.includes('lower'))
+              {
+                return false;
+              }
+              else
+                return true;
+            },
+          }
+        },
         zoom: {
           pan: {
             enabled: false,
@@ -423,12 +487,16 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   sonificationButton.onclick = () => play(myChart);
   saveSon.onclick = () => saveSonify(myChart);
 
+
+//Clean-up event listener. Only runs once, when page is changed.
   document.getElementById('chart-type-form').addEventListener("change" , function () {
     //destroy the chart
     //testing a bunch of creating charts and destroying them to make the thing work
     mySpecto.destroy();
     myChart.destroy();
-  });
+    let elm = document.getElementById('extract-data-button')
+    elm.parentElement.removeChild(elm);
+  }, {once: true} );
 
   return [hot, [myChart, mySpecto], gravClass];
 }
@@ -506,11 +574,10 @@ export function gravityProFileUpload(
     return;
   }
 
-
+  console.log("getting strain server...")
   get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
     let data = json['data'];
-    console.log(json);
     let [min, max] = updateTable(table, data);
     let midpoint = (min + max) / 2
     let view_buffer = (max - min) * 0.20
@@ -523,7 +590,7 @@ export function gravityProFileUpload(
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
   }) 
 
-
+  console.log("getting spectrogram...")
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
     //define graph bounds
     let r = response.response;
@@ -532,17 +599,25 @@ export function gravityProFileUpload(
     myCharts[1].options.scales.x.max = parseFloat(strarr[1])
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3])
-    myCharts[0].data.datasets[0].data =
-    extract_strain_model(r.spec_array, 
-      myCharts[1].data.datasets[0].data as ScatterDataPoint[],
-      parseFloat(r.x0), parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
-    
+    document.getElementById("extract-data-button").onclick = () => {
+      myCharts[0].data.datasets[2].data =
+        extract_strain_model(r.spec_array, 
+        myCharts[1],
+        parseFloat(r.x0), parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
+        console.log("Model extracted")
+
+        myCharts[0].data.datasets[1].hidden = true;
+        myCharts[0].data.datasets[2].hidden = false;
+        myCharts[0].update();
+        console.log("chart changed")
+    }
     //console.log("Implementing background")
     //decode the spectogram
     myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
     myCharts[1].update()
     //console.log("background complete")
   })
+  console.log("success")
 }
 
 export class gravityProClass {

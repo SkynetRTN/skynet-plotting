@@ -142,9 +142,6 @@ function chartType(chart: string) {
         }
     }
     document.getElementById("grav-charts").style.display = "none";
-    
-    if(document.getElementById("extract-data-button") != null)
-        document.getElementById("extract-data-button").remove();
 
     if (document.getElementById('clusterProForm') != null)
         document.getElementById('clusterProForm').remove()

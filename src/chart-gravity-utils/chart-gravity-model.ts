@@ -1,5 +1,5 @@
 
-import { ScatterDataPoint } from "chart.js";
+import { Chart, ScatterDataPoint } from "chart.js";
 import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
 
@@ -15,32 +15,63 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
 }
 
 //Extract strain model from the yellow model plotted over the spectogram :)
-export function extract_strain_model(specto: number[][], model: ScatterDataPoint[] , x0: number, dx: number,y0: number,dy: number)
+export function extract_strain_model(specto: number[][], chart: Chart , x0: number, dx: number,y0: number,dy: number)
 : ScatterDataPoint[] 
 {
+    console.log(specto,' ',x0, ',',y0)
+    let model = chart.data.datasets[0].data as {x: number, y: number}[];
+    let upper = chart.data.datasets[1].data as {x: number, y: number}[];
+    let lower = chart.data.datasets[1].data as {x: number, y: number}[];
+
     var strain_model: ScatterDataPoint[] = [];
-    model.forEach(value => {
+    for(var i in model) 
+    {
         //find the approx.strain magnitude at this point from the spectogram
-        let mag = get_Magnitude(value)
+        let mag = get_Magnitude(parseInt(i))
         //Make a cool NEW point and add it to our model. It's freq vs. time.
-        strain_model.push( {x: value.x, y: mag*(10000000000000000) } as ScatterDataPoint )
-    })
+        strain_model.push( {x: model[i].x, y: mag} as ScatterDataPoint )
+    }
 
     //all done :)
-    console.log(strain_model)
     return strain_model;
 
-    function get_Magnitude(p: ScatterDataPoint): number{
-        var addressX = Math.round((p.x - x0) / dx)
-        var addressY = Math.round((p.y - y0) / dy)
-        try{
-            return specto[addressY][addressX]
+    function get_Magnitude(p: number): number{
+        var addressX = Math.round((model[p].x - x0) / dx)
+        var addressYUpper = Math.round((upper[p].y - y0) / dy)
+        var addressYLower = Math.round((lower[p].y - y0) / dy)
+        var sumMag = 0;
+        for(var i = (addressYLower>0?addressYLower:0); i <= addressYUpper; i++)
+        {
+            try{
+                sumMag += Math.sqrt(specto[addressX][i]*1000000000000000);
+            }
+            catch (err){ console.log(i)}//pro error handling
         }
-        catch (err){
-            console.log("oopsies\n" + err);
-            return 0;
-        }
+        return sumMag;
     }
+    //OLD VERSION
+    // var strain_model: ScatterDataPoint[] = [];
+    // model.forEach(value => {
+    //     //find the approx.strain magnitude at this point from the spectogram
+    //     let mag = get_Magnitude(value)
+    //     //Make a cool NEW point and add it to our model. It's freq vs. time.
+    //     strain_model.push( {x: value.x, y: mag*(10000000000000000) } as ScatterDataPoint )
+    // })
+
+    // //all done :)
+    // return strain_model;
+
+    // function get_Magnitude(p: ScatterDataPoint): number{
+    //     var addressX = Math.round((p.x - x0) / dx)
+    //     var addressY = Math.round((p.y - y0) / dy)
+    //     try{
+    //         return specto[addressY][addressX]
+    //     }
+    //     catch (err){
+    //         console.log("oopsies\n" + err);
+    //         return 0;
+    //     }
+    // }
 }
 
 /**
