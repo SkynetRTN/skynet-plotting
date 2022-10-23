@@ -179,7 +179,11 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         };
         number.oninput = debounce(()=> {
         // number.oninput = function(){
+            numMin = parseFloat(number.min)
+            numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
+            min = parseFloat(slider.min)
+            max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 4).toString();
         // }
@@ -229,7 +233,11 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
         };
         number.oninput = debounce(()=> {
         // number.oninput = function(){
+            numMin = parseFloat(number.min)
+            numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
+            min = parseFloat(slider.min)
+            max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 6).toString();
         // }
@@ -449,4 +457,67 @@ export function changeOptions(element: HTMLInputElement, newOptions: { value: st
         result += '<option value="' + newOptions[i].value + '" title="' + newOptions[i].title + '">' + newOptions[i].text + '</option></div>\n';
     }
     element.innerHTML = result;
+}
+
+export function defaultLayout(){
+    // rewrite HTML content of table & chart
+    document.getElementById('input-div').innerHTML = '';
+    document.getElementById('table-div').innerHTML = '';
+    //reset myChart object
+    if (document.getElementById('myChart') != null) {
+        document.getElementById('myChart').remove();
+    }
+    document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
+    //remove display of 4 charts
+    for (let i = 1; i < 5; i++) {
+        let chartId: string = 'myChart'+i.toString()
+        let divId: string = 'chart-div'+i.toString()
+        if (document.getElementById(divId) != null) {
+            if (document.getElementById(chartId) != null) {
+                document.getElementById(chartId).remove();
+            }
+            if (i=== 1 || i ===2)
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
+            else
+                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
+            document.getElementById(divId).style.display = 'none';
+        }
+    }
+    //remove gravity pro chart
+    document.getElementById("grav-charts").style.display = "none";
+    //remove cluster pro controls
+    document.getElementById("clusterProPmChartControl").style.display = "none";
+    //put in chart-info-form
+    document.getElementById("chart-info-form").style.display = "inline";
+    //remove cluster pro form
+    if (document.getElementById('clusterProForm') != null)
+        document.getElementById('clusterProForm').remove()
+
+    //expand the size of axisSet1 and hide axisSet2 for all interfaces
+    document.getElementById('chart-info-form-div').className = 'col-sm-12';
+    document.getElementById('axis-col').style.display = 'inline';
+    document.getElementById("title-data-col").className = 'col-sm-6'
+    document.getElementById('axisSet1').className = 'col-sm-12';
+    document.getElementById('axisSet1').style.display = 'inline';
+    document.getElementById('axisSet2').style.display = 'none';
+    document.getElementById('file-upload-button').style.display = 'none';
+    document.getElementById('extra-options').innerHTML = '';
+    //remove display of 2 axis labels
+    for (let i = 0; i < 5; i++) {
+        if (document.getElementById('axis-label'+i.toString()) != null) {
+            document.getElementById('axis-label'+i.toString()).style.display = 'none';
+        }
+    }
+    // hide cluster-scraper-form
+    document.getElementById('cluster-scraper-form-div').style.display = 'none';
+    // document.getElementById('extra-options').style.display = 'none';
+    document.getElementById('table-div').hidden = false;
+    document.getElementById('add-row-button').hidden = false;
+    document.getElementById('chart-div').style.cursor = "auto"
+}
+
+export function percentToAbsolute(value: string, percent: string): string{
+    let valueNum = parseFloat(value);
+    let percentNum = parseFloat(percent);
+    return Math.abs(valueNum*percentNum/100).toFixed(2).toString()
 }

@@ -2,62 +2,26 @@
  * This file contains functions that inject essential HTML into index.html for Cluster interfaces
  */
 
-import { Chart } from "chart.js";
-import { chart2Scale, proFormMinmax } from "../chart-cluster3";
+import {Chart, LinearScaleOptions} from "chart.js";
 import Handsontable from "handsontable";
+import {modelFormKey} from "./chart-cluster-util";
+import {updateChartDataLabel} from "../index";
+import {chart2Scale, proFormMinmax} from "./chart-cluster-pro-util";
 
 /**
  *  This function insert the clusterform and modelform into the website
  *  @param chartCounts: how many charts need to be controlled
  */
 export function insertClusterControls(chartCounts:number = 1, isPro = false) {
-    let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
-        '</div>\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        //add a checkbox that disables the corresponding slider
-        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" id="distrangeCheck"></input></div>\n' +
-        '<div class = "col-sm-5 des">±Range (%):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
-        "</div>\n"
+    let htmlContent = '<form title="Cluster Diagram" id="cluster-form">\n'
 
-    if (isPro)
-        htmlContent += '<div class="row">\n' +
-        '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
-        "</div>\n"
 
-    htmlContent += "</form>\n" +
-        '<form title="Filters" id="model-form" style="padding-bottom: .5em">\n' +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
-        "</div>\n" +
-        '<div class="row">\n' +
-        '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
-        '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
-        "</div>\n" +
+
+    htmlContent +=
         '<div class="row">\n' +
         '<div class="col-sm-6" style="color: grey;">Select Filters:</div>\n' +
         "</div>\n" +
-        '<div class="row">\n'
+        '<div class="row" style="margin-bottom: 0px">\n'
 
     if (chartCounts === 1) {
         for (let i = 0; i < chartCounts; i++) {
@@ -71,7 +35,7 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
                 '<div class="col-sm-4">Red:</div>\n' +
                 '<div class="col-sm-4">Luminosity:</div>\n' +
                 "</div>\n" +
-                '<div class="row">\n' +
+                '<div class="row" style="margin-top: 5px">\n' +
                 '<div class="col-sm-4"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
@@ -112,32 +76,81 @@ export function insertClusterControls(chartCounts:number = 1, isPro = false) {
                 num = (i+1).toString()
             }
             //add a number that corresponds what graph each row of drop down boxes controls
-            htmlContent += '<div class="col-sm-1" style="font-size: 20px;">' + logo + '</div>\n' +
-                '<div class="col-sm-3"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
+            htmlContent += '<div class="col-sm-1" style="font-size: 20px; margin-top: 5px">' + logo + '</div>\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="blue' + num + '" style="width: 100%;" title="Select Blue Color Filter">\n' +
                 '<option value="B" title="B filter" selected>B</option></div>\n' +
                 '<option value="V" title="V filter">V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
-                '<div class="col-sm-3"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="red' + num + '" style="width: 100%;" title="Red Color Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n' +
                 '<div class="col-sm-1"></div>\n' +
-                '<div class="col-sm-3"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
+                '<div class="col-sm-3" style="margin-top: 5px"><select name="lum' + num + '" style="width: 100%;" title="Select Luminosity Filter">\n' +
                 '<option value="B" title="B filter">B</option></div>\n' +
                 '<option value="V" title="V filter" selected>V</option></div>\n' +
                 '<option value="R" title="R filter">R</option></select></div>\n'
         }
     }
+    htmlContent += "</div>\n"
+
+    htmlContent +=
+        '<div class="row" style="margin-top: 15px">\n' +
+        '<div class="col-sm-6 des">Distance (kpc):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Distance" name="d"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Distance" name="d_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        //add a checkbox that disables the corresponding slider
+        '<div class="col-sm-1"><input type="checkbox" class="range" checked="0" name="distrangeCheck" id="distrangeCheck"></input></div>\n' +
+        '<div class = "col-sm-5 des">±Range (%):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Dist Range" name="distrange"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Dist Range" name="distrange_num" class="field"></div>\n' +
+        "</div>\n"
+
+    htmlContent +=
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Max Error (mag)</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Error" name="err"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Error" name="err_num" class="field"></div>\n' +
+        '</div>\n'
 
 
-    htmlContent += "</div>\n" + "</form>\n"
+    htmlContent +=
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">log(Age (yr)):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Age" name="age"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Age" name="age_num" class="field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">Metallicity (solar):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Metallicity" name="metal"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Metallicity" name="metal_num" class="field"></div>\n' +
+        "</div>\n"
 
-    if (chartCounts === 2) {
-        // @ts-ignore
-        document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
-        document.getElementById('chart-div2-colControl').style.width = '50%';
-    }
+    htmlContent +=
+        '<div class="row">\n' +
+        '<div class="col-sm-6 des">E(B–V) Reddening (mag):</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
+        '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
+        "</div>\n"
+
+    if (isPro)
+        htmlContent += '<div class="row">\n' +
+            '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
+            '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
+            '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +
+            "</div>\n"
+
+
+    htmlContent += "</form>\n"
+
+    // if (chartCounts === 2) {
+    //     // @ts-ignore
+    //     // document.getElementById('chart-div2').style = document.getElementById('chart-div1').style;
+    //     // document.getElementById('chart-div2-colControl').style.width = '50%';
+    // }
 
     document
         .getElementById("input-div")
@@ -181,9 +194,9 @@ export function clusterProSliders(clusterPro: true = true) {
             "beforeend",
             htmlContent
         );
-    document.getElementById('chart-div2').style.width = '310px'
-    document.getElementById('chart-div2').style.height = '100px'
-    document.getElementById('chart-div2-colControl').style.width = '330px'
+    // document.getElementById('chart-div2').style.width = '310px'
+    // document.getElementById('chart-div2').style.height = '100px'
+    // document.getElementById('chart-div2-colControl').style.width = '330px'
 }}
 
 /**
@@ -258,8 +271,6 @@ export function rangeCheckControl(clusterChart = true){
 
 export function clusterProCheckControl (){
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
-        (document.getElementById("rarangeCheck") as HTMLInputElement).checked = false;
-        (document.getElementById("decrangeCheck") as HTMLInputElement).checked = false;
         clusterProForm["rarange"].disabled = true;
         clusterProForm["rarange_num"].disabled = true;
         clusterProForm["decrange"].disabled = true;
@@ -279,7 +290,7 @@ export function clusterProCheckControl (){
               rangeSlider.style.opacity = "0.4";
             }
           });
-            decrangeCheckbox.addEventListener("change", () => {
+        decrangeCheckbox.addEventListener("change", () => {
             let rangeSlider = clusterProForm["decrange"]
             let rangeNum = clusterProForm["decrange_num"]
             if (decrangeCheckbox.checked) {
@@ -293,6 +304,12 @@ export function clusterProCheckControl (){
             }
           }
         );
+        if (rarangeCheckbox.checked){
+            rarangeCheckbox.click();
+        }
+        if (decrangeCheckbox.checked){
+            decrangeCheckbox.click();
+        }
 }
 
 export function clusterProButtons(isClusterPro: boolean){
@@ -311,7 +328,7 @@ export function clusterProButtons(isClusterPro: boolean){
     }
 }
 
-export function clusterProButtonControl(chart: Chart, table: Handsontable, modelForm: ModelForm){
+export function clusterProButtonControl(chart: Chart, table: Handsontable, clusterform: ClusterForm){
     //update chart as button is held down
     //add event listeners that will be used to control the chart based ion the clusterProButtons function
 
@@ -370,7 +387,7 @@ export function clusterProButtonControl(chart: Chart, table: Handsontable, model
         document.getElementById("zoomOutPro").addEventListener("mouseleave", ()=>{clearInterval(interval);})
     })
     document.getElementById("ResetPro").addEventListener("click", () => {
-        chart2Scale(chart, proFormMinmax(table, modelForm));
+        chart2Scale(chart, proFormMinmax(table, clusterform));
         chart.update();
     });
 }
@@ -403,7 +420,7 @@ export function insertClusterSimControls(chartCounts:number = 1) {
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-6 des">B – V Reddening (mag):</div>\n' +
-        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="red"></div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Reddening" name="bv"></div>\n' +
         '<div class="col-sm-2 text"><input type="number" title="Reddening" name="red_num" class="field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
@@ -493,4 +510,107 @@ export function insertClusterSimControls(chartCounts:number = 1) {
             "beforeend",
             htmlContent
         );
+}
+
+
+export function clusterProLayoutSetups(){
+    //remove chart tags from myChart1 and 2
+    //change the class of chart-div2 to col-lg-4
+    document.getElementById('chartTag1').style.display = "None";
+    document.getElementById('chartTag2').style.display = "None";
+    document.getElementById('chartTag3').style.display = "block";
+    document.getElementById('chartTag4').style.display = "block";
+    document.getElementById('chart-div1').style.display = 'block';
+    document.getElementById('chart-div2').style.display = 'block';
+    document.getElementById('chart-div3').style.display = 'block';
+    document.getElementById('chart-div4').style.display = 'block';
+
+    //change cluster pro form cursor behavior from graph to auto
+    document.getElementById("clusterProForm").style.cursor= "auto";
+
+    //configure bottom forms layout
+    document.getElementById('chart-info-form-div').className = 'col-sm-2';
+    document.getElementById('axis-col').style.display = 'none';
+    document.getElementById("title-data-col").className = 'col-sm-12'
+    document.getElementById('cluster-scraper-form-div').style.display = 'inline';
+    document.getElementById('cluster-scraper-form-div').className = 'col-sm-10';
+    /**
+        // possible hack model form
+        const modelFormStyle = document.getElementById('model-form').style;
+        modelFormStyle.position = 'absolute';
+        modelFormStyle.zIndex = '1';
+        modelFormStyle.width = document.getElementById('cluster-form').style.width;
+     **/
+}
+
+
+export function setClusterProDefaultLabels(charts: Chart[]){
+    // const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    // chartInfoForm.style.display = 'None';
+    updateClusterProDefaultLabels(charts)
+}
+
+export function updateClusterProDefaultLabels(charts: Chart[]) {
+    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    chartInfoForm.elements['data'].value = "Data";
+    updateClusterProLabels(charts, "Title");
+}
+
+export function updateClusterProLabels(charts: Chart[], title: string = null) {
+    const chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    updateClusterProAxis(charts);
+    for (const chart of charts) {
+        updateChartDataLabel(chart, chartInfoForm)
+        if (title) {
+            chartInfoForm.elements["title"].value = title;
+            chart.options.plugins.title.text = title;
+        } else {
+            chart.options.plugins.title.text = chartInfoForm.elements["title"].value
+        }
+        chart.update('none');
+    }
+
+}
+
+function updateClusterProAxis(charts: Chart[]){
+    for (let i = 0; i < charts.length; i++) {
+        const chart = charts[i];
+        (chart.options.scales['x'] as LinearScaleOptions).title.text = clusterProXaxis(i);
+        (chart.options.scales['y'] as LinearScaleOptions).title.text = clusterProYaxis(i);
+    }
+}
+
+function clusterProXaxis(chartNum: number): string{
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const result = clusterForm[modelFormKey(chartNum, 'blue')].value
+        + '-' + clusterForm[modelFormKey(chartNum, 'red')].value
+    return result
+}
+
+function clusterProYaxis(chartNum: number): string{
+    const clusterForm = document.getElementById("cluster-form") as ClusterForm;
+    const result = 'M_' + clusterForm[modelFormKey(chartNum, 'lum')].value
+    return result
+}
+
+export function deActivateInterfaceOnFetch(activate: boolean){
+    const opacity = activate ? "1" : "0.6";
+    document.getElementById('cluster-form').style.opacity = opacity;
+    document.getElementById('clusterProForm').style.opacity = opacity;
+    document.getElementById('clusterProPmChartControl').style.opacity = opacity;
+    document.getElementById('bottom=forms-div').style.opacity = opacity;
+    document.getElementById('button-row').style.opacity = opacity;
+    const fetchDataButton = document.getElementById('fetchData') as HTMLInputElement;
+    if (activate){
+        fetchDataButton.style.backgroundColor = 'white';
+        fetchDataButton.style.color = 'black';
+        fetchDataButton.innerHTML = 'Fetch Data';
+        fetchDataButton.disabled = false;
+    } else {
+        fetchDataButton.style.backgroundColor = 'yellow';
+        fetchDataButton.style.color = 'red';
+        fetchDataButton.innerHTML = 'Fetching';
+        fetchDataButton.disabled = true;
+    }
+
 }

@@ -5,29 +5,33 @@ import 'bootstrap/js/dist/modal';
 import { saveAs } from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime } from './util';
-import { curve } from './chart-curve';
-import { dual } from './chart-dual';
-import { moon } from './chart-moon';
-import { scatter } from './chart-scatter';
-import { venus } from './chart-venus';
-import { variable, variableFileUpload } from './chart-variable';
-import { spectrum, spectrumFileUpload } from './chart-spectrum';
-import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster0} from './chart-cluster0';
-import { cluster1 } from './chart-cluster';
-import { cluster2 } from './chart-cluster2';
-import { cluster3 } from './chart-cluster3';
+import {updateTableHeight, getDateString, dataURLtoBlob, formatTime, defaultLayout, percentToAbsolute} from './util';
 import { round } from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
-import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
-import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
+import {cluster3plus} from "./chart-cluster3plus";
+import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
+import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
+import {curve} from "./chart-curve";
+import {moon} from "./chart-moon";
+import {scatter} from "./chart-scatter";
+import {venus} from "./chart-venus";
+import {dual} from "./chart-dual";
+import {spectrum, spectrumFileUpload} from "./chart-spectrum";
+import {variable, variableFileUpload} from "./chart-variable";
+import {pulsar, pulsarFileUpload} from "./chart-pulsar";
+import {cluster3} from "./chart-cluster3";
+import {cluster2} from "./chart-cluster2";
+import {cluster1} from "./chart-cluster";
+import {cluster0} from "./chart-cluster0";
+// import {cluster0} from "./chart-cluster0";
+// import {cluster1} from "./chart-cluster";
+// import {cluster2} from "./chart-cluster2";
 
 /**
  *  Initializing the page when the website loads
@@ -85,7 +89,7 @@ window.onload = function () {
         // for cluster pro
         } else if ('myChart3' in window){
             document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0);
+            saveImage([3, 4, 2], signature, true, 1.0, true);
         }
     };
 
@@ -105,56 +109,12 @@ window.onload = function () {
  *                  chart-type-form
  */
 function chartType(chart: string) {
-    // rewrite HTML content of table & chart
-    document.getElementById('input-div').innerHTML = '';
-    document.getElementById('table-div').innerHTML = '';
-    //reset myChart object
-    if (document.getElementById('myChart') != null) {
-        document.getElementById('myChart').remove();
-    }
-    document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
-    //remove display of 4 charts
-    for (let i = 1; i < 5; i++) {
-        let chartId: string = 'myChart'+i.toString()
-        let divId: string = 'chart-div'+i.toString()
-        if (document.getElementById(divId) != null) {
-            if (document.getElementById(chartId) != null) {
-                document.getElementById(chartId).remove();
-            }
-            if (i=== 1 || i ===2)
-                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
-            else
-                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
-            document.getElementById(divId).style.display = 'none';
-        }
-    }
-
-    if (document.getElementById('clusterProForm') != null)
-        document.getElementById('clusterProForm').remove()
-
-    //expand the size of axisSet1 and hide axisSet2 for all interfaces
-    document.getElementById('axisSet1').className = 'col-sm-12';
-    document.getElementById('axisSet2').style.display = 'none';
-    document.getElementById('file-upload-button').style.display = 'none';
-    document.getElementById('extra-options').innerHTML = '';
-    //remove display of 2 axis labels
-    for (let i = 0; i < 5; i++) {
-        if (document.getElementById('axis-label'+i.toString()) != null) {
-            document.getElementById('axis-label'+i.toString()).style.display = 'none';
-        }
-    }
-    // document.getElementById('extra-options').style.display = 'none';
-    document.getElementById('table-div').hidden = false;
-    document.getElementById('add-row-button').hidden = false;
-
-    document.getElementById('chart-div').style.cursor = "auto"
-
-    clusterProButtons(false);
-
+    defaultLayout()
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
     let grav_objects: [Handsontable, Chart, gravityClass]
-
+    let cluster_objects: [Handsontable, Chart[], ClusterForm, graphScale]
+    let old_cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    // let gravpro_objects: [Handsontable, Chart[], gravityClass]
 
     if (chart === 'curve') {
         objects = curve();
@@ -185,37 +145,42 @@ function chartType(chart: string) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
     } else if (chart === 'cluster0') {
-        cluster_objects = cluster0();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
+        old_cluster_objects = cluster0();
+        objects = [old_cluster_objects[0], old_cluster_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+            clusterFileUpload(evt, old_cluster_objects[0], old_cluster_objects[1], old_cluster_objects[3]);
     }
-    } else if (chart === 'cluster1') {
-        cluster_objects = cluster1();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
-    } else if (chart === 'cluster2') {
-        cluster_objects = cluster2();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-        }
-
-
-    } else if (chart === 'cluster3') {
-        let result = cluster3()
-        cluster_objects = [result[0], result[1], result[2], result[3]];
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
-        }
-
+    // } else if (chart === 'cluster1') {
+    //     old_cluster_objects = cluster1();
+    //     objects = [old_cluster_objects[0], old_cluster_objects[1][0]]
+    //     document.getElementById('file-upload-button').style.display = 'inline';
+    //     document.getElementById('file-upload').onchange = function (evt) {
+    //         clusterFileUpload(evt, old_cluster_objects[0], old_cluster_objects[1], old_cluster_objects[3]);
+    //     }
+    // } else if (chart === 'cluster2') {
+    //     old_cluster_objects = cluster2();
+    //     objects = [old_cluster_objects[0], old_cluster_objects[1][0]]
+    //     document.getElementById('file-upload-button').style.display = 'inline';
+    //     document.getElementById('file-upload').onchange = function (evt) {
+    //         clusterFileUpload(evt, old_cluster_objects[0], old_cluster_objects[1], old_cluster_objects[3]);
+    //     }
+    // } else if (chart === 'cluster3') {
+    //     let result = cluster3()
+    //     old_cluster_objects = [result[0], result[1], result[2], result[3]];
+    //     objects = [old_cluster_objects[0], old_cluster_objects[1][0]]
+    //     document.getElementById('file-upload-button').style.display = 'inline';
+    //     document.getElementById('file-upload').onchange = function (evt) {
+    //         clusterFileUpload(evt, old_cluster_objects[0], old_cluster_objects[1], old_cluster_objects[3], true, result[4]);
+    //     }
+    }else if (chart === 'cluster3plus') {
+            let result = cluster3plus()
+            cluster_objects = [result[0], result[1], result[2], result[3]];
+            objects = [cluster_objects[0], cluster_objects[1][0]]
+            document.getElementById('file-upload-button').style.display = 'inline';
+            document.getElementById('file-upload').onchange = function (evt) {
+                clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
+            }
     }else if (chart === 'gravity') {
         grav_objects = gravity();
         objects = [grav_objects[0], grav_objects[1]]
@@ -223,6 +188,14 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
+    }else if (chart === 'gravityPro') {
+        let grav_pro_objects = gravityPro();
+        objects = [grav_pro_objects[0], grav_pro_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            gravityProFileUpload(evt, grav_pro_objects[0], grav_pro_objects[1] as Chart<'line'>[], grav_pro_objects[2]);
+        }
+
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
         transientObjects = transient();
@@ -250,13 +223,14 @@ function chartType(chart: string) {
 
     const chartInfoForm = document.getElementById('chart-info-form') as HTMLFormElement;
     chartInfoForm.oninput = function () {
-        if (chart === 'cluster2' || chart === 'cluster3') {
+        if (chart === 'cluster2') {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
-        
+        } else if (chart === 'cluster3'){
+            updateClusterProLabels([cluster_objects[1][0], cluster_objects[1][1]])
         } else if (chart !== 'transient') {
             updateChartInfo(objects[1], chartInfoForm);
-        } 
+        }
     };
 
     if(objects[1].data.sonification)
@@ -317,6 +291,12 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
     // @ts-ignore
     (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y'+key+'Axis'].value;
     myChart.options.plugins.title.text = elements['title'].value;
+    updateChartDataLabel(myChart, form);
+    myChart.update('none');
+}
+
+export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement){
+    const elements = form.elements as ChartInfoFormElements;
     const labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
@@ -324,10 +304,9 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
             myChart.data.datasets[i].label = labels[p++];
         }
     }
-    myChart.update('none');
 }
 
-function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0) {
+function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3: boolean = false) {
     const destCanvas = document.createElement('canvas');
     destCanvas.width = 0;
     destCanvas.height = 0;
@@ -352,6 +331,34 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         dx += canvas.width;
     })
 
+    if (isCluster3) {
+        const proMotionForm = document.getElementById('clusterProForm') as ClusterProForm;
+        const clusterForm = document.getElementById('cluster-form') as ClusterForm;
+        let texts = [];
+        if (JSON.parse(proMotionForm['rarangeCheck'].checked))
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
+                + " ± " + proMotionForm['rarange_num'].value + " mas/yr");
+        if (JSON.parse(proMotionForm['decrangeCheck'].checked))
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
+                + " ± " + proMotionForm['decrange_num'].value + " mas/yr");
+        if (JSON.parse(clusterForm['distrangeCheck'].checked))
+            texts.push("Distance: " + clusterForm['d_num'].value
+                + " ± " + percentToAbsolute(clusterForm['d_num'].value, clusterForm['distrange'].value) + " kpc");
+        texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
+        texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
+        texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
+        texts.push("R_V: " + clusterForm['rv_num'].value)
+
+        dx -= canvases[canvases.length - 1].width;
+        let dy = canvases[canvases.length - 1].height;
+        destCtx.font = '24px serif';
+        destCtx.fillStyle = 'black'
+        for (const text of texts) {
+            dy += 30
+            destCtx.fillText(text, dx + 20, dy);
+        }
+    }
+
     // Download the dummy canvas
     const time = getDateString();
     if (jpg) {
@@ -361,93 +368,6 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
     } else {
         console.log('Only jpg export is supported for EXIF info.');
     }
-
-    // if (chartNum === 0) {
-    //
-    //         // Create a dummy canvas
-    // const destCanvas = document.createElement('canvas');
-    // destCanvas.width = canvas.width;
-    // destCanvas.height = canvas.height;
-    //
-    // const destCtx = destCanvas.getContext('2d');
-    //
-    // // Create a rectangle with the desired color
-    // destCtx.fillStyle = '#FFFFFF';
-    // destCtx.fillRect(0, 0, canvas.width, canvas.height);
-    //
-    // // Draw the original canvas onto the destination canvas
-    // destCtx.drawImage(canvas, 0, 0);
-    //
-    // // Download the dummy canvas
-    // const time = getDateString();
-    // if (jpg) {
-    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-    //     //create image
-    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    // } else {
-    //     console.log('Only jpg export is supported for EXIF info.');
-    // }
-    // } else if (chartNum === 1) {
-    //     const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
-    //     // const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
-    //     // Create a dummy canvas
-    //         // Create a dummy canvas
-    // const destCanvas = document.createElement('canvas');
-    // destCanvas.width = 2 * canvas.width;
-    // destCanvas.height = canvas.height;
-    //
-    // const destCtx = destCanvas.getContext('2d');
-    //
-    // // Create a rectangle with the desired color
-    // destCtx.fillStyle = '#FFFFFF';
-    // destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-    //
-    // // // Draw the original canvas onto the destination canvas
-    // // let compile = destCtx.drawImage(canvas, 0, 0);
-    // // //draw canvas 2 onto the destination canvas
-    // // compile = destCtx.drawImage(canvas2, canvas.width, 0);
-    //
-    //
-    // // Download the dummy canvas
-    // const time = getDateString();
-    // if (jpg) {
-    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-    //     //create image
-    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    // } else {
-    //     console.log('Only jpg export is supported for EXIF info.');
-    // }
-    // }   else if (chartNum === 2) {
-    //     const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
-    //     // const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
-    //     // Create a dummy canvas
-    //         // Create a dummy canvas
-    // const destCanvas = document.createElement('canvas');
-    // destCanvas.width = 2 * canvas.width;
-    // destCanvas.height = canvas.height;
-    //
-    // const destCtx = destCanvas.getContext('2d');
-    //
-    // // Create a rectangle with the desired color
-    // destCtx.fillStyle = '#FFFFFF';
-    // destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-    //
-    // // Draw the original canvas onto the destination canvas
-    // // let compile = destCtx.drawImage(canvas, 0, 0);
-    // //draw canvas 2 onto the destination canvas
-    // // compile = destCtx.drawImage(canvas2, canvas.width, 0);
-    //
-    //
-    // // Download the dummy canvas
-    // const time = getDateString();
-    // if (jpg) {
-    //     const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-    //     //create image
-    //     saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    // } else {
-    //     console.log('Only jpg export is supported for EXIF info.');
-    // }
-    // }
 }
 
 function addEXIFToImage(jpegData: string, signature: string, time: string) {
