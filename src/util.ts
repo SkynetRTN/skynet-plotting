@@ -2,6 +2,7 @@
 
 import { Chart, LinearScaleOptions, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
+import { load } from "piexif-ts";
 import { clamp, round } from "./my-math";
 
 /**

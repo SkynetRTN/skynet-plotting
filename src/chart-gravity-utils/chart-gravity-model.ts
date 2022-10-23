@@ -21,7 +21,7 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
     console.log(specto,' ',x0, ',',y0)
     let model = chart.data.datasets[0].data as {x: number, y: number}[];
     let upper = chart.data.datasets[1].data as {x: number, y: number}[];
-    let lower = chart.data.datasets[1].data as {x: number, y: number}[];
+    let lower = chart.data.datasets[2].data as {x: number, y: number}[];
 
     var strain_model: ScatterDataPoint[] = [];
     for(var i in model) 
@@ -43,7 +43,7 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
         for(var i = (addressYLower>0?addressYLower:0); i <= addressYUpper; i++)
         {
             try{
-                sumMag += Math.sqrt(specto[addressX][i]*1000000000000000);
+                sumMag += specto[addressX][i]*1000000000000;
             }
             catch (err){ console.log(i)}//pro error handling
         }

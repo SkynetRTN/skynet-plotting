@@ -70,7 +70,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         "</form>"
     );
       document.getElementById("below-table-column").insertAdjacentHTML("beforeend",
-      '<button id="extract-data-button">Extract Data</button>'
+      '<button id="extract-data-button" disabled>Extract Data</button>'
       )
 
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
@@ -558,6 +558,7 @@ export function gravityProFileUpload(
   gravClass: gravityProClass
 ) 
 {
+
   const file = (evt.target as HTMLInputElement).files[0];
 
   if (file === undefined) {
@@ -573,6 +574,7 @@ export function gravityProFileUpload(
     alert("Please upload a 16Khz, 32s, .hdf5 file. Can be found at https://www.gw-openscience.org/eventapi/html/allevents/");
     return;
   }
+//begin load animation
 
   console.log("getting strain server...")
   get_grav_strain_server(file, (response: string) => {
@@ -598,18 +600,23 @@ export function gravityProFileUpload(
     myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
     myCharts[1].options.scales.x.max = parseFloat(strarr[1])
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
-    myCharts[1].options.scales.y.max = parseFloat(strarr[3])
+    myCharts[1].options.scales.y.max = parseFloat(strarr[3]);
+
+    (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false
     document.getElementById("extract-data-button").onclick = () => {
+      (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = true;
+
+      setTimeout(function () {
       myCharts[0].data.datasets[2].data =
         extract_strain_model(r.spec_array, 
         myCharts[1],
         parseFloat(r.x0), parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
-        console.log("Model extracted")
 
-        myCharts[0].data.datasets[1].hidden = true;
+        //myCharts[0].data.datasets[1].hidden = true;
         myCharts[0].data.datasets[2].hidden = false;
         myCharts[0].update();
-        console.log("chart changed")
+        (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false;
+        }, 100);
     }
     //console.log("Implementing background")
     //decode the spectogram
@@ -670,8 +677,8 @@ export class gravityProClass {
         continue;
       }
       freqChart[start++] = {
-        x: this.currentFreqData[i][0] + merge,
-        y: this.currentFreqData[i][1]
+        x: this.currentFreqData[i][0]*(this.totalMassDivGridMass) + merge,
+        y: this.currentFreqData[i][1]/(this.totalMassDivGridMass)
       };
     }
     while (freqChart.length !== start) {
