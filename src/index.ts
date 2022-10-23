@@ -16,7 +16,7 @@ import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/au
 import Handsontable from 'handsontable';
 import { pause } from './sonification';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
-import {cluster3} from "./chart-cluster3";
+import {cluster3} from "./chart-cluster3plus";
 import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
 import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
