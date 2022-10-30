@@ -363,8 +363,7 @@ console.log(colors['bright'])
           grid:
           {
             color: colors["gray"]
-          },
-          
+          },    
         },
         y: {
           //label: 'grav stuff',
@@ -586,6 +585,12 @@ export function gravityProFileUpload(
     gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
     linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
+
+    // myCharts[1].options.scales.x.ticks.
+    //                         callback = (tickValue,index,ticks) => {
+    //                           return (tickValue as number) - (ticks[0].value);
+    //                         }
+                            
 
     updateDataPlot(table, myCharts[0]);
     gravClass.fitChartToBounds(myCharts[0]);
