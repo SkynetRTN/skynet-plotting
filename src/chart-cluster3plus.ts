@@ -11,7 +11,7 @@ import {
   clusterProButtons,
   clusterProCheckControl,
   clusterProLayoutSetups,
-  clusterProSliders, deActivateInterfaceOnFetch,
+  clusterProSliders,
   insertClusterControls,
   rangeCheckControl,
   setClusterProDefaultLabels,
@@ -553,7 +553,9 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
   updateHRModel(clusterForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
+  //@ts-ignore
   myChart3.options.scales["x"].title.text = "Motion in RA (mas/yr)";
+  //@ts-ignore
   myChart3.options.scales["y"].title.text = "Motion in Dec (mas/yr)";
   myChart1.options.plugins.title.text = "Title";
   myChart1.options.scales["x"].title.text = "x1";

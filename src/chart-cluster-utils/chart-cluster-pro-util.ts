@@ -106,24 +106,37 @@ export function proFormMinmax(hot: Handsontable, clusterForm: ClusterForm) {
     let raArray = tableData2.filter((numList) => numList[0] !== null).map(row => row[columns.indexOf(clusterForm[blueKey].value + " pmra")]).sort((a, b) => a - b);
     //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
     let raArrayLength = raArray.length;
-    let raArraHalfLength = Math.floor(raArrayLength / 2);
+    let raArrayHalfLength = Math.floor(raArrayLength / 2);
     let medRa = 0;
     if (raArrayLength % 2 === 0) {
-        medRa = (raArray[raArraHalfLength] + raArray[raArraHalfLength - 1]) / 2;
+        medRa = (raArray[raArrayHalfLength] + raArray[raArrayHalfLength - 1]) / 2;
     } else {
-        medRa = raArray[raArraHalfLength];
+        medRa = raArray[raArrayHalfLength];
     }
     let raArrayAbs = raArray.map(row => Math.abs(row - medRa)).sort((a, b) => a - b);
+    //find the middle 68.3% of values in the ra array
+    let raArray68 = raArrayAbs.slice(Math.floor(raArrayLength * 0), Math.ceil(raArrayLength * 0.683));
+    //let raArray68Mean = raArray68.reduce((a, b) => a + b, 0) / raArray68.length;
+    //find the standard deviation of the dec out of all stars
+    let stdRa = 0;
+    for (let i = 0; i < raArray68.length; i++) {
+        stdRa += Math.pow(raArray68[i], 2);
+    }
+    stdRa = Math.sqrt(stdRa / raArray68.length);
+
+
     //make an array of all the dec values
-    let decArray = tableData2.map(row => row[columns.indexOf(clusterForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
+    let decArray = tableData2.filter((numList) => numList[1] !== null).map(row => row[columns.indexOf(clusterForm[blueKey].value + " pmdec")]).sort((a, b) => a - b);
     //find the number in the array that is in the middle, if there are an even number of values, take the average of the two middle values
     let decArrayLength = decArray.length;
-    let decArraHalfLength = Math.floor(decArrayLength / 2);
+    let decArrayHalfLength = Math.floor(decArrayLength / 2);
     let medDec = 0;
+    console.log(decArray)
     if (decArrayLength % 2 === 0) {
-        medDec = (decArray[decArraHalfLength] + decArray[decArraHalfLength - 1]) / 2;
+        medDec = (decArray[decArrayHalfLength] + decArray[decArrayHalfLength - 1]) / 2;
     } else {
-        medDec = decArray[raArraHalfLength];
+        // medDec = decArray[raArrayHalfLength];
+        medDec = decArray[decArrayHalfLength];
     }
     //make an array of the absolute value of the dec values minus the median
     let decArrayAbs = decArray.map(row => Math.abs(row - medDec)).sort((a, b) => a - b);
@@ -137,15 +150,8 @@ export function proFormMinmax(hot: Handsontable, clusterForm: ClusterForm) {
         stdDec += Math.pow(decArray68[i], 2);
     }
     stdDec = Math.sqrt(stdDec / decArray68.length);
-    //find the middle 68.3% of values in the ra array
-    let raArray68 = raArrayAbs.slice(Math.floor(raArrayLength * 0), Math.ceil(raArrayLength * 0.683));
-    //let raArray68Mean = raArray68.reduce((a, b) => a + b, 0) / raArray68.length;
-    //find the standard deviation of the dec out of all stars
-    let stdRa = 0;
-    for (let i = 0; i < raArray68.length; i++) {
-        stdRa += Math.pow(raArray68[i], 2);
-    }
-    stdRa = Math.sqrt(stdRa / raArray68.length);
+
+
     let maxRa = medRa + (2 * stdRa);
     let maxDec = medDec + (2 * stdDec);
     let minRa = medRa - (2 * stdRa);
@@ -207,6 +213,7 @@ export function chart2Scale(myChart2: Chart, minmax: number[]) {
     //right now test with minimum values
     myChart2.options.scales['x'].min = medRa - (2 * stdRa);
     myChart2.options.scales['y'].min = medDec - (2 * stdDec);
+    console.log(minmax);
 }
 
 function floatTo1(num: number) {
