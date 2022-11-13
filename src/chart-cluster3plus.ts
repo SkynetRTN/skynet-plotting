@@ -525,12 +525,15 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
 
   document.getElementById('discardData').onclick = ()=>{
     updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm, true);
-    // clusterProCheckControl();
     updateClusterProScatter(hot, myChart3, clusterForm);
-    const proMinMax = proFormMinmax(hot, clusterForm);
-    // updateProForm(proMinMax, clusterProForm);
-    updateChart2(myChart3, clusterProForm, proMinMax);
-    chart2Scale(myChart3, proMinMax);
+
+    if (!clusterProForm['rarangeCheck'].checked && !clusterProForm['decrangeCheck'].checked){
+      const proMinMax = proFormMinmax(hot, clusterForm);
+      updateProForm(proMinMax, clusterProForm);
+      updateChart2(myChart3, clusterProForm, proMinMax);
+      chart2Scale(myChart3, proMinMax);
+    }
+
     myChart3.update();
   }
 
