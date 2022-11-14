@@ -47,7 +47,8 @@ export function updateScatter(
         decMotion = parseFloat(clusterProForm['decmotion_num'].value);
         decRange = parseFloat(clusterProForm['decrange_num'].value);
     }
-    let tableData = table.getData();
+    const tableData = table.getData();
+    const tableSource = table.getSourceData();
     let columns = table.getColHeader();
     let keptDataIndex: number[] = [];
     let downloadData: { [key: string]: { [key: string]: string } } = {};
@@ -133,26 +134,24 @@ export function updateScatter(
                     }
                 }
 
-                if (id){
-                    if (!downloadData[id])
-                        downloadData[id] = {}
-                    downloadData[id]['id'] = id
-                    let downloadList: number[] = [blue, blueErr, red, redErr, lum, lumErr]
-                    for (let j = 0; j < downloadList.length; j++) {
-                        if (downloadList[j] !== null)
-                            downloadData[id][columns[downloadList[j]]] = tableData[i][downloadList[j]]
-                    }
-                    downloadData[id]['distance'] = tableData[i][blueDist]
-                    downloadData[id]['pmra'] = tableData[i][bluePmra]
-                    downloadData[id]['pmdec'] = tableData[i][bluePmdec]
-                    downloadData[id]['x_'+ (c+1).toString()] = ""
-                    downloadData[id]['y_' + (c+1).toString()] = ""
-                }
+                // if (id){
+                //     if (!downloadData[id])
+                //         downloadData[id] = {}
+                //     downloadData[id]['id'] = id
+                //     let downloadList: number[] = [blue, blueErr, red, redErr, lum, lumErr]
+                //     for (let j = 0; j < downloadList.length; j++) {
+                //         if (downloadList[j] !== null)
+                //             downloadData[id][columns[downloadList[j]]] = tableData[i][downloadList[j]]
+                //     }
+                //     downloadData[id]['distance'] = tableData[i][blueDist]
+                //     downloadData[id]['pmra'] = tableData[i][bluePmra]
+                //     downloadData[id]['pmdec'] = tableData[i][bluePmdec]
+                //     downloadData[id]['x_'+ (c+1).toString()] = ""
+                //     downloadData[id]['y_' + (c+1).toString()] = ""
+                // }
 
                 if (isSkip)
                     continue
-                else
-                    keptDataIndex.push(i)
 
                 //red-blue,lum
 
@@ -170,10 +169,17 @@ export function updateScatter(
                 scaleLimits = pointMinMax(scaleLimits, x, y);
 
                 if (id){
-                    downloadData[id]['id'] = id;
-                    downloadData[id]['x_'+ (c+1).toString()] = x.toString();
-                    downloadData[id]['y_' + (c+1).toString()] = y.toString();
+                    if (keptDataIndex.indexOf(i) < 0)
+                        downloadData[id] = tableSource[i] as { [key: string]: string };
+
+                    try {
+                        downloadData[id]['x_'+ (c+1).toString()] = x.toString();
+                        downloadData[id]['y_' + (c+1).toString()] = y.toString();
+                    } catch (e) {
+                    }
                 }
+
+                keptDataIndex.push(i)
 
             }
             while (chart.length !== start) {
@@ -190,7 +196,6 @@ export function updateScatter(
     }
     if (clusterProForm) {
         keptDataIndex = [...new Set(keptDataIndex)];
-        const tableSource = table.getSourceData();
         document.getElementById("data-count").innerHTML =
             keptDataIndex.length.toString() + '/' + tableSource.length.toString()
         if (isDiscard) {
