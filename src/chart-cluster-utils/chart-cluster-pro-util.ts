@@ -131,6 +131,7 @@ export function proFormMinmax(hot: Handsontable, clusterForm: ClusterForm) {
     let decArrayLength = decArray.length;
     let decArrayHalfLength = Math.floor(decArrayLength / 2);
     let medDec = 0;
+    console.log(decArray)
     if (decArrayLength % 2 === 0) {
         medDec = (decArray[decArrayHalfLength] + decArray[decArrayHalfLength - 1]) / 2;
     } else {
@@ -212,6 +213,7 @@ export function chart2Scale(myChart2: Chart, minmax: number[]) {
     //right now test with minimum values
     myChart2.options.scales['x'].min = medRa - (2 * stdRa);
     myChart2.options.scales['y'].min = medDec - (2 * stdDec);
+    console.log(minmax);
 }
 
 function floatTo1(num: number) {
