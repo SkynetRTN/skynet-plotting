@@ -1,7 +1,7 @@
 "use strict";
 
 import Chart from "chart.js/auto";
-import { ChartConfiguration, Filler, ScatterDataPoint} from "chart.js";
+import { ChartConfiguration, Filler, ScatterDataPoint, Tick} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { backgroundPlugin } from "./chart-gravity-utils/background-image";
 import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
@@ -270,6 +270,9 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           //label: 'time',
           type: "linear",
           position: "bottom",
+          ticks:{
+            precision: 5,
+          },
         },
         y: {
           //label: 'grav stuff',
@@ -293,6 +296,16 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         title:
         {
           display: false,
+        },
+        legend:{
+          labels:{
+            filter(item, data) {
+              if(item.text.includes("Magnitude") && data.datasets[2].hidden === true)
+                return false
+              else
+                return true
+            },
+          },
         },
       },
     },
@@ -363,7 +376,14 @@ console.log(colors['bright'])
           grid:
           {
             color: colors["gray"]
-          },    
+          },
+          ticks:{
+            precision: 5,
+            // callback(tickValue: number, index, ticks: Tick[]) {
+            //   var x = ticks[0].value
+            //   return tickValue - x;//Round to two decimals. IDK why this is necessary, these numbers should already be to 3 places.
+            // },
+          },
         },
         y: {
           //label: 'grav stuff',
@@ -698,7 +718,7 @@ export class gravityProClass {
   public setXbounds(minX:number, maxX:number){
     this.minX = minX;
     this.maxX = maxX;
-    this.xBuffer = (maxX - minX) * 0.15;
+    this.xBuffer = Math.round(maxX - minX) * 0.15;
   }
 
   public fitChartToBounds(myChart: Chart){
