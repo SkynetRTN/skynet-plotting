@@ -335,7 +335,11 @@ export function pulsarTest(): [Handsontable, Chart] {
             scales: {
                 x: {
                     type: 'linear',
-                    position: 'bottom'
+                    position: 'bottom',
+                    ticks: {
+                        maxTicksLimit: 9,
+                        includeBounds: true,
+                    },
                 }
             },
 
@@ -410,6 +414,7 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         chn1 = [];
         chn2 = [];
+        myChart.data.minT = Number.POSITIVE_INFINITY;
         for (let i = 0; i < time.length; i++) {
             myChart.data.minT = Math.min(myChart.data.minT, time[i]);
             chn1.push({
@@ -482,6 +487,9 @@ export function pulsarTest(): [Handsontable, Chart] {
         myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
         myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
 
+        myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        myChart.options.scales.x.max = (myChart.data.datasets[2].data[this.rc.value-1] as ScatterDataPoint).x;
+
         myChart.update('none')
     }
 
@@ -492,7 +500,7 @@ export function pulsarTest(): [Handsontable, Chart] {
 
     periodFoldingForm.doublePeriodMode.onchange = function(){
         this.bins.value = clamp(this.bins.value, 0, 10000);
-        let period = parseFloat(periodFoldingForm.period_num.value);
+        let period = parseFloat((periodFoldingForm.period_num.value<fourierForm["pstart"].value?fourierForm["pstart"].value:periodFoldingForm.period_num.value));
         let bins = parseInt(this.bins.value);
         let phase = parseFloat(periodFoldingForm.phase_num.value);
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
