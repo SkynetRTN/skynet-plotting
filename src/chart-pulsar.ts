@@ -682,6 +682,12 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
     Set2DefaultSpeed(myChart);
     myChart.data.sonification.audioSource.buffer = null;
 
+    if (fourierForm.fouriermode.value === 'p') {
+        myChart.options.scales['x'].type = 'logarithmic';
+    }else{
+        myChart.options.scales['x'].type = 'linear';
+    }
+
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {
         myChart.data.datasets[i].hidden = true;
