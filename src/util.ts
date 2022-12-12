@@ -158,7 +158,7 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = debounce(()=> {
+        number.onchange = debounce(()=> {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
         }, debounceTime);

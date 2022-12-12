@@ -11,6 +11,16 @@ export function round(value: number, digits: number): number {
 }
 
 /**
+ *  This function takes a floating point number and rounds it up to a specified decimal places.
+ *  @param value:   The value to be rounded up.
+ *  @param digits:  The decimal places to round the value up.
+ *  @returns {number}
+ */
+export function ceiling(value: number, digits: number): number {
+    return Math.ceil(value * Math.pow(10, digits)) / Math.pow(10, digits);
+}
+
+/**
  * Clamps a number. Note the output is a string since this function directly
  * interacts with HTMLInputElement, whose values are always strings.
  * @param num The string representing the number to be clamped.
