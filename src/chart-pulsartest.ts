@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js";
 import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -91,7 +91,7 @@ export function pulsarTest(): [Handsontable, Chart] {
         '<div class="row">\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-5 des">Period (days):</div>\n' +
+        '<div class="col-sm-5 des">Period (sec):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" StringFormat={}{0:N2} step="0.001"></div>\n' +
         '</div>\n' +
@@ -472,6 +472,19 @@ export function pulsarTest(): [Handsontable, Chart] {
             myChart.options.scales['x'].title.text = "Frequency (Hz)";
             myChart.options.scales['x'].type = 'linear';
         }
+
+
+        let tend = (myChart.data.datasets[1].data[myChart.data.datasets[1].data.length-1] as ScatterDataPoint).x;
+        let tstart = (myChart.data.datasets[0].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(tstart-tend);
+        if (periodFoldingForm["period_num"].min != fourierForm.pstart.value){
+            linkInputs(
+                periodFoldingForm["period"],
+                periodFoldingForm["period_num"],
+                parseFloat(fourierForm.pstart.value), range, 0.01, range, true
+            );
+        }
+
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
         if (start > stop) {
@@ -500,7 +513,7 @@ export function pulsarTest(): [Handsontable, Chart] {
 
     periodFoldingForm.doublePeriodMode.onchange = function(){
         this.bins.value = clamp(this.bins.value, 0, 10000);
-        let period = parseFloat((periodFoldingForm.period_num.value<fourierForm["pstart"].value?fourierForm["pstart"].value:periodFoldingForm.period_num.value));
+        let period = parseFloat(periodFoldingForm.period_num.value);
         let bins = parseInt(this.bins.value);
         let phase = parseFloat(periodFoldingForm.phase_num.value);
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
@@ -519,26 +532,6 @@ export function pulsarTest(): [Handsontable, Chart] {
             // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
             //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
             // }
-        if (periodFoldingForm["period_num"].max != range){
-            linkInputsPuls(
-                periodFoldingForm["period"],
-                periodFoldingForm["period_num"],
-                parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
-            );
-    
-    
-            
-            linkInputs(
-                periodFoldingForm["phase"], 
-                periodFoldingForm["phase_num"], 
-                0, 
-                1, 
-                0.01, 
-                0
-            );
-        }else{
-
-        }
 
         if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
             step = round(periodFoldingForm.period_num.value*periodFoldingForm.period_num.value*10e-4/range, 6)
@@ -576,13 +569,25 @@ export function pulsarTest(): [Handsontable, Chart] {
     periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
     // periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
-    
-
-    linkInputs(
+    linkInputs(//Phase slider
+        periodFoldingForm["phase"], 
+        periodFoldingForm["phase_num"], 
+        0, 
+        1, 
+        0.01, 
+        0
+    );
+    linkInputs(//Period Slider
+        periodFoldingForm["period"],
+        periodFoldingForm["period_num"],
+        0.1, 199.80000000000018, 0.01, 199.80000000000018, true//199.blah blah is the range of the default data set
+    );
+    linkInputs(//calibration slider
         polarizationForm.eq,
         polarizationForm.eq_num,
         0.5, 2, 0.001, 1, true, true, 0, Number.POSITIVE_INFINITY
     );
+    
 
     let polarizationOninput = function () {
         let eqaulizer = parseFloat(this.eq_num.value);
@@ -787,6 +792,10 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
     pause(myChart, clearInter);
     Set2DefaultSpeed(myChart);
     myChart.data.sonification.audioSource.buffer = null;
+
+    //Reset the chart to defining it's bounds based on the data
+    myChart.options.scales.x.min = null;
+    myChart.options.scales.x.max = null;
 
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {

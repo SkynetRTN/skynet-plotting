@@ -188,56 +188,6 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
     }
 }
 
-export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
-    log = false, numOverride = false, numMin = 0, numMax = 0
-) {
-    let debounceTime = 1000;
-    if (!numOverride) {
-        numMin = min;
-        numMax = max;
-    }
-    number.min = numMin.toString();
-    number.max = numMax.toString();
-    number.step = step.toString();
-    number.value = value.toString();
-    if (!log) {
-        slider.min = min.toString();
-        slider.max = max.toString();
-        slider.step = step.toString();
-        slider.value = value.toString();
-
-        slider.oninput = function () {
-            number.value = slider.value;
-        };
-        number.oninput = debounce(()=> {
-            number.value = clamp(number.value, numMin, numMax);
-            slider.value = clamp(number.value, min, max);
-        }, debounceTime);
-    } else {
-        slider.min = Math.log(min * 1).toString();
-        slider.max = Math.log(max * 1).toString();
-        slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
-        slider.value = Math.log(value).toString();
-        slider.oninput = function () {
-            /**  
-             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
-             * The reason is that the slider has min and max values defined for log. Also this is
-             * clamped to min and max instead of numMin and numMax, because the slider logically
-             * still correspond to min and max, even though the implementation changed to accommodate
-             * the log behavior.
-            */ 
-            number.value = clamp(round(Math.exp(parseFloat(slider.value)), 6), min, max);
-        };
-        number.oninput = debounce(()=> {
-        // number.oninput = function(){
-            number.value = clamp(number.value, numMin, numMax);
-            // Note that we clamp() to min and max instead of numMin and numMax.
-            slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 6).toString();
-        // }
-        }, debounceTime)
-    }
-}
-
 /**
  *  This function updates the height for the Handsontable object based on the number of rows it has.
  *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
