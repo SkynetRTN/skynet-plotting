@@ -4,6 +4,7 @@ import Chart from "chart.js/auto";
 import { ChartConfiguration, Filler, ScatterDataPoint, Tick} from "chart.js";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import { backgroundPlugin } from "./chart-gravity-utils/background-image";
+import { bufferAnimPlugin } from "./chart-gravity-utils/buffer-anim";
 import { get_grav_spectrogram_server, get_grav_strain_server } from "./chart-gravity-utils/chart-gravity-file"
 import Handsontable from "handsontable";
 import {dummyData} from "./chart-gravity-utils/chart-gravity-dummydata";
@@ -353,7 +354,7 @@ console.log(colors['bright'])
         },
       ],
     },
-    plugins: [backgroundPlugin, {id: 'callback', beforeUpdate: (chart,args,options) => 
+    plugins: [backgroundPlugin, bufferAnimPlugin, {id: 'callback', beforeUpdate: (chart,args,options) => 
     {
       let rng = parseFloat((document.getElementById("gravity-form") as GravityForm)["rng_num"].value)/2;
       chart.data.datasets[1].data = []
@@ -441,6 +442,9 @@ console.log(colors['bright'])
         background: {
           image: null
         },
+        buffer: {
+          image: "./assets/waitbear.gif"
+        }
       },
     },
   };
@@ -594,6 +598,8 @@ export function gravityProFileUpload(
     return;
   }
 //begin load animation
+//we stop these IN the functions, because they are asynchronus and the anim will stop instantly if we don't
+  myCharts[1].startBuffer()
 
   console.log("getting strain server...")
   get_grav_strain_server(file, (response: string) => {
@@ -647,6 +653,8 @@ export function gravityProFileUpload(
     //decode the spectogram
     myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
     myCharts[1].update()
+
+    myCharts[1].endBuffer()
     //console.log("background complete")
   })
   console.log("success")
