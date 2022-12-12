@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, linkInputs, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, linkInputs, sanitizeTableData, throttle, debounce, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js";
 import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -93,7 +93,7 @@ export function pulsarTest(): [Handsontable, Chart] {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Period (sec):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" StringFormat={}{0:N2} step="0.001"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field" StringFormat={}{0:N2} step="0.001"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
@@ -434,8 +434,7 @@ export function pulsarTest(): [Handsontable, Chart] {
 
         myChart.update('none');
     }
-    lightCurveForm.oninput = lightCurveOninput;
-    // lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
+    lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
     fourierForm.elements['fouriermode'].oninput = function () {
         if (fourierForm.elements['fouriermode'].value === 'p') {
@@ -481,8 +480,9 @@ export function pulsarTest(): [Handsontable, Chart] {
             linkInputs(
                 periodFoldingForm["period"],
                 periodFoldingForm["period_num"],
-                parseFloat(fourierForm.pstart.value), range, 0.01, range, true
+                parseFloat(fourierForm.pstart.value), range, 0.01, parseFloat(fourierForm.pstart.value), true
             );
+            periodFoldingForm.oninput();//an argument is not needed here, VScode lies
         }
 
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
@@ -580,7 +580,7 @@ export function pulsarTest(): [Handsontable, Chart] {
     linkInputs(//Period Slider
         periodFoldingForm["period"],
         periodFoldingForm["period_num"],
-        0.1, 199.80000000000018, 0.01, 199.80000000000018, true//199.blah blah is the range of the default data set
+        0.1, 199.80000000000018, 0.01, 0.1, true//199.blah blah is the range of the default data set
     );
     linkInputs(//calibration slider
         polarizationForm.eq,
