@@ -31,6 +31,10 @@ export function radio(): any {
         '<div class="col-sm-5"><input class="field" type="string" step="0.001" name="fluxDensity" min="10" max="100000" id="FluxDensity"></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
+        '<div class="col-sm-7">Effective Frequency (MHz): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="string" step="0.001" name="effectiveFrequency" min="10" max="100000" id="EffectiveFrequency"></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
         '<div class="col-sm-12" style="color: grey;">Trotter, A. S, Reichart, D. E., Egger, R. E., et al. 1997, MNRAS, 469, 1299</div>\n' +
         '</div>\n' +
         '</form>\n');
@@ -38,6 +42,8 @@ export function radio(): any {
     const radioForm = document.getElementById('radio-form') as RadioForm;
     radioForm.elements['fluxDensity'].disabled = true;
     radioForm.elements['fluxDensity'].style.opacity = "100";
+    radioForm.elements['effectiveFrequency'].disabled = true;
+    radioForm.elements['effectiveFrequency'].style.opacity = "100";
     document.getElementById('table-div').hidden = true;
     document.getElementById('add-row-button').hidden = true;
     document.getElementById('save-button').hidden = true;
@@ -78,7 +84,7 @@ export function radio(): any {
         if (parseFloat(radioForm.elements['stopFreq'].value) < parseFloat(radioForm.elements['startFreq'].value)){
             radioForm.elements['stopFreq'].value = radioForm.elements['startFreq'].value
         }
-        let [fluxAvg, uncertainty]= fluxGenesis(
+        let [fluxAvg, uncertainty, finalEffectiveFreq]= fluxGenesis(
             parseFloat(radioForm.elements['year'].value),
             parseFloat(radioForm.elements['startFreq'].value),
             parseFloat(radioForm.elements['stopFreq'].value),
@@ -86,7 +92,9 @@ export function radio(): any {
         );
         fluxAvg = round(fluxAvg, 1)
         uncertainty = round(uncertainty, 1)
+        finalEffectiveFreq = round(finalEffectiveFreq, 1)
         radioForm.elements['fluxDensity'].value = fluxAvg.toString() +  " +/- " + uncertainty.toString()
+        radioForm.elements['effectiveFrequency'].value = finalEffectiveFreq.toString()
     }
 
     return []
@@ -101,6 +109,7 @@ export function radio(): any {
 function fluxGenesis(year: number, startFreq: number, stopFreq: number, source: string) {
     let fluxSum  = 0
     let sigmaFluxSum = 0
+    let effectiveFreqSum = 0
     let t_ref = 0
     let t_0 = 0
     let logF_0 = 0 
@@ -189,7 +198,7 @@ function fluxGenesis(year: number, startFreq: number, stopFreq: number, source: 
         variencemdeltlog = 0
     }
     // use the trapezoidal rule to aproximate eq 14 -- stepsize 0.001
-    let deltax = (stopFreq - startFreq) / 1000
+    let deltax = (stopFreq - startFreq) / 100000
     for (let nu = startFreq; nu < stopFreq + deltax; nu = nu + deltax) {
         if(nu == startFreq || nu == stopFreq){
             let equation14 = logF_0 + a_1 * Math.log(nu / nu_ref) + a_2 * (Math.log(nu / nu_ref))**2 + a_3 * (Math.log(nu / nu_ref))**3 
@@ -197,22 +206,29 @@ function fluxGenesis(year: number, startFreq: number, stopFreq: number, source: 
             // Keeping the temporal component in the equation, since they will drop anyway for all unecessary sources
             let equation15 = Math.sqrt(varianceLogF_0 + variancea_1 * (Math.log(nu / nu_ref))**2 + variencea_2 * (Math.log(nu / nu_ref))**4 
                 + variencea_3 * (Math.log(nu / nu_ref))**6 + variencemnu_0 * (t - t_ref)**2 + variencemdeltlog * (Math.log(nu / nu_0))**2 * (t - t_0)**2)
+            let effectiveFreq = nu * 10**(logF_0 + a_1 * Math.log(nu / nu_ref) + a_2 * (Math.log(nu / nu_ref))**2 + a_3 * (Math.log(nu / nu_ref))**3 
+                + (mnu_0 *  (t - t_ref)+ mdeltlog *  (t - t_0) *  Math.log(nu / nu_0)))
             fluxSum += 10**(equation14)
             sigmaFluxSum += 10**(equation14 + equation15)
+            effectiveFreqSum += effectiveFreq
         }  
         if(startFreq < nu && nu < stopFreq){
             let equation14 = logF_0 + a_1 * Math.log(nu / nu_ref) + a_2 * (Math.log(nu / nu_ref))**2 + a_3 * (Math.log(nu / nu_ref))**3 
                 + (mnu_0 *  (t - t_ref)+ mdeltlog *  (t - t_0) *  Math.log(nu / nu_0))
             let equation15 = Math.sqrt(varianceLogF_0 + variancea_1 * (Math.log(nu / nu_ref))**2 + variencea_2 * (Math.log(nu / nu_ref))**4 
                 + variencea_3 * (Math.log(nu / nu_ref))**6 + variencemnu_0 * (t - t_ref)**2 + variencemdeltlog * (Math.log(nu / nu_0))**2 * (t - t_0)**2)
+            let effectiveFreq = nu * 10**(logF_0 + a_1 * Math.log(nu / nu_ref) + a_2 * (Math.log(nu / nu_ref))**2 + a_3 * (Math.log(nu / nu_ref))**3 
+                + (mnu_0 *  (t - t_ref)+ mdeltlog *  (t - t_0) *  Math.log(nu / nu_0)))
             fluxSum += 10**(equation14) * 2
             // adding equation 14 to 15 gives us the value of the flux one sigma above the average -- our method of getting uncertainty
             sigmaFluxSum += 10**(equation14 + equation15) * 2
+            effectiveFreqSum += effectiveFreq * 2
         }
     }
     let finalAvgFlux = (fluxSum * deltax / 2) / (stopFreq - startFreq)
     let finalSigmaAvgFlux = (sigmaFluxSum * deltax / 2) / (stopFreq - startFreq)
     let uncertainty = finalSigmaAvgFlux - finalAvgFlux
+    let finalEffectiveFreq = (effectiveFreqSum * deltax / 2) / (finalAvgFlux * (stopFreq - startFreq))
     //console.log('avg flux: ', finalAvgFlux, 'uncertainty: ', uncertainty)
-    return [finalAvgFlux, uncertainty]
+    return [finalAvgFlux, uncertainty, finalEffectiveFreq]
 }

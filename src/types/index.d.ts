@@ -38,6 +38,7 @@ interface RadioFormElements extends HTMLCollection {
     stopFreq: HTMLInputElement,
     year: HTMLInputElement,
     fluxDensity: HTMLInputElement,
+    effectiveFrequency: HTMLInputElement,
 }
 interface RadioForm extends HTMLFormElement {
     elements: RadioFormElements
