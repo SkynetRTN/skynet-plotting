@@ -20,21 +20,24 @@ export function radio(): any {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="stopFreq" min="10" max="100000" title="Stop Frequency" value=1435></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-7">Year: </div>\n' +
-        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="year" id="year" min="2000" max="100000" title="Year" value=2022></input></div>\n' +
+        '<div class="col-sm-7">Date (Years): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="year" id="year" min="2000" title="Year" value=2022.95></input></div>\n' +
         '</div>\n' +
         '<div class="row justify-content-end">\n' +
-        '<div class="graphControl"><button id="compute" style="width: 100%; padding-left: 5em;">Compute</button></div>\n' +
+        '<div class="graphControl"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Flux Density (Jy): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="string" step="0.001" name="fluxDensity" min="10" max="100000" id="FluxDensity"></input></div>\n' +
         '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-12" style="color: grey;">Trotter, A. S, Reichart, D. E., Egger, R. E., et al. 1997, MNRAS, 469, 1299</div>\n' +
+        '</div>\n' +
         '</form>\n');
     
     const radioForm = document.getElementById('radio-form') as RadioForm;
-    //radioForm.elements['fluxDensity'].disabled = true;
-    //radioForm.elements['fluxDensity'].style.opacity = "100";
+    radioForm.elements['fluxDensity'].disabled = true;
+    radioForm.elements['fluxDensity'].style.opacity = "100";
     document.getElementById('table-div').hidden = true;
     document.getElementById('add-row-button').hidden = true;
     document.getElementById('save-button').hidden = true;
@@ -57,6 +60,24 @@ export function radio(): any {
     let fluxButton = document.getElementById('compute') as HTMLInputElement
     fluxButton.onclick = (e) => {
         e.preventDefault();
+        if (parseFloat(radioForm.elements['year'].value) < 2000 ||  isNaN(parseFloat(radioForm.elements['year'].value)) == true){
+            radioForm.elements['year'].value = (2000).toString()
+        }
+        if (parseFloat(radioForm.elements['startFreq'].value) < 10 ||  isNaN(parseFloat(radioForm.elements['startFreq'].value)) == true){
+            radioForm.elements['startFreq'].value = (10).toString()
+        }
+        if (parseFloat(radioForm.elements['startFreq'].value) > 100000){
+            radioForm.elements['startFreq'].value = (100000).toString()
+        }
+        if (parseFloat(radioForm.elements['stopFreq'].value) < 10 || isNaN(parseFloat(radioForm.elements['stopFreq'].value)) == true){
+            radioForm.elements['stopFreq'].value = (10).toString()
+        }
+        if (parseFloat(radioForm.elements['stopFreq'].value) > 100000){
+            radioForm.elements['stopFreq'].value = (100000).toString()
+        }
+        if (parseFloat(radioForm.elements['stopFreq'].value) < parseFloat(radioForm.elements['startFreq'].value)){
+            radioForm.elements['stopFreq'].value = radioForm.elements['startFreq'].value
+        }
         let [fluxAvg, uncertainty]= fluxGenesis(
             parseFloat(radioForm.elements['year'].value),
             parseFloat(radioForm.elements['startFreq'].value),
