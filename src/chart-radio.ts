@@ -24,7 +24,7 @@ export function radio(): any {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="year" id="year" min="2000" max="100000" title="Year" value=2022></input></div>\n' +
         '</div>\n' +
         '<div class="row justify-content-end">\n' +
-        '<div class="graphControl"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
+        '<div class="graphControl"><button id="compute" style="width: 100%; padding-left: 5em;">Compute</button></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Flux Density (Jy): </div>\n' +
