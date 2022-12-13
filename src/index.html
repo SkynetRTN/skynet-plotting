@@ -13,7 +13,7 @@
     <div class="row">
       <div class="col-lg-4" id="input-col">
         <form title="input" id="chart-type-form">
-          <select name="chart" title="select chart">
+          <select name="chart" title="select chart" id="selectChart">
             <option value="curve" title="Curve" selected>Curve</option>
             <option value="moon" title="Moon">Moon</option>
             <option value="venus" title="Venus">Venus</option>
@@ -22,6 +22,7 @@
             <option value="spectrum" title="spectrum">Spectrum</option>
             <option value="dual" title="Dual">Dual</option>
             <option value="gravity" title="Gravity">Gravity</option>  
+            <option value="radio" title="Radio">Radio</option>
 <!--            <option value="cluster0" title="Cluster Sim">Cluster Sim</option>-->
             <option value="cluster1" title="Cluster One">Cluster One</option>
             <option value="cluster2" title="Cluster Two">Cluster Two</option>
@@ -98,12 +99,12 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="row">
-                <div class="col-sm-3 des">Title</div>
-                <div class="col-sm-9"><input type="text" title="Title" name="title" value="Title" class="field"></div>
+                <div class="col-sm-3 des" id="titleLabel">Title</div>
+                <div class="col-sm-9"><input id='titleInput' type="text" title="Title" name="title" value="Title" class="field"></div>
               </div>
               <div class="row">
-                <div class="col-sm-3 des">Data</div>
-                <div class="col-sm-9"><input type="text" title="Data" name="data" value="Data" class="field"></div>
+                <div class="col-sm-3 des" id="dataLabel">Data</div>
+                <div class="col-sm-9"><input id='dataInput' type="text" title="Data" name="data" value="Data" class="field"></div>
               </div>
             </div>
             <div class="col-sm-6">

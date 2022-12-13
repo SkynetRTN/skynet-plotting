@@ -32,6 +32,17 @@ interface MoonForm extends HTMLFormElement {
     elements: MoonFormElements
 }
 
+interface RadioFormElements extends HTMLCollection {
+    source: HTMLInputElement,
+    startFreq: HTMLInputElement,
+    stopFreq: HTMLInputElement,
+    year: HTMLInputElement,
+    fluxDensity: HTMLInputElement,
+}
+interface RadioForm extends HTMLFormElement {
+    elements: RadioFormElements
+}
+
 interface ScatterFormElements extends HTMLCollection {
     d: HTMLInputElement,
     x: HTMLInputElement,

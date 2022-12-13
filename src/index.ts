@@ -28,6 +28,7 @@ import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
 import { pause } from './sonification';
 import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
 import { TransientChart } from './chart-transient-utils/chart-transient-chart';
+import { radio } from './chart-radio'
 
 /**
  *  Initializing the page when the website loads
@@ -146,6 +147,11 @@ function chartType(chart: string) {
     // document.getElementById('extra-options').style.display = 'none';
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
+    document.getElementById('save-button').hidden = false;
+    document.getElementById('dataInput').hidden = false;
+    document.getElementById('titleInput').hidden = false;
+    document.getElementById('titleLabel').hidden = false;
+    document.getElementById('dataLabel').hidden = false;
 
     document.getElementById('chart-div').style.cursor = "auto"
 
@@ -160,6 +166,8 @@ function chartType(chart: string) {
         objects = curve();
     } else if (chart === 'moon') {
         objects = moon();
+    } else if (chart === 'radio') {
+        objects = radio();
     } else if (chart === 'scatter') {
         objects = scatter();
     } else if (chart === 'venus') {
@@ -232,12 +240,13 @@ function chartType(chart: string) {
             transientFileUpload(evt, transientObjects[0], transientObjects[1]);
         }
     }
+    if (chart !== 'radio'){
     updateTableHeight(objects[0]);
     // Update the height of the table when the chart resizes.
     objects[1].options.onResize = function () {
         updateTableHeight(objects[0]);
     }
-
+    }
     /**
      *  TODO: Find a way to align add-row-button while still putting it directly below
      *  the table element, so that in smaller screen it will be next to the table instead
@@ -259,6 +268,7 @@ function chartType(chart: string) {
         } 
     };
 
+    if (chart != 'radio'){
     if(objects[1].data.sonification)
     {
         document.getElementById('chart-type-form').onchange = function () {
@@ -267,7 +277,7 @@ function chartType(chart: string) {
         };
     }
     objects[1].update('none');
-
+    }
 }
 
 /**
