@@ -35,7 +35,9 @@ export function radio(): any {
         '<div class="col-sm-5"><input class="field" type="string" step="0.001" name="effectiveFrequency" min="10" max="100000" id="EffectiveFrequency"></input></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-12" style="color: grey;">Trotter, A. S, Reichart, D. E., Egger, R. E., et al. 1997, MNRAS, 469, 1299</div>\n' +
+            '<a style="color: grey;" href="https://ui.adsabs.harvard.edu/link_gateway/2017MNRAS.469.1299T/doi:10.1093/mnras/stx810">' +
+            'Trotter, A. S, Reichart, D. E., Egger, R. E., et al. 1997, MNRAS, 469, 1299' +
+            '</a>'+
         '</div>\n' +
         '</form>\n');
     
