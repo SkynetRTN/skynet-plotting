@@ -309,16 +309,16 @@ export function pulsar(): [Handsontable, Chart] {
                         }
                     }
                 },
-                // tooltip: {
-                //     callbacks: {
-                //         label: function (context) {
-                //             let precision = context.datasetIndex === 2 ||
-                //                 context.datasetIndex === 3 ? 6 : 4
-                //             return '(' + round(context.parsed.x, precision) + ', ' +
-                //                 round(context.parsed.y, 4) + ')';
-                //         },
-                //     },
-                // },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let precision = context.datasetIndex === 2 ||
+                                context.datasetIndex === 3 ? 6 : 4
+                            return '(' + round(context.parsed.x, precision) + ', ' +
+                                round(context.parsed.y, 4) + ')';
+                        },
+                    },
+                },
                 zoom: {
                     pan: {
                         enabled: true,
