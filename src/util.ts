@@ -85,8 +85,8 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 *  @param value:        The initial value of both inputs.
 *  @param log:          A boolean that determines whether the slider uses logarithmic scale.
 *  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
-*  @param numMin:       Min value for number field when @param numOverride is true.
-*  @param numMax:       Max value for number field when @param numOverride is true.
+*  @param numMin:       Min value for number field when numOverride is true.
+*  @param numMax:       Max value for number field when numOverride is true.
 */
 export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
     log = false, numOverride = false, numMin = 0, numMax = 0

@@ -338,6 +338,11 @@ export function pulsar(): [Handsontable, Chart] {
                     position: 'bottom',
                     ticks: {
                         maxTicksLimit: 9,
+                        //There seems to be an underlying issue with ticks on logarithmic graphs where they get rounded weirdly, 
+                        //this solves that. Yes, this function literally does nothing, except get chart.js to work right somehow.
+                        callback: function (tickValue, index, ticks) {
+                            return tickValue;
+                        },
                     },
                 }
             },
@@ -460,6 +465,7 @@ export function pulsar(): [Handsontable, Chart] {
 
             myChart.options.scales['x'].title.text = "Period (sec)";
             myChart.options.scales['x'].type = 'logarithmic';
+            console.log(myChart.options.scales['x'].min);
         } else {
             //frequency mode
             document.getElementById('period-div').hidden = true;
@@ -561,8 +567,6 @@ export function pulsar(): [Handsontable, Chart] {
         )
         myChart.update('none');
         
-        
-        periodFoldingForm.oninput
     }
 
     periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
@@ -821,10 +825,15 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
-            // document.getElementById('fourier-form').oninput();
+            //document.getElementById('fourier-form').oninput();
             myChart.data.datasets[2].data = [];
             myChart.data.datasets[3].data = [];
         }
+        else
+        {
+            myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        }
+
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
