@@ -6,7 +6,11 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {
+  clusterProButtons,
+  insertClusterControls,
+  rangeCheckControl
+} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -288,6 +292,7 @@ export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
   let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
   document.getElementById('chart-div1').onmousedown = frameChart1;
   document.getElementById('chart-div2').onmousedown = frameChart2;
+  clusterProButtons(false);
 
   //Adjust the gradient with the window size
   window.onresize = function () {
