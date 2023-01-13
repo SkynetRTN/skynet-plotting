@@ -16,10 +16,12 @@
 
 body {
     font-family: 'Lato', sans-serif;
+    background-color: #4B9CD3;
 }
 
 main.container {
     margin-top: 2rem;
+    background-color: white;
 }
 
 h2 {
@@ -153,6 +155,12 @@ button {
     outline: none;
 }
 
+button.scraper {
+    line-height: inherit;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 button.clusterRest {
     line-height: 18px;
     /* margin-bottom: 8px; */
@@ -231,6 +239,11 @@ input.field:focus {
 }
 input.field:disabled {
     opacity: 0.7;
+}
+
+input.field.scrape{
+    padding-left: 2px;
+    padding-right: 0px;
 }
 
 input[type=radio].table {
@@ -347,7 +360,7 @@ label.scaleSelection{
     border: 2px solid #E7E7E7;
     line-height: 2.7em;
     margin-bottom: 8px;
-    padding: 0px 6px 1px 6px;
+    padding: 0 6px 1px 6px;
     background-color: white;
     width:max-content;
     opacity: 0.7;
@@ -430,5 +443,5 @@ div.row.clusterPro {
 
 #clusterProPmChartControl {
     width: auto;
-    padding-right: 0px;
+    padding-right: 0;
 }

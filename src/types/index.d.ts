@@ -137,7 +137,7 @@ interface ClusterForm extends HTMLFormElement {
     d: HTMLInputElement,
     distrange: HTMLInputElement,
     err: HTMLInputElement,
-    red: HTMLInputElement,
+    bv: HTMLInputElement,
     rv: HTMLInputElement
     d_num: HTMLInputElement,
     distrange_num: HTMLInputElement,
@@ -148,9 +148,6 @@ interface ClusterForm extends HTMLFormElement {
     distScatter_num: HTMLInputElement,
     redScatter: HTMLInputElement,
     redScatter_num: HTMLInputElement,
-}
-
-interface ModelForm extends HTMLFormElement {
     age: HTMLInputElement,
     age_num: HTMLInputElement,
     metal: HTMLInputElement,
@@ -172,6 +169,7 @@ interface ModelForm extends HTMLFormElement {
     blue4: HTMLInputElement,
     lum4: HTMLInputElement,
 }
+
 interface ClusterProForm extends HTMLFormElement {
     ramotion: HTMLInputElement,
     ramotion_num: HTMLInputElement,
@@ -215,4 +213,16 @@ interface ClusterSimForm extends HTMLFormElement {
     starNum_num: HTMLInputElement,
     noise: HTMLInputElement,
     noise_num: HTMLInputElement,
+}
+
+interface ClusterScraperForm extends HTMLFormElement {
+    ra: HTMLInputElement,
+    dec: HTMLInputElement,
+    radius: HTMLInputElement,
+    object: HTMLInputElement,
+    isGaia: HTMLInputElement,
+    isApass: HTMLInputElement,
+    is2Mass: HTMLInputElement,
+    isWise: HTMLInputElement,
+    isOriginal: HTMLInputElement,
 }

@@ -1,13 +1,14 @@
 'use strict';
+/*test*/ 
 import Chart from "chart.js/auto";
-import { ScatterDataPoint, Ticks } from "chart.js";
+import { ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
 
 import { throttle, updateLabels, updateTableHeight, linkInputs, linkInputsVar } from "./util"
 import { Mode } from "./types/chart.js/index.js";
-import { round, ceiling, lombScargle, floatMod, lombScargleWithError, clamp } from "./my-math"
+import { round, lombScargle, floatMod, lombScargleWithError, clamp } from "./my-math"
 // import { PulsarMode } from "./types/chart.js/index.js";
 import { valueAccordingPercent } from "handsontable/helpers";
 
@@ -20,7 +21,7 @@ import { valueAccordingPercent } from "handsontable/helpers";
 export function variable(): [Handsontable, Chart] {
     // console.log("root func called");
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Variable" id="variable-form" style="padding-bottom: 1em">\n' +
+        '<form title="VariableTest" id="variableTest-form" style="padding-bottom: 1em">\n' +
         '<div class="flex-container">\n' +
         '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="lc" checked><span>Light Curve</span></label></div>\n' +
         '<div class="flex-item-grow1"><label><input type="radio" class="table" name="mode" value="ft" disabled><span>Periodogram</span></label></div>\n' +
@@ -200,15 +201,7 @@ export function variable(): [Handsontable, Chart] {
             scales: {
                 x: {
                     type: 'linear',
-                    position: 'bottom',
-                    ticks:
-                    {
-                        //There seems to be an underlying issue with ticks on logarithmic graphs where they get rounded weirdly, 
-                        //this solves that. Yes, this function literally does nothing to the value.
-                        callback: function (tickValue, index, ticks) {
-                            return tickValue;
-                        },
-                    },
+                    position: 'bottom'
                 }
             }
         }
@@ -257,7 +250,7 @@ export function variable(): [Handsontable, Chart] {
     
     lightCurve(myChart, err1, err2);
 
-    const variableForm = document.getElementById("variable-form") as VariableForm;
+    const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.onchange = function () {
         const mode: Mode = variableForm.elements["mode"].value as Mode;
         if (mode === "lc") {
@@ -396,7 +389,7 @@ export function variableFileUpload(evt: Event, table: Handsontable, myChart: Cha
         myChart.data.datasets[0].label = src1;
         myChart.data.datasets[1].label = src2;
 
-        const variableForm = document.getElementById("variable-form") as VariableForm;
+        const variableForm = document.getElementById("variableTest-form") as VariableForm;
         variableForm.mode[1].disabled = true;
         variableForm.mode[2].disabled = true;
 
@@ -587,7 +580,7 @@ function updateVariable(table: Handsontable, myChart: Chart) {
 
     updateChart(myChart, 0, 1, 5, 6);
 
-    const variableForm = document.getElementById("variable-form") as VariableForm;
+    const variableForm = document.getElementById("variableTest-form") as VariableForm;
     variableForm.mode.value = "lc";
     variableForm.onchange(null);
 }
@@ -622,7 +615,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         '</div>\n' +
         '</form>\n';
     document.getElementById('light-curve-div').innerHTML = lcHTML;
-    const variableForm = document.getElementById('variable-form') as VariableForm;
+    const variableForm = document.getElementById('variableTest-form') as VariableForm;
     const lightCurveForm = document.getElementById('light-curve-form') as VariableLightCurveForm;
     lightCurveForm.mag.onchange = function(){
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm);
@@ -783,6 +776,16 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
     const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
     let initial = true
 
+    fourierForm.start.oninput = debounce(()=> {
+        let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+        let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(starting-ending);
+        if(range < 0.1){
+            fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),range/10,range)
+        }else{
+            fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
+        }
+    }, 1000)
 
     fourierForm.oninput = function() {
         let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
@@ -797,16 +800,17 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             initial = false
         }
 
-        let start = parseFloat(clamp(parseFloat(fourierForm.start.value),10e-4,range));
-        let stop = parseFloat(clamp(parseFloat(fourierForm.stop.value),start,range));
-
-        //ISSUE: this runs EVERY time you change everyhing. This results in jankiness where the box debounces to previous values.
-        debounce(() => {
-            fourierForm.start.value = start;
-            fourierForm.stop.value = stop;
+        debounce(()=> {
+        fourierForm.start.value = clamp(parseFloat(fourierForm.start.value),10e-4,range)
         }, 1000)
+        let start = parseFloat(fourierForm.start.value);
 
-
+        fourierForm.stop.value = clamp(parseFloat(fourierForm.stop.value),start,range)
+        let stop = parseFloat(fourierForm.stop.value);
+        if (start > stop) {
+            // alert("Please make sure the stop value is greater than the start value.");
+            return;
+        }
         let fData = []; // this is the original one without error bar
         let fDataWError = [];
 
@@ -831,21 +835,14 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         // console.log(fData)
         // console.log(fDataWError)
         
-        //Lets change the slider on the period folding page to match
-        // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-        //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
-        // }
-        linkInputsVar(
-            periodFoldingForm["period"],
-            periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, 1, parseFloat(fourierForm.start.value), true
-        );
+        
+
         
         
         myChart.options.scales['x'].min = start;
         myChart.options.scales['x'].max = stop;
-        myChart.options.scales['x'].type = 'logarithmic';
         updateChart(myChart, 3);
+        myChart.options.scales['x'].type = 'logarithmic';
     }
     // },1000)
 
@@ -891,6 +888,11 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
         //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
         // }
+        linkInputsVar(
+            periodFoldingForm["period"],
+            periodFoldingForm["period_num"],
+            parseFloat(fourierForm.start.value), range, 1, range, true
+        );
         periodFoldingForm["period"].step = 0.001
 
 
@@ -1038,13 +1040,11 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
         if(p - parseInt(p.toString()) < delta){
             p = parseInt(p.toString())+delta
         }
-
-
-        //Nice even max, without cutting out data
+        
         if (doubleMode == true){
-            p = ceiling((p)*2,1)
+            p = round((p)*2,1)
         }else{
-            p = ceiling(p,1);
+            p = round((p),1);
         }
 
         myChart.options.scales['x'].max = p

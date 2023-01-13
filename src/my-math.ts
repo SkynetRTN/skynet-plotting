@@ -72,7 +72,7 @@ export function rad(degree: number): number {
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
 export function lombScargleWithError(ts: number[], ys: number[], error: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
-    
+
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return null;
@@ -92,10 +92,11 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
     let i = 0
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        // let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
 
-        let frequency = freqMode ? xVal : 1 / xVal;
-        // let frequency = freqMode ? logXVal : 1 / logXVal;
+        let logXVal = Math.exp(Math.log(start) + (Math.log(stop) - Math.log(start)) * i / (steps))
+
+        // let frequency = freqMode ? xVal : 1 / xVal;
+        let frequency = freqMode ? logXVal : 1 / logXVal;
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -103,8 +104,7 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: xVal,
-            // x: logXVal,
+            x: logXVal,
             y: (Math.pow(ArrMath.errordot(hResidue, error, ArrMath.cos(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.cos(omegaTMinusTau)) +
                 Math.pow(ArrMath.errordot(hResidue, error, ArrMath.sin(omegaTMinusTau)), 2.0) /
@@ -125,7 +125,7 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
  * @param {number} stop the stopin period
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
- export function lombScargle(ts: number[], ys: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
+export function lombScargle(ts: number[], ys: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return null;
@@ -142,15 +142,16 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
     // xVal is what we iterate through & push to result. It will either be frequency or
     // period, depending on the mode.
     let spectralPowerDensity = [];
-    let i = 0
+    let i = 0;
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        // let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
-        // let frequency = freqMode ? logXVal : 1 / logXVal;
-        // if(freqMode === true){
-        //     frequency = freqMode ? xVal : 1 / xVal;
-        // }
-        let frequency = freqMode ? xVal : 1 / xVal;
+
+        let logXVal = Math.exp(Math.log(start) + (Math.log(stop) - Math.log(start)) * i / (steps))
+        let frequency = freqMode ? logXVal : 1 / logXVal;
+        if (freqMode === true) {
+            frequency = freqMode ? xVal : 1 / xVal;
+            logXVal = xVal
+        }
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -158,13 +159,13 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: xVal,
+            x: logXVal,
             y: (Math.pow(ArrMath.dot(hResidue, ArrMath.cos(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.cos(omegaTMinusTau)) +
                 Math.pow(ArrMath.dot(hResidue, ArrMath.sin(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.sin(omegaTMinusTau))) / twoVarOfY,
         });
-        i++
+        i++;
     }
 
     return spectralPowerDensity;
@@ -226,20 +227,20 @@ export const ArrMath = {
     },
     weightedSum: function (arr: number[], weight: number[]): number {
         let summed = 0;
-        for (let i = 0; i < arr.length; i++){
-            summed = summed + arr[i]*weight[i];
+        for (let i = 0; i < arr.length; i++) {
+            summed = summed + arr[i] * weight[i];
         };
         return summed
     },
     mean: function (arr: number[]): number {
         return this.sum(arr) / arr.length;
     },
-    errorMean: function (arr: number[], error: number[] ){
+    errorMean: function (arr: number[], error: number[]) {
         let weight = [];
-        for (let i = 0; i < arr.length; i++){
-            weight[i] = 1/(error[i]*error[i])
+        for (let i = 0; i < arr.length; i++) {
+            weight[i] = 1 / (error[i] * error[i])
         };
-        return this.weightedSum(arr, weight)/this.sum(weight)
+        return this.weightedSum(arr, weight) / this.sum(weight)
 
     },
     mul: function (arr1: number[] | number, arr2: number[] | number): number[] {
@@ -308,7 +309,7 @@ export const ArrMath = {
             throw new TypeError("Error: Can't take dot product of a vector and a number");
         }
     },
-    errordot: function (arr1: number[] | number, error: number[]|number, arr2?: number[] | number, ): number {
+    errordot: function (arr1: number[] | number, error: number[] | number, arr2?: number[] | number,): number {
         if (arr2 === undefined) {
             return this.errordot(arr1, error, arr1);
         }
@@ -317,11 +318,11 @@ export const ArrMath = {
                 "Error: Dimension mismatch when dot multiplying two arrays.");
             let weight = [];
             let dotlist = []
-            for (let i = 0; i < arr1.length; i++){
-                weight[i] = 1/(error[i]*error[i])
-                dotlist.push(arr1[i]*arr2[i])
+            for (let i = 0; i < arr1.length; i++) {
+                weight[i] = 1 / (error[i] * error[i])
+                dotlist.push(arr1[i] * arr2[i])
             };
-            return this.weightedSum(dotlist, weight)/this.sum(weight);
+            return this.weightedSum(dotlist, weight) / this.sum(weight);
         } else if (!Array.isArray(arr1) && !Array.isArray(arr2) && !Array.isArray(error)) {
             return arr1 * arr2;
         } else {
@@ -343,15 +344,15 @@ export const ArrMath = {
 
 //Returns a pseudorandom number generator function. A bad one, but a pseudorandom one nonetheless.
 export function sfc32(a: number, b: number, c: number, d: number) {
-    return function() {
-      a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0; 
-      var t = (a + b) | 0;
-      a = b ^ b >>> 9;
-      b = c + (c << 3) | 0;
-      c = (c << 21 | c >>> 11);
-      d = d + 1 | 0;
-      t = t + d | 0;
-      c = c + t | 0;
-      return (t >>> 0) / 4294967296;
+    return function () {
+        a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+        var t = (a + b) | 0;
+        a = b ^ b >>> 9;
+        b = c + (c << 3) | 0;
+        c = (c << 21 | c >>> 11);
+        d = d + 1 | 0;
+        t = t + d | 0;
+        c = c + t | 0;
+        return (t >>> 0) / 4294967296;
     }
 }

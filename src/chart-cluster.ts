@@ -15,7 +15,7 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
+export function cluster1(): [Handsontable, Chart[], ClusterForm, graphScale] {
   insertClusterControls();
   //make graph scaling options visible to users
   document.getElementById('axis-label1').style.display = 'inline';
@@ -24,15 +24,14 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
   //Declare UX forms. Seperate based on local and server side forms.
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-  const modelForm = document.getElementById("model-form") as ModelForm;
 
   // Link each slider with corresponding text box
   linkInputs(clusterForm['err'], clusterForm["err_num"], 0, 1, 0.05, 1, false, true, 0, 999)
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
-  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
-  linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
+  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.2, 0.01, 6.6);
+  linkInputs(clusterForm["bv"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -2.2, 0.7, 0.01, -2.2);
 
   //declare graphScale limits
   let graphMinMax = new graphScale();
@@ -144,15 +143,15 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   document.getElementById('chart-div').style.cursor = "move"
 
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
-  let graphControl = new ChartScaleControl([myChart], modelForm, graphMinMax);
-  myChart.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)}
-  myChart.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)}
+  let graphControl = new ChartScaleControl([myChart], clusterForm, graphMinMax);
+  myChart.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(clusterForm)}
+  myChart.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(clusterForm)}
 
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
       myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-        modelForm["red"].value, modelForm["blue"].value)
+          clusterForm["red"].value, clusterForm["blue"].value)
       myChart.update()
     }, 10)
   }
@@ -160,7 +159,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   //update table height and scatter plotting
   const update = function () {
     updateTableHeight(hot);
-    updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
+    updateScatter(hot, [myChart], clusterForm, [2], graphMinMax);
   };
 
   // link chart to table
@@ -173,23 +172,18 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
   //update scatter plotting when clusterFrom being updated by user
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
-  clusterForm.oninput = throttle(
-    function () {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax);
-    },
-    frameTime);
 
   // link chart to model form (slider + text). BOTH datasets are updated because both are affected by the filters.
-  modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart], (chartNum: number) => {
-      updateScatter(hot, [myChart], clusterForm, modelForm, [2], graphMinMax, chartNum);
+  clusterForm.oninput = throttle(function () {
+    updateHRModel(clusterForm, hot, [myChart], (chartNum: number) => {
+      updateScatter(hot, [myChart], clusterForm, [2], graphMinMax, chartNum);
     });
   }, 100);
 
 
   //initializing website
   update();
-  updateHRModel(modelForm, hot, [myChart]);
+  updateHRModel(clusterForm, hot, [myChart]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
   (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
@@ -207,7 +201,7 @@ export function cluster1(): [Handsontable, Chart[], ModelForm, graphScale] {
     false
   );
 
-  return [hot, [myChart], modelForm, graphMinMax];
+  return [hot, [myChart], clusterForm, graphMinMax];
 }
 
 
