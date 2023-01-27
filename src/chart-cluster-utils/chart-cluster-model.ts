@@ -102,7 +102,7 @@ export function generateURL(form: ClusterForm, chartNum: number) {
         metal = -3.4;
     else if (metal > 0.7)
         metal = 0.7;
-    return baseUrl + "/isochrone-beta?"
+    return baseUrl + "/isochrone?"
         + "age=" + age.toString()
         + "&metallicity=" + metal.toString()
         + "&filters=[%22" + form[blueKey].value.replace('\'', 'prime')
