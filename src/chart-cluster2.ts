@@ -21,23 +21,23 @@ Chart.register(zoomPlugin);
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
 export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
-    insertClusterControls(2);
-    //make graph scaling options visible to users
+  insertClusterControls(2);
+  //make graph scaling options visible to users
 
   //setup two charts
-    document.getElementById('myChart').remove();
-    //document.getElementById('myChart3').remove();
-    //document.getElementById('myChart4').remove();
-    document.getElementById('chart-div1').style.display = 'block';
-    document.getElementById('chart-div2').style.display = 'block';
-    document.getElementById('axis-label1').style.display = 'inline';
-    document.getElementById('axis-label2').style.display = 'inline';
-    document.getElementById('axis-label3').style.display = 'inline';
-    document.getElementById('axis-label4').style.display = 'inline';
-    document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
-    document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
-    document.getElementById('axisSet1').className = 'col-sm-6';
-    document.getElementById('axisSet2').style.display = 'inline';
+  document.getElementById('myChart').remove();
+  //document.getElementById('myChart3').remove();
+  //document.getElementById('myChart4').remove();
+  document.getElementById('chart-div1').style.display = 'block';
+  document.getElementById('chart-div2').style.display = 'block';
+  document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label2').style.display = 'inline';
+  document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('axis-label4').style.display = 'inline';
+  document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
+  document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
+  document.getElementById('axisSet1').className = 'col-sm-6';
+  document.getElementById('axisSet2').style.display = 'inline';
   document.getElementById('chartTag1').style.display = "inline";
   document.getElementById('chartTag2').style.display = "inline";
 
@@ -55,7 +55,6 @@ export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
   let graphMinMax = new graphScale(2);
 
   // create table
-  // create table
   const container = document.getElementById("table-div");
   const hot = defaultTable(container)
         // unhide table whenever interface is selected
@@ -67,7 +66,6 @@ export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
 
 
   // create chart
-
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
@@ -330,8 +328,10 @@ export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
 
   //initializing website
 
-   //figure out why this update is breaking the code and it does not break the code in the other one
   update();
+  //temp fix for chart 2 HR rainbow color not reset
+  document.getElementById("myChart1").click();
+  document.getElementById("myChart2").click();
   updateHRModel(clusterForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
