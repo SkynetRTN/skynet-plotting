@@ -214,6 +214,7 @@ export function pulsar(): [Handsontable, Chart] {
                 gravity: {t: 'Title', x: 'x', y: 'y'},
                 lastMode: 'lc'
             },
+            nyquist: 0,
             sonification:
             {
                 audioContext: audioCtx,
@@ -454,12 +455,22 @@ export function pulsar(): [Handsontable, Chart] {
     // }
     const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
+        let nyquist = myChart.data.nyquist;
 
         let start, stop;
         if (this.fouriermode.value === 'p') {
             //period mode
             document.getElementById('period-div').hidden = false;
             document.getElementById("frequency-div").hidden = true;
+
+            if(this.pstart.value < Number((1 / nyquist).toPrecision(4)))
+            {
+                this.pstart.value = Number((1 / nyquist).toPrecision(4));
+            }
+            if(this.pstop.value < this.pstart.value)
+            {
+                this.pstop.value = this.pstart.value;
+            }
             start = parseFloat(this.pstart.value);
             stop = parseFloat(this.pstop.value);
 
@@ -487,7 +498,7 @@ export function pulsar(): [Handsontable, Chart] {
                 periodFoldingForm["period_num"],
                 parseFloat(fourierForm.pstart.value), range, 0.01, parseFloat(fourierForm.pstart.value), true
             );
-            periodFoldingForm.oninput();//an argument is not needed here, VScode lies
+            periodFoldingForm.oninput(null);//an argument is not needed here, VScode lies
         }
 
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
@@ -568,6 +579,24 @@ export function pulsar(): [Handsontable, Chart] {
         myChart.update('none');
         
     }
+    //set period precision
+    periodFoldingForm.onchange = debounce(() => {
+        let period = periodFoldingForm["period_num"].value;
+        let precision: number = 0;
+        if(period.includes(".")){
+            precision = period.split(".")[1].length;
+        }
+        else{period += "."}
+
+
+        while (precision < 4)
+        {
+            period += "0";
+            precision += 1;
+        }
+
+        periodFoldingForm["period_num"].value = period;
+    },5);
 
     periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
     // periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
@@ -583,7 +612,7 @@ export function pulsar(): [Handsontable, Chart] {
     linkInputs(//Period Slider
         periodFoldingForm["period"],
         periodFoldingForm["period_num"],
-        0.1, 199.80000000000018, 0.01, 0.1, true//199.blah blah is the range of the default data set
+        0.1, 199.8000, 0.01, 0.1, true//199.blah blah is the range of the default data set
     );
     linkInputs(//calibration slider
         polarizationForm.eq,
@@ -708,6 +737,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+            myChart.data.nyquist = nyquist;
 
             switchMode(myChart, 'lc', true, false);
         }

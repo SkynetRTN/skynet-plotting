@@ -19,6 +19,7 @@ declare module 'chart.js/auto'{
             gravity: ModeLabels,
             lastMode: Mode
         },
+        nyquist?: number,
         sonification?:{
             audioContext: AudioContext,
             audioSource: AudioBufferSourceNode,

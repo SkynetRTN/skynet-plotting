@@ -266,11 +266,23 @@ export function variable(): [Handsontable, Chart] {
             lightCurveForm.oninput(null);
         } else if (mode === "ft") {
             showDiv("fourier-div");
+            for (let i = 0; i < 9; i++) {
+                myChart.data.datasets[i].hidden = true;
+        
+            }
             const fourierForm = document.getElementById("fourier-form");
             fourierForm.oninput(null);
         } else {
             showDiv("period-folding-div");
-            const periodFoldingForm = document.getElementById("period-folding-form");
+            const periodFoldingForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
+            linkInputs(
+                periodFoldingForm["phase"], 
+                periodFoldingForm["phase_num"], 
+                0, 
+                1, 
+                0.01, 
+                0
+            );
             periodFoldingForm.oninput(null);
         }
 
@@ -782,9 +794,9 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
     document.getElementById("fourier-div").innerHTML = fHTML;
     const fourierForm = document.getElementById("fourier-form") as VariableFourierForm;
     let initial = true
+    
+    fourierForm.oninput =   debounce(() => {
 
-
-    fourierForm.oninput = function() {
         let starting = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
         let ending = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
         let range = Math.abs(starting-ending);
@@ -801,10 +813,9 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         let stop = parseFloat(clamp(parseFloat(fourierForm.stop.value),start,range));
 
         //ISSUE: this runs EVERY time you change everyhing. This results in jankiness where the box debounces to previous values.
-        debounce(() => {
-            fourierForm.start.value = start;
-            fourierForm.stop.value = stop;
-        }, 1000)
+
+        fourierForm.start.value = start;
+        fourierForm.stop.value = stop;
 
 
         let fData = []; // this is the original one without error bar
@@ -846,8 +857,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         myChart.options.scales['x'].max = stop;
         myChart.options.scales['x'].type = 'logarithmic';
         updateChart(myChart, 3);
-    }
-    // },1000)
+    },500)
 
     const pfHTML =
         '<form title="Period Folding" id="period-folding-form" style="padding-bottom: .5em" onSubmit="return false;">\n' +
@@ -883,36 +893,19 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
     }
 
-    periodFoldingForm.oninput = function () {
-        let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
-        let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-        let range = Math.abs(start-end);
-        let step = 10e-5
-        // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
-        //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
-        // }
-        periodFoldingForm["period"].step = 0.001
-
-
-        
-        linkInputs(
-            periodFoldingForm["phase"], 
-            periodFoldingForm["phase_num"], 
-            0, 
-            1, 
-            0.01, 
-            0
-        );
-        updatePeriodFolding(myChart, parseFloat(periodFoldingForm.period_num.value), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
-        // console.log('part1')
-        
-        
-        periodFoldingForm.oninput = throttle(function () {
+    periodFoldingForm.oninput = throttle(function () {
             // console.log('part2')
-
+            let start = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length-1] as ScatterDataPoint).x;
+            let end = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+            let range = Math.abs(start-end);
+            let step = 10e-5
+            // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
+            //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
+            // }
+            periodFoldingForm["period"].step = 0.001
             // step = round((periodFoldingForm.period_num.value)*0.001, 4)
-            var i = periodFoldingForm["period_num"].step
-            var I = 0
+            let i = periodFoldingForm["period_num"].step
+            let I = 0
             while(i >= 1){
                 i = i/10
                 I ++
@@ -957,9 +950,6 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
             updatePeriodFolding(myChart, parseFloat(clamp(periodFoldingForm["period_num"].value, periodFoldingForm["period_num"].min, periodFoldingForm["period_num"].max)), parseFloat(periodFoldingForm.phase_num.value),periodFoldingForm.doublePeriodMode.checked)
 
         },3);
-            
-    };
-
 
     }
 
@@ -982,6 +972,8 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
     let pfData = [];
     // let error = myChart.data.datasets[7].data;
     let ebarData = [];
+    phase = parseFloat(clamp(phase,0,1))
+
     if (period !== 0) {
         for (let i = 0; i < datasets[2].data.length; i++) {
             let temp_x = phase*period + floatMod((datasets[2].data[i] as ScatterDataPoint).x - minMJD, period);
@@ -1049,25 +1041,7 @@ function updatePeriodFolding(myChart: Chart, period: number, phase: number, doub
 
         myChart.options.scales['x'].max = p
         
-    } else if(period !== 0){
-        for (let i = 0; i < datasets[2].data.length; i++) {
-            pfData.push({
-                "x": 0, 
-                "y": (datasets[2].data[i] as ScatterDataPoint).y
-            })
-
-            for (let j = 0; j < 3; j++){
-                ebarData.push({
-                    "x": 0,
-                    "y": (datasets[7].data[3*i+j] as ScatterDataPoint).y,
-                });
-            }
-        }
-        myChart.data.datasets[4].data = pfData;
-        myChart.data.datasets[8].data = ebarData;
-    }else{
-
-    }
+    } 
     myChart.options.scales['x'].type = 'linear';
 
 
