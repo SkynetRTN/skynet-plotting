@@ -6,7 +6,11 @@ import { colors } from "./config";
 import {linkInputs, throttle, updateLabels, updateTableHeight, } from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter } from "./chart-cluster-utils/chart-cluster-scatter";
-import { insertClusterControls, rangeCheckControl } from "./chart-cluster-utils/chart-cluster-interface";
+import {
+  clusterProButtons,
+  insertClusterControls,
+  rangeCheckControl
+} from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable } from "./chart-cluster-utils/chart-cluster-dummy";
 import { HRrainbow } from "./chart-cluster-utils/chart-cluster-util";
 import { updateHRModel } from "./chart-cluster-utils/chart-cluster-model";
@@ -16,42 +20,40 @@ Chart.register(zoomPlugin);
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
  */
-export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
-    insertClusterControls(2);
-    //make graph scaling options visible to users
+export function cluster2(): [Handsontable, Chart[], ClusterForm, graphScale] {
+  insertClusterControls(2);
+  //make graph scaling options visible to users
 
   //setup two charts
-    document.getElementById('myChart').remove();
-    //document.getElementById('myChart3').remove();
-    //document.getElementById('myChart4').remove();
-    document.getElementById('chart-div1').style.display = 'block';
-    document.getElementById('chart-div2').style.display = 'block';
-    document.getElementById('axis-label1').style.display = 'inline';
-    document.getElementById('axis-label2').style.display = 'inline';
-    document.getElementById('axis-label3').style.display = 'inline';
-    document.getElementById('axis-label4').style.display = 'inline';
-    document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
-    document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
-    document.getElementById('axisSet1').className = 'col-sm-6';
-    document.getElementById('axisSet2').style.display = 'inline';
+  document.getElementById('myChart').remove();
+  //document.getElementById('myChart3').remove();
+  //document.getElementById('myChart4').remove();
+  document.getElementById('chart-div1').style.display = 'block';
+  document.getElementById('chart-div2').style.display = 'block';
+  document.getElementById('axis-label1').style.display = 'inline';
+  document.getElementById('axis-label2').style.display = 'inline';
+  document.getElementById('axis-label3').style.display = 'inline';
+  document.getElementById('axis-label4').style.display = 'inline';
+  document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
+  document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
+  document.getElementById('axisSet1').className = 'col-sm-6';
+  document.getElementById('axisSet2').style.display = 'inline';
   document.getElementById('chartTag1').style.display = "inline";
   document.getElementById('chartTag2').style.display = "inline";
 
   // Link each slider with corresponding text box
   const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-  const modelForm = document.getElementById("model-form") as ModelForm;
   linkInputs(clusterForm['err'], clusterForm["err_num"], 0, 1, 0.05, 1, false, true, 0, 999)
   linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
   linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
-  linkInputs(modelForm["age"], modelForm["age_num"], 6.6, 10.3, 0.01, 6.6);
-  linkInputs(clusterForm["red"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
-  linkInputs(modelForm["metal"], modelForm["metal_num"], -3.4, 0.2, 0.01, -3.4);
+  linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.2, 0.01, 6.6);
+  linkInputs(clusterForm["bv"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
+  linkInputs(clusterForm["metal"], clusterForm["metal_num"], -2.2, 0.7, 0.01, -2.2);
   rangeCheckControl(true)
 
   //declare graphScale limits
   let graphMinMax = new graphScale(2);
 
-  // create table
   // create table
   const container = document.getElementById("table-div");
   const hot = defaultTable(container)
@@ -64,7 +66,6 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
 
 
   // create chart
-
   const ctx1 = (document.getElementById("myChart1") as HTMLCanvasElement).getContext('2d');
 
   const myChart1 = new Chart(ctx1, {
@@ -280,23 +281,24 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   });
 
   //create graph control buttons and assign onZoom onPan functions to deactivate radio button selections
-  let graphControl = new ChartScaleControl([myChart1, myChart2], modelForm, graphMinMax);
-  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm)};
-  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm)};
-  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
-  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(modelForm, 1)};
+  let graphControl = new ChartScaleControl([myChart1, myChart2], clusterForm, graphMinMax);
+  myChart1.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(clusterForm)};
+  myChart1.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(clusterForm)};
+  myChart2.options.plugins.zoom.zoom.onZoom = ()=>{graphControl.zoompanDeactivate(clusterForm, 1)};
+  myChart2.options.plugins.zoom.pan.onPan = ()=>{graphControl.zoompanDeactivate(clusterForm, 1)};
   let frameChart1 = ()=>{document.getElementById('frameChart1').click()};
   let frameChart2 = ()=>{document.getElementById('frameChart2').click()};
   document.getElementById('chart-div1').onmousedown = frameChart1;
   document.getElementById('chart-div2').onmousedown = frameChart2;
+  clusterProButtons(false);
 
   //Adjust the gradient with the window size
   window.onresize = function () {
     setTimeout(function () {
       myChart1.data.datasets[2].backgroundColor = HRrainbow(myChart1,
-        modelForm["red"].value, modelForm["blue"].value);
+          clusterForm["red"].value, clusterForm["blue"].value);
       myChart2.data.datasets[2].backgroundColor = HRrainbow(myChart2,
-            modelForm["red2"].value, modelForm["blue2"].value);
+          clusterForm["red2"].value, clusterForm["blue2"].value);
       myChart1.update();
       myChart2.update();
       updateTableHeight(hot);
@@ -305,7 +307,7 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   const update = function () {
     //console.log(tableData);
     updateTableHeight(hot);
-    updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax);
+    updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax);
   };
   // link chart to table
   hot.updateSettings({
@@ -316,23 +318,21 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
   const fps = 100;
   const frameTime = Math.floor(1000 / fps);
 
-  clusterForm.oninput = throttle(
-    function () { updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax); },
-    frameTime);
-
   // link chart to model form (slider + text)
   // modelForm.oninput=
-  modelForm.oninput = throttle(function () {
-    updateHRModel(modelForm, hot, [myChart1, myChart2], (chartNum: number) => {
-      updateScatter(hot, [myChart1, myChart2], clusterForm, modelForm, [2, 2], graphMinMax, chartNum);}
+  clusterForm.oninput = throttle(function () {
+    updateHRModel(clusterForm, hot, [myChart1, myChart2], (chartNum: number) => {
+      updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, chartNum);}
     );
    }, 100);
 
   //initializing website
 
-   //figure out why this update is breaking the code and it does not break the code in the other one
   update();
-  updateHRModel(modelForm, hot, [myChart1, myChart2]);
+  //temp fix for chart 2 HR rainbow color not reset
+  document.getElementById("myChart1").click();
+  document.getElementById("myChart2").click();
+  updateHRModel(clusterForm, hot, [myChart1, myChart2]);
   document.getElementById("extra-options").style.display = "block";
   document.getElementById("standardView").click();
   (document.getElementById("distrangeCheck") as HTMLInputElement).checked = false
@@ -350,6 +350,6 @@ export function cluster2(): [Handsontable, Chart[], ModelForm, graphScale] {
     myChart1.destroy();
     myChart2.destroy();
   });
-  return [hot, [myChart1, myChart2], modelForm, graphMinMax];
+  return [hot, [myChart1, myChart2], clusterForm, graphMinMax];
   
 }

@@ -49,10 +49,10 @@ export function radio(): any {
     document.getElementById('table-div').hidden = true;
     document.getElementById('add-row-button').hidden = true;
     document.getElementById('save-button').hidden = true;
-    document.getElementById('dataInput').hidden = true;
-    document.getElementById('titleInput').hidden = true;
-    document.getElementById('titleLabel').hidden = true;
-    document.getElementById('dataLabel').hidden = true;
+    document.getElementById('chart-info-form').hidden = true;
+    // document.getElementById('titleInput').hidden = true;
+    // document.getElementById('titleLabel').hidden = true;
+    // document.getElementById('dataLabel').hidden = true;
 
     const sourceBox = (document.getElementById("source") as HTMLInputElement);   
     sourceBox.addEventListener("change", () => {
