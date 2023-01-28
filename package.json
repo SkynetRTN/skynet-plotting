@@ -33,6 +33,7 @@
     "chartjs-plugin-zoom": "^1.2.0",
     "file-saver": "^2.0.5",
     "handsontable": "^12.3.0",
+    "node": "^19.3.0",
     "piexif-ts": "^2.0.16"
   }
 }

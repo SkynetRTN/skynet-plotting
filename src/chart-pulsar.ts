@@ -3,7 +3,7 @@ import { ChartConfiguration, ScatterDataPoint } from "chart.js";
 import Handsontable from "handsontable";
 
 import { tableCommonOptions, colors } from "./config"
-import { chartDataDiff, linkInputs, linkInputsPuls, sanitizeTableData, throttle, updateLabels, updateTableHeight } from "./util"
+import { chartDataDiff, linkInputs, sanitizeTableData, throttle, debounce, updateLabels, updateTableHeight } from "./util"
 import { round, lombScargle, backgroundSubtraction, ArrMath, clamp, floatMod, median } from "./my-math"
 import { Mode } from "./types/chart.js";
 import {pause, play, saveSonify, Set2DefaultSpeed} from "./sonification";
@@ -91,9 +91,9 @@ export function pulsar(): [Handsontable, Chart] {
         '<div class="row">\n' +
         '</div>\n' +
         '<div class="row">\n' +
-        '<div class="col-sm-5 des">Period (days):</div>\n' +
+        '<div class="col-sm-5 des">Period (sec):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Period" name="period"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="spinboxnum field" StringFormat={}{0:N2} step="0.001"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Period" name="period_num" class="field" StringFormat={}{0:N2} step="0.001"></div>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase (cycles):</div>\n' +
@@ -214,6 +214,7 @@ export function pulsar(): [Handsontable, Chart] {
                 gravity: {t: 'Title', x: 'x', y: 'y'},
                 lastMode: 'lc'
             },
+            nyquist: 0,
             sonification:
             {
                 audioContext: audioCtx,
@@ -335,7 +336,15 @@ export function pulsar(): [Handsontable, Chart] {
             scales: {
                 x: {
                     type: 'linear',
-                    position: 'bottom'
+                    position: 'bottom',
+                    ticks: {
+                        maxTicksLimit: 9,
+                        //There seems to be an underlying issue with ticks on logarithmic graphs where they get rounded weirdly, 
+                        //this solves that. Yes, this function literally does nothing, except get chart.js to work right somehow.
+                        callback: function (tickValue, index, ticks) {
+                            return tickValue;
+                        },
+                    },
                 }
             },
 
@@ -410,6 +419,7 @@ export function pulsar(): [Handsontable, Chart] {
 
         chn1 = [];
         chn2 = [];
+        myChart.data.minT = Number.POSITIVE_INFINITY;
         for (let i = 0; i < time.length; i++) {
             myChart.data.minT = Math.min(myChart.data.minT, time[i]);
             chn1.push({
@@ -429,8 +439,7 @@ export function pulsar(): [Handsontable, Chart] {
 
         myChart.update('none');
     }
-    lightCurveForm.oninput = lightCurveOninput;
-    // lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
+    lightCurveForm.oninput = debounce(lightCurveOninput, 1000);
 
     fourierForm.elements['fouriermode'].oninput = function () {
         if (fourierForm.elements['fouriermode'].value === 'p') {
@@ -446,17 +455,28 @@ export function pulsar(): [Handsontable, Chart] {
     // }
     const fourierOninput = function () {
         this.rc.value = clamp(this.rc.value, 0, 10000);
+        let nyquist = myChart.data.nyquist;
 
         let start, stop;
         if (this.fouriermode.value === 'p') {
             //period mode
             document.getElementById('period-div').hidden = false;
             document.getElementById("frequency-div").hidden = true;
+
+            if(this.pstart.value < Number((1 / nyquist).toPrecision(4)))
+            {
+                this.pstart.value = Number((1 / nyquist).toPrecision(4));
+            }
+            if(this.pstop.value < this.pstart.value)
+            {
+                this.pstop.value = this.pstart.value;
+            }
             start = parseFloat(this.pstart.value);
             stop = parseFloat(this.pstop.value);
 
             myChart.options.scales['x'].title.text = "Period (sec)";
             myChart.options.scales['x'].type = 'logarithmic';
+            console.log(myChart.options.scales['x'].min);
         } else {
             //frequency mode
             document.getElementById('period-div').hidden = true;
@@ -467,6 +487,20 @@ export function pulsar(): [Handsontable, Chart] {
             myChart.options.scales['x'].title.text = "Frequency (Hz)";
             myChart.options.scales['x'].type = 'linear';
         }
+
+
+        let tend = (myChart.data.datasets[1].data[myChart.data.datasets[1].data.length-1] as ScatterDataPoint).x;
+        let tstart = (myChart.data.datasets[0].data[0] as ScatterDataPoint).x;
+        let range = Math.abs(tstart-tend);
+        if (periodFoldingForm["period_num"].min != fourierForm.pstart.value){
+            linkInputs(
+                periodFoldingForm["period"],
+                periodFoldingForm["period_num"],
+                parseFloat(fourierForm.pstart.value), range, 0.01, parseFloat(fourierForm.pstart.value), true
+            );
+            periodFoldingForm.oninput(null);//an argument is not needed here, VScode lies
+        }
+
         updateLabels(myChart, document.getElementById('chart-info-form') as ChartInfoForm, true);
 
         if (start > stop) {
@@ -481,6 +515,9 @@ export function pulsar(): [Handsontable, Chart] {
 
         myChart.data.datasets[2].data = lombScargle(t, y1, start, stop, this.rc.value, this.fouriermode.value === 'f');
         myChart.data.datasets[3].data = lombScargle(t, y2, start, stop, this.rc.value, this.fouriermode.value === 'f');
+
+        myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        myChart.options.scales.x.max = (myChart.data.datasets[2].data[this.rc.value-1] as ScatterDataPoint).x;
 
         myChart.update('none')
     }
@@ -511,26 +548,6 @@ export function pulsar(): [Handsontable, Chart] {
             // if ((periodFoldingForm.period_num.value/range)*0.01 > 10e-5){
             //     step = round((periodFoldingForm.period_num.value/range)*0.01, 5)
             // }
-        if (periodFoldingForm["period_num"].max != range){
-            linkInputsPuls(
-                periodFoldingForm["period"],
-                periodFoldingForm["period_num"],
-                parseFloat(fourierForm["pstart"].value), range, 0.01, range, true
-            );
-    
-    
-            
-            linkInputs(
-                periodFoldingForm["phase"], 
-                periodFoldingForm["phase_num"], 
-                0, 
-                1, 
-                0.01, 
-                0
-            );
-        }else{
-
-        }
 
         if (periodFoldingForm.period_num.value*10e-4 > 10e-6){
             step = round(periodFoldingForm.period_num.value*periodFoldingForm.period_num.value*10e-4/range, 6)
@@ -561,20 +578,48 @@ export function pulsar(): [Handsontable, Chart] {
         )
         myChart.update('none');
         
-        
-        periodFoldingForm.oninput
     }
+    //set period precision
+    periodFoldingForm.onchange = debounce(() => {
+        let period = periodFoldingForm["period_num"].value;
+        let precision: number = 0;
+        if(period.includes(".")){
+            precision = period.split(".")[1].length;
+        }
+        else{period += "."}
+
+
+        while (precision < 4)
+        {
+            period += "0";
+            precision += 1;
+        }
+
+        periodFoldingForm["period_num"].value = period;
+    },5);
 
     periodFoldingForm.oninput = throttle(periodFoldingOninput, 16);
     // periodFoldingForm.oninput = debounce(periodFoldingOninput, 1000);
 
-    
-
-    linkInputs(
+    linkInputs(//Phase slider
+        periodFoldingForm["phase"], 
+        periodFoldingForm["phase_num"], 
+        0, 
+        1, 
+        0.01, 
+        0
+    );
+    linkInputs(//Period Slider
+        periodFoldingForm["period"],
+        periodFoldingForm["period_num"],
+        0.1, 199.8000, 0.01, 0.1, true//199.blah blah is the range of the default data set
+    );
+    linkInputs(//calibration slider
         polarizationForm.eq,
         polarizationForm.eq_num,
         0.5, 2, 0.001, 1, true, true, 0, Number.POSITIVE_INFINITY
     );
+    
 
     let polarizationOninput = function () {
         let eqaulizer = parseFloat(this.eq_num.value);
@@ -692,6 +737,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
             fourierForm.pstart.value = Number((1 / nyquist).toPrecision(4));
             fourierForm.fstop.value = Number(nyquist.toPrecision(4));
+            myChart.data.nyquist = nyquist;
 
             switchMode(myChart, 'lc', true, false);
         }
@@ -780,6 +826,10 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
     Set2DefaultSpeed(myChart);
     myChart.data.sonification.audioSource.buffer = null;
 
+    //Reset the chart to defining it's bounds based on the data
+    myChart.options.scales.x.min = null;
+    myChart.options.scales.x.max = null;
+
     // Displaying the correct datasets
     for (let i = 0; i < 7; i++) {
         myChart.data.datasets[i].hidden = true;
@@ -805,10 +855,15 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
         // Only update fourier transform periodogram when changes occured.
         if (modified.fourierChanged) {
             modified.fourierChanged = false;
-            // document.getElementById('fourier-form').oninput();
+            //document.getElementById('fourier-form').oninput();
             myChart.data.datasets[2].data = [];
             myChart.data.datasets[3].data = [];
         }
+        else
+        {
+            myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+        }
+
         showDiv("fourier-div");
         myChart.data.datasets[2].hidden = false;
         myChart.data.datasets[3].hidden = false;
