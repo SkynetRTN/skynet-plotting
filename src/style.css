@@ -16,10 +16,12 @@
 
 body {
     font-family: 'Lato', sans-serif;
+    background-color: #4B9CD3;
 }
 
 main.container {
     margin-top: 2rem;
+    background-color: white;
 }
 
 h2 {
