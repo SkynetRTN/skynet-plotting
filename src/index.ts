@@ -20,6 +20,7 @@ import { cluster3 } from './chart-cluster3';
 import { cluster3p } from "./chart-cluster3plus";
 import { round } from './my-math';
 import { gravity, gravityClass, gravityFileUpload } from './chart-gravity';
+import { gravityPro, gravityProFileUpload } from './chart-gravitypro';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import { pause } from './sonification';
@@ -28,7 +29,7 @@ import { clusterFileUpload } from "./chart-cluster-utils/chart-cluster-file";
 import { graphScale } from "./chart-cluster-utils/chart-cluster-scatter";
 import { updateClusterProLabels } from "./chart-cluster-utils/chart-cluster-interface";
 import { radio } from './chart-radio'
-import {transient, transientFileUpload} from "./chart-transient";
+import { transient, transientFileUpload } from "./chart-transient";
 /**
  *  Initializing the page when the website loads
  */
@@ -139,19 +140,19 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             spectrumFileUpload(evt, objects[0]);
         }
-    }  else if (chart === 'pulsar') {
+    } else if (chart === 'pulsar') {
         objects = pulsar();
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-    // } else if (chart === 'cluster0') {
-    //     cluster_objects = cluster0();
-    //     objects = [cluster_objects[0], cluster_objects[1][0]]
-    //     document.getElementById('file-upload-button').style.display = 'inline';
-    //     document.getElementById('file-upload').onchange = function (evt) {
-    //         clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-    //     }
+        // } else if (chart === 'cluster0') {
+        //     cluster_objects = cluster0();
+        //     objects = [cluster_objects[0], cluster_objects[1][0]]
+        //     document.getElementById('file-upload-button').style.display = 'inline';
+        //     document.getElementById('file-upload').onchange = function (evt) {
+        //         clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+        //     }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
         objects = [cluster_objects[0], cluster_objects[1][0]]
@@ -209,7 +210,7 @@ function chartType(chart: string) {
             transientFileUpload(evt, transientObjects[0], transientObjects[1]);
         }
     }
-    if (chart !== 'radio'){
+    if (chart !== 'radio') {
         updateTableHeight(objects[0]);
         // Update the height of the table when the chart resizes.
         objects[1].options.onResize = function () {
