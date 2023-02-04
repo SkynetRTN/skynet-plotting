@@ -83,11 +83,8 @@ window.onload = function () {
         else if ('myChart1' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             saveImage([1, 2], signature, true, 1.0);
-            // for cluster pro
+        // for cluster pro & pro plus
         } else if ('myChart3' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0);
-        } else if ('myChart3p' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             saveImage([3, 4, 2], signature, true, 1.0, true);
         }
