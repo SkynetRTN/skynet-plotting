@@ -61,7 +61,7 @@ export function clusterFileUpload(
     reader.onload = () => {
         // reset clusterForm input values to default
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-        resetClusterFormValue(true);
+        resetClusterFormValue(true, isCluster3);
         // uncheck checkboxes for pm chart
         if (isCluster3)
             clusterProCheckControl()

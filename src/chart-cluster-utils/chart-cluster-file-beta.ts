@@ -176,7 +176,7 @@ function filtersToLists(filters: string[]): {headers: any[], columns: any[], opt
  *
  * @param isRangeReset: if true, uncheck and reset range checkbox
  */
-export function resetClusterFormValue(isRangeReset: boolean){
+export function resetClusterFormValue(isRangeReset: boolean, isClusterPro: boolean=false){
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     clusterForm["d"].value = Math.log(3).toString();
     clusterForm["err"].value = "1";
@@ -191,8 +191,10 @@ export function resetClusterFormValue(isRangeReset: boolean){
     clusterForm["red_num"].value = "0";
     clusterForm["metal_num"].value = "-2.2";
     clusterForm["distrange_num"].value = "30";
-    clusterForm["rv"].value = "3.1";
-    clusterForm["rv_num"].value = "3.1";
+    if (isClusterPro){
+        clusterForm["rv"].value = "3.1";
+        clusterForm["rv_num"].value = "3.1";
+    }
     if (isRangeReset)
         rangeCheckControl()
 }
