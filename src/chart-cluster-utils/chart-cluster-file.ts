@@ -87,6 +87,7 @@ export function clusterFileUpload(
 
         //request server to get the data
         let stars: starData[] = []
+        let starsNoGaia: starData[] = []
         for (let row of data) {
             let items = row.trim().split(",");
             if (items[0] !== "" && items[1] !==""){
@@ -99,26 +100,47 @@ export function clusterFileUpload(
                 let err = parseFloat(items[keyIndex['mag_error']]);
                 if (src && ra && dec && calibratedMag && filter)
                     stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
+                if (src && calibratedMag && filter)
+                    starsNoGaia.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
             }
         }
-        let cleanedup = sortStar(stars)
-        let url: string = baseUrl + "/gaia"
-        let sortedData = cleanedup[0]
-        let range = cleanedup[1]['range'];
-        httpPostAsync(url, cleanedup[1],
-            (result: string)=>{
-                let gaia = JSON.parse(result)
-                if (!result.includes('error')) {
-                    try{
-                        let [dict, filters] = generateDatadictGaia(sortedData, gaia);
-                        updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax, range);
+        if (stars.length == 0) {
+            alert("There's no RA/DEC information to match GAIA data, plot will proceed but functionality maybe limited");
+            let [dict, filters] = generateDatadict(starsNoGaia);
+            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, null);
+        } else if (!isCluster3){
+            let [dict, filters] = generateDatadict(stars);
+            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, null);
+        } else {
+            let cleanedup = sortStar(stars)
+            let url: string = baseUrl + "/gaia"
+            let sortedData = cleanedup[0]
+            let range = cleanedup[1]['range'];
+            httpPostAsync(url, cleanedup[1],
+                (result: string)=>{
+                    let gaia = JSON.parse(result)
+                    if (!result.includes('error')) {
+                        try{
+                            let [dict, filters] = generateDatadictGaia(sortedData, gaia);
+                            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax, range);
+                        }
+                        catch (e) {
+                            alert('GAIA data matched successfully! Unable to plot the data file: ' + e);
+                        }
+                    } else {
+                        try{
+                            alert("Fail to load GAIA catalog, double check your file!");
+                            let [dict, filters] = generateDatadict(sortedData);
+                            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, range);
+                        }
+                        catch (e) {
+                            alert('File Format Error: ' + e);
+                        }
                     }
-                    catch (e) {
-                        alert('GAIA data matched successfully! Unable to plot the data file: ' + e);
-                    }
-                } else {
+                },
+                (serverMsg: string)=>{
                     try{
-                        alert("Fail to load GAIA catalog, double check your file!");
+                        alert(serverMsg);
                         let [dict, filters] = generateDatadict(sortedData);
                         updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, range);
                     }
@@ -126,18 +148,8 @@ export function clusterFileUpload(
                         alert('File Format Error: ' + e);
                     }
                 }
-            },
-            (serverMsg: string)=>{
-                try{
-                    alert(serverMsg);
-                    let [dict, filters] = generateDatadict(sortedData);
-                    updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, range);
-                }
-                catch (e) {
-                    alert('File Format Error: ' + e);
-                }
-            }
-        )
+            )
+        }
     };
     reader.readAsText(file);
 }
