@@ -75,7 +75,7 @@ export function pulsar(): [Handsontable, Chart] {
         '</div>\n' +
         '</form>\n' +
         '<div class="row justify-content-end">\n' +
-        '<div class="col-4"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
+        '<div class="col-4"><button class="compute" id="compute" style="width: 100%;">Compute</button></div>\n' +
         '</div>\n';
 
     document.getElementById('period-folding-div').insertAdjacentHTML('beforeend',

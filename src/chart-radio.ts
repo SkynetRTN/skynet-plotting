@@ -11,6 +11,10 @@ export function radio(): any {
         '<option value="z" title="Vir A">Vir A</option>\n' +
         '</select></div>\n' +
         '</div>\n' +
+        '<div class="row justify-content-end">\n' +
+        '<button id="fits-upload-button" class="compute" type="button">Upload Fits File</button>\n' +
+        '<input type="file" id="fits-upload" style="display: none;">' +
+        '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Start Frequency (MHz): </div>\n' +
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="startFreq" min="10" max="100000" title="Start Frequency" value=1355></input></div>\n' +
@@ -24,7 +28,7 @@ export function radio(): any {
         '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="year" id="year" min="2000" title="Year" value=2022.95></input></div>\n' +
         '</div>\n' +
         '<div class="row justify-content-end">\n' +
-        '<div class="graphControl"><button id="compute" style="width: 100%;">Compute</button></div>\n' +
+        '<button id="compute" class="compute">Compute</button>\n' +
         '</div>\n' +
         '<div class="row">\n' +
         '<div class="col-sm-7">Flux Density (Jy): </div>\n' +
@@ -93,7 +97,14 @@ export function radio(): any {
         radioForm.elements['fluxDensity'].value = fluxAvg.toString() +  " +/- " + uncertainty.toString()
         radioForm.elements['effectiveFrequency'].value = finalEffectiveFreq.toString()
     }
-
+    // Enabling Fits upload function
+    const fileUpload = document.getElementById('fits-upload') as HTMLButtonElement;
+    document.getElementById('fits-upload-button').onclick = function () {
+        // Clearing the file upload API first by setting it to null, so that uploading actions are
+        // always triggered even if the same file is uploaded again.
+        fileUpload.value = null;
+        fileUpload.click();
+    }
     return []
 }
 
@@ -228,4 +239,63 @@ function fluxGenesis(year: number, startFreq: number, stopFreq: number, source: 
     let finalEffectiveFreq = (effectiveFreqSum * deltax / 2) / (finalAvgFlux * (stopFreq - startFreq))
     //console.log('avg flux: ', finalAvgFlux, 'uncertainty: ', uncertainty)
     return [finalAvgFlux, uncertainty, finalEffectiveFreq]
+}
+
+export function radioFileUpload(evt: Event){
+    let file = (evt.target as HTMLInputElement).files[0];
+    if (file === undefined) {
+        return;
+    }
+    // File type validation
+    if (!file.type.match("(fits)") &&
+        !file.name.match(".*\.fits")) {
+        console.log("Uploaded file type is: ", file.type);
+        console.log("Uploaded file name is: ", file.name);
+        alert("Please upload a Fits file.");
+        return;
+    }
+    let reader = new FileReader();
+    reader.onload = () => {
+        const raw: string = reader.result as string;
+        const header = raw.split("        END")[0];
+
+        const startFQ = parseFloat(getHeader("RCMINFQ", header));
+        const stopFQ = parseFloat(getHeader("RCMAXFQ", header));
+        const dateUTC = stringToUTC(getHeader("OBSTIME", header));
+        const radioForm = document.getElementById('radio-form') as RadioForm;
+        radioForm['startFreq'].value = startFQ != null ? startFQ : "?";
+        radioForm['stopFreq'].value = stopFQ != null ? stopFQ : "?";
+        radioForm['year'].value = dateUTC != null ?
+            (dateUTC.getUTCFullYear() + dateUTC.getUTCMonth()/12 + dateUTC.getUTCDate()/30) : "?";
+    }
+    reader.readAsText(file);
+}
+
+function getHeader(target: string, hdr: string): string{
+    const location: number = hdr.indexOf(target);
+    if (location < 0)
+        return null;
+    let result = hdr.slice(location, location + 30);
+    return result.split("=")[1].replace(" ", "").replace("\'", "");
+}
+// OBSTIME = '2023-01-12 21:44:34'
+function stringToUTC(input: string): Date{
+    if (input == null)
+        return null;
+    const [date, time] = input.split(" ");
+    const [year, month, day] = date.split("-");
+    const [hour, min, sec] = time.split(":");
+    const rawDate = new Date( parseInt(year), parseInt(month)-1, parseInt(day),
+        parseInt(hour), parseInt(min), parseFloat(sec));
+    return new Date(rawDate.getTime() - (rawDate.getTimezoneOffset() * 60000));
+}
+
+function dateToJ2000(date: Date): number{
+    // See https://www.ietf.org/timezones/data/leap-seconds.list
+    // Last updated: 13 Feb 2023
+    const LEAP_SEC_SINCE_J2000 = 5;
+    // Unix time at 12:00:00 TT Jan 1 2000
+    const UNIX_J2000_TT_EPOCH_SEC = 946727935.816;
+    const unixTime = date.getTime()/1000;
+    return unixTime - UNIX_J2000_TT_EPOCH_SEC + LEAP_SEC_SINCE_J2000;
 }

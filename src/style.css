@@ -127,16 +127,16 @@ label:hover span {
 }
 
 /* Compute button for Periodogram in Pulsar */
-#compute {
+button.compute {
     color: #41A3D1;
     background-color: white;
     opacity: 1;
 }
-#compute:focus {
+button.compute:focus {
     outline: none;
     opacity: 1;
 }
-#compute:hover {
+button.compute:hover {
     color: white;
     background-color: #41A3D1;
     /* background-color: #E7E7E7; */

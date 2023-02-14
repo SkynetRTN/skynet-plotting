@@ -28,7 +28,7 @@ import { TransientChart } from './chart-transient-utils/chart-transient-chart';
 import { clusterFileUpload } from "./chart-cluster-utils/chart-cluster-file";
 import { graphScale } from "./chart-cluster-utils/chart-cluster-scatter";
 import { updateClusterProLabels } from "./chart-cluster-utils/chart-cluster-interface";
-import { radio } from './chart-radio'
+import {radio, radioFileUpload} from './chart-radio'
 import { transient, transientFileUpload } from "./chart-transient";
 /**
  *  Initializing the page when the website loads
@@ -119,6 +119,9 @@ function chartType(chart: string) {
         objects = moon();
     } else if (chart === 'radio') {
         objects = radio();
+        document.getElementById('fits-upload').onchange = function (evt) {
+            radioFileUpload(evt);
+        }
     } else if (chart === 'scatter') {
         objects = scatter();
     } else if (chart === 'venus') {
