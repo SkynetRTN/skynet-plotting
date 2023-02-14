@@ -7,7 +7,7 @@
 }
 #myBrowser{
     zoom: 100%;
-    }
+}
 
 .handsontable {
     font-family: 'Lato', sans-serif;
@@ -20,6 +20,7 @@ body {
 
 main.container {
     margin-top: 2rem;
+    background-color: white;
 }
 
 h2 {
@@ -85,7 +86,7 @@ label input:checked ~ span {
     opacity: 1;
 }
 label input:disabled ~ span {
-    opacity: 0.3; 
+    opacity: 0.3;
 }
 label:hover span {
     background-color: #E7E7E7;
@@ -153,6 +154,12 @@ button {
     outline: none;
 }
 
+button.scraper {
+    line-height: inherit;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 button.clusterRest {
     line-height: 18px;
     /* margin-bottom: 8px; */
@@ -181,9 +188,9 @@ button.graphControl {
     bottom: -0.13em; */
 }
 
-button.graphControlAlt { 
-    position: relative; 
-    bottom: 0.25em; 
+button.graphControlAlt {
+    position: relative;
+    bottom: 0.25em;
 }
 /* specificallly the graphControlAlt classes are for the "reset" button in the spectrum section. They control the font size and the position of the button*/
 
@@ -231,6 +238,11 @@ input.field:focus {
 }
 input.field:disabled {
     opacity: 0.7;
+}
+
+input.field.scrape{
+    padding-left: 2px;
+    padding-right: 0px;
 }
 
 input[type=radio].table {
