@@ -46,13 +46,8 @@ export function radio(): any {
     radioForm.elements['fluxDensity'].style.opacity = "100";
     radioForm.elements['effectiveFrequency'].disabled = true;
     radioForm.elements['effectiveFrequency'].style.opacity = "100";
-    document.getElementById('table-div').hidden = true;
-    document.getElementById('add-row-button').hidden = true;
-    document.getElementById('save-button').hidden = true;
-    document.getElementById('chart-info-form').hidden = true;
-    // document.getElementById('titleInput').hidden = true;
-    // document.getElementById('titleLabel').hidden = true;
-    // document.getElementById('dataLabel').hidden = true;
+    document.getElementById('button-row').style.display = 'none';
+    document.getElementById('chart-info-form').style.display = 'none';
 
     const sourceBox = (document.getElementById("source") as HTMLInputElement);   
     sourceBox.addEventListener("change", () => {

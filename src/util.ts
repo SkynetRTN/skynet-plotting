@@ -460,6 +460,9 @@ export function changeOptions(element: HTMLInputElement, newOptions: { value: st
 }
 
 export function defaultLayout(){
+    //show button row
+    document.getElementById('button-row').style.display = 'flex';
+
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
@@ -487,11 +490,17 @@ export function defaultLayout(){
     document.getElementById("grav-charts").style.display = "none";
     //remove cluster pro controls
     document.getElementById("clusterProPmChartControl").style.display = "none";
+    //hide save data from Cluster Pro
+    document.getElementById('save-data-button').style.display = 'none';
+
     //put in chart-info-form
     document.getElementById("chart-info-form").style.display = "inline";
     //remove cluster pro form
     if (document.getElementById('clusterProForm') != null)
         document.getElementById('clusterProForm').remove()
+
+    //show chart info form div
+    document.getElementById('chart-info-form-div').style.display = 'inline';
 
     //expand the size of axisSet1 and hide axisSet2 for all interfaces
     document.getElementById('chart-info-form-div').className = 'col-sm-12';
@@ -514,6 +523,7 @@ export function defaultLayout(){
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
     document.getElementById('chart-div').style.cursor = "auto"
+
 }
 
 export function percentToAbsolute(value: string, percent: string): string{
