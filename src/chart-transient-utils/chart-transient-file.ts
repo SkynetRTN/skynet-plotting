@@ -1,5 +1,3 @@
-
-
 export const verifyCSV = (file: File) => {
     if (file === undefined) {
         return false;
@@ -55,13 +53,14 @@ const getDataFromCSV = (data: string[], cols: string[], colIds: number[], key: s
             ]);
         } else {
             return map;
-        };
+        }
+
     }
     return map;
 };
 
 
- export function readCSVData(reader: FileReader) {
+export function readCSVData(reader: FileReader) {
     console.log('Reading in data..');
 
     const data = {

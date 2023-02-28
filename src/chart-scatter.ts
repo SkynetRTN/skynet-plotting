@@ -1,11 +1,11 @@
 'use strict';
 
 import Chart from "chart.js/auto";
-import { ChartConfiguration, LinearScaleOptions, ScatterDataPoint } from "chart.js";
+import {ChartConfiguration, LinearScaleOptions, ScatterDataPoint} from "chart.js";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config";
-import { updateLabels, updateTableHeight, linkInputs, throttle } from "./util";
+import {colors, tableCommonOptions} from "./config";
+import {linkInputs, throttle, updateLabels, updateTableHeight} from "./util";
 
 /**
  *  Function for scatter chart.
@@ -40,27 +40,27 @@ export function scatter(): [Handsontable, Chart] {
     }
 
     const container = document.getElementById('table-div');
-          // unhide table whenever interface is selected
-  document.getElementById("chart-type-form").addEventListener("click", () => {
-    container.style.display = "block";
-    document.getElementById('add-row-button').hidden = false;
-    document.getElementById('file-upload-button').hidden = false;
+    // unhide table whenever interface is selected
+    document.getElementById("chart-type-form").addEventListener("click", () => {
+        container.style.display = "block";
+        document.getElementById('add-row-button').hidden = false;
+        document.getElementById('file-upload-button').hidden = false;
     });
     const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['Longitude', 'Latitude', 'Distance'],
         maxCols: 3,
         columns: [
-            { data: 'lo', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'la', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'di', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            {data: 'lo', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'la', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'di', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     };
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
-    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
     const chartOptions: ChartConfiguration = {
         type: 'line',
@@ -68,7 +68,7 @@ export function scatter(): [Handsontable, Chart] {
             datasets: [
                 {
                     label: 'Sun',
-                    data: [{ x: 0, y: 0 }],
+                    data: [{x: 0, y: 0}],
                     backgroundColor: colors['bright'],
                     fill: false,
                     showLine: false,
@@ -88,7 +88,7 @@ export function scatter(): [Handsontable, Chart] {
                     immutableLabel: false,
                 }, {
                     pointStyle: 'crossRot',
-                    data: [{ x: 0, y: 0 }],
+                    data: [{x: 0, y: 0}],
                     fill: false,
                     showLine: false,
                     borderWidth: 5,
@@ -111,7 +111,7 @@ export function scatter(): [Handsontable, Chart] {
                     immutableLabel: true
                 }
             ],
-             
+
         },
         options: {
             hover: {
@@ -160,7 +160,7 @@ export function scatter(): [Handsontable, Chart] {
         let x = parseFloat(this.elements['x_num'].value);
         let y = 0;
         let d = parseFloat(this.elements['d_num'].value);
-        myChart.data.datasets[2].data = [{ x: x, y: y }];
+        myChart.data.datasets[2].data = [{x: x, y: y}];
         myChart.data.datasets[3].data = circle(x, y, d);
         myChart.update('none');
     }
@@ -220,10 +220,10 @@ function updateScatter(tableData: any[], myChart: Chart) {
 /**
  * Adjust the min/max scales of the chart by given new min/max values.
  * @param {Chart} myChart The chart to be updated
- * @param {number} minX 
- * @param {number} maxX 
- * @param {number} minY 
- * @param {number} maxY 
+ * @param {number} minX
+ * @param {number} maxX
+ * @param {number} minY
+ * @param {number} maxY
  * @param {boolean} suggested       Default is false. If true, min/max values won't be
  * updated if new values are greater (for min) or less (for max) than the existing values.
  */

@@ -1,18 +1,9 @@
-import { formatFilterName, ZERO_POINT_VALUES } from "./chart-transient-util";
-import { filterWavelength } from "../chart-cluster-utils/chart-cluster-util";
-import { calculateLambda } from "../chart-cluster-utils/chart-cluster-util";
-import { baseUrl } from "../chart-cluster-utils/chart-cluster-util";
+import {formatFilterName, ZERO_POINT_VALUES} from "./chart-transient-util";
+import {baseUrl, calculateLambda, filterWavelength} from "../chart-cluster-utils/chart-cluster-util";
 
 const DEBUG = false;
 
 export class Model {
-    private _temporalIndex: number;
-    private _spectralIndex: number;
-    private _referenceTime: number;
-    private _referenceMagn: number;
-    private _atmExtinction: number;
-    private _referenceFltr: string;
-
     constructor(form: VariableLightCurveForm) {
         this.temporalIndex = parseFloat(form["a_num"].value);
         this.spectralIndex = parseFloat(form["b_num"].value);
@@ -22,18 +13,110 @@ export class Model {
         this.referenceFltr = form["filter"].value;
     }
 
+    private _temporalIndex: number;
+
+    /* GETTERS */
+    get temporalIndex(): number {
+        return this._temporalIndex;
+    }
+
+    /* SETTERS */
+    set temporalIndex(i: number) {
+        if (isNaN(i)) {
+            this._temporalIndex = -0.65;
+            console.log('temporal index set to -0.65');
+        } else {
+            this._temporalIndex = i;
+        }
+    }
+
+    private _spectralIndex: number;
+
+    get spectralIndex(): number {
+        return this._spectralIndex;
+    }
+
+    set spectralIndex(i: number) {
+        if (isNaN(i)) {
+            this._spectralIndex = -0.5;
+            console.log('spectral index set to -0.5');
+        } else {
+            this._spectralIndex = i;
+        }
+    }
+
+    private _referenceTime: number;
+
+    get referenceTime(): number {
+        return this._referenceTime;
+    }
+
+    set referenceTime(t: number) {
+        if (isNaN(t)) {
+            this._referenceTime = 8.0;
+            console.log('reference time set to 8');
+        } else {
+            this._referenceTime = t;
+        }
+    }
+
+    private _referenceMagn: number;
+
+    get referenceMagn(): number {
+        return this._referenceMagn;
+    }
+
+    set referenceMagn(m: number) {
+        if (isNaN(m)) {
+            this._referenceMagn = 10.0;
+            console.log('reference magnitude set to 10');
+        } else {
+            this._referenceMagn = m;
+        }
+    }
+
+    private _atmExtinction: number;
+
+    get atmExtinction(): number {
+        return this._atmExtinction;
+    }
+
+    set atmExtinction(ae: number) {
+        if (isNaN(ae)) {
+            this._atmExtinction = 0.0;
+            console.log('Atmospheric Extinction set to 8.0');
+        } else {
+            this._atmExtinction = ae;
+        }
+    }
+
+    private _referenceFltr: string;
+
+    get referenceFltr(): string {
+        return this._referenceFltr;
+    }
+
+    set referenceFltr(f: string) {
+        if (f === null) {
+            this._referenceFltr = 'U';
+            console.log('reference filter set to \'U\'');
+        } else {
+            this._referenceFltr = f;
+        }
+    }
+
     /* METHODS */
     calculate(filter: string, currentTime: number): number {
         const wavelength = filterWavelength;
         const eventTime = 0;//parseFloat(this.form["time"].value);
-        const f  = wavelength[filter];
+        const f = wavelength[filter];
         const f0 = wavelength[this.referenceFltr];
         const Rv = 3.1;
 
         const FZP0 = ZERO_POINT_VALUES[this.referenceFltr];
         const FZP = ZERO_POINT_VALUES[filter];
         const td = currentTime - eventTime;
-        const Anu = calculateLambda(this.atmExtinction*Rv, wavelength[this.referenceFltr]);
+        const Anu = calculateLambda(this.atmExtinction * Rv, wavelength[this.referenceFltr]);
 
         const eq1 = Math.log10(FZP0 / FZP);
         const eq2 = this.temporalIndex * Math.log10(td / this.referenceTime);
@@ -51,86 +134,6 @@ export class Model {
         return this.referenceMagn - (2.5 * (eq1 + eq2 + eq3 - eq4));
     }
 
-    /* GETTERS */
-    get temporalIndex(): number {
-        return this._temporalIndex;
-    }
-
-    get spectralIndex(): number {
-        return this._spectralIndex;
-    }
-
-    get referenceTime(): number {
-        return this._referenceTime;
-    }
-
-    get referenceMagn(): number {
-        return this._referenceMagn;
-    }
-
-    get atmExtinction(): number {
-        return this._atmExtinction;
-    }
-
-    get referenceFltr(): string {
-        return this._referenceFltr;
-    }
-
-    /* SETTERS */
-    set temporalIndex(i: number) {
-        if (isNaN(i)) {
-            this._temporalIndex = -0.65;
-            console.log('temporal index set to -0.65');
-        } else {
-            this._temporalIndex = i;
-        }
-    }
-
-    set spectralIndex(i: number) {
-        if (isNaN(i)) {
-            this._spectralIndex = -0.5;
-            console.log('spectral index set to -0.5');
-        } else {
-            this._spectralIndex = i;
-        }
-    }
-
-    set referenceTime(t: number) {
-        if (isNaN(t)) {
-            this._referenceTime = 8.0;
-            console.log('reference time set to 8');
-        } else {
-            this._referenceTime = t;
-        }
-    }
-
-    set referenceMagn(m: number) {
-        if (isNaN(m)) {
-            this._referenceMagn = 10.0;
-            console.log('reference magnitude set to 10');
-        } else {
-            this._referenceMagn = m;
-        }
-    }
-
-    set atmExtinction(ae: number) {
-        if (isNaN(ae)) {
-            this._atmExtinction = 0.0;
-            console.log('Atmospheric Extinction set to 8.0');
-        } else {
-            this._atmExtinction = ae;
-        }
-    }
-
-    set referenceFltr(f: string) {
-        if (f === null) {
-            this._referenceFltr = 'U';
-            console.log('reference filter set to \'U\'');
-        } else {
-            this._referenceFltr = f;
-        }
-    }
-
 }
 
 
@@ -138,7 +141,7 @@ export class Model {
 export class NonLinearRegression extends Model {
     xdata: Array<number> = [];
     ydata: Array<number> = [];
-    filters: {[x: number]: string} = {};
+    filters: { [x: number]: string } = {};
 
     constructor(form: VariableLightCurveForm, data: any[], eventTime: number, range?: Array<number>) {
         super(form);
@@ -157,6 +160,10 @@ export class NonLinearRegression extends Model {
         }
     }
 
+    async leastSquaresMethod() {
+        return await this.LSMServerRequest();
+    }
+
     /* METHODS */
     private parameters() {
         if (!this.xdata || !this.ydata) {
@@ -168,23 +175,23 @@ export class NonLinearRegression extends Model {
             return {};
         }
         if (!this.referenceFltr ||
-            isNaN(this.referenceMagn) || 
+            isNaN(this.referenceMagn) ||
             isNaN(this.referenceTime) ||
             isNaN(this.temporalIndex) ||
             isNaN(this.spectralIndex)) {
-                console.log('Missing form parameter(s)');
-                return {};
+            console.log('Missing form parameter(s)');
+            return {};
         }
         return {
             'xdata': this.xdata,
             'ydata': this.ydata,
-            'filters': this.filters, 
+            'filters': this.filters,
             'params': {
-               'm': this.referenceMagn,
-               'a': this.temporalIndex,
-               'b': this.spectralIndex,
-               't': this.referenceTime,
-               'filter': this.referenceFltr,
+                'm': this.referenceMagn,
+                'a': this.temporalIndex,
+                'b': this.spectralIndex,
+                't': this.referenceTime,
+                'filter': this.referenceFltr,
             }
         };
     }
@@ -208,7 +215,7 @@ export class NonLinearRegression extends Model {
             let url = baseUrl + "/transient";
             let updateForm = this.LMSFormUpdate;
 
-            xmlhttp.onload = function() {
+            xmlhttp.onload = function () {
                 if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                     let response = JSON.parse(xmlhttp.responseText);
                     updateForm(response);
@@ -221,9 +228,5 @@ export class NonLinearRegression extends Model {
             xmlhttp.setRequestHeader("Content-Type", "application/json");
             xmlhttp.send(JSON.stringify(this.parameters()));
         });
-    }
-
-    async leastSquaresMethod() {
-        return await this.LSMServerRequest();    
     }
 }

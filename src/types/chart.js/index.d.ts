@@ -1,7 +1,7 @@
-import {ChartType, ScatterDataPoint } from 'chart.js/auto'
+import {ChartType, ScatterDataPoint} from 'chart.js/auto'
 
 
-declare module 'chart.js/auto'{
+declare module 'chart.js/auto' {
     interface ChartData<TType extends ChartType, TData, TLabel = unknown> {
         minT?: number,
         minMJD?: number,
@@ -20,17 +20,18 @@ declare module 'chart.js/auto'{
             lastMode: Mode
         },
         nyquist?: number,
-        sonification?:{
+        sonification?: {
             audioContext: AudioContext,
             audioSource: AudioBufferSourceNode,
             audioControls:
-            {
-                playPause: HTMLButtonElement,
-                save: HTMLButtonElement,
-                speed?: HTMLInputElement
-            },
+                {
+                    playPause: HTMLButtonElement,
+                    save: HTMLButtonElement,
+                    speed?: HTMLInputElement
+                },
         },
     }
+
     interface ChartDatasetProperties<TType extends ChartType, TData> {
         immutableLabel?: boolean,
         rawData?: ScatterDataPoint[]

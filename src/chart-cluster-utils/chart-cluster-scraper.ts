@@ -7,9 +7,9 @@ import {graphScale} from "./chart-cluster-scatter";
 import {proFormMinmax, updateProForm} from "./chart-cluster-pro-util";
 import {deActivateInterfaceOnFetch} from "./chart-cluster-interface";
 
-export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOriginal: boolean){
+export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOriginal: boolean) {
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
-    if (isCoord){
+    if (isCoord) {
         scrapeForm.ra.value = '';
         scrapeForm.dec.value = '';
         scrapeForm.radius.value = '';
@@ -40,12 +40,11 @@ export function resetScraperForm(isCoord: boolean, isCheckbox: boolean, isOrigin
     }
 
 
-
 }
 
-export function updateScraperParameters(table: Handsontable){
+export function updateScraperParameters(table: Handsontable) {
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
-    if (scrapeForm.object.value){
+    if (scrapeForm.object.value) {
         queryObjectLocation(scrapeForm.object.value);
     } else {
         const stars = tableDataToStars(table)
@@ -55,43 +54,43 @@ export function updateScraperParameters(table: Handsontable){
     }
 }
 
-export function updateComputeLookupButton(isEmptyObj: boolean = false){
+export function updateComputeLookupButton(isEmptyObj: boolean = false) {
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     if (isEmptyObj) {
         scrapeForm.object.value = '';
     }
-    if (scrapeForm.object.value){
+    if (scrapeForm.object.value) {
         document.getElementById('computeCenter').innerHTML = 'Look up'; //my roommate said look up is two words
     } else {
         document.getElementById('computeCenter').innerHTML = 'Measure';
     }
 }
 
-export function updateScrapeFormOnupload(ra: number, dec: number, r: number){
+export function updateScrapeFormOnupload(ra: number, dec: number, r: number) {
     updateScrapeFormRange(ra, dec, r);
     resetScraperForm(false, true, true);
     updateComputeLookupButton(true);
 }
 
-function updateScrapeFormRange(ra: number|string, dec: number|string, r: number|string){
+function updateScrapeFormRange(ra: number | string, dec: number | string, r: number | string) {
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
-    ra = typeof('ra') === 'number' ? ra as number: parseFloat(ra as string);
-    dec = typeof('dec') === 'number' ? dec as number: parseFloat(dec as string);
-    r = typeof('r') === 'number' ? r as number: parseFloat(r as string);
+    ra = typeof ('ra') === 'number' ? ra as number : parseFloat(ra as string);
+    dec = typeof ('dec') === 'number' ? dec as number : parseFloat(dec as string);
+    r = typeof ('r') === 'number' ? r as number : parseFloat(r as string);
     scrapeForm.ra.value = ra.toFixed(2).toString();
     scrapeForm.dec.value = dec.toFixed(2).toString();
     scrapeForm.radius.value = r.toFixed(3).toString();
 }
 
-function tableDataToStars(table: Handsontable): [starData[], number[]]{
+function tableDataToStars(table: Handsontable): [starData[], number[]] {
     let tableDict = table.getSourceData();
     let result: starData[] = [];
     let keys = Object.keys(tableDict[0]);
-    if (keys[0] == 'id'){
+    if (keys[0] == 'id') {
         keys = keys.splice(2);
     }
-    let filters:string[] = [];
-    for (let i = 0; i < keys.length; i+=7){
+    let filters: string[] = [];
+    for (let i = 0; i < keys.length; i += 7) {
         filters.push(keys[i]);
     }
     // @ts-ignore
@@ -100,8 +99,8 @@ function tableDataToStars(table: Handsontable): [starData[], number[]]{
         for (const entry of tableDict) {
             let star = new starData(null, null, null, null, null,
                 // @ts-ignore
-                entry[filter+'ra'], entry[filter+'dec'], null, [null, null])
-            if (star.ra && star.dec){
+                entry[filter + 'ra'], entry[filter + 'dec'], null, [null, null])
+            if (star.ra && star.dec) {
                 result.push(star);
                 minMax = maxMinRaDec(star, minMax);
             }
@@ -110,40 +109,40 @@ function tableDataToStars(table: Handsontable): [starData[], number[]]{
     return [result, minMax]
 }
 
-function queryObjectLocation(object: string){
+function queryObjectLocation(object: string) {
     let url = baseUrl + "/location-query?object=" + object
     httpGetAsync(url,
-        (result: string)=>{
+        (result: string) => {
             result = JSON.parse(result);
             // @ts-ignore
             updateScrapeFormRange(result['RA'], result['DEC'], result['Range']);
         },
-        ()=>{
+        () => {
             alert('Object query failed, check your input!');
             const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
             scrapeForm.object.value = '';
         }
-        )
+    )
 }
 
-export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin : graphScale, proChart: Chart){
+export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin: graphScale, proChart: Chart) {
     const scrapeForm = document.getElementById('cluster-scraper') as ClusterScraperForm;
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
     const ra = scrapeForm.ra.value;
     const dec = scrapeForm.dec.value;
     const r = scrapeForm.radius.value;
-    if (!(ra && dec && r)){
+    if (!(ra && dec && r)) {
 
         alert('RA, DEC, and Radius have to be provided for query!');
         return
     }
 
     let catalog: string[] = [];
-    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked){
+    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked) {
         catalog.push('gaia')
     }
-    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked){
+    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked) {
         catalog.push('apass')
     }
     if (!scrapeForm.is2Mass.disabled && scrapeForm.is2Mass.checked) {
@@ -170,10 +169,10 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         }
 
         let queryRestriction = {
-                'distance': {'min': null, 'max': null},
-                'pmra': {'min': null, 'max': null},
-                'pmdec': {'min': null, 'max': null},
-            };
+            'distance': {'min': null, 'max': null},
+            'pmra': {'min': null, 'max': null},
+            'pmdec': {'min': null, 'max': null},
+        };
 
         if (clusterForm.distrangeCheck.checked) {
             const dist_range_abs = parseFloat(clusterForm.d_num.value) * parseFloat(clusterForm.distrange_num.value);
@@ -191,7 +190,8 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
             queryRestriction.pmdec.max = parseFloat(clusterProForm.decmotion_num.value) + parseFloat(clusterProForm.decrange_num.value);
         }
 
-        const query = {'ra': ra, 'dec': dec, 'r': r,
+        const query = {
+            'ra': ra, 'dec': dec, 'r': r,
             'catalog': catalog.concat(','),
             'keys': currTableDataKeys,
             'data': currTableData,
@@ -202,18 +202,18 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
         deActivateInterfaceOnFetch(false);
         httpPostAsync(url,
             query,
-            (result: string)=>{
-                if (result.includes('failure')){
+            (result: string) => {
+                if (result.includes('failure')) {
                     const error = JSON.parse(result) as any;
                     deActivateInterfaceOnFetch(true);
-                    if (error['failure'].includes('Object input invalid type')){
+                    if (error['failure'].includes('Object input invalid type')) {
                         alert('VizieR query failed, your input for coordinates needs to be numbers!');
-                    } else if (error['failure'].includes('Radius too big')){
+                    } else if (error['failure'].includes('Radius too big')) {
                         alert('VizieR query failed, too many stars to process! Please reduce your radius');
                     }
                 }
                 let data = JSON.parse(result) as any;
-                try{
+                try {
                     updateClusterOnNewData(table, data['data'], data['filters'], mycharts, graphMaxMin, proChart);
 
                     if (!scrapeForm.isGaia.disabled &&
@@ -225,11 +225,11 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
                         updateProForm(proMinMax, clusterProForm);
                     }
 
-                    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked){
+                    if (!scrapeForm.isGaia.disabled && scrapeForm.isGaia.checked) {
                         scrapeForm.isGaia.disabled = true;
                         document.getElementById("isGaiaRow").style.opacity = "0.6";
                     }
-                    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked){
+                    if (!scrapeForm.isApass.disabled && scrapeForm.isApass.checked) {
                         scrapeForm.isApass.disabled = true;
                         document.getElementById("isApassRow").style.opacity = "0.6";
                     }
@@ -242,12 +242,12 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin 
                         document.getElementById("isWiseRow").style.opacity = "0.6";
                     }
 
-                } catch (e){
+                } catch (e) {
                     deActivateInterfaceOnFetch(true);
                     console.log(e)
                 }
             },
-            (result: string)=>{
+            (result: string) => {
                 console.log(result)
                 deActivateInterfaceOnFetch(true);
                 alert('VizieR query failed, check your input!');

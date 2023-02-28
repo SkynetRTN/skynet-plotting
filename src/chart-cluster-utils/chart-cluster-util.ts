@@ -3,7 +3,7 @@
  */
 
 
-import { Chart, Color } from "chart.js";
+import {Chart, Color} from "chart.js";
 
 // @ts-ignore
 export const baseUrl: string = import.meta.env.VITE_API_URL
@@ -15,24 +15,48 @@ export const baseUrl: string = import.meta.env.VITE_API_URL
 export function filterMags(): { [key: string]: Function[] } {
     return {
         'red': [
-            (a: number) => { return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381 },
-            (a: number) => { return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823 },
-            (a: number) => { return 11.9244167337 * a ** 2 - 79.9482119938 * a ** + 140.0181065948 },
+            (a: number) => {
+                return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381
+            },
+            (a: number) => {
+                return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823
+            },
+            (a: number) => {
+                return 11.9244167337 * a ** 2 - 79.9482119938 * a ** +140.0181065948
+            },
         ],
         'faint': [
-            (a: number) => { return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381 },
-            (a: number) => { return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823 },
-            (a: number) => { return 11.9244167337 * a ** 2 - 79.9482119938 * a ** + 140.0181065948 },
+            (a: number) => {
+                return -604.9556806553 * a ** 4 + 6657.4536333723 * a ** 3 - 27441.1323617070 * a ** 2 + 50194.4653936770 * a - 34357.3779319381
+            },
+            (a: number) => {
+                return -17.2973064259 * a ** 4 + 155.8920623226 * a ** 3 - 471.5079870677 * a ** 2 + 482.3528952725 * a - 3.5819536823
+            },
+            (a: number) => {
+                return 11.9244167337 * a ** 2 - 79.9482119938 * a ** +140.0181065948
+            },
         ],
         'blue': [
-            (a: number) => { return -432.3187790466 * a ** 4 + 4844.3907659246 * a ** 3 - 20351.2132865810 * a ** 2 + 37989.5444003501 * a - 26593.1590790576 },
-            (a: number) => { return 64.2415377544 * a ** 4 - 716.2518817838 * a ** 3 + 2993.0524145205 * a ** 2 - 5551.5482754012 * a + 3848.8331639064 },
-            (a: number) => { return -1.8118436212 * a ** 2 + 12.6764507556 * a - 25.9497039289 },
+            (a: number) => {
+                return -432.3187790466 * a ** 4 + 4844.3907659246 * a ** 3 - 20351.2132865810 * a ** 2 + 37989.5444003501 * a - 26593.1590790576
+            },
+            (a: number) => {
+                return 64.2415377544 * a ** 4 - 716.2518817838 * a ** 3 + 2993.0524145205 * a ** 2 - 5551.5482754012 * a + 3848.8331639064
+            },
+            (a: number) => {
+                return -1.8118436212 * a ** 2 + 12.6764507556 * a - 25.9497039289
+            },
         ],
         'bright': [
-            (a: number) => { return 496.2961271126 * a ** 4 - 5416.9941114328 * a ** 3 + 22145.4191356992 * a ** 2 - 40191.1352476384 * a + 27312.8317216371 },
-            (a: number) => { return 415.1740517030 * a ** 4 - 4647.3324718671 * a ** 3 + 19494.9006610996 * a ** 2 - 36323.2785086341 * a + 25353.6661077333 },
-            (a: number) => { return 10.8290320338 * a ** 2 - 71.5469551223 * a + 105.6498422000 },
+            (a: number) => {
+                return 496.2961271126 * a ** 4 - 5416.9941114328 * a ** 3 + 22145.4191356992 * a ** 2 - 40191.1352476384 * a + 27312.8317216371
+            },
+            (a: number) => {
+                return 415.1740517030 * a ** 4 - 4647.3324718671 * a ** 3 + 19494.9006610996 * a ** 2 - 36323.2785086341 * a + 25353.6661077333
+            },
+            (a: number) => {
+                return 10.8290320338 * a ** 2 - 71.5469551223 * a + 105.6498422000
+            },
         ]
     };
 }
@@ -71,7 +95,8 @@ export const filterWavelength: { [key: string]: number } = {
  * @param {function} callback -function to execute with http response
  * @param {function} failedCallback -function to execute when http request failed
  */
-export function httpGetAsync(theUrl: string, callback: Function, failedCallback: Function = () => { }) {
+export function httpGetAsync(theUrl: string, callback: Function, failedCallback: Function = () => {
+}) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -93,6 +118,7 @@ export function httpGetAsync(theUrl: string, callback: Function, failedCallback:
     xmlHttp.open("GET", theUrl, true); // true for asynchronous
     xmlHttp.send(null);
 }
+
 //create and export a function that uses the http push to send the data to the server
 export function httpPostAsync(theUrl: string, data: any, callback: Function, failedCallback: Function) {
     var xmlHttp = new XMLHttpRequest();
@@ -126,6 +152,7 @@ export function modelFormKeys(chartNum: number, form: ClusterForm) {
     function getFilter(key: string): string {
         return form[key].value
     }
+
     let returnArray = []
     let filterList = ['blue', 'red', 'lum']
     for (let i = 0; i < filterList.length; i++) {
@@ -206,7 +233,7 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
  * @constructor
  */
 export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradient | Color {
-    let { ctx, chartArea } = chart;
+    let {ctx, chartArea} = chart;
     let rl = isNaN(filterWavelength[red]) ? Math.log10(0.442 * 1000) : Math.log10(filterWavelength[red] * 1000);//default to B-V for unknowns
     let bl = isNaN(filterWavelength[blue]) ? Math.log10(0.54 * 1000) : Math.log10(filterWavelength[blue] * 1000);
 
@@ -239,8 +266,7 @@ export function HRrainbow(chart: Chart, red: string, blue: string): CanvasGradie
 
     if (isNaN(start) || isNaN(stop)) {//stop div/0
         return "red"
-    }
-    else {
+    } else {
 
         let gradient = ctx.createLinearGradient(start, 0, stop, 0);
 

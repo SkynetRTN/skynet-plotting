@@ -2,34 +2,35 @@
 
 import 'bootstrap/js/dist/modal';
 
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime, defaultLayout, percentToAbsolute } from './util';
-import { curve } from './chart-curve';
-import { dual } from './chart-dual';
-import { moon } from './chart-moon';
-import { scatter } from './chart-scatter';
-import { venus } from './chart-venus';
-import { variable, variableFileUpload } from './chart-variable';
-import { spectrum, spectrumFileUpload } from './chart-spectrum';
-import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster1 } from './chart-cluster';
-import { cluster2 } from './chart-cluster2';
-import { cluster3 } from './chart-cluster3';
-import { cluster3p } from "./chart-cluster3plus";
-import { round } from './my-math';
-import { gravity, gravityClass, gravityFileUpload } from './chart-gravity';
-import { gravityPro, gravityProFileUpload } from './chart-gravitypro';
-import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
+import {dataURLtoBlob, defaultLayout, formatTime, getDateString, percentToAbsolute, updateTableHeight} from './util';
+import {curve} from './chart-curve';
+import {dual} from './chart-dual';
+import {moon} from './chart-moon';
+import {scatter} from './chart-scatter';
+import {venus} from './chart-venus';
+import {variable, variableFileUpload} from './chart-variable';
+import {spectrum, spectrumFileUpload} from './chart-spectrum';
+import {pulsar, pulsarFileUpload} from './chart-pulsar';
+import {cluster1} from './chart-cluster';
+import {cluster2} from './chart-cluster2';
+import {cluster3} from './chart-cluster3';
+import {cluster3p} from "./chart-cluster3plus";
+import {round} from './my-math';
+import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
+import {gravityPro, gravityProFileUpload} from './chart-gravitypro';
+import Chart, {AnimationSpec, ChartType, LinearScaleOptions} from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { pause } from './sonification';
-import { TransientChart } from './chart-transient-utils/chart-transient-chart';
-import { clusterFileUpload } from "./chart-cluster-utils/chart-cluster-file";
-import { graphScale } from "./chart-cluster-utils/chart-cluster-scatter";
-import { updateClusterProLabels } from "./chart-cluster-utils/chart-cluster-interface";
+import {pause} from './sonification';
+import {TransientChart} from './chart-transient-utils/chart-transient-chart';
+import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
+import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
 import {radio, radioFileUpload} from './chart-radio'
-import { transient, transientFileUpload } from "./chart-transient";
+import {transient, transientFileUpload} from "./chart-transient";
+
 /**
  *  Initializing the page when the website loads
  */
@@ -50,7 +51,7 @@ window.onload = function () {
                     for (let i = 0; i < len; i++) {
                         arr[i] = binStr.charCodeAt(i);
                     }
-                    callback(new Blob([arr], { type: type || 'image/png' }));
+                    callback(new Blob([arr], {type: type || 'image/png'}));
                 });
             }
         });
@@ -72,8 +73,7 @@ window.onload = function () {
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        }
-        else if ('myChart' in window) {
+        } else if ('myChart' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             // NO MORE JQUERY BYE BYE xD
             // $('#honor-pledge-modal').modal('hide');
@@ -83,7 +83,7 @@ window.onload = function () {
         else if ('myChart1' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             saveImage([1, 2], signature, true, 1.0);
-        // for cluster pro & pro plus
+            // for cluster pro & pro plus
         } else if ('myChart3' in window) {
             document.getElementById('no-signature-alert').style.display = 'none';
             saveImage([3, 4, 2], signature, true, 1.0, true);
@@ -268,7 +268,8 @@ function setChartDefaults() {
 
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    Chart.defaults.plugins.legend.onClick = function () { };
+    Chart.defaults.plugins.legend.onClick = function () {
+    };
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
@@ -382,7 +383,7 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
 
-    const exifObj = { '0th': zeroth, 'Exif': exif };
+    const exifObj = {'0th': zeroth, 'Exif': exif};
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }

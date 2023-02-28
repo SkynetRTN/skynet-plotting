@@ -2,361 +2,399 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P8NHQCNXKF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P8NHQCNXKF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-    gtag('config', 'G-P8NHQCNXKF');
-  </script>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Skynet Plotting</title>
-  <link rel="stylesheet" href="./style.css">
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-P8NHQCNXKF');
+    </script>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Skynet Plotting</title>
+    <link href="./style.css" rel="stylesheet">
 </head>
 <element id="myBrowser">
-<body>
-  <main class="container">
-    <div class="row">
-      <div class="col-lg-4" id="input-col">
-        <form title="input" id="chart-type-form">
-          <select name="chart" title="select chart" id="selectChart">
-            <option value="curve" title="Curve" selected>Curve</option>
-            <option value="moon" title="Moon">Moon</option>
-            <option value="venus" title="Venus">Venus</option>
-            <option value="variable" title="Variable">Variable</option>
-            <option value="scatter" title="Scatter">Scatter</option>
-            <option value="spectrum" title="spectrum">Spectrum</option>
-            <option value="dual" title="Dual">Dual</option>
-            <option value="gravity" title="Gravity">Gravity</option>
-<!--           <option value="gravityPro" title="Gravity Pro">Gravity Pro</option>-->
-            <option value="radio" title="Radio">Radio</option>
-<!--            <option value="cluster0" title="Cluster Sim">Cluster Sim</option>-->
-            <option value="cluster1" title="Cluster One">Cluster One</option>
-            <option value="cluster2" title="Cluster Two">Cluster Two</option>
-            <option value="cluster3" title="Cluster Pro">Cluster Pro</option>
-            <option value="cluster3p" title="Cluster Pro Plus">Cluster Pro Plus</option>
-            <option value="pulsar" title="Pulsar">Pulsar</option>
-            <option value="transient" title="Transient">Transient</option>
-          </select>
-        </form>
-        <div id="input-div"></div>
-        <div id="table-div"></div>
-      </div>
-      <div class="col-lg-8" id="chart-col">
-        <div id="chart-div">
-          <canvas id="myChart" width="300" height="200"></canvas>
-          <div class = "row">
-            <div class="col-lg-6">
-              <div id="chart-div1" class="clusterCharts" style="cursor: move">
-                <canvas id="myChart1" width="428" height="200"></canvas>
-                <div class="chartTag" id = "chartTag1">①</div>
-              </div>
+    <body>
+    <main class="container">
+        <div class="row">
+            <div class="col-lg-4" id="input-col">
+                <form id="chart-type-form" title="input">
+                    <select id="selectChart" name="chart" title="select chart">
+                        <option selected title="Curve" value="curve">Curve</option>
+                        <option title="Moon" value="moon">Moon</option>
+                        <option title="Venus" value="venus">Venus</option>
+                        <option title="Variable" value="variable">Variable</option>
+                        <option title="Scatter" value="scatter">Scatter</option>
+                        <option title="spectrum" value="spectrum">Spectrum</option>
+                        <option title="Dual" value="dual">Dual</option>
+                        <option title="Gravity" value="gravity">Gravity</option>
+                        <!--           <option value="gravityPro" title="Gravity Pro">Gravity Pro</option>-->
+                        <option title="Radio" value="radio">Radio</option>
+                        <!--            <option value="cluster0" title="Cluster Sim">Cluster Sim</option>-->
+                        <option title="Cluster One" value="cluster1">Cluster One</option>
+                        <option title="Cluster Two" value="cluster2">Cluster Two</option>
+                        <option title="Cluster Pro" value="cluster3">Cluster Pro</option>
+                        <option title="Cluster Pro Plus" value="cluster3p">Cluster Pro Plus</option>
+                        <option title="Pulsar" value="pulsar">Pulsar</option>
+                        <option title="Transient" value="transient">Transient</option>
+                    </select>
+                </form>
+                <div id="input-div"></div>
+                <div id="table-div"></div>
             </div>
-            <div class="col-lg-6" id="chart-div2-colControl">
-              <div id="chart-div2" class="clusterCharts" style="cursor: move">
-                <canvas id="myChart2"></canvas>
-                <div class="chartTag" id = "chartTag2">②</div>
-              </div>
-            </div>
-            <div class="col-lg-2" id = 'clusterProPmChartControl' style="display: none">
-              <div id="chart-pro-options" style="padding:0px; border:0px;">
-                <div class="row-clusterPro" style="margin-left: 28%">
-                  <button class = "graphControl" id="panUpPro" style="margin-bottom: 1px;">
-                    <center class = "graphControl" style="margin-left: 14%">&#8593;</center>
-                  </button>
+            <div class="col-lg-8" id="chart-col">
+                <div id="chart-div">
+                    <canvas height="200" id="myChart" width="300"></canvas>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="clusterCharts" id="chart-div1" style="cursor: move">
+                                <canvas height="200" id="myChart1" width="428"></canvas>
+                                <div class="chartTag" id="chartTag1">①</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6" id="chart-div2-colControl">
+                            <div class="clusterCharts" id="chart-div2" style="cursor: move">
+                                <canvas id="myChart2"></canvas>
+                                <div class="chartTag" id="chartTag2">②</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id='clusterProPmChartControl' style="display: none">
+                            <div id="chart-pro-options" style="padding:0px; border:0px;">
+                                <div class="row-clusterPro" style="margin-left: 28%">
+                                    <button class="graphControl" id="panUpPro" style="margin-bottom: 1px;">
+                                        <center class="graphControl" style="margin-left: 14%">&#8593;</center>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row" style="margin: 0;">
+                                <button class="graphControl" id="panLeftPro" style="margin-bottom: 1px;">
+                                    <center class="graphControl" style="margin-left: -40%">&#8592;</center>
+                                </button>&nbsp;
+                                <button class="graphControl" id="panRightPro" style="margin-bottom: 1px;">
+                                    <center class="graphControl" style="margin-left: -40%">&#8594;</center>
+                                </button>
+                            </div>
+                            <div class="row-clusterPro" style="margin-left: 28%">
+                                <button class="graphControl" id="panDownPro" style="margin-bottom: 1px; ">
+                                    <center class="graphControl" style="margin-left: 14%">&#8595;</center>
+                                </button>
+                            </div>
+                            <div class="row" style="margin: 0;">
+                                <button class="graphControl" id="zoomInPro" style="margin-bottom: 1px;">
+                                    <center class="graphControl">&plus;</center>
+                                </button>&nbsp;
+                                <button class="graphControl" id="zoomOutPro" style="margin-bottom: 1px;">
+                                    <center class="graphControl">&minus;</center>
+                                </button>
+                            </div>
+                            <div class="row" style="margin: 0;">
+                                <button class="clusterRest" id="ResetPro" style="margin-bottom: 1px;">
+                                    <div style="margin-left: 20%">Reset</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="clusterCharts" id="chart-div3" style="cursor: move">
+                                <canvas height="200" id="myChart3" width="300"></canvas>
+                                <div class="chartTag" id="chartTag3">①</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="clusterCharts" id="chart-div4" style="cursor: move">
+                                <canvas height="200" id="myChart4" width="300"></canvas>
+                                <div class="chartTag" id=chartTag4>②</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="row" style="margin: 0;">
-                <button class = "graphControl" id="panLeftPro" style="margin-bottom: 1px;">
-                  <center class = "graphControl" style="margin-left: -40%">&#8592;</center>
-                </button>&nbsp;
-                <button class = "graphControl" id="panRightPro" style="margin-bottom: 1px;">
-                  <center class = "graphControl" style="margin-left: -40%">&#8594;</center>
-                </button>
-              </div>
-              <div class="row-clusterPro" style="margin-left: 28%">
-                <button class = "graphControl" id="panDownPro" style="margin-bottom: 1px; ">
-                  <center class = "graphControl" style="margin-left: 14%">&#8595;</center>
-                </button>
-              </div>
-              <div class="row" style="margin: 0;">
-                <button class = "graphControl" id="zoomInPro" style="margin-bottom: 1px;"><center class = "graphControl">&plus;</center></button>&nbsp;
-                <button class = "graphControl" id="zoomOutPro" style="margin-bottom: 1px;"><center class = "graphControl">&minus;</center></button>
-              </div>
-              <div class="row" style="margin: 0;">
-                <button class = "clusterRest" id="ResetPro" style="margin-bottom: 1px;"><div style="margin-left: 20%">Reset</div></button>
-              </div>
+                <div id="bottom=forms-div">
+                    <div class="row">
+                        <div class="col-sm-6" id="chart-info-form-div">
+                            <form class="text" id="chart-info-form">
+                                <div class="row">
+                                    <div class="col-sm-6" id="title-data-col">
+                                        <div class="row">
+                                            <div class="col-sm-4 des">Title</div>
+                                            <div class="col-sm-8"><input class="field" name="title" title="Title"
+                                                                         type="text" value="Title"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-4 des">Data</div>
+                                            <div class="col-sm-8"><input class="field" name="data" title="Data"
+                                                                         type="text" value="Data"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6" id="axis-col">
+                                        <div class="row">
+                                            <div class="col-sm-12" id="axisSet1">
+                                                <div id="axis-label1">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 des" id="xAxisPrompt">X Axis</div>
+                                                        <div class="col-sm-8"><input class="field" name="xAxis"
+                                                                                     title="X Axis" type="text"
+                                                                                     value="x"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="axis-label3">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 des" id="yAxisPrompt">Y Axis</div>
+                                                        <div class="col-sm-8"><input class="field" name="yAxis"
+                                                                                     title="Y Axis" type="text"
+                                                                                     value="y"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" id="axisSet2" style="display: none">
+                                                <div id="axis-label2">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 des">X<sub>2</sub> Axis</div>
+                                                        <div class="col-sm-8"><input class="field" name="x1Axis"
+                                                                                     title="X2 Axis" type="text"
+                                                                                     value="x"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="axis-label4">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
+                                                        <div class="col-sm-8"><input class="field" name="y1Axis"
+                                                                                     title="Y2 Axis" type="text"
+                                                                                     value="y"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6" id="axisSet3" style="display: none">
+                                            <div id="axis-label5">
+                                                <div class="row">
+                                                    <div class="col-sm-4 des">
+                                                        <div class="col-sm-8"><input class="field" name="MotionXaxis"
+                                                                                     title="MotionX Axis" type="text"
+                                                                                     value="x"></div>
+                                                    </div>
+                                                </div>
+                                                <div id="axis-label6">
+                                                    <div class="row">
+                                                        <div class="col-sm-4 des">
+                                                            <div class="col-sm-8"><input class="field"
+                                                                                         name="MotionYaxis"
+                                                                                         title="MotionY Axis" type="text"
+                                                                                         value="y"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm" id="cluster-scraper-form-div">
+                            <!--                 style="border-style: double; border-bottom-color: #0c4128; border-width: thick">-->
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="row-sm" style="text-align: center">
+                                        <p id="data-count" style="margin-bottom: 0px"></p>
+                                    </div>
+                                    <div class="row">
+                                        <button class="scraper" id="discardData" style="margin-top: 13px" type="button">
+                                            Lock Cuts
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-sm-10">
+                                    <form id="cluster-scraper" type="text">
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col-sm-4" style="padding-top: 3px">Ra</div>
+                                                    <div class="col-sm-8" style="padding-left: 5px; padding-right: 0px">
+                                                        <input class="field scrape" name="ra" type="text" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col-sm-4" style="padding-top: 3px">Dec</div>
+                                                    <div class="col-sm-8"
+                                                         style="padding-left: 10px; padding-right: 0px">
+                                                        <input class="field scrape" name="dec" type="text" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col-sm-4" style="padding-top: 3px">Rad</div>
+                                                    <div class="col-sm-8" style="padding-left: 8px; padding-right: 0px">
+                                                        <input class="field scrape" name="radius" type="text" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button class="scraper" id="computeCenter" style="width: 80px; margin-left: 10px"
+                                                        type="button">Measure
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row" id="objRow">
+                                                    <div class="col-sm-4" style="padding-top: 3px">Obj</div>
+                                                    <div class="col-sm-8" style="padding-left: 8px">
+                                                        <input class="field scrape" name="object" type="text" value="">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-bottom: 5px">
+                                            <div class="col">
+                                                <div class="row" id="isGaiaRow">
+                                                    <div class="col-sm-3"><input class="range" name="isGaia"
+                                                                                 type="checkbox"></div>
+                                                    <div class="col-sm-9">GAIA</div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row" id="isApassRow">
+                                                    <div class="col-sm-3"><input class="range" name="isApass"
+                                                                                 type="checkbox"></div>
+                                                    <div class="col-sm-9">APASS</div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row" id="is2MassRow">
+                                                    <div class="col-sm-3"><input class="range" name="is2Mass"
+                                                                                 type="checkbox"></div>
+                                                    <div class="col-sm-9">2MASS</div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div class="row" id="isWiseRow">
+                                                    <div class="col-sm-3"><input class="range" name="isWise"
+                                                                                 type="checkbox"></div>
+                                                    <div class="col-sm-9">WISE</div>
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <button class="scraper" id="fetchData" style="margin-top: -8px; width: 125px;"
+                                                        type="button">Fetch Data
+                                                </button>
+                                            </div>
+                                            <input class="range" name="isOriginal" style="display: none"
+                                                   type="checkbox">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grav Charts -->
+                <div id="grav-charts" style="display: none">
+                    <div class="row">
+                        <div class="clusterCharts" id="grav-div1" style="cursor: move;display: block">
+                            <canvas height="200" id="myGrav1" width="428"></canvas>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="clusterCharts" id="grav-div2" style="cursor: move;display: block">
+                            <canvas height="200" id="myGrav2" width="428"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class = "row">
-            <div class="col-lg-6">
-              <div id="chart-div3" class="clusterCharts" style="cursor: move">
-                <canvas id="myChart3" width="300" height="200"></canvas>
-                <div class="chartTag" id = "chartTag3">①</div>
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <div id="chart-div4" class="clusterCharts" style="cursor: move">
-                <canvas id="myChart4" width="300" height="200"></canvas>
-                <div class="chartTag" id = chartTag4>②</div>
-              </div>
-            </div>
-          </div>
         </div>
-        <div id = "bottom=forms-div">
-          <div class = "row">
-            <div id = "chart-info-form-div" class="col-sm-6">
-              <form id="chart-info-form" class="text">
-                <div class="row">
-                  <div id = "title-data-col" class="col-sm-6">
-                    <div class="row">
-                      <div class="col-sm-4 des">Title</div>
-                      <div class="col-sm-8"><input type="text" title="Title" name="title" value="Title" class="field"></div>
-                    </div>
-                    <div class="row">
-                      <div class="col-sm-4 des">Data</div>
-                      <div class="col-sm-8"><input type="text" title="Data" name="data" value="Data" class="field"></div>
-                    </div>
-                  </div>
-                  <div id = "axis-col" class="col-sm-6">
-                    <div class="row">
-                      <div class="col-sm-12" id="axisSet1">
-                        <div id = "axis-label1">
-                          <div class="row">
-                            <div class="col-sm-4 des" id="xAxisPrompt">X Axis</div>
-                            <div class="col-sm-8"><input type="text" title="X Axis" name="xAxis" value="x" class="field"></div>
-                          </div>
-                        </div>
-                        <div id = "axis-label3">
-                          <div class="row">
-                            <div class="col-sm-4 des" id="yAxisPrompt">Y Axis</div>
-                            <div class="col-sm-8"><input type="text" title="Y Axis" name="yAxis" value="y" class="field"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-sm-6" id="axisSet2" style="display: none">
-                        <div id = "axis-label2">
-                          <div class="row">
-                            <div class="col-sm-4 des">X<sub>2</sub> Axis</div>
-                            <div class="col-sm-8"><input type="text" title="X2 Axis" name="x1Axis" value="x" class="field"></div>
-                          </div>
-                        </div>
-                        <div id = "axis-label4">
-                          <div class="row">
-                            <div class="col-sm-4 des">Y<sub>2</sub> Axis</div>
-                            <div class="col-sm-8"><input type="text" title="Y2 Axis" name="y1Axis" value="y" class="field"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-sm-6" id="axisSet3" style="display: none">
-                      <div id = "axis-label5">
-                        <div class="row">
-                          <div class="col-sm-4 des">
-                            <div class="col-sm-8"><input type="text" title="MotionX Axis" name="MotionXaxis" value="x" class="field"></div>
-                          </div>
-                        </div>
-                        <div id = "axis-label6">
-                          <div class="row">
-                            <div class="col-sm-4 des">
-                              <div class="col-sm-8"><input type="text" title="MotionY Axis" name="MotionYaxis" value="y" class="field"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
+        <div class="row" id="button-row">
+            <div class="col-lg-4">
+                <button id="file-upload-button">Upload Data File</button>
+                <button id="add-row-button">Add Row</button>
+                <input id="file-upload" style="display: none;" type="file">
             </div>
-            <div id="cluster-scraper-form-div" class="col-sm">
-<!--                 style="border-style: double; border-bottom-color: #0c4128; border-width: thick">-->
+            <div class="col-lg-3" id="below-graph-column">
+                <button data-bs-target="#honor-pledge-modal" data-bs-toggle="modal" id="save-button">Save Graph</button>
+                <button id="save-data-button" style="display: none">Save Data</button>
+            </div>
+            <div class="col-lg-5" id="extra-options" style="padding:0px; border:0px;">
+            </div>
+        </div>
 
-                <div class="row">
-                  <div class="col-sm-2">
-                    <div class="row-sm" style="text-align: center">
-                      <p id="data-count" style="margin-bottom: 0px"></p>
-                    </div>
-                    <div class="row">
-                      <button class="scraper" id="discardData" type="button" style="margin-top: 13px">Lock Cuts</button>
-                    </div>
-                  </div>
-                  <div class="col-sm-10">
-                    <form id="cluster-scraper" type="text">
-                      <div class="row">
-                        <div class="col">
-                          <div class="row">
-                            <div class="col-sm-4" style="padding-top: 3px">Ra</div>
-                            <div class="col-sm-8" style="padding-left: 5px; padding-right: 0px">
-                              <input type="text" name="ra" class="field scrape" value="">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="row">
-                            <div class="col-sm-4" style="padding-top: 3px">Dec</div>
-                            <div class="col-sm-8" style="padding-left: 10px; padding-right: 0px">
-                              <input type="text" name="dec" class="field scrape" value="">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="row">
-                            <div class="col-sm-4" style="padding-top: 3px">Rad</div>
-                            <div class="col-sm-8" style="padding-left: 8px; padding-right: 0px">
-                              <input type="text" name="radius" class="field scrape" value="">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-sm-2">
-                          <button class="scraper" id="computeCenter" type="button"
-                                  style="width: 80px; margin-left: 10px">Measure</button>
-                        </div>
-                        <div class="col" >
-                          <div class="row" id = "objRow">
-                            <div class="col-sm-4" style="padding-top: 3px">Obj</div>
-                            <div class="col-sm-8" style="padding-left: 8px">
-                              <input type="text" name="object" class="field scrape" value=""></div>
-                          </div>
-                        </div>
 
-                      </div>
-                      <div class="row" style="margin-bottom: 5px">
-                        <div class="col">
-                          <div class="row" id="isGaiaRow">
-                            <div class="col-sm-3"><input type="checkbox" class="range" name="isGaia"></div>
-                            <div class="col-sm-9">GAIA</div>
-                          </div>
+        <!-- Modal -->
+        <div aria-hidden="true" aria-labelledby="honor-pledge-title" class="modal fade" id="honor-pledge-modal"
+             tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="honor-pledge-title">Honor Code Pledge</h5>
+                        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                    </div>
+                    <form id="honor-pledge-form">
+                        <div class="modal-body">
+                            <p>REQUIRED FOR RECEIVING CREDIT</p>
+                            <p>Sign your name to attest to the fact that you made this graph yourself:</p>
+                            <input autocomplete="name" class="field" name="signature" title="Sign your name here"
+                                   type="text">
                         </div>
-                        <div class="col">
-                          <div class="row" id="isApassRow">
-                            <div class="col-sm-3"><input type="checkbox" class="range" name="isApass"></div>
-                            <div class="col-sm-9">APASS</div>
-                          </div>
+                        <div class="modal-footer" style="flex-direction: row-reverse; justify-content: space-between">
+                            <button data-bs-dismiss="modal" id="pledge-signed" type="submit">Save Graph</button>
+                            <div class="alert alert-warning" id="no-signature-alert" role="alert"
+                                 style="display: none;">
+                                Please make sure to sign your name.
+                            </div>
                         </div>
-                        <div class="col">
-                          <div class="row" id="is2MassRow">
-                            <div class="col-sm-3"><input type="checkbox" class="range" name="is2Mass"></div>
-                            <div class="col-sm-9">2MASS</div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <div class="row" id="isWiseRow">
-                            <div class="col-sm-3"><input type="checkbox" class="range" name="isWise"></div>
-                            <div class="col-sm-9">WISE</div>
-                          </div>
-                        </div>
-                        <div class="col">
-                          <button class="scraper" id="fetchData" type="button"
-                                  style="margin-top: -8px; width: 125px;">Fetch Data</button>
-                        </div>
-                        <input type="checkbox" class="range" name="isOriginal" style="display: none">
-                      </div>
                     </form>
-                  </div>
                 </div>
             </div>
-          </div>
         </div>
 
-        <!-- Grav Charts -->
-        <div id="grav-charts" style="display: none">
-          <div class="row">
-            <div id="grav-div1" class="clusterCharts" style="cursor: move;display: block">
-              <canvas id="myGrav1" width="428" height="200"></canvas>
-            </div>
-          </div>
-          <div class="row">
-            <div id="grav-div2" class="clusterCharts" style="cursor: move;display: block">
-              <canvas id="myGrav2" width="428" height="200"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row" id="button-row">
-      <div class="col-lg-4">
-        <button id="file-upload-button">Upload Data File</button>
-        <button id="add-row-button">Add Row</button>
-        <input type="file" id="file-upload" style="display: none;">
-      </div>
-      <div class="col-lg-3" id="below-graph-column">
-        <button id="save-button" data-bs-toggle="modal" data-bs-target="#honor-pledge-modal">Save Graph</button>
-        <button id="save-data-button" style="display: none">Save Data</button>
-      </div>
-      <div class="col-lg-5" id="extra-options" style="padding:0px; border:0px;">
-      </div>
-    </div>
+    </main>
+    <script defer>
+        // If IE is detected, show the unsupported message.
+        let version = detectIE();
+        if (version !== false) {
+            if (version < 12) {
+                document.body.innerHTML =
+                    '<h2 class="ie">We Are Sorry</h2>\n' +
+                    '<p class="ie">Internet Explorer is not supported by this site. Please either upgrade to a modern ' +
+                    'browser such as <a href="https://www.google.com/chrome/">Chrome</a>, ' +
+                    '<a href="https://www.mozilla.org/en-US/firefox/">Firefox</a>, or ' +
+                    '<a href="https://www.microsoft.com/en-us/windows/microsoft-edge">Edge</a>, ' +
+                    'or use this <a href="https://skynet.unc.edu/ASTR101L/graph-ie/">alternate site</a>.</p>';
+            }
+        }
 
-
-
-    <!-- Modal -->
-    <div class="modal fade" id="honor-pledge-modal" tabindex="-1" aria-labelledby="honor-pledge-title"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="honor-pledge-title">Honor Code Pledge</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form id="honor-pledge-form">
-          <div class="modal-body">
-              <p>REQUIRED FOR RECEIVING CREDIT</p>
-              <p>Sign your name to attest to the fact that you made this graph yourself:</p>
-              <input type="text" class="field" title="Sign your name here" name="signature" autocomplete="name">
-          </div>
-          <div class="modal-footer" style="flex-direction: row-reverse; justify-content: space-between">
-            <button type="submit" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>
-            <div id="no-signature-alert" class="alert alert-warning" role="alert" style="display: none;">
-              Please make sure to sign your name.
-            </div>
-          </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-  </main>
-  <script defer>
-    // If IE is detected, show the unsupported message.
-    let version = detectIE();
-    if (version !== false) {
-      if (version < 12) {
-        document.body.innerHTML =
-          '<h2 class="ie">We Are Sorry</h2>\n' +
-          '<p class="ie">Internet Explorer is not supported by this site. Please either upgrade to a modern ' +
-          'browser such as <a href="https://www.google.com/chrome/">Chrome</a>, ' +
-          '<a href="https://www.mozilla.org/en-US/firefox/">Firefox</a>, or ' +
-          '<a href="https://www.microsoft.com/en-us/windows/microsoft-edge">Edge</a>, ' +
-          'or use this <a href="https://skynet.unc.edu/ASTR101L/graph-ie/">alternate site</a>.</p>';
-      }
-    }
-    function detectIE() {
-      let ua = window.navigator.userAgent;
-      let msie = ua.indexOf('MSIE ');
-      if (msie > 0) {
-        // IE 10 or older => return version number
-        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-      }
-      let trident = ua.indexOf('Trident/');
-      if (trident > 0) {
-        // IE 11 => return version number
-        let rv = ua.indexOf('rv:');
-        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
-      }
-      let edge = ua.indexOf('Edge/');
-      if (edge > 0) {
-        // Edge (IE 12+) => return version number
-        return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
-      }
-      // Other browsers
-      return false;
-    }
-  </script>
-  <script type="module" src="./index.ts"></script>
-</body>
+        function detectIE() {
+            let ua = window.navigator.userAgent;
+            let msie = ua.indexOf('MSIE ');
+            if (msie > 0) {
+                // IE 10 or older => return version number
+                return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+            }
+            let trident = ua.indexOf('Trident/');
+            if (trident > 0) {
+                // IE 11 => return version number
+                let rv = ua.indexOf('rv:');
+                return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+            }
+            let edge = ua.indexOf('Edge/');
+            if (edge > 0) {
+                // Edge (IE 12+) => return version number
+                return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+            }
+            // Other browsers
+            return false;
+        }
+    </script>
+    <script src="./index.ts" type="module"></script>
+    </body>
 </element>
 </html>

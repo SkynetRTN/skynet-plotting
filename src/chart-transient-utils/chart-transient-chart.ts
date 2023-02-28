@@ -2,28 +2,64 @@
 
 import Chart from "chart.js/auto";
 import "chartjs-chart-error-bars";
-import { CategoryScale, ChartDataset, LinearScale, registerables } from "chart.js";
-import { ScatterWithErrorBarsController, PointWithErrorBar } from 'chartjs-chart-error-bars';
-import { round } from "./../my-math";
-import { Model } from "./chart-transient-model";
-import { findDelimiter, FILTERCOLORS } from "./chart-transient-util";
+import {CategoryScale, ChartDataset, LinearScale, registerables} from "chart.js";
+import {PointWithErrorBar, ScatterWithErrorBarsController} from 'chartjs-chart-error-bars';
+import {round} from "./../my-math";
+import {Model} from "./chart-transient-model";
+import {FILTERCOLORS, findDelimiter} from "./chart-transient-util";
 
 export class TransientChart {
 
     chart: Chart;
-
-    /* SHIFTS */
-    private _timeShift: number;
-    private _eventShift: number;
     filterShift: Map<string, number> = new Map();
-
-    /* MIN MAX */
-    private _minMag: number;
-    private _maxMag: number;
 
     constructor() {
         this.minMag = Number.POSITIVE_INFINITY;
         this.maxMag = Number.NEGATIVE_INFINITY;
+    }
+
+    /* SHIFTS */
+    private _timeShift: number;
+
+    get timeShift(): number {
+        return this._timeShift;
+    }
+
+    set timeShift(shift: number) {
+        this._timeShift = shift;
+    }
+
+    private _eventShift: number;
+
+    get eventShift(): number {
+        return this._eventShift;
+    }
+
+    set eventShift(shift: number) {
+        this._eventShift = shift;
+    }
+
+    /* MIN MAX */
+    private _minMag: number;
+
+    /* GETTERS */
+    get minMag(): number {
+        return this._minMag;
+    }
+
+    /* SETTERS */
+    set minMag(min: number) {
+        this._minMag = min;
+    }
+
+    private _maxMag: number;
+
+    get maxMag(): number {
+        return this._maxMag;
+    }
+
+    set maxMag(max: number) {
+        this._maxMag = max;
     }
 
     initialize() {
@@ -50,7 +86,7 @@ export class TransientChart {
                     legend: {
                         labels: {
                             filter: item => {
-                                if (typeof(item.text) === 'string') {
+                                if (typeof (item.text) === 'string') {
                                     if (item.text.includes("error-bar")) {
                                         return false
                                     }
@@ -65,16 +101,16 @@ export class TransientChart {
                     },
                     zoom: {
                         pan: {
-                          enabled: true,
-                          mode: 'x',
+                            enabled: true,
+                            mode: 'x',
                         },
                         zoom: {
-                          wheel: {
-                            enabled: true,
-                          },
-                          mode: 'x',
+                            wheel: {
+                                enabled: true,
+                            },
+                            mode: 'x',
                         },
-                      },
+                    },
                     tooltip: {
                         //enabled: false,
                         callbacks: {
@@ -131,11 +167,11 @@ export class TransientChart {
 
     /* MODEL METHODS */
     updateModel(form: VariableLightCurveForm) {
-        let tempData: Array<{x: number, y: number}> = [];
+        let tempData: Array<{ x: number, y: number }> = [];
         // currently using min/max data, not visible
         const visibleMin = this.getMinMJD();//this.getVisibleRange()[0];
         const visibleMax = this.getMaxMJD();//this.getVisibleRange()[1];
-        const buffer = (visibleMax - visibleMin)*0.5;
+        const buffer = (visibleMax - visibleMin) * 0.5;
         const range = [Math.max(visibleMin - buffer, 0.1), visibleMax + buffer];
 
         const model = new Model(form);
@@ -144,7 +180,7 @@ export class TransientChart {
             let label = this.getDataset(i).label;
             let delim = findDelimiter(label);
             let filter = label.split(delim)[0];
-            let magShift = this.getMagShift(filter) ? this.getMagShift(filter): 0;
+            let magShift = this.getMagShift(filter) ? this.getMagShift(filter) : 0;
             if (label.includes("model")) {
                 for (let j = 0; j < range.length; j++) {
                     let mjd = range[j];
@@ -162,20 +198,20 @@ export class TransientChart {
     }
 
     addModel(data: Map<any, any>, modelForm: VariableLightCurveForm) {
-        let tmp: Array<{x: number, y: number}> = [];
+        let tmp: Array<{ x: number, y: number }> = [];
         const itr = data.keys();
-    
+
         /* USE VISIBLE RANGES FOR MODEL */
-        let buffer = (this.getMaxMJD() - this.getMinMJD())*0.5;
+        let buffer = (this.getMaxMJD() - this.getMinMJD()) * 0.5;
         let range = [Math.max(this.getMinMJD() - buffer, 0.1), this.getMaxMJD() + buffer];
         this.chart.options.scales["x"].max = range[1];
-    
+
         let model = new Model(modelForm);
         for (let i = 0; i < data.size; i++) {
             let key = itr.next().value;
-    
+
             tmp = [];
-            let magShift = this.getMagShift(key) ? this.getMagShift(key): 0;
+            let magShift = this.getMagShift(key) ? this.getMagShift(key) : 0;
             for (let j = 0; j < range.length; j++) {
                 tmp.push({
                     x: range[j],
@@ -183,7 +219,7 @@ export class TransientChart {
                 });
             }
             this.addDataset({
-                label: key+"-model",
+                label: key + "-model",
                 data: tmp,
                 backgroundColor: FILTERCOLORS[key],
                 borderColor: FILTERCOLORS[key],
@@ -191,7 +227,7 @@ export class TransientChart {
                 pointHoverRadius: 0,
                 pointBorderWidth: 0,
                 hidden: false,
-                showLine:true,
+                showLine: true,
                 spanGaps: false,
                 parsing: {},
             });
@@ -199,18 +235,18 @@ export class TransientChart {
     }
 
     /* NON-MODEL METHODS */
-    addData(datapoints: Map<string, Array<Array<number>>>, xShift:number) {
+    addData(datapoints: Map<string, Array<Array<number>>>, xShift: number) {
         const dataITR = datapoints.keys();
         const errorITR = datapoints.keys();
-        let tmp: Array<{x: number, y: number}> = [];
-        let errors: Array<{x: number, y: number}> = [];
+        let tmp: Array<{ x: number, y: number }> = [];
+        let errors: Array<{ x: number, y: number }> = [];
 
         this.clearDatasets();
         // add data
         for (let i = 0; i < datapoints.size; i++) {
             let key = dataITR.next().value;
             let dps = datapoints.get(key);
-            let magShift = this.getMagShift(key) ? this.getMagShift(key): 0;
+            let magShift = this.getMagShift(key) ? this.getMagShift(key) : 0;
             let operation = magShift < 0 ? '\-' : '\+';
 
             tmp = [];
@@ -221,7 +257,7 @@ export class TransientChart {
                 });
             }
             this.addDataset({
-                label: key+operation+String(magShift),
+                label: key + operation + String(magShift),
                 data: tmp,
                 backgroundColor: FILTERCOLORS[key],
                 pointRadius: 6,
@@ -240,10 +276,10 @@ export class TransientChart {
 
             errors = [];
             for (let j = 0; j < dps.length; j++) {
-                errors.push({x:null, y:null});
+                errors.push({x: null, y: null});
                 errors.push({
                     x: dps[j][0] - xShift,
-                    y: dps[j][1]-1,
+                    y: dps[j][1] - 1,
                 });
                 errors.push({
                     x: dps[j][0] - xShift,
@@ -256,15 +292,15 @@ export class TransientChart {
                 borderColor: "black",
                 borderWidth: 1,
                 pointRadius: 0,
-                showLine:true,
+                showLine: true,
                 spanGaps: false,
                 parsing: {}
             });
         }
     }
 
-    shiftData(axis:string, shift: number) {
-        // shift           // new input 
+    shiftData(axis: string, shift: number) {
+        // shift           // new input
         // this.eventShift // previous input
         // this.timeShift  // scale shift using min/max values
         let data = {};
@@ -294,7 +330,9 @@ export class TransientChart {
             }
             this.updateDataFromDataset(tmp, i);
         }
-        if (axis === "x") { this.eventShift = shift; }
+        if (axis === "x") {
+            this.eventShift = shift;
+        }
     }
 
     setBoundaries(data: any[]) {
@@ -357,23 +395,6 @@ export class TransientChart {
         }
     }
 
-    /* GETTERS */
-    get minMag(): number {
-        return this._minMag;
-    }
-
-    get maxMag(): number {
-        return this._maxMag;
-    }
-
-    get timeShift(): number {
-        return this._timeShift;
-    }
-
-    get eventShift(): number {
-        return this._eventShift;
-    }
-
     getMinMJD() {
         return this.chart.data.minMJD;
     }
@@ -389,8 +410,7 @@ export class TransientChart {
     getDataset(idx: number) {
         if (this.chart.data.datasets.length > idx) {
             return this.chart.data.datasets[idx];
-        }
-        else {
+        } else {
             console.log('dataset does not exist');
             return null;
         }
@@ -400,27 +420,9 @@ export class TransientChart {
         return this.chart.data.datasets;
     }
 
-    /* SETTERS */
-    set minMag(min: number) {
-        this._minMag = min;
-    }
-
-    set maxMag(max: number) {
-        this._maxMag = max;
-    }
-
-    set timeShift(shift: number) {
-        this._timeShift = shift;
-    }
-
-    set eventShift(shift: number) {
-        this._eventShift = shift;
-    }
-
-    setMagShift(filter: string, shift: number) 
-    {
-        this.filterShift.set(filter, shift);   
-        this.update();     
+    setMagShift(filter: string, shift: number) {
+        this.filterShift.set(filter, shift);
+        this.update();
     }
 
     setBuffer(buffer: number) {
@@ -429,7 +431,7 @@ export class TransientChart {
         this.chart.options.scales['y'].min = min - buffer;
         this.chart.options.scales['y'].max = max + buffer;
     }
-    
+
     setMinMJD(min: number) {
         this.chart.data.minMJD = min;
     }
@@ -445,8 +447,7 @@ export class TransientChart {
     setScaleType(model: string) {
         if (model === 'Power Law') {
             this.chart.options.scales['x'].type = 'logarithmic';
-        } 
-        else if (model === 'Exponential') {
+        } else if (model === 'Exponential') {
             this.chart.options.scales['x'].type = 'linear';
         } else {
             this.chart.options.scales['x'].type = 'logarithmic'; // default
