@@ -136,7 +136,7 @@ export function insertClusterControls(chartCounts: number = 1, isPro = false) {
         "</div>\n"
 
     if (isPro)
-        htmlContent += '<div class="row">\n' +
+        htmlContent += '<div class="row" style="display: none">\n' +
             '<div class="col-sm-6 des">R_V (typically 3.1):</div>\n' +
             '<div class="col-sm-4 range"><input type="range" title="Reddening" name="rv"></div>\n' +
             '<div class="col-sm-2 text"><input type="number" title="Reddening" name="rv_num" class="field"></div>\n' +

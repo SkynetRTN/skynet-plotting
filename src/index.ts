@@ -346,16 +346,20 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         if (JSON.parse(proMotionForm['rarangeCheck'].checked))
             texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
                 + " ± " + proMotionForm['rarange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value);
         if (JSON.parse(proMotionForm['decrangeCheck'].checked))
             texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
                 + " ± " + proMotionForm['decrange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value);
         if (JSON.parse(clusterForm['distrangeCheck'].checked))
             texts.push("Distance: " + clusterForm['d_num'].value
-                + " ± " + percentToAbsolute(clusterForm['d_num'].value, clusterForm['distrange'].value) + " kpc");
+                + " kpc" + " ± " + clusterForm['distrange'].value + "%");
         texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
         texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
         texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
-        texts.push("R_V: " + clusterForm['rv_num'].value)
+        // texts.push("R_V: " + clusterForm['rv_num'].value)
         console.log(dx)
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
