@@ -356,13 +356,13 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
         texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
         texts.push("R_V: " + clusterForm['rv_num'].value)
-
+        console.log(dx)
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
-        destCtx.font = '24px serif';
+        destCtx.font = dx/100 + 'px serif';
         destCtx.fillStyle = 'black'
         for (const text of texts) {
-            dy += 30
+            dy += dx/100
             destCtx.fillText(text, dx + 20, dy);
         }
     }
