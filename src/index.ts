@@ -68,7 +68,8 @@ window.onload = function () {
 
     // Enabling download function. Will trigger Honor Code Pledge interface before
     //  students are allowed to download images.
-    document.getElementById('honor-pledge-form').onsubmit = () => {
+    document.getElementById('honor-pledge-form').onsubmit = (event) => {
+        event.preventDefault();
         const honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
