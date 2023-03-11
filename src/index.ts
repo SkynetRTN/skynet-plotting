@@ -363,10 +363,10 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         console.log(dx)
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
-        destCtx.font = dx/100 + 'px serif';
+        destCtx.font = dx/60 + 'px serif';
         destCtx.fillStyle = 'black'
         for (const text of texts) {
-            dy += dx/100
+            dy += dx/60
             destCtx.fillText(text, dx + 20, dy);
         }
     }
