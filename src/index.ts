@@ -74,20 +74,23 @@ window.onload = function () {
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        } else if ('myChart' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide');
-            saveImage([], signature, true, 1.0);
-        }
-        // for cluster two
-        else if ('myChart1' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([1, 2], signature, true, 1.0);
-            // for cluster pro & pro plus
-        } else if ('myChart3' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0, true);
+        } else {
+            if ('myChart' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                // NO MORE JQUERY BYE BYE xD
+                // $('#honor-pledge-modal').modal('hide');
+                saveImage([], signature, true, 1.0);
+            }
+            // for cluster two
+            else if ('myChart1' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([1, 2], signature, true, 1.0);
+                // for cluster pro & pro plus
+            } else if ('myChart3' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([3, 4, 2], signature, true, 1.0, true);
+            }
+            document.getElementById('dismiss-honor-modal').click();
         }
     };
 
