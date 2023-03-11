@@ -356,6 +356,8 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         if (JSON.parse(clusterForm['distrangeCheck'].checked))
             texts.push("Distance: " + clusterForm['d_num'].value
                 + " kpc" + " ± " + clusterForm['distrange'].value + "%");
+        else
+            texts.push("Distance: " + clusterForm['d_num'].value + " kpc");
         texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
         texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
         texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
