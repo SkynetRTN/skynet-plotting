@@ -851,7 +851,9 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
             myChart.data.datasets[2].data = [];
             myChart.data.datasets[3].data = [];
         } else {
+            //I think logarithmic scales do chart bounds differently, so we have to specify the ends of the datasets as max and min
             myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
+            myChart.options.scales.x.max = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length - 1] as ScatterDataPoint).x;
         }
 
         showDiv("fourier-div");
