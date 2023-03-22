@@ -341,7 +341,7 @@ export function pulsar(): [Handsontable, Chart] {
                         maxTicksLimit: 9,
                         //There seems to be an underlying issue with ticks on logarithmic graphs where they get rounded weirdly, 
                         //this solves that. Yes, this function literally does nothing, except get chart.js to work right somehow.
-                        callback: function (tickValue, index, ticks) {
+                        callback: function (tickValue) {
                             return tickValue;
                         },
                     },
@@ -539,8 +539,19 @@ export function pulsar(): [Handsontable, Chart] {
     }
 
     const periodFoldingOninput = function () {
-        let end = (myChart.data.datasets[1].data[myChart.data.datasets[1].data.length - 1] as ScatterDataPoint).x;
-        let start = (myChart.data.datasets[0].data[0] as ScatterDataPoint).x;
+        let srcStart: number = 0;
+        let srcEnd: number = 0;
+        console.log(myChart.data.datasets)
+        if (myChart.data.datasets[0].data.length > 0 && myChart.data.datasets[1].data.length > 0){
+            srcStart = 0;
+            srcEnd = 1;
+        } else if (myChart.data.datasets[5].data.length > 0){
+            srcStart= 5
+            srcEnd = 6
+        }
+
+        let start = (myChart.data.datasets[srcStart].data[srcStart] as ScatterDataPoint).x;
+        let end = (myChart.data.datasets[srcEnd].data[myChart.data.datasets[srcEnd].data.length - 1] as ScatterDataPoint).x;
         let range = Math.abs(start - end);
         let step = 10e-5
 
@@ -566,8 +577,8 @@ export function pulsar(): [Handsontable, Chart] {
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
         let eqaulizer = parseFloat(polarizationForm.eq_num.value);
 
-        myChart.data.datasets[5].data = periodFolding(myChart, 0, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
-        myChart.data.datasets[6].rawData = periodFolding(myChart, 1, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
+        myChart.data.datasets[5].data = periodFolding(myChart, srcStart, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
+        myChart.data.datasets[6].rawData = periodFolding(myChart, srcEnd, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({x: point.x, y: point.y * eqaulizer})
         );
@@ -576,6 +587,7 @@ export function pulsar(): [Handsontable, Chart] {
             myChart.data.datasets[6].data as ScatterDataPoint[]
         )
         myChart.update('none');
+        console.log(myChart.data.datasets)
 
     }
     //set period precision
@@ -680,6 +692,9 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         type = "pressto"
     } else if (file.name.match(".*\.txt"))//we'll check file type later
     {
+        let periodForm = document.getElementById("period-folding-form") as PeriodFoldingForm;
+        periodForm.elements["period"].disabled = false;
+        periodForm.elements["period_num"].disabled = false;
     } else {
         console.log("Uploaded file type is: ", file.type);
         console.log("Uploaded file name is: ", file.name);
@@ -741,19 +756,19 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
         if (type === "pressto") {
             let period = parseFloat(data[15].split(' ').filter(str => str != '')[4]) / 1000;
             let fluxstr: string[] = data
-            console.log(fluxstr);
+            // console.log(fluxstr);
             if (data[27].includes("\t")) {
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length != 0)).map(str => str.split("\t")[str.split("\t").length - 1].trim());
             } else {
                 fluxstr = data.filter(str => (str[0] !== '#' && str.length != 0)).map(str => str.split(" ")[str.split(" ").length - 1].trim());
             }
-            console.log(fluxstr);
+            // console.log(fluxstr);
             if (!fluxstr[0].includes("e+")) {
                 var fluxes: number[] = fluxstr.map(Number);
             } else {
                 var fluxes: number[] = fluxstr.map(f => parseFloat(f.split("e+")[0]) * (10 ** parseFloat(f.split("e+")[1])));
             }
-            console.log(fluxes);
+            // console.log(fluxes);
             let sampleRat = period / fluxes.length;
 
             var max = ArrMath.max(fluxes);
@@ -772,7 +787,6 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
                     'y': (flux - med) / (max - med),
                 });
             }
-
             presstoMode(myChart, chartData, period)
 
         }
@@ -852,8 +866,8 @@ function switchMode(myChart: Chart<'line'>, mode: Mode, reset: boolean = false, 
             myChart.data.datasets[3].data = [];
         } else {
             //I think logarithmic scales do chart bounds differently, so we have to specify the ends of the datasets as max and min
-            myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint).x;
-            myChart.options.scales.x.max = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length - 1] as ScatterDataPoint).x;
+            myChart.options.scales.x.min = (myChart.data.datasets[2].data[0] as ScatterDataPoint)?.x;
+            myChart.options.scales.x.max = (myChart.data.datasets[2].data[myChart.data.datasets[2].data.length - 1] as ScatterDataPoint)?.x;
         }
 
         showDiv("fourier-div");
@@ -1048,12 +1062,13 @@ function presstoMode(myChart: Chart<'line'>, data: ScatterDataPoint[], period: n
     let polForm = document.getElementById("polarization-form") as PolarizationForm;
     let modeForm = document.getElementById('pulsar-form') as PulsarForm;
 
-    periodForm.elements["pf"].value = period.toString();
+    periodForm.elements["period_num"].value = period.toString();
     periodForm.elements["bins"].value = (data.length / 2).toString();
     modeForm.mode.value = 'pf';
     polForm.elements["eq_num"].value = '1';
     polForm.elements["eq"].value = '0';
-    periodForm.elements["pf"].disabled = true;
+    periodForm.elements["period"].disabled = true;
+    periodForm.elements["period_num"].disabled = true;
     periodForm.elements["bins"].disabled = true;
     polForm.hidden = true;
     modeForm.mode[0].disabled = true;
