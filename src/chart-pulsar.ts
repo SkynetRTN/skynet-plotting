@@ -533,7 +533,6 @@ export function pulsar(): [Handsontable, Chart] {
         let phase = parseFloat(periodFoldingForm.phase_num.value);
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
 
-        // console.log(periodFoldingForm.doublePeriodMode.checked)
         myChart.data.datasets[5].data = periodFolding(myChart, 0, period, bins, phase, whetherDouble)
         myChart.data.datasets[6].rawData = periodFolding(myChart, 1, period, bins, phase, whetherDouble)
     }
@@ -541,6 +540,7 @@ export function pulsar(): [Handsontable, Chart] {
     const periodFoldingOninput = function () {
         let srcStart: number = 0;
         let srcEnd: number = 0;
+        let period: number = parseFloat(periodFoldingForm.period_num.value);;
         console.log(myChart.data.datasets)
         if (myChart.data.datasets[0].data.length > 0 && myChart.data.datasets[1].data.length > 0){
             srcStart = 0;
@@ -550,7 +550,7 @@ export function pulsar(): [Handsontable, Chart] {
             srcEnd = 6
         }
 
-        let start = (myChart.data.datasets[srcStart].data[srcStart] as ScatterDataPoint).x;
+        let start = (myChart.data.datasets[srcStart].data[0] as ScatterDataPoint).x;
         let end = (myChart.data.datasets[srcEnd].data[myChart.data.datasets[srcEnd].data.length - 1] as ScatterDataPoint).x;
         let range = Math.abs(start - end);
         let step = 10e-5
@@ -571,14 +571,16 @@ export function pulsar(): [Handsontable, Chart] {
         // this.pf.value = clamp(this.pf.value,0, NaN);
         this.bins.value = clamp(this.bins.value, 0, 10000);
 
-        let period = parseFloat(periodFoldingForm.period_num.value);
         let bins = parseInt(this.bins.value);
         let phase = parseFloat(periodFoldingForm.phase_num.value);
         let whetherDouble = periodFoldingForm.doublePeriodMode.checked
         let eqaulizer = parseFloat(polarizationForm.eq_num.value);
+        if (srcStart == 0)
+            period = parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range));
 
-        myChart.data.datasets[5].data = periodFolding(myChart, srcStart, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
-        myChart.data.datasets[6].rawData = periodFolding(myChart, srcEnd, parseFloat(clamp(period, parseFloat(fourierForm["pstart"].value), range)), bins, phase, whetherDouble)
+        myChart.data.datasets[5].data = periodFolding(myChart, srcStart, period, bins, phase, whetherDouble);
+        myChart.data.datasets[6].rawData = periodFolding(myChart, srcEnd, period, bins, phase, whetherDouble);
+
         myChart.data.datasets[6].data = myChart.data.datasets[6].rawData.map(
             point => ({x: point.x, y: point.y * eqaulizer})
         );
@@ -754,6 +756,7 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
 
         //PRESSTO files
         if (type === "pressto") {
+            myChart.data.minT = 0;
             let period = parseFloat(data[15].split(' ').filter(str => str != '')[4]) / 1000;
             let fluxstr: string[] = data
             // console.log(fluxstr);
