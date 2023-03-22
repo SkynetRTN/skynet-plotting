@@ -725,7 +725,8 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
             let rows: number[][] | string[][] = data.map(val => val.trim().split(/\ +/));
 
             rows = rows.map(row => row.map(str => parseFloat(str)));
-            rows = rows.filter(row => (row[9] !== 0));
+            const validIndex = rows[0].length-1;
+            rows = rows.filter(row => (row[validIndex] !== 0));
             rows = rows.map(row => [row[0], row[5], row[6]]) as number[][];
 
             const tableData = [];
