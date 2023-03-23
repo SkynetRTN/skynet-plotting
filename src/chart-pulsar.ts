@@ -540,13 +540,14 @@ export function pulsar(): [Handsontable, Chart] {
     const periodFoldingOninput = function () {
         let srcStart: number = 0;
         let srcEnd: number = 0;
-        let period: number = parseFloat(periodFoldingForm.period_num.value);;
+        let period: number = parseFloat(periodFoldingForm.period_num.value);
+        ;
         console.log(myChart.data.datasets)
-        if (myChart.data.datasets[0].data.length > 0 && myChart.data.datasets[1].data.length > 0){
+        if (myChart.data.datasets[0].data.length > 0 && myChart.data.datasets[1].data.length > 0) {
             srcStart = 0;
             srcEnd = 1;
-        } else if (myChart.data.datasets[5].data.length > 0){
-            srcStart= 5
+        } else if (myChart.data.datasets[5].data.length > 0) {
+            srcStart = 5
             srcEnd = 6
         }
 
@@ -725,9 +726,13 @@ export function pulsarFileUpload(evt: Event, table: Handsontable, myChart: Chart
             let rows: number[][] | string[][] = data.map(val => val.trim().split(/\ +/));
 
             rows = rows.map(row => row.map(str => parseFloat(str)));
-            const validIndex = rows[0].length-1;
+            const validIndex = rows[0].length - 1;
             rows = rows.filter(row => (row[validIndex] !== 0));
             rows = rows.map(row => [row[0], row[5], row[6]]) as number[][];
+            if (rows.length === 0) {
+                alert("All Observation Sweeps Are Invalid!\nFile Upload Failed.");
+                return;
+            }
 
             const tableData = [];
             for (let row of rows) {
