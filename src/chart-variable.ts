@@ -845,7 +845,7 @@ function lightCurve(myChart: Chart, err1: ScatterDataPoint[], err2: ScatterDataP
         linkInputsVar(
             periodFoldingForm["period"],
             periodFoldingForm["period_num"],
-            parseFloat(fourierForm.start.value), range, 1, parseFloat(fourierForm.start.value), true
+            parseFloat(fourierForm.start.value), range, 1, range, true
         );
 
 
