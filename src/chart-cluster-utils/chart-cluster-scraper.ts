@@ -175,7 +175,7 @@ export function queryVizieR(table: Handsontable, mycharts: Chart[], graphMaxMin:
         };
 
         if (clusterForm.distrangeCheck.checked) {
-            const dist_range_abs = parseFloat(clusterForm.d_num.value) * parseFloat(clusterForm.distrange_num.value);
+            const dist_range_abs = parseFloat(clusterForm.d_num.value) * parseFloat(clusterForm.distrange_num.value)/100;
             queryRestriction.distance.min = 1000 * (parseFloat(clusterForm.d_num.value) - dist_range_abs);
             queryRestriction.distance.max = 1000 * (parseFloat(clusterForm.d_num.value) + dist_range_abs);
         }
