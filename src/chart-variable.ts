@@ -107,7 +107,7 @@ export function variable(): [Handsontable, Chart] {
                 }, {
                     label: 'Fourier',
                     data: [],
-                    backgroundColor: colors['bright'],
+                    backgroundColor: colors['slate'],
                     pointRadius: 3,
                     pointHoverRadius: 6,
                     pointBorderWidth: 0,
