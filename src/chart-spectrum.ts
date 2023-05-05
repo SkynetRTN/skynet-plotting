@@ -4,11 +4,10 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import {tableCommonOptions, colors} from "./config"
+import {colors, tableCommonOptions} from "./config"
 import {updateLabels, updateTableHeight} from "./util"
 import {round} from "./my-math"
 import {ChartConfiguration} from "chart.js";
-import {insertGraphControl} from "./chart-cluster-utils/chart-cluster-interface";
 
 
 /**
@@ -87,7 +86,7 @@ export function spectrum(): [Handsontable, Chart] {
         zoom = setInterval(() => {
             myChart.zoom(1.03)
         }, 20);
-        ;
+
     }
     zoomIn.onmouseup = zoomIn.onmouseleave = function () {
         clearInterval(zoom);
@@ -96,7 +95,7 @@ export function spectrum(): [Handsontable, Chart] {
         zoom = setInterval(() => {
             myChart.zoom(0.97);
         }, 20);
-        ;
+
     }
     zoomOut.onmouseup = zoomOut.onmouseleave = function () {
         clearInterval(zoom);
@@ -338,7 +337,7 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
         data = data.filter(str => (str[0] !== '#'));
         const tableData = [];
         let isRadio: boolean = false;
-        if (theFrequencyInfoString){
+        if (theFrequencyInfoString) {
             isRadio = true;
         }
         if (isRadio) {
@@ -392,10 +391,10 @@ export function spectrumFileUpload(evt: Event, table: Handsontable) {
                         "y": y,
                     })
                 }
-                ;
+
             }
         }
-        ;
+
 
         // console.log(tableData);
         tableData.sort((a, b) => a.wl - b.wl);

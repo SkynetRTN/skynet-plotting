@@ -1,0 +1,38 @@
+{
+  "name": "skynet-plotting",
+  "version": "2.2.0",
+  "description": "A graphing tool used by the OPIS! (Our Place In Space) and MWU! (The Multi-Wavelength Universe) [curricula](https://www.danreichart.com/curricula) at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "npm i && vite",
+    "build": "npm i && vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shengjiex98/skynet-plotting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shengjiex98/skynet-plotting/issues"
+  },
+  "homepage": "https://github.com/shengjiex98/skynet-plotting#readme",
+  "devDependencies": {
+    "@types/bootstrap": "^5.2.6",
+    "@types/file-saver": "^2.0.4",
+    "typescript": "^4.9.5",
+    "vite": "^2.9.15"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.3",
+    "chart.js": "^3.9.1",
+    "chartjs-chart-error-bars": "^3.10.0",
+    "chartjs-plugin-zoom": "^1.2.1",
+    "file-saver": "^2.0.5",
+    "handsontable": "^12.3.1",
+    "piexif-ts": "^2.0.16"
+  }
+}

@@ -1,8 +1,8 @@
 'use strict';
 
-import { Chart, LinearScaleOptions, ScatterDataPoint } from "chart.js";
+import {Chart, LinearScaleOptions, ScatterDataPoint} from "chart.js";
 import Handsontable from "handsontable";
-import { clamp, round } from "./my-math";
+import {clamp, round} from "./my-math";
 
 /**
  *  This function takes the data in a dictionary object and updates a Chart object with the data. The
@@ -22,7 +22,7 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
             tableData[i][xKey] === null || tableData[i][yKey] === null) {
             continue;
         }
-        data[start++] = { x: tableData[i][xKey], y: tableData[i][yKey] };
+        data[start++] = {x: tableData[i][xKey], y: tableData[i][yKey]};
     }
     while (data.length !== start) {
         data.pop();
@@ -35,16 +35,17 @@ export function updateLine(tableData: any[], myChart: Chart, dataSetIndex = 0, x
  *  @param myChart:     The Chart object
  *  @param form:        The form to be updated.
  */
-export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum:number = 0, changeDataQMark = true) {
+export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = false, immTitle = false, immX = false, immY = false, chartNum: number = 0, changeDataQMark = true) {
 
-    if(changeDataQMark === true){
+    if (changeDataQMark === true) {
         // console.log(true)
         let labels = "";
         for (let i = 0; i < myChart.data.datasets.length; i++) {
             if (!myChart.data.datasets[i].hidden && !(myChart.data.datasets[i] as any).immutableLabel && myChart.data.datasets[i].label !== "error-bar") {
                 if (labels !== "") {
                     labels += ", ";
-                };
+                }
+
                 labels += myChart.data.datasets[i].label;
             }
         }
@@ -75,21 +76,21 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 }
 
 /**
-*  This function links a <input type="range"> and a <input type="number"> together so changing the value
-*  of one updates the other. This function also sets the min, max and step properties for both the inputs.
-*  @param slider:       A <input type="range"> to be linked.
-*  @param number:       A <input type"number"> to be linked.
-*  @param min:          The min value for both inputs.
-*  @param max:          The max value for both inputs.
-*  @param step:         The step of changes for both inputs.
-*  @param value:        The initial value of both inputs.
-*  @param log:          A boolean that determines whether the slider uses logarithmic scale.
-*  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
-*  @param numMin:       Min value for number field when @param numOverride is true.
-*  @param numMax:       Max value for number field when @param numOverride is true.
-*/
+ *  This function links a <input type="range"> and a <input type="number"> together so changing the value
+ *  of one updates the other. This function also sets the min, max and step properties for both the inputs.
+ *  @param slider:       A <input type="range"> to be linked.
+ *  @param number:       A <input type"number"> to be linked.
+ *  @param min:          The min value for both inputs.
+ *  @param max:          The max value for both inputs.
+ *  @param step:         The step of changes for both inputs.
+ *  @param value:        The initial value of both inputs.
+ *  @param log:          A boolean that determines whether the slider uses logarithmic scale.
+ *  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
+ *  @param numMin:       Min value for number field when @param numOverride is true.
+ *  @param numMax:       Max value for number field when @param numOverride is true.
+ */
 export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
-    log = false, numOverride = false, numMin = 0, numMax = 0
+                           log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
     let debounceTime = 1000;
     if (!numOverride) {
@@ -109,7 +110,7 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = debounce(()=> {
+        number.oninput = debounce(() => {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
         }, debounceTime);
@@ -119,16 +120,16 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
         slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
         slider.value = Math.log(value).toString();
         slider.oninput = function () {
-            /**  
-             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
+            /**
+             * Note that we exp() first then clamp(), in contrast to below log() first then clamp().
              * The reason is that the slider has min and max values defined for log. Also this is
              * clamped to min and max instead of numMin and numMax, because the slider logically
              * still correspond to min and max, even though the implementation changed to accomodate
              * the log behavior.
-            */
+             */
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 2), min, max);
         };
-        number.oninput = debounce(()=> {
+        number.oninput = debounce(() => {
             number.value = clamp(number.value, numMin, numMax);
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = Math.log(parseFloat(clamp(number.value, min, max))).toString();
@@ -137,7 +138,7 @@ export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, m
 }
 
 export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
-    log = false, numOverride = false, numMin = 0, numMax = 0
+                              log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
     let debounceTime = 1000;
     if (!numOverride) {
@@ -157,7 +158,7 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = debounce(()=> {
+        number.oninput = debounce(() => {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
         }, debounceTime);
@@ -167,18 +168,18 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
         slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
         slider.value = Math.log(value).toString();
         slider.oninput = function () {
-            /**  
-             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
+            /**
+             * Note that we exp() first then clamp(), in contrast to below log() first then clamp().
              * The reason is that the slider has min and max values defined for log. Also this is
              * clamped to min and max instead of numMin and numMax, because the slider logically
              * still correspond to min and max, even though the implementation changed to accomodate
              * the log behavior.
-            */
+             */
             // number.value = clamp(round(Math.exp(parseFloat(slider.value)), 4), min, max);
             number.value = round((Math.exp(parseFloat(slider.value))), 4).toString();
         };
-        number.oninput = debounce(()=> {
-        // number.oninput = function(){
+        number.oninput = debounce(() => {
+            // number.oninput = function(){
             numMin = parseFloat(number.min)
             numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
@@ -186,13 +187,13 @@ export function linkInputsVar(slider: HTMLInputElement, number: HTMLInputElement
             max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 4).toString();
-        // }
+            // }
         }, debounceTime)
     }
 }
 
 export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
-    log = false, numOverride = false, numMin = 0, numMax = 0
+                               log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
     let debounceTime = 1000;
     if (!numOverride) {
@@ -212,7 +213,7 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
         slider.oninput = function () {
             number.value = slider.value;
         };
-        number.oninput = debounce(()=> {
+        number.oninput = debounce(() => {
             number.value = clamp(number.value, numMin, numMax);
             slider.value = clamp(number.value, min, max);
         }, debounceTime);
@@ -222,17 +223,17 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
         slider.step = ((Math.log(max) - Math.log(min)) / ((max - min) / step)).toString();
         slider.value = Math.log(value).toString();
         slider.oninput = function () {
-            /**  
-             * Note that we exp() first then clamp(), in contrast to below log() first then clamp(). 
+            /**
+             * Note that we exp() first then clamp(), in contrast to below log() first then clamp().
              * The reason is that the slider has min and max values defined for log. Also this is
              * clamped to min and max instead of numMin and numMax, because the slider logically
              * still correspond to min and max, even though the implementation changed to accommodate
              * the log behavior.
-            */ 
+             */
             number.value = clamp(round(Math.exp(parseFloat(slider.value)), 6), min, max);
         };
-        number.oninput = debounce(()=> {
-        // number.oninput = function(){
+        number.oninput = debounce(() => {
+            // number.oninput = function(){
             numMin = parseFloat(number.min)
             numMax = parseFloat(number.max)
             number.value = clamp(number.value, numMin, numMax);
@@ -240,7 +241,7 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
             max = parseFloat(slider.max)
             // Note that we clamp() to min and max instead of numMin and numMax.
             slider.value = round(Math.log(parseFloat(clamp(number.value, min, max))), 6).toString();
-        // }
+            // }
         }, debounceTime)
     }
 }
@@ -276,9 +277,9 @@ export function updateTableHeight(table: Handsontable) {
      * Not ideal. But this seems benign and I REALLY CAN'T FIGURE OUT WHAT'S WRONG
      */
     try {
-        table.updateSettings({ stretchH: 'none' });
-        table.updateSettings({ height: height });
-        table.updateSettings({ stretchH: 'all' });
+        table.updateSettings({stretchH: 'none'});
+        table.updateSettings({height: height});
+        table.updateSettings({stretchH: 'all'});
     } catch (error) {
         // console.error(error);
     }
@@ -291,7 +292,7 @@ export function dataURLtoBlob(dataurl: string) {
     while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
     }
-    return new Blob([u8arr], { type: mime });
+    return new Blob([u8arr], {type: mime});
 }
 
 /**
@@ -300,7 +301,7 @@ export function dataURLtoBlob(dataurl: string) {
 export function getDateString() {
     let date = new Date();
     let year = '' + date.getFullYear();
-    let month = dateAppendZero(date.getMonth()+1); //Date.getMonth() gives you month from 0 to 11!
+    let month = dateAppendZero(date.getMonth() + 1); //Date.getMonth() gives you month from 0 to 11!
     let days = dateAppendZero(date.getDate());
 
     let hour = dateAppendZero(date.getHours());
@@ -318,7 +319,7 @@ export function getDateString() {
  * is also an array, which represents one row of the table data.
  * @param {Array} cols An array containing, in increasing order, the index of the columns
  * that needs to be filled in.
- * @returns Sanitized table data. 
+ * @returns Sanitized table data.
  */
 export function sanitizeTableData(data: any[], cols: number[]) {
     return data.filter(row => cols.reduce(
@@ -354,7 +355,7 @@ export function chartDataDiff(data1: ScatterDataPoint[], data2: ScatterDataPoint
     const result = [];
     while (p1 < data1.length && p2 < data2.length) {
         if (data1[p1].x == data2[p2].x) {
-            result.push({ x: data1[p1].x, y: data1[p1].y - data2[p2].y });
+            result.push({x: data1[p1].x, y: data1[p1].y - data2[p2].y});
             p1++;
             p2++;
         } else if (data1[p1].x < data2[p2].x) {
@@ -367,13 +368,13 @@ export function chartDataDiff(data1: ScatterDataPoint[], data2: ScatterDataPoint
 }
 
 /**
- * This function takes a function @param func and a wait time @param wait, and returns a 
+ * This function takes a function @param func and a wait time @param wait, and returns a
  * version of the function that will execute at max once per @param wait interval.
- * 
+ *
  * @param func                  The function to be throttled
  * @param wait                  Wait time in (ms).
  * @param extraTrailExecution   If set to true, the function will be executed one
- * extra time after the @param wait interval if an execution attemp was made during the 
+ * extra time after the @param wait interval if an execution attemp was made during the
  * blocking period. This will be useful if @param func is some sort of update function that
  *  will update a view based on the underlying model.
  * @returns Throttled version of @param func.
@@ -398,7 +399,9 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
 
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
-            setTimeout(() => { trailFunc.apply(this, args); }, wait);
+            setTimeout(() => {
+                trailFunc.apply(this, args);
+            }, wait);
         } else {
             lock = false;
         }
@@ -417,9 +420,13 @@ export function throttle(func: Function, wait: number, extraTrailExecution: bool
             // BADDDDDDD! callback(...args) will run here and now ;_;
             // setTimeout(callback(...args), wait);
             if (extraTrailExecution) {
-                setTimeout(() => { trailFunc.apply(this, args); }, wait);
+                setTimeout(() => {
+                    trailFunc.apply(this, args);
+                }, wait);
             } else {
-                setTimeout(() => { lock = false; }, wait);
+                setTimeout(() => {
+                    lock = false;
+                }, wait);
             }
         } else {
             changed = true;
@@ -431,12 +438,14 @@ export function debounce(func: Function, wait: number) {
     let timeout: number = undefined;
     return function (...args: any[]) {
         clearTimeout(timeout);
-        timeout = setTimeout(() => { func.apply(this, args); }, wait);
+        timeout = setTimeout(() => {
+            func.apply(this, args);
+        }, wait);
     }
 }
 
 /**
- * 
+ *
  * @param time A string in returned by getDateString()
  * @returns Formatted time string as Year-Month-DayTHourMinuteSecond
  */
@@ -459,7 +468,10 @@ export function changeOptions(element: HTMLInputElement, newOptions: { value: st
     element.innerHTML = result;
 }
 
-export function defaultLayout(){
+export function defaultLayout() {
+    //show button row
+    document.getElementById('button-row').style.display = 'flex';
+
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
@@ -470,13 +482,13 @@ export function defaultLayout(){
     document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
     //remove display of 4 charts
     for (let i = 1; i < 5; i++) {
-        let chartId: string = 'myChart'+i.toString()
-        let divId: string = 'chart-div'+i.toString()
+        let chartId: string = 'myChart' + i.toString()
+        let divId: string = 'chart-div' + i.toString()
         if (document.getElementById(divId) != null) {
             if (document.getElementById(chartId) != null) {
                 document.getElementById(chartId).remove();
             }
-            if (i=== 1 || i ===2)
+            if (i === 1 || i === 2)
                 document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
             else
                 document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
@@ -487,11 +499,17 @@ export function defaultLayout(){
     document.getElementById("grav-charts").style.display = "none";
     //remove cluster pro controls
     document.getElementById("clusterProPmChartControl").style.display = "none";
+    //hide save data from Cluster Pro
+    document.getElementById('save-data-button').style.display = 'none';
+
     //put in chart-info-form
     document.getElementById("chart-info-form").style.display = "inline";
     //remove cluster pro form
     if (document.getElementById('clusterProForm') != null)
         document.getElementById('clusterProForm').remove()
+
+    //show chart info form div
+    document.getElementById('chart-info-form-div').style.display = 'inline';
 
     //expand the size of axisSet1 and hide axisSet2 for all interfaces
     document.getElementById('chart-info-form-div').className = 'col-sm-12';
@@ -504,8 +522,8 @@ export function defaultLayout(){
     document.getElementById('extra-options').innerHTML = '';
     //remove display of 2 axis labels
     for (let i = 0; i < 5; i++) {
-        if (document.getElementById('axis-label'+i.toString()) != null) {
-            document.getElementById('axis-label'+i.toString()).style.display = 'none';
+        if (document.getElementById('axis-label' + i.toString()) != null) {
+            document.getElementById('axis-label' + i.toString()).style.display = 'none';
         }
     }
     // hide cluster-scraper-form
@@ -514,10 +532,11 @@ export function defaultLayout(){
     document.getElementById('table-div').hidden = false;
     document.getElementById('add-row-button').hidden = false;
     document.getElementById('chart-div').style.cursor = "auto"
+
 }
 
-export function percentToAbsolute(value: string, percent: string): string{
+export function percentToAbsolute(value: string, percent: string): string {
     let valueNum = parseFloat(value);
     let percentNum = parseFloat(percent);
-    return Math.abs(valueNum*percentNum/100).toFixed(2).toString()
+    return Math.abs(valueNum * percentNum / 100).toFixed(2).toString()
 }

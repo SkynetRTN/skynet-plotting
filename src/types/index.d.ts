@@ -6,6 +6,7 @@ interface ChartInfoFormElements extends HTMLCollection {
     x2Axis: HTMLInputElement,
     y2Axis: HTMLInputElement
 }
+
 interface ChartInfoForm extends HTMLFormElement {
     elements: ChartInfoFormElements
 }
@@ -14,6 +15,7 @@ interface LineFormElements extends HTMLCollection {
     magnitude: HTMLInputElement,
     lineCount: HTMLInputElement
 }
+
 interface LineForm extends HTMLFormElement {
     elements: LineFormElements
 }
@@ -28,6 +30,7 @@ interface MoonFormElements extends HTMLCollection {
     phase_num: HTMLInputElement,
     tilt_num: HTMLInputElement,
 }
+
 interface MoonForm extends HTMLFormElement {
     elements: MoonFormElements
 }
@@ -40,6 +43,7 @@ interface RadioFormElements extends HTMLCollection {
     fluxDensity: HTMLInputElement,
     effectiveFrequency: HTMLInputElement,
 }
+
 interface RadioForm extends HTMLFormElement {
     elements: RadioFormElements
 }
@@ -50,6 +54,7 @@ interface ScatterFormElements extends HTMLCollection {
     d_num: HTMLInputElement,
     x_num: HTMLInputElement,
 }
+
 interface ScatterForm extends HTMLFormElement {
     elements: ScatterFormElements
 }
@@ -57,28 +62,35 @@ interface ScatterForm extends HTMLFormElement {
 interface VariableFormElements extends HTMLCollection {
     mode: HTMLInputElement
 }
+
 interface VariableForm extends HTMLFormElement {
     elements: VariableFormElements
 }
+
 interface VariableLightCurveFormElements extends HTMLCollection {
     source: HTMLInputElement,
     mag: HTMLInputElement
 }
+
 interface VariableLightCurveForm extends HTMLFormElement {
     elements: LightCurveFormElements
 }
+
 interface FourierFormElements extends HTMLCollection {
     start: HTMLInputElement,
     stop: HTMLInputElement
 }
+
 interface VariableFourierForm extends HTMLFormElement {
     elements: FourierFormElements
 }
+
 interface VariablePeriodFoldingFormElements extends HTMLCollection {
     pf: HTMLInputElement,
     period: HTMLInputElement,
     period_num: HTMLInputElement,
 }
+
 interface VariablePeriodFoldingForm extends HTMLFormElement {
     elements: PeriodFoldingFormElements
 
@@ -87,6 +99,7 @@ interface VariablePeriodFoldingForm extends HTMLFormElement {
 interface SpectrumFormElements extends HTMLCollection {
     channel: HTMLSelectElement
 }
+
 interface SpectrumForm extends HTMLFormElement {
     elements: SpectrumFormElements
 }
@@ -94,15 +107,19 @@ interface SpectrumForm extends HTMLFormElement {
 interface PulsarFormElements extends HTMLCollection {
     mode: HTMLInputElement
 }
+
 interface PulsarForm extends HTMLFormElement {
     elements: PulsarFormElements
 }
+
 interface LightCurveFormElements extends HTMLCollection {
     dt: HTMLInputElement
 }
+
 interface LightCurveForm extends HTMLFormElement {
     elements: LightCurveFormElements
 }
+
 interface FourierFormElements extends HTMLCollection {
     fouriermode: HTMLInputElement,
     pstart: HTMLInputElement,
@@ -111,23 +128,28 @@ interface FourierFormElements extends HTMLCollection {
     fstop: HTMLInputElement,
     rc: HTMLInputElement
 }
+
 interface FourierForm extends HTMLFormElement {
     elements: FourierFormElements
 }
+
 interface PeriodFoldingFormElements extends HTMLCollection {
     pf: HTMLInputElement,
     bins: HTMLInputElement,
     period: HTMLInputElement,
     period_num: HTMLInputElement,
 }
+
 interface PeriodFoldingForm extends HTMLFormElement {
     elements: PeriodFoldingFormElements
 }
+
 interface PolarizationFormElements extends HTMLCollection {
     diff: HTMLInputElement,
     eq: HTMLInputElement,
     eq_num: HTMLInputElement
 }
+
 interface PolarizationForm extends HTMLFormElement {
     elements: PolarizationFormElements
 }
@@ -172,6 +194,7 @@ interface ModelForm extends HTMLFormElement {
     blue4: HTMLInputElement,
     lum4: HTMLInputElement,
 }
+
 interface ClusterProForm extends HTMLFormElement {
     ramotion: HTMLInputElement,
     ramotion_num: HTMLInputElement,
@@ -184,6 +207,7 @@ interface ClusterProForm extends HTMLFormElement {
     rarangeCheckbox: HTMLInputElement,
     decrangeCheckbox: HTMLInputElement,
 }
+
 interface ClusterProPmChartControl extends HTMLFormElement {
     panLeftPro: HTMLInputElement,
     panRightPro: HTMLInputElement,

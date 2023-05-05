@@ -3,9 +3,9 @@
  */
 
 
-import { Chart, ScatterDataPoint } from "chart.js";
+import {Chart, ScatterDataPoint} from "chart.js";
 import Handsontable from "handsontable";
-import {baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "./chart-cluster-util";
+import {baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax} from "./chart-cluster-util";
 
 
 /**
@@ -16,7 +16,8 @@ import {baseUrl, httpGetAsync, modelFormKey, modelFormKeys, pointMinMax } from "
  *  @param chart:     The Chartjs object to be updated.
  *  @param callback:  callback function asynchronously execute stuff after model is updated
  */
-export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, charts: Chart[], callback: Function = () => { }, isChart: boolean = false) {
+export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, charts: Chart[], callback: Function = () => {
+}, isChart: boolean = false) {
     function modelFilter(dataArray: number[][], iSkip: number): [ScatterDataPoint[], ScatterDataPoint[], { [key: string]: number }] {
         let form: ScatterDataPoint[] = [] //the array containing all model points
         let scaleLimits: { [key: string]: number } = {minX: NaN, minY: NaN, maxX: NaN, maxY: NaN,};
@@ -27,22 +28,23 @@ export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, chart
             scaleLimits = pointMinMax(scaleLimits, dataArray[i][0], dataArray[i][1]);
             form.push(row);
         }
-        iSkip = iSkip > 0? iSkip : 0;
+        iSkip = iSkip > 0 ? iSkip : 0;
         let age = parseFloat(clusterForm['age_num'].value);
         if (age < 6.6)
             age = 6.6;
         else if (age > 10.3)
             age = 10.3;
-        let iEnd = Math.round(-14.324*age**2 + 227.43*age -666.25);
+        let iEnd = Math.round(-14.324 * age ** 2 + 227.43 * age - 666.25);
         return [form.slice(0, iSkip), form.slice(iSkip, iEnd), scaleLimits]
     }
+
     let reveal: string[] = [];
     for (let c = 0; c < charts.length; c++) {
         let chart = charts[c];
         reveal = reveal.concat(modelFormKeys(c, clusterForm));
         httpGetAsync(generateURL(clusterForm, c),
             (response: string) => {
-                if (!response.includes('err')){
+                if (!response.includes('err')) {
                     let json = JSON.parse(response);
                     let dataTable: number[][] = json['data'];
                     let filteredModel = modelFilter(dataTable, json['iSkip'])
@@ -67,7 +69,7 @@ export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, chart
     let columns: string[] = hot.getColHeader() as string[];
     let hidden: number[] = [];
     for (const col in columns) {
-        if (columns[col].includes('Mag')){
+        if (columns[col].includes('Mag')) {
             columns[col] = columns[col].substring(0, columns[col].length - 4); //cut off " Mag"
         }
         if (!reveal.includes(columns[col])) {
@@ -75,12 +77,14 @@ export function updateHRModel(clusterForm: ClusterForm, hot: Handsontable, chart
             hidden.push(parseFloat(col));
         }
     }
-    hot.updateSettings({hiddenColumns: {
+    hot.updateSettings({
+        hiddenColumns: {
             columns: hidden,
             // exclude hidden columns from copying and pasting
             //@ts-ignore
             copyPasteEnabled: false,
-        }});
+        }
+    });
 }
 
 /**

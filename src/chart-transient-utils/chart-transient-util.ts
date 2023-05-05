@@ -1,5 +1,3 @@
-
-
 /* METHODS */
 export const findDelimiter = (s: string) => {
     let plus = false;
@@ -23,17 +21,13 @@ export const findDelimiter = (s: string) => {
 export const formatFilterName = (f: string) => {
     if (f === 'uprime') {
         f = "u\'";
-    }
-    else if (f === 'rprime') {
+    } else if (f === 'rprime') {
         f = "r\'";
-    }
-    else if (f === 'gprime') {
+    } else if (f === 'gprime') {
         f = "g\'";
-    }
-    else if (f === 'iprime') {
+    } else if (f === 'iprime') {
         f = "i\'";
-    }
-    else if (f === 'zprime') {
+    } else if (f === 'zprime') {
         f = "z\'";
     }
     return f;
@@ -42,14 +36,14 @@ export const formatFilterName = (f: string) => {
 
 /* HASH TABLES */
 export const ZERO_POINT_VALUES: { [key: string]: number } = {
-    'U' : 1.790,
-    'B' : 4.063,
-    'V' : 3.636,
-    'R' : 3.064,
-    'I' : 2.416,
-    'J' : 1.589,
-    'H' : 1.021,
-    'K' : 0.640,
+    'U': 1.790,
+    'B': 4.063,
+    'V': 3.636,
+    'R': 3.064,
+    'I': 2.416,
+    'J': 1.589,
+    'H': 1.021,
+    'K': 0.640,
     "u\'": 3.680,
     "g\'": 3.643,
     "r\'": 3.648,
@@ -58,23 +52,23 @@ export const ZERO_POINT_VALUES: { [key: string]: number } = {
 }
 
 export const FILTERCOLORS: { [key: string]: string } = {
-    'U' : '#8601AF',
-    'B' : '#0247FE',
-    'V' : '#66B032',
-    'R' : '#FE2712',
-    'I' : '#4424D6',
-    'Y' : '#347C98',
-    'J' : '#66B032',
-    'H' : '#FC600A',
-    'K' : '#FE2712',
+    'U': '#8601AF',
+    'B': '#0247FE',
+    'V': '#66B032',
+    'R': '#FE2712',
+    'I': '#4424D6',
+    'Y': '#347C98',
+    'J': '#66B032',
+    'H': '#FC600A',
+    'K': '#FE2712',
     "u\'": '#4424D6',
     "g\'": '#347C98',
     "r\'": '#FC600A',
     "i\'": '#8601AF',
     "z\'": '#0247FE',
-    'uprime' : '#4424D6',
-    'gprime' : '#347C98',
-    'rprime' : '#FC600A',
-    'iprime' : '#8601AF',
-    'zprime' : '#0247FE'
+    'uprime': '#4424D6',
+    'gprime': '#347C98',
+    'rprime': '#FC600A',
+    'iprime': '#8601AF',
+    'zprime': '#0247FE'
 }

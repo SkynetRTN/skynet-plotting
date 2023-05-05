@@ -5,13 +5,7 @@ import {changeOptions, updateTableHeight} from "../util";
 import {Chart} from "chart.js";
 import {updateHRModel} from "./chart-cluster-model";
 import {graphScale, updateScatter} from "./chart-cluster-scatter";
-import {
-    chart2Scale,
-    proFormMinmax,
-    updateChart2,
-    updateClusterProScatter,
-    updateProForm
-} from "./chart-cluster-pro-util";
+import {chart2Scale, proFormMinmax, updateChart2, updateClusterProScatter} from "./chart-cluster-pro-util";
 
 // export function clusterFileUploadBeta(
 //     evt: Event,
@@ -54,9 +48,9 @@ export function updateClusterOnNewData(table: Handsontable,
                                        tableData: { [key: string]: number }[],
                                        filters: string[],
                                        myCharts: Chart[],
-                                       graphMaxMin : graphScale,
+                                       graphMaxMin: graphScale,
                                        pmChart: Chart = null,
-                                       ){
+) {
     const knownFilters = Object.keys(filterWavelength);
     // knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
@@ -70,14 +64,14 @@ export function updateClusterOnNewData(table: Handsontable,
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
     const chartCounts = myCharts.length;
     updateHRModel(clusterForm, table, myCharts,
-        (c: number) =>{
-            if (c === chartCounts-1){
+        (c: number) => {
+            if (c === chartCounts - 1) {
                 for (let i = 0; i < chartCounts; i++) {
                     graphMaxMin.updateMode('auto', i);
                     updateScatter(table, [myCharts[i]], clusterForm, [2], graphMaxMin, -1, clusterProForm);
                     myCharts[i].update();
                 }
-                if (pmChart){
+                if (pmChart) {
                     const proMinMax = proFormMinmax(table, clusterForm);
                     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
                     // updateProForm(proMinMax, clusterProForm);
@@ -95,7 +89,7 @@ export function updateClusterOnNewData(table: Handsontable,
 }
 
 
-function clusterWriteHandsonTable(table: Handsontable, tableData: { [key: string]: number }[], filters: string[]){
+function clusterWriteHandsonTable(table: Handsontable, tableData: { [key: string]: number }[], filters: string[]) {
     const headerNColumn = filtersToLists(filters);
     // @ts-ignore
     table.updateSettings({
@@ -111,7 +105,7 @@ function clusterWriteHandsonTable(table: Handsontable, tableData: { [key: string
 }
 
 
-function setFilterForClusterform(chartNum: number, filters: string[]){
+function setFilterForClusterform(chartNum: number, filters: string[]) {
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     const blue = clusterForm[modelFormKey(chartNum, 'blue')];
     const red = clusterForm[modelFormKey(chartNum, 'red')];
@@ -125,7 +119,7 @@ function setFilterForClusterform(chartNum: number, filters: string[]){
     lum.value = filters[1];
 }
 
-function filtersToLists(filters: string[]): {headers: any[], columns: any[], options: any[]}{
+function filtersToLists(filters: string[]): { headers: any[], columns: any[], options: any[] } {
     let headers: any[] = [];
     let columns: any[] = [];
     let options = [];
@@ -154,7 +148,7 @@ function filtersToLists(filters: string[]): {headers: any[], columns: any[], opt
         });
         for (const key of byFilterInfoList) {
             headers.push(filter + " " + key.name);
-            if (key.type === 'numeric'){
+            if (key.type === 'numeric') {
                 columns.push({
                     data: filter + key.name,
                     type: key.type,
@@ -176,7 +170,7 @@ function filtersToLists(filters: string[]): {headers: any[], columns: any[], opt
  *
  * @param isRangeReset: if true, uncheck and reset range checkbox
  */
-export function resetClusterFormValue(isRangeReset: boolean){
+export function resetClusterFormValue(isRangeReset: boolean, isClusterPro: boolean = false) {
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     clusterForm["d"].value = Math.log(3).toString();
     clusterForm["err"].value = "1";
@@ -191,8 +185,10 @@ export function resetClusterFormValue(isRangeReset: boolean){
     clusterForm["red_num"].value = "0";
     clusterForm["metal_num"].value = "-2.2";
     clusterForm["distrange_num"].value = "30";
-    clusterForm["rv"].value = "3.1";
-    clusterForm["rv_num"].value = "3.1";
+    if (isClusterPro) {
+        clusterForm["rv"].value = "3.1";
+        clusterForm["rv_num"].value = "3.1";
+    }
     if (isRangeReset)
         rangeCheckControl()
 }

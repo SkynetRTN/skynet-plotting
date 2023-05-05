@@ -2,34 +2,35 @@
 
 import 'bootstrap/js/dist/modal';
 
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime, defaultLayout, percentToAbsolute } from './util';
-import { curve } from './chart-curve';
-import { dual } from './chart-dual';
-import { moon } from './chart-moon';
-import { scatter } from './chart-scatter';
-import { venus } from './chart-venus';
-import { variable, variableFileUpload } from './chart-variable';
-import { spectrum, spectrumFileUpload } from './chart-spectrum';
-import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { cluster1 } from './chart-cluster';
-import { cluster2 } from './chart-cluster2';
-import { cluster3 } from './chart-cluster3';
-import { cluster3p } from "./chart-cluster3plus";
-import { round } from './my-math';
-import { gravity, gravityClass, gravityFileUpload } from './chart-gravity';
-import { gravityPro, gravityProFileUpload } from './chart-gravitypro';
-import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
+import {dataURLtoBlob, defaultLayout, formatTime, getDateString, percentToAbsolute, updateTableHeight} from './util';
+import {curve} from './chart-curve';
+import {dual} from './chart-dual';
+import {moon} from './chart-moon';
+import {scatter} from './chart-scatter';
+import {venus} from './chart-venus';
+import {variable, variableFileUpload} from './chart-variable';
+import {spectrum, spectrumFileUpload} from './chart-spectrum';
+import {pulsar, pulsarFileUpload} from './chart-pulsar';
+import {cluster1} from './chart-cluster';
+import {cluster2} from './chart-cluster2';
+import {cluster3} from './chart-cluster3';
+import {cluster3p} from "./chart-cluster3plus";
+import {round} from './my-math';
+import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
+import {gravityPro, gravityProFileUpload} from './chart-gravitypro';
+import Chart, {AnimationSpec, ChartType, LinearScaleOptions} from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { pause } from './sonification';
-import { TransientChart } from './chart-transient-utils/chart-transient-chart';
-import { clusterFileUpload } from "./chart-cluster-utils/chart-cluster-file";
-import { graphScale } from "./chart-cluster-utils/chart-cluster-scatter";
-import { updateClusterProLabels } from "./chart-cluster-utils/chart-cluster-interface";
-import { radio } from './chart-radio'
-import { transient, transientFileUpload } from "./chart-transient";
+import {pause} from './sonification';
+import {TransientChart} from './chart-transient-utils/chart-transient-chart';
+import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
+import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
+import {radio, radioFileUpload} from './chart-radio'
+import {transient, transientFileUpload} from "./chart-transient";
+
 /**
  *  Initializing the page when the website loads
  */
@@ -50,7 +51,7 @@ window.onload = function () {
                     for (let i = 0; i < len; i++) {
                         arr[i] = binStr.charCodeAt(i);
                     }
-                    callback(new Blob([arr], { type: type || 'image/png' }));
+                    callback(new Blob([arr], {type: type || 'image/png'}));
                 });
             }
         });
@@ -67,29 +68,29 @@ window.onload = function () {
 
     // Enabling download function. Will trigger Honor Code Pledge interface before
     //  students are allowed to download images.
-    document.getElementById('pledge-signed').onclick = () => {
+    document.getElementById('honor-pledge-form').onsubmit = (event) => {
+        event.preventDefault();
         const honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        }
-        else if ('myChart' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide');
-            saveImage([], signature, true, 1.0);
-        }
-        // for cluster two
-        else if ('myChart1' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([1, 2], signature, true, 1.0);
-            // for cluster pro
-        } else if ('myChart3' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0);
-        } else if ('myChart3p' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            saveImage([3, 4, 2], signature, true, 1.0, true);
+        } else {
+            if ('myChart' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                // NO MORE JQUERY BYE BYE xD
+                // $('#honor-pledge-modal').modal('hide');
+                saveImage([], signature, true, 1.0);
+            }
+            // for cluster two
+            else if ('myChart1' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([1, 2], signature, true, 1.0);
+                // for cluster pro & pro plus
+            } else if ('myChart3' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([3, 4, 2], signature, true, 1.0, true);
+            }
+            document.getElementById('dismiss-honor-modal').click();
         }
     };
 
@@ -122,6 +123,9 @@ function chartType(chart: string) {
         objects = moon();
     } else if (chart === 'radio') {
         objects = radio();
+        document.getElementById('fits-upload').onchange = function (evt) {
+            radioFileUpload(evt);
+        }
     } else if (chart === 'scatter') {
         objects = scatter();
     } else if (chart === 'venus') {
@@ -268,7 +272,8 @@ function setChartDefaults() {
 
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    Chart.defaults.plugins.legend.onClick = function () { };
+    Chart.defaults.plugins.legend.onClick = function () {
+    };
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
@@ -344,23 +349,29 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         if (JSON.parse(proMotionForm['rarangeCheck'].checked))
             texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
                 + " ± " + proMotionForm['rarange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value);
         if (JSON.parse(proMotionForm['decrangeCheck'].checked))
             texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
                 + " ± " + proMotionForm['decrange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value);
         if (JSON.parse(clusterForm['distrangeCheck'].checked))
             texts.push("Distance: " + clusterForm['d_num'].value
-                + " ± " + percentToAbsolute(clusterForm['d_num'].value, clusterForm['distrange'].value) + " kpc");
+                + " kpc" + " ± " + clusterForm['distrange'].value + "%");
+        else
+            texts.push("Distance: " + clusterForm['d_num'].value + " kpc");
         texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
         texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
         texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
-        texts.push("R_V: " + clusterForm['rv_num'].value)
-
+        // texts.push("R_V: " + clusterForm['rv_num'].value)
+        console.log(dx)
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
-        destCtx.font = '24px serif';
+        destCtx.font = dx/60 + 'px serif';
         destCtx.fillStyle = 'black'
         for (const text of texts) {
-            dy += 30
+            dy += dx/60
             destCtx.fillText(text, dx + 20, dy);
         }
     }
@@ -382,7 +393,7 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
 
-    const exifObj = { '0th': zeroth, 'Exif': exif };
+    const exifObj = {'0th': zeroth, 'Exif': exif};
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }

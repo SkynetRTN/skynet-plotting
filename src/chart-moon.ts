@@ -1,11 +1,11 @@
 'use strict';
 
-import Chart, { ScatterDataPoint } from "chart.js/auto";
+import Chart, {ScatterDataPoint} from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config"
-import { updateLine, updateLabels, updateTableHeight, linkInputs, throttle } from "./util"
-import {sqr, rad, round } from "./my-math"
+import {colors, tableCommonOptions} from "./config"
+import {linkInputs, throttle, updateLabels, updateLine, updateTableHeight} from "./util"
+import {rad, round, sqr} from "./my-math"
 
 /**
  *  This function is for the moon of a planet.
@@ -56,8 +56,8 @@ export function moon(): [Handsontable, Chart] {
         colHeaders: ['Julian Date', 'Angular Separation'],
         maxCols: 2,
         columns: [
-            { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     }));
 
@@ -125,8 +125,8 @@ export function moon(): [Handsontable, Chart] {
     const throttledUpdateFormula = throttle(updateFormula, frameTime);
     moonForm.oninput = function () {
         throttledUpdateFormula(tableData, moonForm, myChart);
-        if(moonForm.elements['a_num'].step != round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()){
-            moonForm.elements['a_num'].step = round((parseFloat(moonForm.elements['a_num'].value)*0.01),2).toString()
+        if (moonForm.elements['a_num'].step != round((parseFloat(moonForm.elements['a_num'].value) * 0.01), 2).toString()) {
+            moonForm.elements['a_num'].step = round((parseFloat(moonForm.elements['a_num'].value) * 0.01), 2).toString()
         }
     };
 
@@ -184,17 +184,17 @@ function updateFormula(table: ScatterDataPoint[], form: MoonForm, chart: Chart) 
 }
 
 /**
-*  This function generates the data used for function "updateFormula" with the four parameters provided.
-*
-*  @param a:       Amplitude of the moon's orbit
-*  @param p:       The period of the moon's orbit
-*  @param phase:   The phase of the orbit
-*  @param tilt:    The tilt of the orbit
-*  @param start:   The starting point of the data points
-*  @param end:     The end point of the data points
-*  @param steps:   Steps generated to be returned in the array. Default is 500
-*  @returns {Array}
-*/
+ *  This function generates the data used for function "updateFormula" with the four parameters provided.
+ *
+ *  @param a:       Amplitude of the moon's orbit
+ *  @param p:       The period of the moon's orbit
+ *  @param phase:   The phase of the orbit
+ *  @param tilt:    The tilt of the orbit
+ *  @param start:   The starting point of the data points
+ *  @param end:     The end point of the data points
+ *  @param steps:   Steps generated to be returned in the array. Default is 500
+ *  @returns {Array}
+ */
 function trigGenerator(a: number, p: number, phase: number, tilt: number, start: number, end: number, steps: number = 500): ScatterDataPoint[] {
     const data: ScatterDataPoint[] = [];
     const step = (end - start) / steps;
@@ -215,10 +215,10 @@ function trigGenerator(a: number, p: number, phase: number, tilt: number, start:
 }
 
 /**
-*  This function returns an array of data points that represent a moon's orbit with randomly
-*  generated parameters. This function also introduce a 5% noise to all data points.
-*  @returns    {Array}
-*/
+ *  This function returns an array of data points that represent a moon's orbit with randomly
+ *  generated parameters. This function also introduce a 5% noise to all data points.
+ *  @returns    {Array}
+ */
 function generateMoonData(): ScatterDataPoint[] {
     /**
      *  ln(750) = 6.62
