@@ -43,11 +43,12 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
         for(var i = (addressYLower>0?addressYLower:0); i <= addressYUpper; i++)
         {
             try{
-                sumMag += specto[addressX][i]*1000000000000;
+                sumMag += specto[addressX][i]; // Add scalar *1000000000000
             }
             catch (err){ console.log(i)}//pro error handling
         }
-        return sumMag;
+        var avgMag = sumMag / (addressYUpper- (addressYLower>0?addressYLower:0))
+        return avgMag / 10.0;
     }
     //OLD VERSION
     // var strain_model: ScatterDataPoint[] = [];
