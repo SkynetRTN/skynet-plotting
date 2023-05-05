@@ -696,7 +696,7 @@ export class gravityProClass {
       }
       modelChart[start++] = {
         x: this.currentModelData[i][0] * this.totalMassDivGridMass + merge,
-        y: this.currentModelData[i][1] * this.totalMassDivGridMass * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist) * Math.pow(10,22),
+        y: this.currentModelData[i][1] * this.totalMassDivGridMass * (1-0.5*Math.sin(inc*(Math.PI/180)))*(d0 / dist),
       };
     }
     while (modelChart.length !== start) {
