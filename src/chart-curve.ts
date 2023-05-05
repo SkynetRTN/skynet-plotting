@@ -1,10 +1,10 @@
 'use strict';
 
-import Chart, { ChartConfiguration } from "chart.js/auto";
+import Chart, {ChartConfiguration} from "chart.js/auto";
 import Handsontable from "handsontable";
 
-import { tableCommonOptions, colors } from "./config";
-import { updateLine, updateLabels, updateTableHeight } from "./util";
+import {colors, tableCommonOptions} from "./config";
+import {updateLabels, updateLine, updateTableHeight} from "./util";
 
 /**
  *  The function for up to 4 curves in the same chart. The curves share the same x values.
@@ -23,21 +23,21 @@ export function curve(): [Handsontable, Chart] {
         '</form>\n');
 
     const tableData = [
-        { "x": 0, "y1": 25, "y2": '', "y3": '', "y4": '' },
-        { "x": 1, "y1": 16, "y2": '', "y3": '', "y4": '' },
-        { "x": 2, "y1": 9, "y2": '', "y3": '', "y4": '' },
-        { "x": 3, "y1": 4, "y2": '', "y3": '', "y4": '' },
-        { "x": 4, "y1": 1, "y2": '', "y3": '', "y4": '' },
-        { "x": 5, "y1": 4, "y2": '', "y3": '', "y4": '' },
-        { "x": 6, "y1": 9, "y2": '', "y3": '', "y4": '' },
-        { "x": 7, "y1": 16, "y2": '', "y3": '', "y4": '' },
-        { "x": 8, "y1": 25, "y2": '', "y3": '', "y4": '' },
-        { "x": 9, "y1": 36, "y2": '', "y3": '', "y4": '' },
-        { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
-        { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
-        { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
-        { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
-        { "x": '', "y1": '', 'y2': '', "y3": '', "y4": '' },
+        {"x": 0, "y1": 25, "y2": '', "y3": '', "y4": ''},
+        {"x": 1, "y1": 16, "y2": '', "y3": '', "y4": ''},
+        {"x": 2, "y1": 9, "y2": '', "y3": '', "y4": ''},
+        {"x": 3, "y1": 4, "y2": '', "y3": '', "y4": ''},
+        {"x": 4, "y1": 1, "y2": '', "y3": '', "y4": ''},
+        {"x": 5, "y1": 4, "y2": '', "y3": '', "y4": ''},
+        {"x": 6, "y1": 9, "y2": '', "y3": '', "y4": ''},
+        {"x": 7, "y1": 16, "y2": '', "y3": '', "y4": ''},
+        {"x": 8, "y1": 25, "y2": '', "y3": '', "y4": ''},
+        {"x": 9, "y1": 36, "y2": '', "y3": '', "y4": ''},
+        {"x": '', "y1": '', 'y2': '', "y3": '', "y4": ''},
+        {"x": '', "y1": '', 'y2': '', "y3": '', "y4": ''},
+        {"x": '', "y1": '', 'y2': '', "y3": '', "y4": ''},
+        {"x": '', "y1": '', 'y2': '', "y3": '', "y4": ''},
+        {"x": '', "y1": '', 'y2': '', "y3": '', "y4": ''},
     ];
     document.getElementById('axis-label1').style.display = 'inline';
     document.getElementById('axis-label3').style.display = 'inline';
@@ -49,16 +49,16 @@ export function curve(): [Handsontable, Chart] {
         colHeaders: ['x', 'y1', 'y2', 'y3', 'y4'],
         maxCols: 5,
         columns: [
-            { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'y1', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y1', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     };
-    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
-          // unhide table whenever interface is selected
-  document.getElementById("chart-type-form").addEventListener("click", () => {
-    container.style.display = "block";
-    document.getElementById('add-row-button').hidden = false;
-    document.getElementById('file-upload-button').hidden = false;
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
+    // unhide table whenever interface is selected
+    document.getElementById("chart-type-form").addEventListener("click", () => {
+        container.style.display = "block";
+        document.getElementById('add-row-button').hidden = false;
+        document.getElementById('file-upload-button').hidden = false;
     });
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
     const chartOptions: ChartConfiguration = {
@@ -107,7 +107,7 @@ export function curve(): [Handsontable, Chart] {
                     immutableLabel: false,
                 }
             ],
-             
+
         },
         options: {
             hover: {
@@ -142,18 +142,18 @@ export function curve(): [Handsontable, Chart] {
         myChart.options.scales['y'].reverse = lineForm.elements['magnitude'].checked;
         const lineCount = parseInt(lineForm.elements['lineCount'].value);
         if (lineCount !== lines) {
-            let newCols = [{ data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } }];
+            let newCols = [{data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}}];
             for (let i = 0; i < lineCount; i++) {
                 newCols.push({
-                    data: 'y' + (i + 1), type: 'numeric', numericFormat: { pattern: { mantissa: 2 } }
+                    data: 'y' + (i + 1), type: 'numeric', numericFormat: {pattern: {mantissa: 2}}
                 });
             }
 
             // Turning off stretchH and then turn it back on -- a workaround
             //   to fix the horizontal scroll bar issue when adding more cols.
-            hot.updateSettings({ stretchH: 'none' });
-            hot.updateSettings({ columns: newCols });
-            hot.updateSettings({ stretchH: 'all' });
+            hot.updateSettings({stretchH: 'none'});
+            hot.updateSettings({columns: newCols});
+            hot.updateSettings({stretchH: 'all'});
 
             for (let i = 0; i < 4; i++) {
                 myChart.data.datasets[i].hidden = (i >= lineCount);
@@ -188,11 +188,11 @@ export function curve(): [Handsontable, Chart] {
 
     updateLine(tableData, myChart, 0, 'x', 'y1');
     const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
-    chartTypeForm.addEventListener("change" , function () {
-    //destroy the chart
-     //testing a bunch of creating charts and destroying them to make the thing work
-     myChart.destroy();
-});
+    chartTypeForm.addEventListener("change", function () {
+        //destroy the chart
+        //testing a bunch of creating charts and destroying them to make the thing work
+        myChart.destroy();
+    });
     return [hot, myChart];
-    
+
 }

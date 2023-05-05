@@ -227,20 +227,22 @@ export const ArrMath = {
     },
     weightedSum: function (arr: number[], weight: number[]): number {
         let summed = 0;
-        for (let i = 0; i < arr.length; i++){
-            summed = summed + arr[i]*weight[i];
-        };
+        for (let i = 0; i < arr.length; i++) {
+            summed = summed + arr[i] * weight[i];
+        }
+
         return summed
     },
     mean: function (arr: number[]): number {
         return this.sum(arr) / arr.length;
     },
-    errorMean: function (arr: number[], error: number[] ){
+    errorMean: function (arr: number[], error: number[]) {
         let weight = [];
-        for (let i = 0; i < arr.length; i++){
-            weight[i] = 1/(error[i]*error[i])
-        };
-        return this.weightedSum(arr, weight)/this.sum(weight)
+        for (let i = 0; i < arr.length; i++) {
+            weight[i] = 1 / (error[i] * error[i])
+        }
+
+        return this.weightedSum(arr, weight) / this.sum(weight)
 
     },
     mul: function (arr1: number[] | number, arr2: number[] | number): number[] {
@@ -309,7 +311,7 @@ export const ArrMath = {
             throw new TypeError("Error: Can't take dot product of a vector and a number");
         }
     },
-    errordot: function (arr1: number[] | number, error: number[]|number, arr2?: number[] | number, ): number {
+    errordot: function (arr1: number[] | number, error: number[] | number, arr2?: number[] | number,): number {
         if (arr2 === undefined) {
             return this.errordot(arr1, error, arr1);
         }
@@ -318,11 +320,12 @@ export const ArrMath = {
                 "Error: Dimension mismatch when dot multiplying two arrays.");
             let weight = [];
             let dotlist = []
-            for (let i = 0; i < arr1.length; i++){
-                weight[i] = 1/(error[i]*error[i])
-                dotlist.push(arr1[i]*arr2[i])
-            };
-            return this.weightedSum(dotlist, weight)/this.sum(weight);
+            for (let i = 0; i < arr1.length; i++) {
+                weight[i] = 1 / (error[i] * error[i])
+                dotlist.push(arr1[i] * arr2[i])
+            }
+
+            return this.weightedSum(dotlist, weight) / this.sum(weight);
         } else if (!Array.isArray(arr1) && !Array.isArray(arr2) && !Array.isArray(error)) {
             return arr1 * arr2;
         } else {
@@ -344,15 +347,18 @@ export const ArrMath = {
 
 //Returns a pseudorandom number generator function. A bad one, but a pseudorandom one nonetheless.
 export function sfc32(a: number, b: number, c: number, d: number) {
-    return function() {
-      a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0; 
-      var t = (a + b) | 0;
-      a = b ^ b >>> 9;
-      b = c + (c << 3) | 0;
-      c = (c << 21 | c >>> 11);
-      d = d + 1 | 0;
-      t = t + d | 0;
-      c = c + t | 0;
-      return (t >>> 0) / 4294967296;
+    return function () {
+        a >>>= 0;
+        b >>>= 0;
+        c >>>= 0;
+        d >>>= 0;
+        var t = (a + b) | 0;
+        a = b ^ b >>> 9;
+        b = c + (c << 3) | 0;
+        c = (c << 21 | c >>> 11);
+        d = d + 1 | 0;
+        t = t + d | 0;
+        c = c + t | 0;
+        return (t >>> 0) / 4294967296;
     }
 }

@@ -2,11 +2,11 @@
 
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
-import { ChartConfiguration, ScatterDataPoint } from "chart.js";
+import {ChartConfiguration, ScatterDataPoint} from "chart.js";
 
-import { tableCommonOptions, colors } from "./config"
-import { updateLine, updateLabels, updateTableHeight } from "./util"
-import { sqr, rad } from "./my-math"
+import {colors, tableCommonOptions} from "./config"
+import {updateLabels, updateLine, updateTableHeight} from "./util"
+import {rad, sqr} from "./my-math"
 
 /**
  *  Function for comparing data points with both Heliocentric and geocentric models.
@@ -39,43 +39,43 @@ export function venus(): [Handsontable, Chart] {
     document.getElementById('xAxisPrompt').innerHTML = "X Axis";
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
     const tableData = [
-        { x: 15, y: 0.7 },
-        { x: 30, y: 0.53 },
-        { x: 45, y: 0.27 },
-        { x: 60, y: 0 },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
-        { x: '', y: '' },
+        {x: 15, y: 0.7},
+        {x: 30, y: 0.53},
+        {x: 45, y: 0.27},
+        {x: 60, y: 0},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
+        {x: '', y: ''},
     ];
 
     // create table
     const container = document.getElementById('table-div');
-          // unhide table whenever interface is selected
-  document.getElementById("chart-type-form").addEventListener("click", () => {
-    container.style.display = "block";
-    document.getElementById('add-row-button').hidden = false;
-    document.getElementById('file-upload-button').hidden = false;
+    // unhide table whenever interface is selected
+    document.getElementById("chart-type-form").addEventListener("click", () => {
+        container.style.display = "block";
+        document.getElementById('add-row-button').hidden = false;
+        document.getElementById('file-upload-button').hidden = false;
     });
     const tableOptions: Handsontable.GridSettings = {
         data: tableData,
         colHeaders: ['Angular Diameter', 'Phase of Venus'],
         maxCols: 2,
         columns: [
-            { data: 'x', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
-            { data: 'y', type: 'numeric', numericFormat: { pattern: { mantissa: 2 } } },
+            {data: 'x', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
+            {data: 'y', type: 'numeric', numericFormat: {pattern: {mantissa: 2}}},
         ],
     };
-    const hot = new Handsontable(container, { ...tableCommonOptions, ...tableOptions });
+    const hot = new Handsontable(container, {...tableCommonOptions, ...tableOptions});
 
     // create chart
     const ctx = (document.getElementById("myChart") as HTMLCanvasElement).getContext('2d');
@@ -123,7 +123,7 @@ export function venus(): [Handsontable, Chart] {
                     immutableLabel: true,
                 }
             ],
-             
+
         },
         options: {
             hover: {
@@ -184,14 +184,14 @@ const beta = rad(45);
 const maxA = 60;
 
 /**
-*  This function generates the data points for the Geocentric model.
-*  @param start:   The start point of data points.
-*  @param end:     The end point of data points.
-*  @param x:       The parameter x that represents the ratio of distance of Sun to Venus versus the
-*                  distance of Sun to Earth.
-*  @param steps:   The number of data points to be generated. Default is 500.
-*  @returns {Array}
-*/
+ *  This function generates the data points for the Geocentric model.
+ *  @param start:   The start point of data points.
+ *  @param end:     The end point of data points.
+ *  @param x:       The parameter x that represents the ratio of distance of Sun to Venus versus the
+ *                  distance of Sun to Earth.
+ *  @param steps:   The number of data points to be generated. Default is 500.
+ *  @returns {Array}
+ */
 function geocentric(start: number, end: number, x: number, steps: number = 500): ScatterDataPoint[] {
     const data: ScatterDataPoint[] = [];
     const step = (end - start) / steps;
@@ -216,12 +216,12 @@ function geocentric(start: number, end: number, x: number, steps: number = 500):
 }
 
 /**
-*  This function generates the data points for the Heliocentric model.
-*  @param start:   The start point of data points.
-*  @param end:     The end point of data points.
-*  @param steps:   The number of data points to be generated. Default is 500.
-*  @returns {Array}
-*/
+ *  This function generates the data points for the Heliocentric model.
+ *  @param start:   The start point of data points.
+ *  @param end:     The end point of data points.
+ *  @param steps:   The number of data points to be generated. Default is 500.
+ *  @returns {Array}
+ */
 function heliocentric(start: number, end: number, steps: number = 500): ScatterDataPoint[] {
     const data: ScatterDataPoint[] = [];
     const step = (end - start) / steps;

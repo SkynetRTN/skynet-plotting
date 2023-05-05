@@ -3,16 +3,15 @@
  */
 
 
-import { Chart } from "chart.js";
+import {Chart} from "chart.js";
 import Handsontable from "handsontable";
-import {filterMags, filterWavelength, modelFormKey, pointMinMax, HRrainbow } from "./chart-cluster-util";
-import { insertGraphControl } from "./chart-cluster-interface";
+import {filterWavelength, HRrainbow, modelFormKey, pointMinMax} from "./chart-cluster-util";
+import {insertGraphControl} from "./chart-cluster-interface";
 
 /**
  *  This function updates scatter data and the boudning scale of the graph
  *  @param table:         handsontable containing the data
  *  @param myCharts:      array of chart.js objects, depends on how many you have
- *  @param modelForm:     modelform that provides filter information
  *  @param dataSetIndex:  the dataset index in chart declaration: order need to be consistent with myCharts param
  *  @param graphMaxMin:   the graphScale object that contains chart bounding information
  */
@@ -20,83 +19,77 @@ export function updateScatter(
     table: Handsontable,
     myCharts: Chart[],
     clusterForm: ClusterForm,
-    modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
     specificChart: number = -1,
-    clusterProForm: ClusterProForm = null,) {
+    clusterProForm: ClusterProForm = null,
+    isDiscard: boolean = false
+) {
 
     let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
     let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
     let dist = parseFloat(clusterForm["d_num"].value);
     //as request by educator, Extinction in V (mag) is now calculated by B-V Reddening (input) * 3.1
     let reddening = parseFloat(clusterForm["red_num"].value) * 3.1;
+    let rv = clusterProForm != null ? parseFloat(clusterForm["rv_num"].value) : 3.1;
     let range = parseFloat(clusterForm["distrange_num"].value);
-    let isRaRange =  null;
-    let isDecRange =  null;
+    let isRaRange = null;
+    let isDecRange = null;
     let raMotion = null;
     let raRange = null;
     let decMotion = null;
     let decRange = null;
-    if (clusterProForm !== null){
-        isRaRange =  (document.getElementById("rarangeCheck") as HTMLInputElement).checked
-        isDecRange =  (document.getElementById("decrangeCheck") as HTMLInputElement).checked
+    if (clusterProForm !== null) {
+        isRaRange = (document.getElementById("rarangeCheck") as HTMLInputElement).checked
+        isDecRange = (document.getElementById("decrangeCheck") as HTMLInputElement).checked
         raMotion = parseFloat(clusterProForm['ramotion_num'].value);
         raRange = parseFloat(clusterProForm['rarange_num'].value);
         decMotion = parseFloat(clusterProForm['decmotion_num'].value);
         decRange = parseFloat(clusterProForm['decrange_num'].value);
     }
-    let tableData = table.getData();
+    const tableData = table.getData();
+    const tableSource = table.getSourceData();
     let columns = table.getColHeader();
-    // let isValidIndex = columns.indexOf('isValid');
+    let keptDataIndex: number[] = [];
     let downloadData: { [key: string]: { [key: string]: string } } = {};
     for (let c = 0; c < myCharts.length; c++) {
         if (specificChart < 0 || specificChart === c) {
             let myChart = myCharts[c];
-            
+
             let chart = myChart.data.datasets[dataSetIndex[c]].data;
-                
+
             let blueKey = modelFormKey(c, 'blue')
             let redKey = modelFormKey(c, 'red')
             let lumKey = modelFormKey(c, 'lum')
 
             //Identify the column the selected filter refers to
-            let blue = columns.indexOf(modelForm[blueKey].value + " Mag");
-            let red = columns.indexOf(modelForm[redKey].value + " Mag");
-            let lum = columns.indexOf(modelForm[lumKey].value + " Mag");
+            let blue = columns.indexOf(clusterForm[blueKey].value + " Mag");
+            let red = columns.indexOf(clusterForm[redKey].value + " Mag");
+            let lum = columns.indexOf(clusterForm[lumKey].value + " Mag");
 
-            let A_v1 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[blueKey].value]
-            );
-            let A_v2 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[redKey].value]
-            );
-            let A_v3 = calculateLambda(
-                reddening,
-                filterWavelength[modelForm[lumKey].value]
-            );
+            let A_v1 = calculateLambda(reddening, rv, filterWavelength[clusterForm[blueKey].value]);
+            let A_v2 = calculateLambda(reddening, rv, filterWavelength[clusterForm[redKey].value]);
+            let A_v3 = calculateLambda(reddening, rv, filterWavelength[clusterForm[lumKey].value]);
 
             let blueErr =
-                columns.indexOf(modelForm[blueKey].value + " err") < 0
+                columns.indexOf(clusterForm[blueKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
+                    : columns.indexOf(clusterForm[blueKey].value + " err"); //checks for supplied err data
             let redErr =
-                columns.indexOf(modelForm[redKey].value + " err") < 0
+                columns.indexOf(clusterForm[redKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[redKey].value + " err");
+                    : columns.indexOf(clusterForm[redKey].value + " err");
             let lumErr =
-                columns.indexOf(modelForm[lumKey].value + " err") < 0
+                columns.indexOf(clusterForm[lumKey].value + " err") < 0
                     ? null
-                    : columns.indexOf(modelForm[lumKey].value + " err");
+                    : columns.indexOf(clusterForm[lumKey].value + " err");
 
-            let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
-            let distHighLim = (dist+(dist*(range/100)))*1000;
-            let distLowLim =   (dist-(dist*(range/100)))*1000;
+            let blueDist = columns.indexOf(clusterForm[blueKey].value + " dist");
+            let distHighLim = (dist + (dist * (range / 100))) * 1000;
+            let distLowLim = (dist - (dist * (range / 100))) * 1000;
 
-            let bluePmra = columns.indexOf(modelForm[blueKey].value + " pmra");
-            let bluePmdec = columns.indexOf(modelForm[blueKey].value + " pmdec");
+            let bluePmra = columns.indexOf(clusterForm[blueKey].value + " pmra");
+            let bluePmdec = columns.indexOf(clusterForm[blueKey].value + " pmdec");
             let pmraHighLim = raMotion + raRange;
             let pmraLowLim = raMotion - raRange;
             let pmdecHighLim = decMotion + decRange;
@@ -119,52 +112,51 @@ export function updateScatter(
                     isSkip = true;
                 }
 
-                if (!isSkip){
+                if (!isSkip) {
                     let distance: number = tableData[i][blueDist];
                     let isDistNotValid = isNaN(distance) || distance === null
-                    if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)){
+                    if (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim)) {
                         isSkip = true;
                     }
                 }
                 if (!isSkip && clusterProForm !== null) {
                     if (isRaRange) {
                         let pmra = tableData[i][bluePmra]
-                        if (pmra > pmraHighLim|| pmra < pmraLowLim) {
+                        if (pmra > pmraHighLim || pmra < pmraLowLim) {
                             isSkip = true;
                         }
                     }
                     if (isDecRange) {
                         let pmdec = tableData[i][bluePmdec]
-                        if (pmdec >  pmdecHighLim|| pmdec < pmdecLowLim) {
+                        if (pmdec > pmdecHighLim || pmdec < pmdecLowLim) {
                             isSkip = true;
                         }
                     }
                 }
 
-                if (id){
-                    if (!downloadData[id])
-                        downloadData[id] = {}
-                    downloadData[id]['id'] = id
-                    let downloadList: number[] = [blue, blueErr, red, redErr, lum, lumErr]
-                    for (let j = 0; j < downloadList.length; j++) {
-                        if (downloadList[j] !== null)
-                            downloadData[id][columns[downloadList[j]]] = tableData[i][downloadList[j]]
-                    }
-                    downloadData[id]['distance'] = tableData[i][blueDist]
-                    downloadData[id]['pmra'] = tableData[i][bluePmra]
-                    downloadData[id]['pmdec'] = tableData[i][bluePmdec]
-                    downloadData[id]['x_'+ (c+1).toString()] = ""
-                    downloadData[id]['y_' + (c+1).toString()] = ""
-                }
+                // if (id){
+                //     if (!downloadData[id])
+                //         downloadData[id] = {}
+                //     downloadData[id]['id'] = id
+                //     let downloadList: number[] = [blue, blueErr, red, redErr, lum, lumErr]
+                //     for (let j = 0; j < downloadList.length; j++) {
+                //         if (downloadList[j] !== null)
+                //             downloadData[id][columns[downloadList[j]]] = tableData[i][downloadList[j]]
+                //     }
+                //     downloadData[id]['distance'] = tableData[i][blueDist]
+                //     downloadData[id]['pmra'] = tableData[i][bluePmra]
+                //     downloadData[id]['pmdec'] = tableData[i][bluePmdec]
+                //     downloadData[id]['x_'+ (c+1).toString()] = ""
+                //     downloadData[id]['y_' + (c+1).toString()] = ""
+                // }
 
                 if (isSkip)
                     continue
 
-
                 //red-blue,lum
 
-                let x = tableData[i][blue] - A_v1 - (tableData[i][red] - A_v2);
-                let y = tableData[i][lum] - A_v3 - 5 * Math.log10(dist / 0.01);
+                let x = (tableData[i][blue] - A_v1) - (tableData[i][red] - A_v2);
+                let y = (tableData[i][lum] - A_v3) - 5 * Math.log10(dist / 0.01);
                 //testing purposes'
                 //let x = tableData[i][blue] - (tableData[i][red]);
                 //let y = tableData[i][lum] - 5 * Math.log10(dist / 0.01);
@@ -176,11 +168,18 @@ export function updateScatter(
                 };
                 scaleLimits = pointMinMax(scaleLimits, x, y);
 
-                if (id){
-                    downloadData[id]['id'] = id;
-                    downloadData[id]['x_'+ (c+1).toString()] = x.toString();
-                    downloadData[id]['y_' + (c+1).toString()] = y.toString();
+                if (id) {
+                    if (keptDataIndex.indexOf(i) < 0)
+                        downloadData[id] = tableSource[i] as { [key: string]: string };
+
+                    try {
+                        downloadData[id]['x_' + (c + 1).toString()] = x.toString();
+                        downloadData[id]['y_' + (c + 1).toString()] = y.toString();
+                    } catch (e) {
+                    }
                 }
+
+                keptDataIndex.push(i)
 
             }
             while (chart.length !== start) {
@@ -188,11 +187,23 @@ export function updateScatter(
             }
             graphMaxMin.updateDataLimit(c, scaleLimits);
             myChart.data.datasets[dataSetIndex[c]].backgroundColor = HRrainbow(myChart, //we need to do this anyways if the chart isn't rescaled
-                modelForm[redKey].value, modelForm[blueKey].value)
+                clusterForm[redKey].value, clusterForm[blueKey].value)
             if (graphMaxMin.getMode(c) !== null) {
-                chartRescale([myChart], modelForm, graphMaxMin,null, [c]);
+                chartRescale([myChart], clusterForm, graphMaxMin, null, [c]);
             }
             myChart.update()
+        }
+    }
+    if (clusterProForm) {
+        keptDataIndex = [...new Set(keptDataIndex)];
+        document.getElementById("data-count").innerHTML =
+            keptDataIndex.length.toString() + '/' + tableSource.length.toString()
+        if (isDiscard) {
+            let newTableData = [];
+            for (const kepti of keptDataIndex) {
+                newTableData.push(tableSource[kepti]);
+            }
+            table.updateData(newTableData);
         }
     }
     // @ts-ignore
@@ -200,13 +211,12 @@ export function updateScatter(
 }
 
 
-
 /**
  * A data structure to manage the min/max of x and y value for graph scaling purpose
  */
 export class graphScale {
     mode: string[] = []; //coulde be 'auto' 'data' and unused 'model'
-    modelLimits: { [key: string]: number } = { minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, };
+    modelLimits: { [key: string]: number } = {minX: NaN, maxX: NaN, minY: NaN, maxY: NaN,};
     dataLimits: { [key: string]: number }[] = [];
 
     /**
@@ -214,10 +224,10 @@ export class graphScale {
      * @param chartCount
      * @constructor
      */
-    constructor(chartCount:number = 1) {
+    constructor(chartCount: number = 1) {
         for (let i = 0; i < chartCount; i++) {
             this.mode.push('auto');
-            this.dataLimits.push({ minX: NaN, maxX: NaN, minY: NaN, maxY: NaN, })
+            this.dataLimits.push({minX: NaN, maxX: NaN, minY: NaN, maxY: NaN,})
         }
     }
 
@@ -268,7 +278,7 @@ export class graphScale {
      * @param newMode the new mode in string
      * @param chartNum the chart need to be updated, starting from 0
      */
-    updateMode(newMode: string, chartNum:number):string {
+    updateMode(newMode: string, chartNum: number): string {
         this.mode[chartNum] = newMode;
         return newMode
     }
@@ -279,9 +289,6 @@ export class graphScale {
  * A class to control chart using control buttons and mouse pan/zoom
  */
 export class ChartScaleControl {
-    static zoompanDeactivate() {
-        throw new Error("Method not implemented.");
-    }
     standardViewLabel: HTMLLabelElement;
     frameOnDataLabel: HTMLLabelElement;
     standardViewRadio: HTMLInputElement;
@@ -292,7 +299,7 @@ export class ChartScaleControl {
     zoomOut: HTMLInputElement;
     charts: Chart [];
     chartCount: number;
-    modelForm: ModelForm;
+    clusterForm: ClusterForm;
     chartScale: graphScale;
     chartRadios: HTMLInputElement[] = [];
     chartLabels: HTMLLabelElement[] = [];
@@ -301,13 +308,13 @@ export class ChartScaleControl {
     /**
      * Construct an object to control chart using control buttons and mouse pan/zoom
      * @param charts array of charts need to be controlled
-     * @param modelForm the modelForm of parameters
+     * @param clusterForm the clusterForm of parameters
      * @param chartScale the graphScale object that specifies how the charts are framed
      * @constructor
      */
-    constructor(charts: Chart [], modelForm: ModelForm, chartScale: graphScale) {
+    constructor(charts: Chart [], clusterForm: ClusterForm, chartScale: graphScale) {
         this.charts = charts;
-        this.modelForm = modelForm;
+        this.clusterForm = clusterForm;
         this.chartScale = chartScale;
         this.chartCount = charts.length;
         insertGraphControl(this.chartCount);
@@ -331,20 +338,65 @@ export class ChartScaleControl {
         }
     }
 
+    static zoompanDeactivate() {
+        throw new Error("Method not implemented.");
+    }
+
+    //zoom pan helper function: run an array of function one by one
+    run(funcs: Function[]) {
+        for (let i = 0; i < funcs.length; i++) {
+            funcs[i]();
+        }
+    }
+
+    //zoom pan helper function: clear an array of interval one by one
+    clear(numbs: number[]) {
+        for (let i = 0; i < numbs.length; i++) {
+            clearInterval(numbs[i])
+        }
+    }
+
+    /**
+     * Unchecked and reset both radio buttons to white background
+     * @param clusterForm clusterForm of parameters
+     * @param chartNum the chart need to be updated, starting from 0
+     */
+    zoompanDeactivate(clusterForm: ClusterForm, chartNum: number = 0): any {
+        this.chartScale.updateMode(null, chartNum);
+        if (this.onControl[chartNum]) {
+            this.standardViewRadio.checked = false;
+            this.frameOnDataRadio.checked = false;
+            this.setRadioLabelColor(this.standardViewRadio, false);
+            this.setRadioLabelColor(this.frameOnDataRadio, false);
+        }
+        for (let i = 0; i < this.chartCount; i++) {
+            let chart = this.charts[i];
+            setTimeout(function () {
+                chart.data.datasets[2].backgroundColor = HRrainbow(chart,
+                    clusterForm[modelFormKey(i, "red")].value, clusterForm[modelFormKey(i, "blue")].value)
+                chart.update()
+            }, 5)
+        }
+    }
+
     /**
      * Add eventlisteners for all buttons
      * @private
      */
-    private frameChartAddEventListner(){
+    private frameChartAddEventListner() {
         for (let i = 0; i < this.chartCount; i++) {
-            let label = document.getElementById("frameChart" + (i+1).toString()) as HTMLLabelElement
+            let label = document.getElementById("frameChart" + (i + 1).toString()) as HTMLLabelElement
             this.chartLabels.push(label);
-            this.chartRadios.push(document.getElementById("radioChart" + (i+1).toString()) as HTMLInputElement)
+            this.chartRadios.push(document.getElementById("radioChart" + (i + 1).toString()) as HTMLInputElement)
             this.onControl.push(false);
-            label.onmouseover = ()=>{this.labelOnHover(label)};
-            label.onmouseleave = ()=>{this.labelOffHover(label)};
-            label.onclick = ()=>{
-                for (let j = 0; j < this.chartCount; j ++) {
+            label.onmouseover = () => {
+                this.labelOnHover(label)
+            };
+            label.onmouseleave = () => {
+                this.labelOffHover(label)
+            };
+            label.onclick = () => {
+                for (let j = 0; j < this.chartCount; j++) {
                     if (j !== i) {
                         this.onControl[j] = false
                         this.chartRadios[j].checked = false;
@@ -358,15 +410,17 @@ export class ChartScaleControl {
                 this.radioAddEventListener();
                 this.panAddEventListener();
                 this.zoomAddEventListener();
-                if (this.chartScale.getMode(i) === 'auto'){
+                if (this.chartScale.getMode(i) === 'auto') {
                     this.standardViewLabel.click();
                 } else if (this.chartScale.getMode(i) === 'data') {
                     this.frameOnDataLabel.click();
                 } else {
-                    this.zoompanDeactivate(this.modelForm, i);
+                    this.zoompanDeactivate(this.clusterForm, i);
                 }
             };
-            this.charts[i].options.onClick = ()=>{label.click()}
+            this.charts[i].options.onClick = () => {
+                label.click()
+            }
         }
     }
 
@@ -376,39 +430,51 @@ export class ChartScaleControl {
      * Onhover: turn the background to grey
      * @private
      */
-    private radioAddEventListener(){
+    private radioAddEventListener() {
         let standardFuncs: Function[] = [];
         let frameOnFuncs: Function[] = [];
         let run = this.run;
         for (let i = 0; i < this.chartCount; i++) {
-            if (this.onControl[i]){
-                standardFuncs.push(()=>{
+            if (this.onControl[i]) {
+                standardFuncs.push(() => {
                     this.radioOnclick(this.standardViewRadio, this.frameOnDataRadio, this.chartScale, i);
                 });
-                frameOnFuncs.push(()=>{
+                frameOnFuncs.push(() => {
                     this.radioOnclick(this.frameOnDataRadio, this.standardViewRadio, this.chartScale, i);
                 });
             }
         }
 
-        this.standardViewLabel.onclick = ()=>{run(standardFuncs)};
-        this.frameOnDataLabel.onclick = ()=>{run(frameOnFuncs)};
-        this.standardViewLabel.onmouseover = ()=>{this.labelOnHover(this.standardViewLabel)};
-        this.standardViewLabel.onmouseleave = ()=>{this.labelOffHover(this.standardViewLabel)};
-        this.frameOnDataLabel.onmouseover = ()=>{this.labelOnHover(this.frameOnDataLabel)};
-        this.frameOnDataLabel.onmouseleave = ()=>{this.labelOffHover(this.frameOnDataLabel)};
+        this.standardViewLabel.onclick = () => {
+            run(standardFuncs)
+        };
+        this.frameOnDataLabel.onclick = () => {
+            run(frameOnFuncs)
+        };
+        this.standardViewLabel.onmouseover = () => {
+            this.labelOnHover(this.standardViewLabel)
+        };
+        this.standardViewLabel.onmouseleave = () => {
+            this.labelOffHover(this.standardViewLabel)
+        };
+        this.frameOnDataLabel.onmouseover = () => {
+            this.labelOnHover(this.frameOnDataLabel)
+        };
+        this.frameOnDataLabel.onmouseleave = () => {
+            this.labelOffHover(this.frameOnDataLabel)
+        };
     }
 
     /**
      * Add eventlisteners to the panning button: shift graph along x-axis
      * @private
      */
-    private panAddEventListener(){
+    private panAddEventListener() {
         let panLeftFunctions: Function[] = [];
         let panRightFunctions: Function[] = [];
-        let pans: number[] =[];
+        let pans: number[] = [];
         let run = this.run;
-        let clear= this.clear;
+        let clear = this.clear;
         for (let i = 0; i < this.chartCount; i++) {
             if (this.onControl[i]) {
                 let chart = this.charts[i];
@@ -429,10 +495,10 @@ export class ChartScaleControl {
                 )
             }
         }
-        this.panLeft.onmousedown = function() {
+        this.panLeft.onmousedown = function () {
             run(panLeftFunctions);
         }
-        this.panRight.onmousedown = function() {
+        this.panRight.onmousedown = function () {
             run(panRightFunctions);
         }
         this.panLeft.onmouseup = this.panLeft.onmouseleave = function () {
@@ -447,32 +513,36 @@ export class ChartScaleControl {
      * Add eventlisteners to the zooming button: zoom graph along x-axis
      * @private
      */
-    private zoomAddEventListener(){
+    private zoomAddEventListener() {
         let zoomInFunctions: Function[] = [];
         let zoomOutFunctions: Function[] = [];
-        let zooms: number[] =[];
+        let zooms: number[] = [];
         let run = this.run;
-        let clear= this.clear;
+        let clear = this.clear;
         for (let i = 0; i < this.chartCount; i++) {
             if (this.onControl[i]) {
                 let chart = this.charts[i];
                 zooms.push(0)
                 zoomInFunctions.push(
-                    ()=>{
-                        zooms[i] =  setInterval( () => {chart.zoom(1.03)}, 20 );
+                    () => {
+                        zooms[i] = setInterval(() => {
+                            chart.zoom(1.03)
+                        }, 20);
                     }
                 )
                 zoomOutFunctions.push(
-                    ()=>{
-                        zooms[i] =  setInterval( () => {chart.zoom(0.97)}, 20 );
+                    () => {
+                        zooms[i] = setInterval(() => {
+                            chart.zoom(0.97)
+                        }, 20);
                     }
                 )
             }
         }
-        this.zoomIn.onmousedown = function() {
+        this.zoomIn.onmousedown = function () {
             run(zoomInFunctions);
         }
-        this.zoomOut.onmousedown = function() {
+        this.zoomOut.onmousedown = function () {
             run(zoomOutFunctions);
         }
         this.zoomIn.onmouseup = this.zoomIn.onmouseleave = function () {
@@ -480,19 +550,6 @@ export class ChartScaleControl {
         }
         this.zoomOut.onmouseup = this.zoomOut.onmouseleave = function () {
             clear(zooms);
-        }
-    }
-
-    //zoom pan helper function: run an array of function one by one
-    run(funcs: Function[]) {
-        for (let i = 0; i < funcs.length; i++) {
-            funcs[i]();
-        }
-    }
-    //zoom pan helper function: clear an array of interval one by one
-    clear(numbs: number[]) {
-        for (let i = 0; i < numbs.length; i++) {
-            clearInterval(numbs[i])
         }
     }
 
@@ -512,7 +569,7 @@ export class ChartScaleControl {
         otherRadio.checked = false;
         this.setRadioLabelColor(otherRadio, false)
         graphMaxMin.updateMode(radioOnClicked.id === "standardView" ? "auto" : "data", chartNum)
-        chartRescale([this.charts[chartNum]], this.modelForm, this.chartScale, null, [chartNum]);
+        chartRescale([this.charts[chartNum]], this.clusterForm, this.chartScale, null, [chartNum]);
         this.recoloring()
     }
 
@@ -545,7 +602,7 @@ export class ChartScaleControl {
      * @private
      */
     private labelOnHover(label: HTMLLabelElement) {
-        if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF" || label.style.backgroundColor ==="") {
+        if (label.style.backgroundColor === "white" || label.style.backgroundColor === "#FFFFFF" || label.style.backgroundColor === "") {
             label.style.backgroundColor = "#E7E7E7";
         }
         label.style.opacity = "1";
@@ -572,31 +629,7 @@ export class ChartScaleControl {
         for (let i = 0; i < this.chartCount; i++) {
             let chart = this.charts[i];
             chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                this.modelForm[modelFormKey(i, "red")].value, this.modelForm[modelFormKey(i, "blue")].value)
-        }
-    }
-
-
-    /**
-     * Unchecked and reset both radio buttons to white background
-     * @param modelForm modelForm of parameters
-     * @param chartNum the chart need to be updated, starting from 0
-     */
-    zoompanDeactivate(modelForm: ModelForm, chartNum: number = 0): any {
-        this.chartScale.updateMode(null, chartNum);
-        if (this.onControl[chartNum]) {
-            this.standardViewRadio.checked = false;
-            this.frameOnDataRadio.checked = false;
-            this.setRadioLabelColor(this.standardViewRadio, false);
-            this.setRadioLabelColor(this.frameOnDataRadio, false);
-        }
-        for (let i = 0; i < this.chartCount; i++) {
-            let chart = this.charts[i];
-            setTimeout(function () {
-                chart.data.datasets[2].backgroundColor = HRrainbow(chart,
-                    modelForm[modelFormKey(i, "red")].value, modelForm[modelFormKey(i, "blue")].value)
-                chart.update()
-            }, 5)
+                this.clusterForm[modelFormKey(i, "red")].value, this.clusterForm[modelFormKey(i, "blue")].value)
         }
     }
 }
@@ -604,55 +637,64 @@ export class ChartScaleControl {
 /**
  *  This function rescale the chart
  *  @param myCharts:    array of charts that need to be rescaled
- *  @param modelForm:   modelform that provides filter information
+ *  @param clusterForm:   clusterForm that provides filter information
  *  @param graphMaxMin: the graphScale object
  *  @param option: overwrite the existing zooming option
  */
 function chartRescale(myCharts: Chart[],
-                             modelForm: ModelForm,
-                             graphMaxMin: graphScale,
-                             option: string = null,
-                             scaleIndexOverride: number[] = []) {
-    for (let c = 0; c < myCharts.length; c++)
-    {
+                      clusterForm: ClusterForm,
+                      graphMaxMin: graphScale,
+                      option: string = null,
+                      scaleIndexOverride: number[] = []) {
+    for (let c = 0; c < myCharts.length; c++) {
         let myChart = myCharts[c];
         let adjustScale: { [key: string]: number } = {minX: 0, minY: 0, maxX: 0, maxY: 0,};
         let xBuffer: number = 0;
         let yBuffer: number = 0;
-        let adjustedC = scaleIndexOverride.length === 0? c : scaleIndexOverride[c];
+        let adjustedC = scaleIndexOverride.length === 0 ? c : scaleIndexOverride[c];
         for (let key in adjustScale) {
             let frameOn: string = option === null ? graphMaxMin.getMode(adjustedC) : graphMaxMin.updateMode(option, adjustedC);
             if (frameOn === "auto") {
-                let magList: string[] = ['red', 'blue', 'bright'];
-                let filters: string[] = [
-                    modelForm[modelFormKey(adjustedC, 'red')].value,
-                    modelForm[modelFormKey(adjustedC, 'blue')].value,
-                    modelForm[modelFormKey(adjustedC, 'lum')].value];
-                let x: { [key: string]: number } = {'red': 0, 'blue': 0, 'bright': 0}
-                let magIndex: number[] = [0, 0, 0];
-                for (let i = 0; i < magList.length; i++) {
-                    x[magList[i]] = Math.log(filterWavelength[filters[i]] * 1000) / Math.log(10);
-                    if ("UBVRI".includes(filters[i])) {
-                        magIndex[i] = Number(0);
-                    } else if ("u\'g\'r\'i\'z\'".includes(filters[i])) {
-                        magIndex[i] = Number(1);
-                    } else if ("JHKs".includes(filters[i])) {
-                        magIndex[i] = Number(2);
-                    }
+                let filters: { [key: string]: string } = {
+                    'red': clusterForm[modelFormKey(adjustedC, 'red')].value,
+                    'blue': clusterForm[modelFormKey(adjustedC, 'blue')].value,
+                    'lum': clusterForm[modelFormKey(adjustedC, 'lum')].value
                 }
 
-                let mags: { [key: string]: Function[] } = filterMags()
+                const mags: { [key: string]: { [key: string]: number } } = {
+                    "U": {"red": 11.72, "faint": 11.72, "blue": -4.49, "bright": -10.57},
+                    "B": {"red": 10.72, "faint": 10.72, "blue": -3.34, "bright": -10.6},
+                    "V": {"red": 9.38, "faint": 9.38, "blue": -3.04, "bright": -10.67},
+                    "R": {"red": 8.45, "faint": 8.45, "blue": -2.92, "bright": -10.88},
+                    "I": {"red": 7.69, "faint": 7.69, "blue": -2.75, "bright": -11.25},
+                    "u'": {"red": 12.55, "faint": 12.55, "blue": -3.78, "bright": -9.66},
+                    "g'": {"red": 10.13, "faint": 10.13, "blue": -3.36, "bright": -10.74},
+                    "r'": {"red": 8.8, "faint": 8.8, "blue": -2.84, "bright": -10.68},
+                    "i'": {"red": 8.26, "faint": 8.26, "blue": -2.47, "bright": -10.79},
+                    "z'": {"red": 7.93, "faint": 7.93, "blue": -2.13, "bright": -10.87},
+                    "J": {"red": 6.67, "faint": 6.67, "blue": -2.42, "bright": -11.82},
+                    "H": {"red": 6.1, "faint": 6.1, "blue": -2.28, "bright": -12.18},
+                    "K": {"red": 5.92, "faint": 5.92, "blue": -2.19, "bright": -12.24},
+                    "W1": {"red": 5.7, "faint": 5.7, "blue": -2.11, "bright": -12.3},
+                    "W2": {"red": 5.58, "faint": 5.58, "blue": -2.07, "bright": -12.33},
+                    "W3": {"red": 5.52, "faint": 5.52, "blue": -3.31, "bright": -12.31},
+                    "W4": {"red": 5.19, "faint": 5.19, "blue": -3.13, "bright": -12.62},
+                    "BP": {"red": 9.57, "faint": 9.57, "blue": -3.3, "bright": -10.67},
+                    "G": {"red": 8.73, "faint": 8.73, "blue": -3.13, "bright": -10.76},
+                    "RP": {"red": 7.83, "faint": 7.83, "blue": -2.82, "bright": -11.18},
+                }
 
-                let color_red: number = mags['red'][magIndex[1]](x['blue']) - mags['red'][magIndex[0]](x['red']);
-                let color_blue: number = mags['blue'][magIndex[1]](x['blue']) - mags['blue'][magIndex[0]](x['red']);
+                let color_red: number = mags[filters['blue']]['red'] - mags[filters['red']]['red'];
+                let color_blue: number = mags[filters['blue']]['blue'] - mags[filters['red']]['blue'];
 
                 let minX = color_blue - (color_red - color_blue) / 8;
                 let maxX = color_red + (color_red - color_blue) / 8;
                 adjustScale = {
                     'minX': minX <= maxX ? minX : maxX,
-                    'maxX': maxX >= minX ? maxX: minX,
-                    'minY': mags['bright'][magIndex[2]](x['bright']) + (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8,
-                    'maxY': mags['faint'][magIndex[0]](x['bright']) - (mags['bright'][magIndex[2]](x['bright']) - mags['faint'][magIndex[0]](x['bright'])) / 8
+                    'maxX': maxX >= minX ? maxX : minX,
+                    'minY': mags[filters['lum']]['bright'] + (mags[filters['lum']]['bright'] - mags[filters['red']]['faint']) / 8,
+                    'maxY': mags[filters['lum']]['faint'] - (mags[filters['lum']]['bright'] - mags[filters['lum']]['faint']) / 8,
+
                 };
             } else {
                 if (frameOn === "both") {
@@ -690,7 +732,7 @@ function chartRescale(myCharts: Chart[],
         myChart.options.scales["x"].type = "linear"
 
         myChart.data.datasets[2].backgroundColor = HRrainbow(myChart,
-            modelForm[modelFormKey(adjustedC, 'red')].value, modelForm[modelFormKey(adjustedC, 'blue')].value)
+            clusterForm[modelFormKey(adjustedC, 'red')].value, clusterForm[modelFormKey(adjustedC, 'blue')].value)
         myChart.update()
     }
 }
@@ -700,9 +742,8 @@ function chartRescale(myCharts: Chart[],
  * @param A_v The reddening value based on user input
  * @param filterlambda the wavelength of the filter in meter
  */
-export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
+export function calculateLambda(A_v: number, R_v: number, filterlambda = 10 ** -6) {
     let lambda = filterlambda;
-    let R_v = 3.1;
     let x = (lambda / 1) ** -1;
     let y = x - 1.82;
     let a = 0;
@@ -736,83 +777,3 @@ export function calculateLambda(A_v: Number, filterlambda = 10 ** -6) {
 
     return Number(A_v) * (a + b / R_v);
 }
-export function updateClusterProScatter(
-    table: Handsontable,
-    proChart: Chart,
-    modelForm: ModelForm,
-    clusterForm: ClusterForm
-    ) {
-        let chart = proChart.data.datasets[2].data;
-        let tableData = table.getData();
-        let columns = table.getColHeader();
-
-        let blueKey = modelFormKey(0, 'blue')
-        let redKey = modelFormKey(0, 'red')
-        let lumKey = modelFormKey(0, 'lum')
-
-        //Identify the column the selected filter refers to
-        let bluera = columns.indexOf(modelForm[blueKey].value + " pmra");
-        let bluedec = columns.indexOf(modelForm[blueKey].value + " pmdec");
-        let blueDist = columns.indexOf(modelForm[blueKey].value + " dist");
-
-        let blueErr =
-            columns.indexOf(modelForm[blueKey].value + " err") < 0
-                ? null
-                : columns.indexOf(modelForm[blueKey].value + " err"); //checks for supplied err data
-        let redErr =
-            columns.indexOf(modelForm[redKey].value + " err") < 0
-                ? null
-                : columns.indexOf(modelForm[redKey].value + " err");
-        let lumErr =
-            columns.indexOf(modelForm[lumKey].value + " err") < 0
-                ? null
-                : columns.indexOf(modelForm[lumKey].value + " err");
-
-        let err = parseFloat(clusterForm['err_num'].value); // 3 sigma value = 0.312347, now using user inputs
-        let isRange = (document.getElementById("distrangeCheck") as HTMLInputElement).checked
-        let dist = parseFloat(clusterForm["d_num"].value);
-        let range = parseFloat(clusterForm["distrange_num"].value);
-        let distHighLim = (dist+(dist*(range/100)))*1000;
-        let distLowLim =   (dist-(dist*(range/100)))*1000;
-        let proMinMax: { [key: string]: number } = { minX: 0, maxX: 0, minY: 0, maxY: 0, };
-        let start = 0;
-        for (let i = 0; i < tableData.length; i++) {
-            let x = tableData[i][bluera];
-            let y = tableData[i][bluedec];
-            let distance: number = tableData[i][blueDist];
-            let isDistNotValid = isNaN(distance) || distance === null
-            if (!(
-                    typeof (x) != 'number' || typeof (y) != 'number'
-                ||
-                    ((blueErr != null && tableData[i][blueErr] > err || tableData[i][blueErr] == "") ||
-                    (redErr != null && tableData[i][redErr] > err || tableData[i][redErr] == "") ||
-                    (lumErr != null && tableData[i][lumErr] > err || tableData[i][lumErr] == ""))
-                ||
-                    (isRange && (isDistNotValid || (distance > distHighLim) || distance < distLowLim))
-                )){
-                chart[start++] = {
-                    x: x,
-                    y: y
-                };
-                if (x > proMinMax['maxX'])
-                    proMinMax['maxX'] = x;
-                else if (x < proMinMax['minX'])
-                    proMinMax['minX'] = x;
-                if (y > proMinMax['maxY'])
-                    proMinMax['maxY'] = y;
-                else if (y < proMinMax['minY'])
-                    proMinMax['minY'] = y;
-            }
-        }
-       // updateProChartScale(proChart, proMinMax)
-        chart = chart.slice(0, start++);
-        proChart.data.datasets[2].data = chart;
-        proChart.update()
-    }
-//obselete -- new scale code in cluster3.ts
-//function updateProChartScale(proChart: Chart, minmax: { [key: string]: number }){
-  //  proChart.options.scales.x.min = minmax['minX'];
-    //proChart.options.scales.x.max = minmax['maxX'];
-    //proChart.options.scales.y.min = minmax['minY'];
-    //proChart.options.scales.y.max = minmax['maxY'];
-//}

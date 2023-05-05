@@ -1,18 +1,16 @@
-
-
 const addDropdown = (options: string[], title: string, id: string) => {
     const label = title + ': ';
     let html =
-        '<div class="row">\n'    +
+        '<div class="row">\n' +
         '<div class="col-sm-7">' + label + '</div>\n' +
-        '<div class="col-sm-5">' + 
-        '<select name="'+ id     +
-        '" style="width: 100%;" title="' + title + '" id="'+ id +'">\n';
-    
+        '<div class="col-sm-5">' +
+        '<select name="' + id +
+        '" style="width: 100%;" title="' + title + '" id="' + id + '">\n';
+
     for (let option of options) {
         html +=
             '<option value="' + option +
-            '"title="'        + option +
+            '"title="' + option +
             '">' + option + '</option>\n';
     }
     html += '</select></div>\n' + '</div>\n';
@@ -23,22 +21,22 @@ const addDropdown = (options: string[], title: string, id: string) => {
 
 const addSliderWithInput = (label: string, title: string, id: string) => {
 
-    let html = 
-        '<div class="row" style="margin:auto">\n'         +
-        '<div class="col-sm-2 des">'+ label +':</div>\n'  +
+    let html =
+        '<div class="row" style="margin:auto">\n' +
+        '<div class="col-sm-2 des">' + label + ':</div>\n' +
         '<div class="col-sm-7 range"><input type="range"' +
-        'title="'+ title +'" name="'+ title +'" id="'+ id +'"></div>\n';
+        'title="' + title + '" name="' + title + '" id="' + id + '"></div>\n';
 
-    html += addInput(title, id+'_num');
+    html += addInput(title, id + '_num');
     return html;
 }
 
 
-const addInput = (title: string, id:string) => {
-    return '<div class="col-sm-3 text"><input type="number"' + 
-           'title="'+ title +'" name="'+ title +'_num"' + 
-           'class="field" id="'+ id +'"></div>\n' +
-           '</div>\n' + '<div class="row">\n' + '</div>\n';
+const addInput = (title: string, id: string) => {
+    return '<div class="col-sm-3 text"><input step="any" type="number"' +
+        'title="' + title + '" name="' + title + '_num"' +
+        'class="field" id="' + id + '"></div>\n' +
+        '</div>\n' + '<div class="row">\n' + '</div>\n';
 }
 
 
@@ -47,7 +45,7 @@ const addRow = () => {
 }
 
 
-export const disableDropdown = (id: string, state: boolean, hasInput: boolean=true) => {
+export const disableDropdown = (id: string, state: boolean, hasInput: boolean = true) => {
     (document.getElementById(id) as HTMLInputElement).disabled = state;
     if (hasInput) {
         let inputID = id + '_num';
@@ -60,24 +58,31 @@ export const disableDropdown = (id: string, state: boolean, hasInput: boolean=tr
 export const initHTML = () => {
 
     document.getElementById('input-div').insertAdjacentHTML('beforeend',
-        '<form title="Variable"' + 
-            'id="variable-form"' +
-            'style="padding-bottom: 1em">'+
+        '<form title="Variable"' +
+        'id="variable-form"' +
+        'style="padding-bottom: 1em">' +
         '</form>\n' +
         '<div id="transient-div"></div>\n'
     );
 
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
         '<div style="float: right;">\n' +
-            '<button class = "graphControl" id="panLeft">'  + 
-            '<center class = "graphControl">&#8592;</center></button>\n' +
-            '<button class = "graphControl" id="panRight">' +
-            '<center class = "graphControl">&#8594;</center></button>\n' +
-            '<button class = "graphControl" id="zoomIn">'   +
-            '<center class = "graphControl">&plus;</center></button>\n'  +
-            '<button class = "graphControl" id="zoomOut">'  +
-            '<center class = "graphControl">&minus;</center></button>\n' +
-            '<button class = "graphControlAlt" id="Reset" >Reset</center></button>\n'+
+        '<div class="row">\n' +
+        '<button class = "graphControl" id="panLeft">' +
+        '<center class = "graphControl">&#8592;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="panRight">' +
+        '<center class = "graphControl">&#8594;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomIn">' +
+        '<center class = "graphControl">&plus;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="zoomOut">' +
+        '<center class = "graphControl">&minus;</center></button>\n' +
+        '&nbsp;' +
+        '<button class = "graphControl" id="Reset" style="width: auto" >' +
+        '<center class = "graphControl" style="font-size: 16px">Reset</center></button>\n' +
+        '</div>\n' +
         '</div>\n'
     )
 
@@ -110,6 +115,13 @@ export const initHTML = () => {
     HTML += addSliderWithInput('t<sub>0</sub>', 'referenceTime', 't');
     HTML += addSliderWithInput('mag<sub>0</sub>', 'magnitude', 'mag');
     HTML += addSliderWithInput('a', 'extinction', 'a');
+
+    HTML +=
+        '<div class="row">' +
+        '<div style="width: 100%">' +
+        '<button id="best-fit" style="width: 100%">Find Best Fit Parameters Algorithmically</button>' +
+        '</div>' +
+        '</div>'
 
     document.getElementById('transient-div').innerHTML = HTML;
     (document.getElementById("ebv_num") as HTMLInputElement).disabled = true;

@@ -2,35 +2,35 @@
 
 import 'bootstrap/js/dist/modal';
 
-import { saveAs } from 'file-saver';
+import {saveAs} from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import { updateTableHeight, getDateString, dataURLtoBlob, formatTime, updateLabels } from './util';
-import { curve } from './chart-curve';
-import { dual } from './chart-dual';
-import { moon } from './chart-moon';
-import { scatter } from './chart-scatter';
-import { venus } from './chart-venus';
-import { variable, variableFileUpload } from './chart-variable';
-import { variableTest, variableFileUploadTest } from './chart-variabletest';
-import { spectrum, spectrumFileUpload } from './chart-spectrum';
-import { pulsar, pulsarFileUpload } from './chart-pulsar';
-import { pulsarTest, pulsarFileUploadTest} from './chart-pulsartest';
-import { cluster0} from './chart-cluster0';
-import { cluster1 } from './chart-cluster';
-import { cluster2 } from './chart-cluster2';
-import { cluster3 } from './chart-cluster3';
-import { round } from './my-math';
+import {dataURLtoBlob, defaultLayout, formatTime, getDateString, percentToAbsolute, updateTableHeight} from './util';
+import {curve} from './chart-curve';
+import {dual} from './chart-dual';
+import {moon} from './chart-moon';
+import {scatter} from './chart-scatter';
+import {venus} from './chart-venus';
+import {variable, variableFileUpload} from './chart-variable';
+import {spectrum, spectrumFileUpload} from './chart-spectrum';
+import {pulsar, pulsarFileUpload} from './chart-pulsar';
+import {cluster1} from './chart-cluster';
+import {cluster2} from './chart-cluster2';
+import {cluster3} from './chart-cluster3';
+import {cluster3p} from "./chart-cluster3plus";
+import {round} from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
 import { gravityPro, gravityProClass, gravityProFileUpload } from './chart-gravitypro';
 import { transient, transientFileUpload } from './chart-transient';
 import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
-import { graphScale } from './chart-cluster-utils/chart-cluster-scatter';
-import { clusterFileUpload } from './chart-cluster-utils/chart-cluster-file';
-import { pause } from './sonification';
-import { clusterProButtons } from './chart-cluster-utils/chart-cluster-interface';
-import { TransientChart } from './chart-transient-utils/chart-transient-chart';
+import {pause} from './sonification';
+import {TransientChart} from './chart-transient-utils/chart-transient-chart';
+import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
+import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
+import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
+import {radio, radioFileUpload} from './chart-radio'
+import {transient, transientFileUpload} from "./chart-transient";
 
 /**
  *  Initializing the page when the website loads
@@ -52,7 +52,7 @@ window.onload = function () {
                     for (let i = 0; i < len; i++) {
                         arr[i] = binStr.charCodeAt(i);
                     }
-                    callback(new Blob([arr], { type: type || 'image/png' }));
+                    callback(new Blob([arr], {type: type || 'image/png'}));
                 });
             }
         });
@@ -69,31 +69,29 @@ window.onload = function () {
 
     // Enabling download function. Will trigger Honor Code Pledge interface before
     //  students are allowed to download images.
-    document.getElementById('pledge-signed').onclick = () => {
+    document.getElementById('honor-pledge-form').onsubmit = (event) => {
+        event.preventDefault();
         const honorPledgeForm = document.getElementById('honor-pledge-form') as HTMLFormElement;
         const signature = (honorPledgeForm.elements[0] as HTMLInputElement).value;
         if (signature === null || signature === '') {
             document.getElementById('no-signature-alert').style.display = 'block';
-        }
-        else if ('myChart' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide');
-            saveImage(0, signature, true, 1.0);
-        
-        
-        } 
-        else if ('myChart4' in window) {
-            document.getElementById('no-signature-alert').style.display = 'none';
-            // NO MORE JQUERY BYE BYE xD
-            // $('#honor-pledge-modal').modal('hide')
-            if ('myChart1' in window) {
-                saveImage(1, signature, true, 1.0);
+        } else {
+            if ('myChart' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                // NO MORE JQUERY BYE BYE xD
+                // $('#honor-pledge-modal').modal('hide');
+                saveImage([], signature, true, 1.0);
             }
-            else {
-                saveImage(2, signature, true, 1.0);
+            // for cluster two
+            else if ('myChart1' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([1, 2], signature, true, 1.0);
+                // for cluster pro & pro plus
+            } else if ('myChart3' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([3, 4, 2], signature, true, 1.0, true);
             }
-
+            document.getElementById('dismiss-honor-modal').click();
         }
     };
 
@@ -113,60 +111,9 @@ window.onload = function () {
  *                  chart-type-form
  */
 function chartType(chart: string) {
-    // rewrite HTML content of table & chart
-    document.getElementById('input-div').innerHTML = '';
-    document.getElementById('table-div').innerHTML = '';
-    //reset myChart object
-    if (document.getElementById('myChart') != null) {
-        document.getElementById('myChart').remove();
-    }
-    //reset my -Grav and -Specto objects
-    document.getElementById('myGrav1').innerHTML = '';
-    document.getElementById('myGrav2').innerHTML = '';
-
-    
-    document.getElementById('chart-div').insertAdjacentHTML('afterbegin', '<canvas id="myChart" width=300 height=200></canvas>\n');
-    //remove display of 4 charts
-    for (let i = 1; i < 5; i++) {
-        let chartId: string = 'myChart'+i.toString()
-        let divId: string = 'chart-div'+i.toString()
-        if (document.getElementById(divId) != null) {
-            if (document.getElementById(chartId) != null) {
-                document.getElementById(chartId).remove();
-            }
-            if (i=== 1 || i ===2)
-                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=428 height=200></canvas>\n');
-            else
-                document.getElementById(divId).insertAdjacentHTML('afterbegin', '<canvas id= "' + chartId + '" width=300 height=200></canvas>\n');
-            document.getElementById(divId).style.display = 'none';
-        }
-    }
-    document.getElementById("grav-charts").style.display = "none";
-
-    if (document.getElementById('clusterProForm') != null)
-        document.getElementById('clusterProForm').remove()
-
-    //expand the size of axisSet1 and hide axisSet2 for all interfaces
-    document.getElementById('axisSet1').className = 'col-sm-12';
-    document.getElementById('axisSet2').style.display = 'none';
-    document.getElementById('file-upload-button').style.display = 'none';
-    document.getElementById('extra-options').innerHTML = '';
-    //remove display of 2 axis labels
-    for (let i = 0; i < 5; i++) {
-        if (document.getElementById('axis-label'+i.toString()) != null) {
-            document.getElementById('axis-label'+i.toString()).style.display = 'none';
-        }
-    }
-    // document.getElementById('extra-options').style.display = 'none';
-    document.getElementById('table-div').hidden = false;
-    document.getElementById('add-row-button').hidden = false;
-
-    document.getElementById('chart-div').style.cursor = "auto"
-
-    clusterProButtons(false);
-
+    defaultLayout()
     let objects: [Handsontable, Chart];
-    let cluster_objects: [Handsontable, Chart[], ModelForm, graphScale]
+    let cluster_objects: [Handsontable, Chart[], ClusterForm, graphScale]
     let grav_objects: [Handsontable, Chart[], gravityClass]
 
 
@@ -185,13 +132,7 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             variableFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
-        }     
-    } else if (chart === 'variableTest') {
-        objects = variableTest();
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            variableFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
-        }    
+        }
     } else if (chart === 'spectrum') {
         objects = spectrum();
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -204,19 +145,13 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             pulsarFileUpload(evt, objects[0], objects[1] as Chart<'line'>);
         }
-    } else if (chart === 'pulsarTest') {
-        objects = pulsarTest();
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            pulsarFileUploadTest(evt, objects[0], objects[1] as Chart<'line'>);
-        }
-    } else if (chart === 'cluster0') {
-        cluster_objects = cluster0();
-        objects = [cluster_objects[0], cluster_objects[1][0]]
-        document.getElementById('file-upload-button').style.display = 'inline';
-        document.getElementById('file-upload').onchange = function (evt) {
-            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
-    }
+        // } else if (chart === 'cluster0') {
+        //     cluster_objects = cluster0();
+        //     objects = [cluster_objects[0], cluster_objects[1][0]]
+        //     document.getElementById('file-upload-button').style.display = 'inline';
+        //     document.getElementById('file-upload').onchange = function (evt) {
+        //         clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3]);
+        //     }
     } else if (chart === 'cluster1') {
         cluster_objects = cluster1();
         objects = [cluster_objects[0], cluster_objects[1][0]]
@@ -242,7 +177,15 @@ function chartType(chart: string) {
             clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
         }
 
-    }else if (chart === 'gravity') {
+    } else if (chart === 'cluster3p') {
+        let result = cluster3p()
+        cluster_objects = [result[0], result[1], result[2], result[3]];
+        objects = [cluster_objects[0], cluster_objects[1][0]]
+        document.getElementById('file-upload-button').style.display = 'inline';
+        document.getElementById('file-upload').onchange = function (evt) {
+            clusterFileUpload(evt, cluster_objects[0], cluster_objects[1], cluster_objects[3], true, result[4]);
+        }
+    } else if (chart === 'gravity') {
         grav_objects = gravity();
         objects = [grav_objects[0], grav_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -265,10 +208,12 @@ function chartType(chart: string) {
             transientFileUpload(evt, transientObjects[0], transientObjects[1]);
         }
     }
-    updateTableHeight(objects[0]);
-    // Update the height of the table when the chart resizes.
-    objects[1].options.onResize = function () {
+    if (chart !== 'radio') {
         updateTableHeight(objects[0]);
+        // Update the height of the table when the chart resizes.
+        objects[1].options.onResize = function () {
+            updateTableHeight(objects[0]);
+        }
     }
 
     /**
@@ -286,21 +231,22 @@ function chartType(chart: string) {
         if (chart === 'cluster2' || chart === 'cluster3') {
             updateChartInfo(cluster_objects[1][0], chartInfoForm)
             updateChartInfo(cluster_objects[1][1], chartInfoForm, 1)
-        
+        } else if (chart === 'cluster3p') {
+            updateClusterProLabels([cluster_objects[1][0], cluster_objects[1][1]])
         } else if (chart !== 'transient') {
             updateChartInfo(objects[1], chartInfoForm);
-        } 
+        }
     };
 
-    if(objects[1].data.sonification)
-    {
-        document.getElementById('chart-type-form').onchange = function () {
-            pause(objects[1]);
-            chartType(((document.getElementById('chart-type-form') as HTMLFormElement ).elements[0] as HTMLInputElement).value);
-        };
+    if (chart !== 'radio') {
+        if (objects[1].data.sonification) {
+            document.getElementById('chart-type-form').onchange = function () {
+                pause(objects[1]);
+                chartType(((document.getElementById('chart-type-form') as HTMLFormElement).elements[0] as HTMLInputElement).value);
+            };
+        }
+        objects[1].update('none');
     }
-    objects[1].update('none');
-
 }
 
 /**
@@ -321,7 +267,8 @@ function setChartDefaults() {
 
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     // Disable hiding datasets by clicking their label in the legends.
-    Chart.defaults.plugins.legend.onClick = function () { };
+    Chart.defaults.plugins.legend.onClick = function () {
+    };
 
     // Setting properties about the tooltip
     Chart.defaults.plugins.tooltip.mode = 'nearest';
@@ -343,12 +290,18 @@ function setChartDefaults() {
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
-    let key:string = chartNum === 0 ? "" : (chartNum).toString();
+    let key: string = chartNum === 0 ? "" : (chartNum).toString();
     // @ts-ignore
-    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x'+key+'Axis'].value;
+    (myChart.options.scales['x'] as LinearScaleOptions).title.text = elements['x' + key + 'Axis'].value;
     // @ts-ignore
-    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y'+key+'Axis'].value;
+    (myChart.options.scales['y'] as LinearScaleOptions).title.text = elements['y' + key + 'Axis'].value;
     myChart.options.plugins.title.text = elements['title'].value;
+    updateChartDataLabel(myChart, form);
+    myChart.update('none');
+}
+
+export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement) {
+    const elements = form.elements as ChartInfoFormElements;
     const labels = elements['data'].value.split(',').map((item: string) => item.trim());
     let p = 0;
     for (let i = 0; p < labels.length && i < myChart.data.datasets.length; i++) {
@@ -359,22 +312,64 @@ function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number
     myChart.update('none');
 }
 
-function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.0) {
-    if (chartNum === 0) {
-        const canvas = document.getElementById('myChart') as HTMLCanvasElement;
-            // Create a dummy canvas
+function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3p: boolean = false) {
     const destCanvas = document.createElement('canvas');
-    destCanvas.width = canvas.width;
-    destCanvas.height = canvas.height;
+    destCanvas.width = 0;
+    destCanvas.height = 0;
+    chartNums = chartNums.length === 0 ? [''] : chartNums;
+    const canvases: HTMLCanvasElement[] = [];
+    for (let c = 0; c < chartNums.length; c++) {
+        const graphName = 'myChart' + chartNums[c].toString();
+        const canvas = document.getElementById(graphName) as HTMLCanvasElement;
+        destCanvas.width += canvas.width;
+        destCanvas.height = destCanvas.height < canvas.height ? canvas.height : destCanvas.height;
+        canvases.push(canvas);
+    }
 
     const destCtx = destCanvas.getContext('2d');
-
     // Create a rectangle with the desired color
     destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, canvas.width, canvas.height);
+    destCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
+    let dx = 0;
+    canvases.forEach((canvas) => {
+        // Draw the original canvas onto the destination canvas
+        destCtx.drawImage(canvas, dx, 0);
+        dx += canvas.width;
+    })
 
-    // Draw the original canvas onto the destination canvas
-    destCtx.drawImage(canvas, 0, 0);
+    if (isCluster3p) {
+        const proMotionForm = document.getElementById('clusterProForm') as ClusterProForm;
+        const clusterForm = document.getElementById('cluster-form') as ClusterForm;
+        let texts = [];
+        if (JSON.parse(proMotionForm['rarangeCheck'].checked))
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value
+                + " ± " + proMotionForm['rarange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in RA: " + proMotionForm['ramotion_num'].value);
+        if (JSON.parse(proMotionForm['decrangeCheck'].checked))
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value
+                + " ± " + proMotionForm['decrange_num'].value + " mas/yr");
+        else
+            texts.push("Motion in DEC: " + proMotionForm['decmotion_num'].value);
+        if (JSON.parse(clusterForm['distrangeCheck'].checked))
+            texts.push("Distance: " + clusterForm['d_num'].value
+                + " kpc" + " ± " + clusterForm['distrange'].value + "%");
+        else
+            texts.push("Distance: " + clusterForm['d_num'].value + " kpc");
+        texts.push("log(Age): " + clusterForm['age_num'].value + " log(yr)");
+        texts.push("Metallicity: " + clusterForm['metal'].value + " solar");
+        texts.push("E(B-V): " + clusterForm['red_num'].value + ' mag');
+        // texts.push("R_V: " + clusterForm['rv_num'].value)
+        console.log(dx)
+        dx -= canvases[canvases.length - 1].width;
+        let dy = canvases[canvases.length - 1].height;
+        destCtx.font = dx/60 + 'px serif';
+        destCtx.fillStyle = 'black'
+        for (const text of texts) {
+            dy += dx/60
+            destCtx.fillText(text, dx + 20, dy);
+        }
+    }
 
     // Download the dummy canvas
     const time = getDateString();
@@ -384,67 +379,6 @@ function saveImage(chartNum: number, signature: string, jpg = true, quality = 1.
         saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
     } else {
         console.log('Only jpg export is supported for EXIF info.');
-    }
-    } else if (chartNum === 1) {
-        const canvas = document.getElementById('myChart1') as HTMLCanvasElement;
-        const canvas2 = document.getElementById('myChart2') as HTMLCanvasElement;
-        // Create a dummy canvas
-            // Create a dummy canvas
-    const destCanvas = document.createElement('canvas');
-    destCanvas.width = 2 * canvas.width;
-    destCanvas.height = canvas.height;
-
-    const destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    let compile = destCtx.drawImage(canvas, 0, 0);
-    //draw canvas 2 onto the destination canvas
-    compile = destCtx.drawImage(canvas2, canvas.width, 0);
-
-
-    // Download the dummy canvas
-    const time = getDateString();
-    if (jpg) {
-        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-        //create image
-        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    } else {
-        console.log('Only jpg export is supported for EXIF info.');
-    }
-    }   else if (chartNum === 2) {
-        const canvas = document.getElementById('myChart3') as HTMLCanvasElement;
-        const canvas2 = document.getElementById('myChart4') as HTMLCanvasElement;
-        // Create a dummy canvas
-            // Create a dummy canvas
-    const destCanvas = document.createElement('canvas');
-    destCanvas.width = 2 * canvas.width;
-    destCanvas.height = canvas.height;
-
-    const destCtx = destCanvas.getContext('2d');
-
-    // Create a rectangle with the desired color
-    destCtx.fillStyle = '#FFFFFF';
-    destCtx.fillRect(0, 0, 2* canvas.width, canvas.height);
-
-    // Draw the original canvas onto the destination canvas
-    let compile = destCtx.drawImage(canvas, 0, 0);
-    //draw canvas 2 onto the destination canvas
-    compile = destCtx.drawImage(canvas2, canvas.width, 0);
-
-
-    // Download the dummy canvas
-    const time = getDateString();
-    if (jpg) {
-        const exifImage = addEXIFToImage(destCanvas.toDataURL('image/jpeg', quality), signature, time);
-        //create image
-        saveAs(dataURLtoBlob(exifImage), 'chart-' + formatTime(time) + '.jpg');
-    } else {
-        console.log('Only jpg export is supported for EXIF info.');
-    }
     }
 }
 
@@ -454,7 +388,7 @@ function addEXIFToImage(jpegData: string, signature: string, time: string) {
     zeroth[piexif.TagValues.ImageIFD.Artist] = signature;
     exif[piexif.TagValues.ExifIFD.DateTimeOriginal] = time;
 
-    const exifObj = { '0th': zeroth, 'Exif': exif };
+    const exifObj = {'0th': zeroth, 'Exif': exif};
     const exifBytes = piexif.dump(exifObj);
     return piexif.insert(exifBytes, jpegData);
 }

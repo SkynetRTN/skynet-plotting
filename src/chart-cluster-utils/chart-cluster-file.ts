@@ -3,15 +3,24 @@
  */
 
 
-import { Chart } from "chart.js";
+import {Chart} from "chart.js";
 import Handsontable from "handsontable";
-import {baseUrl, httpPostAsync, modelFormKey } from "./chart-cluster-util";
-import {changeOptions, getDateString, updateLabels, updateTableHeight } from "../util";
-import { updateHRModel } from "./chart-cluster-model";
-import { graphScale, updateClusterProScatter, updateScatter } from "./chart-cluster-scatter";
-import {starData, sortStar} from "./chart-cluster-gaia";
-import {clusterProCheckControl, rangeCheckControl } from "./chart-cluster-interface";
-import { updateProForm, proFormMinmax, updateChart2, chart2Scale } from "../chart-cluster3";
+import {baseUrl, filterWavelength, httpPostAsync, modelFormKey} from "./chart-cluster-util";
+import {changeOptions, getDateString, updateLabels, updateTableHeight} from "../util";
+import {updateHRModel} from "./chart-cluster-model";
+import {graphScale, updateScatter} from "./chart-cluster-scatter";
+import {sortStar, starData} from "./chart-cluster-gaia";
+import {clusterProCheckControl, updateClusterProDefaultLabels} from "./chart-cluster-interface";
+import {
+    chart2Scale,
+    proFormMinmax,
+    updateChart2,
+    updateClusterProScatter,
+    updateProForm
+} from "./chart-cluster-pro-util";
+import {resetScraperForm, updateScrapeFormOnupload} from "./chart-cluster-scraper";
+import {resetClusterFormValue} from "./chart-cluster-file-beta";
+
 
 /**
  * This function handles the uploaded file to the variable chart. Specifically, it parse the file
@@ -27,7 +36,7 @@ export function clusterFileUpload(
     table: Handsontable,
     myCharts: Chart[],
     graphMaxMin: graphScale,
-    isCluster3: boolean =false,
+    isCluster3: boolean = false,
     proForm: ClusterProForm = null,
 ) {
     // console.log("clusterFileUpload called");
@@ -50,36 +59,31 @@ export function clusterFileUpload(
 
     const reader = new FileReader();
     reader.onload = () => {
+        // reset clusterForm input values to default
         const clusterForm = document.getElementById("cluster-form") as ClusterForm;
-        const modelForm = document.getElementById("model-form") as ModelForm;
-        clusterForm["d"].value = Math.log(3).toString();
-        clusterForm["err"].value = "1";
-        clusterForm["err_num"].value = "1";
-        modelForm["age"].value = "6.6";
-        clusterForm["red"].value = "0";
-        modelForm["metal"].value = "-3.4";
-        clusterForm["distrange"].value = "100";
-        //clusterForm["err_num"].value = "1";
-        clusterForm["d_num"].value = "3";
-        modelForm["age_num"].value = "6.6";
-        clusterForm["red_num"].value = "0";
-        modelForm["metal_num"].value = "-3.4";
-        clusterForm["distrange_num"].value = "100";
-        rangeCheckControl()
-        let proMinMax: number[] = null;
+        resetClusterFormValue(true, isCluster3);
+        // uncheck checkboxes for pm chart
         if (isCluster3)
             clusterProCheckControl()
-
-        const data: string[] = (reader.result as string)
+        let proMinMax: number[] = null;
+        // @ts-ignore Read in raw string from file
+        const data: string[] = (reader.result as string).replaceAll(' ', '')
             .split("\n")
-            .filter((str) => str !== null && str !== undefined && str !== "");
+            .filter((str: string) => str !== null && str !== undefined && str !== "" && str !== "\r");
 
-        //let stars: starData[] =[];
 
         // find value index in database
         let keys = (data.splice(0, 1) as string[])[0].split(',');
         let wantedKeys: string[] = ['id', 'filter', 'calibrated_mag\\r', 'mag', 'mag_error', 'ra_hours', 'dec_degs']
-        let keyIndex: {[key: string]: number}  = {'id': NaN, 'filter': NaN, 'calibrated_mag\\r': 23, 'mag': NaN, 'mag_error': NaN, 'ra_hours': NaN, 'dec_degs': NaN}
+        let keyIndex: { [key: string]: number } = {
+            'id': NaN,
+            'filter': NaN,
+            'calibrated_mag\\r': 23,
+            'mag': NaN,
+            'mag_error': NaN,
+            'ra_hours': NaN,
+            'dec_degs': NaN
+        }
 
         for (let i = 0; i < wantedKeys.length; i++) {
             let key: string = wantedKeys[i]
@@ -91,36 +95,66 @@ export function clusterFileUpload(
 
         //request server to get the data
         let stars: starData[] = []
+        let starsNoGaia: starData[] = []
         for (let row of data) {
             let items = row.trim().split(",");
-            let src = items[keyIndex['id']]
-            let filter = items[keyIndex['filter']];
-            let calibratedMag = parseFloat(items[keyIndex['calibrated_mag\\r']]);
-            let ra = parseFloat(items[keyIndex['ra_hours']])*15;
-            let dec = parseFloat(items[keyIndex['dec_degs']]);
-            let mag = items[keyIndex['mag']];
-            let err = parseFloat(items[keyIndex['mag_error']]);
-            stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
-        }
-        let cleanedup = sortStar(stars)
-        let url: string = baseUrl + "/gaia"
-        let sortedData = cleanedup[0]
-        httpPostAsync(url, cleanedup[1],
-            (result: string)=>{
-                let gaia = JSON.parse(result)
-                if (!result.includes('error')) {
-                    let [dict, filters] = generateDatadictGaia(sortedData, gaia)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax)
-                } else {
-                    let [dict, filters] = generateDatadict(sortedData)
-                    updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
-                }
-            },
-            ()=>{
-                let [dict, filters] = generateDatadict(sortedData)
-                updateCharts(myCharts, table, dict, modelForm, clusterForm, filters, graphMaxMin, false, proForm, proMinMax)
+            if (items[0] !== "" && items[1] !== "") {
+                let src = items[keyIndex['id']]
+                let filter = items[keyIndex['filter']];
+                let calibratedMag = parseFloat(items[keyIndex['calibrated_mag\\r']]);
+                let ra = parseFloat(items[keyIndex['ra_hours']]) * 15;
+                let dec = parseFloat(items[keyIndex['dec_degs']]);
+                let mag = items[keyIndex['mag']];
+                let err = parseFloat(items[keyIndex['mag_error']]);
+                if (src && ra && dec && calibratedMag && filter)
+                    stars.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
+                if (src && calibratedMag && filter)
+                    starsNoGaia.push(new starData(src, filter, err, calibratedMag, mag, ra, dec, null, [null, null]))
             }
-        )
+        }
+        if (stars.length == 0) {
+            alert("There's no RA/DEC information to match GAIA data, plot will proceed but functionality maybe limited");
+            let [dict, filters] = generateDatadict(starsNoGaia);
+            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, null);
+        } else if (!isCluster3) {
+            let [dict, filters] = generateDatadict(stars);
+            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, null);
+        } else {
+            let cleanedup = sortStar(stars)
+            let url: string = baseUrl + "/gaia"
+            let sortedData = cleanedup[0]
+            let range = cleanedup[1]['range'];
+            httpPostAsync(url, cleanedup[1],
+                (result: string) => {
+                    let gaia = JSON.parse(result)
+                    if (!result.includes('error')) {
+                        try {
+                            let [dict, filters] = generateDatadictGaia(sortedData, gaia);
+                            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, isCluster3, proForm, proMinMax, range);
+                        } catch (e) {
+                            alert('GAIA data matched successfully! Unable to plot the data file: ' + e);
+                        }
+                    } else {
+                        try {
+                            alert("Fail to load GAIA catalog, double check your file!");
+                            let [dict, filters] = generateDatadict(sortedData);
+                            updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, range);
+                        } catch (e) {
+                            alert('File Format Error: ' + e);
+                        }
+                    }
+                },
+                (serverMsg: string) => {
+                    try {
+                        alert(serverMsg);
+                        let [dict, filters] = generateDatadict(sortedData);
+                        updateCharts(myCharts, table, dict, clusterForm, filters, graphMaxMin, false, proForm, proMinMax, range);
+                    } catch (e) {
+                        alert('File Format Error: ' + e);
+                    }
+                }
+            )
+        }
     };
     reader.readAsText(file);
 }
@@ -135,16 +169,14 @@ export function clusterFileDownload(
     table: Handsontable,
     myCharts: Chart[],
     clusterForm: ClusterForm,
-    modelForm: ModelForm,
     dataSetIndex: number[],
     graphMaxMin: graphScale,
     specificChart: number = -1,
     clusterProForm: ClusterProForm = null,
-
-){
+) {
     let csvRowsStar = [];
-    let starData = updateScatter(table, myCharts, clusterForm, modelForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
-    if (starData.length === 0){
+    let starData = updateScatter(table, myCharts, clusterForm, dataSetIndex, graphMaxMin, specificChart, clusterProForm);
+    if (starData.length === 0) {
         alert("Please upload a data file before downloading");
         return
     }
@@ -165,7 +197,7 @@ export function clusterFileDownload(
         for (let set = 0; set < dataSets.length; set++) {
             let dataSet = dataSets[set];
             if (dataSet.length !== 0) {
-                for (let i = 0; i <dataSet.length; i++) {
+                for (let i = 0; i < dataSet.length; i++) {
                     dataSet[i]['chart'] = (c + 1).toString()
                     dataSet[i]['segment'] = (set + 1).toString()
                     // @ts-ignore
@@ -175,29 +207,29 @@ export function clusterFileDownload(
         }
     }
     let dateTime = getDateString()
-    csvDownload(csvRowsStar.join('\n'), 'Cluster Pro Scatter Download '+ dateTime + '.csv')
-    csvDownload(csvRowsHR.join('\n'), 'Cluster Pro Model Download '+ dateTime + '.csv')
+    csvDownload(csvRowsStar.join('\n'), 'Cluster Pro Scatter Download ' + dateTime + '.csv')
+    csvDownload(csvRowsHR.join('\n'), 'Cluster Pro Model Download ' + dateTime + '.csv')
 }
 
 function updateCharts(
     myCharts: Chart[],
     table: Handsontable,
     datadict: Map<string, Map<string, number>>,
-    modelForm: ModelForm,
     clusterForm: ClusterForm,
     filters: string[],
     graphMaxMin: graphScale,
     isCluster3: boolean,
     proForm: ClusterProForm,
     proMinMax: number[],
-    ) {
-    let blue = modelForm[modelFormKey(0, 'blue')];
-    let red = modelForm[modelFormKey(0, 'red')];
-    let lum = modelForm[modelFormKey(0, 'lum')];
+    range: any,
+) {
+    let blue = clusterForm[modelFormKey(0, 'blue')];
+    let red = clusterForm[modelFormKey(0, 'red')];
+    let lum = clusterForm[modelFormKey(0, 'lum')];
 
     //order filters by temperature
     // const knownFilters = ["U", "uprime", "B", "gprime", "V", "rprime", "R", "iprime", "I", "zprime", "Y", "J", "H", "Ks", "K",];
-    const knownFilters = ["U", "u\'", "B", "g\'", "V", "r\'", "R", "i\'", "I", "z\'", "Y", "J", "H", "Ks", "K",];
+    const knownFilters = Object.keys(filterWavelength);
     //knownFilters is ordered by temperature; this cuts filters not in the file from knownFilters, leaving the filters in the file in order.
     filters = knownFilters.filter((f) => filters.indexOf(f) >= 0);
     //if it ain't known ignore it
@@ -205,7 +237,7 @@ function updateCharts(
     const headers: any[] = [];
     const columns: any[] = [];
     let hiddenColumns: any[] = [];
-    let queryCharts =  myCharts.length > 2? myCharts.slice(0,2) : myCharts
+    let queryCharts = myCharts.length > 2 ? myCharts.slice(0, 2) : myCharts
     let chartLength = queryCharts.length
     for (let i = 0; i < filters.length; i++) {
         //makes a list of options for each filter
@@ -275,8 +307,8 @@ function updateCharts(
     })
     // filters = newFilter;
     hiddenColumns = hiddenColumns.filter((c) => [0, 7].indexOf(c) < 0); //get rid of the columns we want revealed
-    hiddenColumns.push(columns.length-1)
-    hiddenColumns.push(columns.length-2)
+    hiddenColumns.push(columns.length - 1)
+    hiddenColumns.push(columns.length - 2)
     //convrt datadict from dictionary to nested number array tableData
     const tableData: { [key: string]: number }[] = [];
     let itr = datadict.keys()
@@ -300,14 +332,14 @@ function updateCharts(
         let myChart = myCharts[c] as Chart<'line'>;
         myChart.options.plugins.title.text = "Title";
         myChart.data.datasets[2].label = "Data";
-        myChart.options.scales['x'].title.text = ('x' + (c+1).toString());
-        myChart.options.scales['y'].title.text = ('y' + (c+1).toString());
+        myChart.options.scales['x'].title.text = ('x' + (c + 1).toString());
+        myChart.options.scales['y'].title.text = ('y' + (c + 1).toString());
         updateLabels(myChart, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, c);
 
         //Change filter options to match file
-        blue = modelForm[modelFormKey(c, 'blue')];
-        red = modelForm[modelFormKey(c, 'red')];
-        lum = modelForm[modelFormKey(c, 'lum')];
+        blue = clusterForm[modelFormKey(c, 'blue')];
+        red = clusterForm[modelFormKey(c, 'red')];
+        lum = clusterForm[modelFormKey(c, 'lum')];
 
         //Change the options in the drop downs to the file's filters
         //blue and lum are most blue by default, red is set to most red
@@ -320,9 +352,10 @@ function updateCharts(
         red.value = filters[1];
         lum.value = filters[1];
     }
-    updateHRModel(modelForm, table, queryCharts,
+    updateHRModel(clusterForm, table, queryCharts,
         (c: number) => {
-            if (c === chartLength-1){
+            if (c === chartLength - 1) {
+                //@ts-ignore
                 table.updateSettings({
                     data: tableData,
                     colHeaders: headers,
@@ -337,17 +370,21 @@ function updateCharts(
                 updateTableHeight(table);
                 for (let i = 0; i < chartLength; i++) {
                     graphMaxMin.updateMode('auto', i);
-                    updateScatter(table, [myCharts[i]], clusterForm, modelForm, [2], graphMaxMin);
+                    updateScatter(table, [myCharts[i]], clusterForm, [2], graphMaxMin);
                     myCharts[i].update()
                 }
-                if (isCluster3){
-                    proMinMax = proFormMinmax(table, modelForm)
+                if (isCluster3) {
+                    proMinMax = proFormMinmax(table, clusterForm)
                     updateProForm(proMinMax, proForm)
-                    let chart = myCharts[myCharts.length-1];
-                    updateClusterProScatter(table, chart, modelForm, clusterForm);
+                    let chart = myCharts[myCharts.length - 1];
+                    updateClusterProScatter(table, chart, clusterForm);
                     updateChart2(chart, proForm, proMinMax)
                     chart2Scale(chart, proMinMax);
                     chart.update();
+                    updateClusterProDefaultLabels([myCharts[0], myCharts[1]]);
+                    updateScrapeFormOnupload(range['ra'], range['dec'], range['r']);
+                } else {
+                    resetScraperForm(true, true, false);
                 }
                 document.getElementById("standardView").click();
             }
@@ -355,8 +392,7 @@ function updateCharts(
 }
 
 
-
-function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, Map<string, number>>, string[]]{
+function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, Map<string, number>>, string[]] {
     let gaia_i = 0;
     let data_i = 0;
     let filters: string[] = [];
@@ -397,7 +433,7 @@ function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, M
             } else {
                 gaia_i++;
             }
-        } catch(err) {
+        } catch (err) {
             break
         }
     }
@@ -419,10 +455,10 @@ function generateDatadictGaia(sortedData: starData[], gaia: any): [Map<string, M
     return [datadict, filters]
 }
 
-function generateDatadict(sortedData: starData[]): [Map<string, Map<string, number>>, string[]]{
+function generateDatadict(sortedData: starData[]): [Map<string, Map<string, number>>, string[]] {
     let filters: string[] = [];
     let datadict = new Map<string, Map<string, number>>(); // initializes a dictionary for the data
-    for (let i = 0; i < sortedData.length; i ++) {
+    for (let i = 0; i < sortedData.length; i++) {
         let star = sortedData[i]
         let src = star['id']
         let filter = star['filter'].replace('prime', '\'')
@@ -460,10 +496,10 @@ function generateDatadict(sortedData: starData[]): [Map<string, Map<string, numb
     return [datadict, filters]
 }
 
-function csvDownload(dataString: string, fileName: string){
+function csvDownload(dataString: string, fileName: string) {
     // Creating a Blob for having a csv file format
     // and passing the data with type
-    const blob = new Blob([dataString], { type: 'text/csv' });
+    const blob = new Blob([dataString], {type: 'text/csv'});
 
     // Creating an object for downloading url
     const url = window.URL.createObjectURL(blob);

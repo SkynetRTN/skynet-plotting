@@ -4,3 +4,5 @@ dist
 bookmarks.json
 .DS_Store
 .idea
+patch
+package-lock.json

@@ -3,16 +3,19 @@
 import Chart from "chart.js/auto";
 import Handsontable from "handsontable";
 import {colors} from "./config";
-import {linkInputs, throttle, updateLabels, updateTableHeight,} from "./util";
+import {linkInputs, throttle, updateTableHeight,} from "./util";
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {ChartScaleControl, graphScale, updateScatter} from "./chart-cluster-utils/chart-cluster-scatter";
 import {
     clusterProButtonControl,
     clusterProButtons,
     clusterProCheckControl,
+    clusterProLayoutSetups,
     clusterProSliders,
     insertClusterControls,
     rangeCheckControl,
+    setClusterProDefaultLabels,
+    updateClusterProLabels
 } from "./chart-cluster-utils/chart-cluster-interface";
 import {defaultTable} from "./chart-cluster-utils/chart-cluster-dummy";
 import {HRrainbow} from "./chart-cluster-utils/chart-cluster-util";
@@ -25,51 +28,35 @@ import {
     updateClusterProScatter,
     updateProForm
 } from "./chart-cluster-utils/chart-cluster-pro-util";
+import {
+    queryVizieR,
+    resetScraperForm,
+    updateComputeLookupButton,
+    updateScraperParameters
+} from "./chart-cluster-utils/chart-cluster-scraper";
 
 Chart.register(zoomPlugin);
 
 /**
  *  This function is for the moon of a planet.
- *  @returns {[Handsontable, Chart, modelForm, graphScale]}:
+ *  @returns {[Handsontable, Chart, clusterForm, graphScale]}:
  */
-export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, ClusterProForm] {
+export function cluster3p(): [Handsontable, Chart[], ClusterForm, graphScale, ClusterProForm] {
     insertClusterControls(2, true);
     clusterProButtons(true);
     clusterProSliders(true);
-    //make graph scaling options visible to users
+    clusterProLayoutSetups();
+    resetScraperForm(true, true, false);
 
     //setup two charts
     document.getElementById('myChart').remove();
     document.getElementById('myChart1').remove();
-    //remove chart tags from myChart1 and 2
-    //change the class of chart-div2 to col-lg-4
-    document.getElementById('chartTag1').style.display = "None";
-    document.getElementById('chartTag2').style.display = "None";
-    document.getElementById('chart-div1').style.display = 'block';
-    document.getElementById('chart-div2').style.display = 'block';
-    document.getElementById('chart-div3').style.display = 'block';
-    document.getElementById('chart-div4').style.display = 'block';
-    document.getElementById('axis-label1').style.display = 'inline';
-    document.getElementById('axis-label2').style.display = 'inline';
-    document.getElementById('axis-label3').style.display = 'inline';
-    document.getElementById('axis-label4').style.display = 'inline';
-    //document.getElementById('axis-label5').style.display = 'inline';
-    //document.getElementById('axis-label6').style.display = 'inline';
-    document.getElementById('xAxisPrompt').innerHTML = "X<sub>1</sub> Axis";
-    document.getElementById('yAxisPrompt').innerHTML = "Y<sub>1</sub> Axis";
-    document.getElementById('axisSet1').className = 'col-sm-6';
-    document.getElementById('axisSet2').style.display = 'inline';
-    document.getElementById("clusterProForm").style.cursor = "auto";
-    //I don't know why this is necessary, but it is.
-    //document.getElementById("myChart2").style.cursor= "auto";
-    //document.getElementById("myChart3").style.cursor= "auto";
-    // Link each slider with corresponding text box
-    // const clusterProPmChartControl = document.getElementById('clusterProPmChartControl') as ClusterProPmChartControl;
+
     const clusterForm = document.getElementById("cluster-form") as ClusterForm;
     const clusterProForm = document.getElementById("clusterProForm") as ClusterProForm;
     linkInputs(clusterForm['err'], clusterForm["err_num"], 0, 1, 0.05, 1, false, true, 0, 999)
     linkInputs(clusterForm["d"], clusterForm["d_num"], 0.1, 100, 0.01, 3, true);
-    linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 100, false, false);
+    linkInputs(clusterForm["distrange"], clusterForm["distrange_num"], 0, 100, 0.01, 30, false, false);
     linkInputs(clusterForm["age"], clusterForm["age_num"], 6.6, 10.2, 0.01, 6.6);
     linkInputs(clusterForm["bv"], clusterForm["red_num"], 0, 1, 0.01, 0, false, true, 0, 100000000);
     linkInputs(clusterForm["rv"], clusterForm["rv_num"], 0, 6, 0.01, 3.1, false, true, 0, 100000000);
@@ -466,7 +453,7 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
                 }
             }
         },
-    );
+    ) as Chart;
 
     //pull the proper motion ra and dec values from the table
     //change the default font size of myChart2
@@ -527,6 +514,12 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     //},
     //frameTime);
     clusterProButtonControl(myChart3, hot, clusterForm);
+    // clusterForm.oninput = throttle(
+    //   function () {
+    //     updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm);
+    //     updateClusterProScatter(hot, myChart3, clusterForm)
+    //     },
+    //   frameTime);
 
     //update the graph continuoustly when the values in the form change
     clusterProForm.oninput = throttle(() => {
@@ -535,20 +528,45 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     }, frameTime)
 
     // link chart to model form (slider + text)
-    // modelForm.oninput=
+    // clusterForm.oninput=
     clusterForm.oninput = throttle(function () {
         updateHRModel(clusterForm, hot, [myChart1, myChart2], (chartNum: number) => {
             updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, chartNum, clusterProForm);
-            updateClusterProScatter(hot, myChart3, clusterForm)
+            updateClusterProScatter(hot, myChart3, clusterForm);
+            updateClusterProLabels([myChart1, myChart2]);
         });
     }, 100);
 
     document.getElementById('save-data-button').onclick = () => {
         clusterFileDownload(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm)
     }
-    //clusterProPmChartControl.oninput = throttle(function () {
-    //clusterProButtonControl(myChart3);
-    //}, 100);
+
+    document.getElementById('discardData').onclick = () => {
+        updateScatter(hot, [myChart1, myChart2], clusterForm, [2, 2], graphMinMax, -1, clusterProForm, true);
+        updateClusterProScatter(hot, myChart3, clusterForm);
+
+        if (!clusterProForm['rarangeCheck'].checked && !clusterProForm['decrangeCheck'].checked) {
+            const proMinMax = proFormMinmax(hot, clusterForm);
+            updateProForm(proMinMax, clusterProForm);
+            updateChart2(myChart3, clusterProForm, proMinMax);
+            chart2Scale(myChart3, proMinMax);
+        }
+
+        myChart3.update();
+    }
+
+    document.getElementById('computeCenter').onclick = () => {
+        updateScraperParameters(hot);
+    }
+
+    document.getElementById('cluster-scraper').oninput = () => {
+        updateComputeLookupButton();
+    }
+
+    document.getElementById('fetchData').onclick = () => {
+
+        queryVizieR(hot, [myChart1, myChart2], graphMinMax, myChart3);
+    }
 
 
     //initializing website
@@ -556,7 +574,9 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     updateHRModel(clusterForm, hot, [myChart1, myChart2]);
     document.getElementById("extra-options").style.display = "block";
     document.getElementById("standardView").click();
+    //@ts-ignore
     myChart3.options.scales["x"].title.text = "Motion in RA (mas/yr)";
+    //@ts-ignore
     myChart3.options.scales["y"].title.text = "Motion in Dec (mas/yr)";
     myChart1.options.plugins.title.text = "Title";
     myChart1.options.scales["x"].title.text = "x1";
@@ -567,8 +587,10 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     updateClusterProScatter(hot, myChart3, clusterForm)
     chart2Scale(myChart3, minmax)
     updateChart2(myChart3, clusterProForm, minmax)
-    updateLabels(myChart1, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 0);
-    updateLabels(myChart2, document.getElementById("chart-info-form") as ChartInfoForm, false, false, false, false, 1);
+    // let chartInfoForm = document.getElementById("chart-info-form") as ChartInfoForm;
+    // updateLabels(myChart1, chartInfoForm, false, false, false, false, 0);
+    // updateLabels(myChart2, chartInfoForm, false, false, false, false, 1);
+    setClusterProDefaultLabels([myChart1, myChart2])
     const chartTypeForm = document.getElementById('chart-type-form') as HTMLFormElement;
     document.getElementById('rarangeCheck').click()
     document.getElementById('rarangeCheck').click()
@@ -585,3 +607,4 @@ export function cluster3(): [Handsontable, Chart[], ClusterForm, graphScale, Clu
     return [hot, [myChart1, myChart2, myChart3], clusterForm, graphMinMax, clusterProForm];
 
 }
+
