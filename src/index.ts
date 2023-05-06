@@ -20,8 +20,9 @@ import {cluster3} from './chart-cluster3';
 import {cluster3p} from "./chart-cluster3plus";
 import {round} from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-import {gravityPro, gravityProFileUpload} from './chart-gravitypro';
-import Chart, {AnimationSpec, ChartType, LinearScaleOptions} from 'chart.js/auto';
+import { gravityPro, gravityProClass, gravityProFileUpload } from './chart-gravitypro';
+import { transient, transientFileUpload } from './chart-transient';
+import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import {pause} from './sonification';
 import {TransientChart} from './chart-transient-utils/chart-transient-chart';
@@ -112,20 +113,14 @@ window.onload = function () {
 function chartType(chart: string) {
     defaultLayout()
     let objects: [Handsontable, Chart];
-    let grav_objects: [Handsontable, Chart, gravityClass]
     let cluster_objects: [Handsontable, Chart[], ClusterForm, graphScale]
-    // let gravpro_objects: [Handsontable, Chart[], gravityClass]
+    let grav_objects: [Handsontable, Chart[], gravityClass]
 
 
     if (chart === 'curve') {
         objects = curve();
     } else if (chart === 'moon') {
         objects = moon();
-    } else if (chart === 'radio') {
-        objects = radio();
-        document.getElementById('fits-upload').onchange = function (evt) {
-            radioFileUpload(evt);
-        }
     } else if (chart === 'scatter') {
         objects = scatter();
     } else if (chart === 'venus') {
@@ -192,19 +187,18 @@ function chartType(chart: string) {
         }
     } else if (chart === 'gravity') {
         grav_objects = gravity();
-        objects = [grav_objects[0], grav_objects[1]]
+        objects = [grav_objects[0], grav_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
-    } else if (chart === 'gravityPro') {
+    }else if (chart === 'gravityPro') {
         let grav_pro_objects = gravityPro();
         objects = [grav_pro_objects[0], grav_pro_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             gravityProFileUpload(evt, grav_pro_objects[0], grav_pro_objects[1] as Chart<'line'>[], grav_pro_objects[2]);
         }
-
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
         transientObjects = transient();
@@ -221,6 +215,7 @@ function chartType(chart: string) {
             updateTableHeight(objects[0]);
         }
     }
+
     /**
      *  TODO: Find a way to align add-row-button while still putting it directly below
      *  the table element, so that in smaller screen it will be next to the table instead
@@ -292,7 +287,6 @@ function setChartDefaults() {
  *  DATA FLOW: chart-info-form -> Chart
  *  @param myChart: The Chartjs object to be updated.
  *  @param form:    The form containing information about the chart.
- * @param chartNum
  */
 function updateChartInfo(myChart: Chart, form: HTMLFormElement, chartNum: number = 0) {
     const elements = form.elements as ChartInfoFormElements;
@@ -315,6 +309,7 @@ export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement) {
             myChart.data.datasets[i].label = labels[p++];
         }
     }
+    myChart.update('none');
 }
 
 function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3p: boolean = false) {

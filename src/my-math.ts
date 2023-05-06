@@ -13,7 +13,7 @@ export function round(value: number, digits: number): number {
 /**
  *  This function takes a floating point number and rounds it up to a specified decimal places.
  *  @param value:   The value to be rounded up.
- *  @param digits:  The decimal places to round the value i.
+ *  @param digits:  The decimal places to round the value up.
  *  @returns {number}
  */
 export function ceiling(value: number, digits: number): number {
@@ -43,7 +43,7 @@ export function clamp(num: string | number, min: number, max: number): string {
         return max.toString();
     }
     return num.toString();
-}
+};
 
 /**
  *  This function returns the square of the input n.
@@ -72,7 +72,7 @@ export function rad(degree: number): number {
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
 export function lombScargleWithError(ts: number[], ys: number[], error: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
-
+    
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return null;
@@ -92,10 +92,11 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
     let i = 0
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
-        // let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
 
-        let frequency = freqMode ? xVal : 1 / xVal;
-        // let frequency = freqMode ? logXVal : 1 / logXVal;
+        let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
+
+        // let frequency = freqMode ? xVal : 1 / xVal;
+        let frequency = freqMode ? logXVal : 1 / logXVal;
 
         let omega = 2.0 * Math.PI * frequency;
         let twoOmegaT = ArrMath.mul(2 * omega, ts);
@@ -103,8 +104,7 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
         let omegaTMinusTau = ArrMath.mul(omega, ArrMath.sub(ts, tau));
 
         spectralPowerDensity.push({
-            x: xVal,
-            // x: logXVal,
+            x: logXVal,
             y: (Math.pow(ArrMath.errordot(hResidue, error, ArrMath.cos(omegaTMinusTau)), 2.0) /
                 ArrMath.dot(ArrMath.cos(omegaTMinusTau)) +
                 Math.pow(ArrMath.errordot(hResidue, error, ArrMath.sin(omegaTMinusTau)), 2.0) /
@@ -125,7 +125,7 @@ export function lombScargleWithError(ts: number[], ys: number[], error: number[]
  * @param {number} stop the stopin period
  * @param {number} steps number of steps between start and stop. Default is 1000.
  */
-export function lombScargle(ts: number[], ys: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
+ export function lombScargle(ts: number[], ys: number[], start: number, stop: number, steps: number = 1000, freqMode = false): any[] {
     if (ts.length != ys.length) {
         alert("Dimension mismatch between time array and value array.");
         return null;
@@ -146,9 +146,9 @@ export function lombScargle(ts: number[], ys: number[], start: number, stop: num
     for (let xVal = start; xVal < stop; xVal += step) {
         // Huge MISTAKE was here: I was plotting power vs. frequency, instead of power vs. period
 
-        let logXVal = Math.exp(Math.log(start) + (Math.log(stop) - Math.log(start)) * i / (steps))
+        let logXVal = Math.exp(Math.log(start)+(Math.log(stop)-Math.log(start))*i/(steps))
         let frequency = freqMode ? logXVal : 1 / logXVal;
-        if (freqMode === true) {
+        if(freqMode === true){
             frequency = freqMode ? xVal : 1 / xVal;
             logXVal = xVal
         }
@@ -201,7 +201,7 @@ export function median(arr: number[]) {
     const mid = Math.floor(arr.length / 2);
     const nums = arr.sort((a, b) => a - b);
     return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
-}
+};
 
 /**
  * This function computes the floating point modulo.
