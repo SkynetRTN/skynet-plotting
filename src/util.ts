@@ -2,7 +2,8 @@
 
 import {Chart, LinearScaleOptions, ScatterDataPoint} from "chart.js";
 import Handsontable from "handsontable";
-import {clamp, round} from "./my-math";
+import { load } from "piexif-ts";
+import { clamp, round } from "./my-math";
 
 /**
  *  This function takes the data in a dictionary object and updates a Chart object with the data. The
@@ -76,19 +77,19 @@ export function updateLabels(myChart: Chart, form: ChartInfoForm, immData = fals
 }
 
 /**
- *  This function links a <input type="range"> and a <input type="number"> together so changing the value
- *  of one updates the other. This function also sets the min, max and step properties for both the inputs.
- *  @param slider:       A <input type="range"> to be linked.
- *  @param number:       A <input type"number"> to be linked.
- *  @param min:          The min value for both inputs.
- *  @param max:          The max value for both inputs.
- *  @param step:         The step of changes for both inputs.
- *  @param value:        The initial value of both inputs.
- *  @param log:          A boolean that determines whether the slider uses logarithmic scale.
- *  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
- *  @param numMin:       Min value for number field when @param numOverride is true.
- *  @param numMax:       Max value for number field when @param numOverride is true.
- */
+*  This function links a <input type="range"> and a <input type="number"> together so changing the value
+*  of one updates the other. This function also sets the min, max and step properties for both the inputs.
+*  @param slider:       A <input type="range"> to be linked.
+*  @param number:       A <input type"number"> to be linked.
+*  @param min:          The min value for both inputs.
+*  @param max:          The max value for both inputs.
+*  @param step:         The step of changes for both inputs.
+*  @param value:        The initial value of both inputs.
+*  @param log:          A boolean that determines whether the slider uses logarithmic scale.
+*  @param numOverride:  A boolean that, when true, allow the number field to exceed the range of the slider.
+*  @param numMin:       Min value for number field when @param numOverride is true.
+*  @param numMax:       Max value for number field when @param numOverride is true.
+*/
 export function linkInputs(slider: HTMLInputElement, number: HTMLInputElement, min: number, max: number, step: number, value: number,
                            log = false, numOverride = false, numMin = 0, numMax = 0
 ) {
@@ -355,7 +356,7 @@ export function chartDataDiff(data1: ScatterDataPoint[], data2: ScatterDataPoint
     const result = [];
     while (p1 < data1.length && p2 < data2.length) {
         if (data1[p1].x == data2[p2].x) {
-            result.push({x: data1[p1].x, y: data1[p1].y - data2[p2].y});
+            result.push({ x: data1[p1].x, y: data1[p1].y - data2[p2].y });
             p1++;
             p2++;
         } else if (data1[p1].x < data2[p2].x) {
@@ -467,6 +468,25 @@ export function changeOptions(element: HTMLInputElement, newOptions: { value: st
     }
     element.innerHTML = result;
 }
+export function b64toBlob(b64Data: string, contentType='', sliceSize=512){
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
 
 export function defaultLayout() {
     //show button row
@@ -475,6 +495,11 @@ export function defaultLayout() {
     // rewrite HTML content of table & chart
     document.getElementById('input-div').innerHTML = '';
     document.getElementById('table-div').innerHTML = '';
+
+    //reset my -Grav and -Specto objects
+    document.getElementById('myGrav1').innerHTML = '';
+    document.getElementById('myGrav2').innerHTML = '';
+
     //reset myChart object
     if (document.getElementById('myChart') != null) {
         document.getElementById('myChart').remove();

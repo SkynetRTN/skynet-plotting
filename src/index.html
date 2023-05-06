@@ -96,6 +96,21 @@
               </div>
             </div>
           </div>
+
+          <!-- Grav Charts -->
+          <div id="grav-charts" style="display: none">
+            <div class="row">
+              <div id="grav-div1" class="clusterCharts" style="cursor: move;display: block">
+                <canvas id="myGrav1" width="428" height="200"></canvas>
+              </div>
+            </div>
+            <div class="row">
+              <div id="grav-div2" class="clusterCharts" style="cursor: move;display: block">
+                <canvas id="myGrav2" width="428" height="200"></canvas>
+              </div>
+            </div>
+        </div>
+
         </div>
         <div id = "bottom=forms-div">
           <div class = "row">
@@ -269,7 +284,7 @@
       </div>
     </div>
     <div class="row" id="button-row">
-      <div class="col-lg-4">
+      <div class="col-lg-4" id="below-table-column">
         <button id="file-upload-button">Upload Data File</button>
         <button id="add-row-button">Add Row</button>
         <input type="file" id="file-upload" style="display: none;">
