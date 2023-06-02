@@ -158,6 +158,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         position: 'bottom'
       }
     }
+
     let midpoint = (gravClass.getXbounds()[0] + gravClass.getXbounds()[1])/2
     gravityForm["merge_num"].value = '' + midpoint
     gravityForm["merge"].value = '' + midpoint
@@ -166,7 +167,8 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
     gravClass.updateModelPlot(myChart, mySpecto, gravityForm)
   }
 
-  linkInputs(gravityForm["merge"], gravityForm["merge_num"], gravClass.getXbounds()[0], gravClass.getXbounds()[1], 0.0005, defaultMerge);
+  //find out how to insert table data here later when you care
+  linkInputs(gravityForm["merge"], gravityForm["merge_num"], 10, 20, 0.0005, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
   linkInputs(gravityForm["rng"],gravityForm["rng_num"],0,0.1,0.001,0,false,true,0,10);
@@ -574,6 +576,7 @@ function updateDataPlot(
   myChart.update()
 }
 
+let timeZero = 0
 export function gravityProFileUpload(
   evt: Event,
   table: Handsontable,
@@ -605,12 +608,17 @@ export function gravityProFileUpload(
   get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
     let data = json['data'];
+    timeZero = Math.ceil(data[0][0])
+    console.log('data[0][0]: ', data[0][0])
+    // change the scaling of time values to match what the LIGO data site reads, starting from 0 (it actually seems like they take ceiling of timeZero)
+    for (let i = 0; i < data.length; i++){
+      data[i][0] = data[i][0] - timeZero}
     let [min, max] = updateTable(table, data);
     let midpoint = (min + max) / 2
     let view_buffer = (max - min) * 0.20
     gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
+    // linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
 
     // myCharts[1].options.scales.x.ticks.
     //                         callback = (tickValue,index,ticks) => {
@@ -628,10 +636,20 @@ export function gravityProFileUpload(
     //define graph bounds
     let r = response.response;
     let strarr = r.bounds.split(" ")
-    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(',''))
-    myCharts[1].options.scales.x.max = parseFloat(strarr[1])
+    console.log('r: ', r)
+    //can change the display of the spectrogram here like this, but i'm going to try to maniupulate the freq table data (actually, just subtract from x0)
+    //i believe these changes are good, should be fine to continue down the list
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
+    myCharts[1].options.scales.x.max = parseFloat(strarr[1]) - timeZero
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3]);
+
+    let mergeLow = parseFloat(strarr[0].replace('(','')) - timeZero
+    let mergeHigh = parseFloat(strarr[1]) - timeZero
+    let mergeMid = (mergeLow + mergeHigh) / 2
+
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
+    linkInputs(gravityForm["merge"], gravityForm["merge_num"], mergeLow, mergeHigh, 0.0005, mergeMid);
 
     (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false
     document.getElementById("extract-data-button").onclick = () => {
@@ -641,7 +659,7 @@ export function gravityProFileUpload(
       myCharts[0].data.datasets[2].data =
         extract_strain_model(r.spec_array, 
         myCharts[1],
-        parseFloat(r.x0), parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
+        parseFloat(r.x0) - timeZero, parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
 
         //myCharts[0].data.datasets[1].hidden = true;
         myCharts[0].data.datasets[2].hidden = false;
@@ -649,6 +667,10 @@ export function gravityProFileUpload(
         (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false;
         }, 100);
     }
+
+    updateDataPlot(table, myCharts[0]);
+    gravClass.fitChartToBounds(myCharts[0]);
+    gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
     //console.log("Implementing background")
     //decode the spectogram
     myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
@@ -658,6 +680,7 @@ export function gravityProFileUpload(
     //console.log("background complete")
   })
   console.log("success")
+  
 }
 
 export class gravityProClass {
