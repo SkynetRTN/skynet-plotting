@@ -636,7 +636,6 @@ export function gravityProFileUpload(
     //define graph bounds
     let r = response.response;
     let strarr = r.bounds.split(" ")
-    console.log('r: ', r)
     //can change the display of the spectrogram here like this, but i'm going to try to maniupulate the freq table data (actually, just subtract from x0)
     //i believe these changes are good, should be fine to continue down the list
     myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
