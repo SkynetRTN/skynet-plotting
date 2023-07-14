@@ -1,8 +1,7 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
-import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
+import {baseUrl, httpGetAsync, httpPostAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
-
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
@@ -10,8 +9,65 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
         let json = JSON.parse(response);
         let strainTable = json['strain_model'];
         let freqTable = json['freq_model']
-        updateChartCallback(strainTable, freqTable, totalMassDivGridMass)}, () => {})
+        let data = json['data']
+        updateChartCallback(strainTable, freqTable, data, totalMassDivGridMass)}, () => {})
         
+}
+
+// create another function that calls the data from the response string
+// it seems like we must do it in the same fashion as the file upload process
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
+export async function sendDataToPass(ratioMass: number, totalMass: number, whitenedStrain: string, time: string): Promise<any> {
+  try {
+    const response = await fetch('/gravdata', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ratioMass: ratioMass,
+        totalMass: totalMass,
+        whitenedStrain: whitenedStrain,
+        time: time
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Request failed with status: ' + response.status);
+    }
+
+    const responseData = await response.json();
+    const processedData = responseData.data;
+
+    return processedData;
+  } catch (error) {
+    console.error(error);
+
+    return null;
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+export function updateRawStrainData(whitenedData: number[], time: number[]){
+    var data: number[][] = [];
+    httpPostAsync(generateURLData(25.000, 1.000, whitenedData, time), [whitenedData, time], (response: string) => {
+        let json = JSON.parse(response);
+        data = json['data']
+    },
+    (result: string) => {
+        console.log(result)
+        alert('Something went wrong updating strain bandpass!');
+    })
+    return data
 }
 
 //Extract strain model from the yellow model plotted over the spectogram :)
@@ -85,6 +141,15 @@ function generateURL(totalMass: number, ratioMass: number) {
     return baseUrl + "/gravity?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
+}
+
+function generateURLData(totalMass: number, ratioMass: number, whitenedData: number[], time: number[]) {
+
+    return baseUrl + "/gravitydata?"
+        + "totalMass=" + totalMass.toString()
+        + "&ratioMass=" + ratioMass.toString()
+        + "&whitenedData=" + whitenedData.toString()
+        + "&time=" + time.toString()
 }
 
 function fitValuesToGrid(gravityModelForm : GravityModelForm){

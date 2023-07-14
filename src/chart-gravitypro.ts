@@ -19,7 +19,7 @@ import {
   updateTableHeight,
 } from "./util";
 
-import {updateGravModelData, extract_strain_model} from "./chart-gravity-utils/chart-gravity-model";
+import {updateGravModelData, extract_strain_model, sendDataToPass} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 import { chart2Scale } from "./chart-cluster3";
 
@@ -196,7 +196,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain"],
+      colHeaders: ["Time", "Strain", 'WhitenedStrain'],
       columns: [
         {
           data: "Time",
@@ -205,6 +205,11 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         },
         {
           data: "Strain",
+          type: "numeric",
+          numericFormat: { pattern: { mantissa: 2 } },
+        },
+        {
+          data: "WhitenedStrain",
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
@@ -461,7 +466,7 @@ console.log(colors['bright'])
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
+    updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], data : number[][], totalMassDivGrid : number) => {
         gravClass.plotNewModel(myChart, mySpecto, gravityForm, strainData, freqData, totalMassDivGrid);
       })
     gravClass.fitChartToBounds(myChart)
@@ -476,7 +481,7 @@ console.log(colors['bright'])
   });
 
   gravityModelForm.oninput = throttle(
-    function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
+    function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], data : number[][], totalMassDivGrid : number) => 
       gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));},
      200);
 
@@ -526,14 +531,14 @@ console.log(colors['bright'])
   return [hot, [myChart, mySpecto], gravClass];
 }
 
-function updateTable(table: Handsontable, data: number[][]){
+function updateTable(table: Handsontable, data: number[][], whitenedStrain: number[]){
   //table.populateFromArray(1, 1, data)
   let data_dict : {[key: string]: number }[] = [];
 
   let min = 100000000000;
   let max = 0;
   for (let i = 0; i < data.length; i++){
-    data_dict.push({'Time' : data[i][0], 'Strain' : data[i][1]})
+    data_dict.push({'Time' : data[i][0], 'Strain' : data[i][1], 'WhitenedStrain' : whitenedStrain[i]})
     if (data[i][0] < min){
       min = data[i][0]
     }
@@ -607,29 +612,37 @@ export function gravityProFileUpload(
   console.log("getting strain server...")
   get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
-    let data = json['data'];
-    timeZero = Math.ceil(data[0][0])
-    console.log('data[0][0]: ', data[0][0])
-    // change the scaling of time values to match what the LIGO data site reads, starting from 0 (it actually seems like they take ceiling of timeZero)
-    for (let i = 0; i < data.length; i++){
-      data[i][0] = data[i][0] - timeZero}
-    let [min, max] = updateTable(table, data);
-    let midpoint = (min + max) / 2
-    let view_buffer = (max - min) * 0.20
+    let whitenedStrain = json['whitenedStrain'];
+    let time = json['time'];
+  
+    // Combine time and whitenedStrain into a new dataset
+    let dataset: number[][] = [];
+    for (let i = 0; i < time.length; i++) {
+      dataset.push([time[i], whitenedStrain[i]]);
+    }
+  
+    // Continue with the rest of the code using the combined dataset
+    console.log('Combined dataset:', dataset);
+  
+    let timeZero = Math.ceil(dataset[0][0]);
+    console.log('data[0][0]: ', dataset[0][0]);
+  
+    // Change the scaling of time values to match the LIGO data site, starting from 0
+    for (let i = 0; i < dataset.length; i++) {
+      dataset[i][0] = dataset[i][0] - timeZero;
+    }
+  
+    let [min, max] = updateTable(table, dataset, whitenedStrain);
+    let midpoint = (min + max) / 2;
+    let view_buffer = (max - min) * 0.20;
     gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
-    // linkInputs(gravityForm["merge"], gravityForm["merge_num"], min, max, 0.0005, midpoint);
-
-    // myCharts[1].options.scales.x.ticks.
-    //                         callback = (tickValue,index,ticks) => {
-    //                           return (tickValue as number) - (ticks[0].value);
-    //                         }
-                            
-
+  
+    // Continue with the remaining code for updating the plots, fitting the chart bounds, and updating the model plot
     updateDataPlot(table, myCharts[0]);
     gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
-  }) 
+  });
 
   console.log("getting spectrogram...")
   get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
