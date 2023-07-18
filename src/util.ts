@@ -248,7 +248,7 @@ export function linkInputsPuls(slider: HTMLInputElement, number: HTMLInputElemen
 }
 
 /**
- *  This function updates the height for the Handsontable object based on the number of rows it has.
+ *  Updates the height for the Handsontable object based on the number of rows it has.
  *  The min and max height is set to be 5 rows and the height of the right side of the page, respectively.
  *  @param table:   The Handsontable object whose height is to be updated.
  */

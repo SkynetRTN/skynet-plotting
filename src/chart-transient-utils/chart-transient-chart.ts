@@ -2,65 +2,40 @@
 
 import Chart from "chart.js/auto";
 import "chartjs-chart-error-bars";
-import {CategoryScale, ChartDataset, LinearScale, registerables} from "chart.js";
+import {CategoryScale, ChartDataset, LinearScale, LinearScaleOptions, registerables} from "chart.js";
 import {PointWithErrorBar, ScatterWithErrorBarsController} from 'chartjs-chart-error-bars';
 import {round} from "./../my-math";
 import {Model} from "./chart-transient-model";
 import {FILTERCOLORS, findDelimiter} from "./chart-transient-util";
+import { Row } from "../transient/photometry";
 
 export class TransientChart {
-
-    chart: Chart;
-    filterShift: Map<string, number> = new Map();
 
     constructor() {
         this.minMag = Number.POSITIVE_INFINITY;
         this.maxMag = Number.NEGATIVE_INFINITY;
+        this.initialize();
     }
 
-    /* SHIFTS */
+    chart: Chart;
+    filterShift: Map<string, number> = new Map();
+
     private _timeShift: number;
-
-    get timeShift(): number {
-        return this._timeShift;
-    }
-
-    set timeShift(shift: number) {
-        this._timeShift = shift;
-    }
-
     private _eventShift: number;
-
-    get eventShift(): number {
-        return this._eventShift;
-    }
-
-    set eventShift(shift: number) {
-        this._eventShift = shift;
-    }
-
-    /* MIN MAX */
     private _minMag: number;
-
-    /* GETTERS */
-    get minMag(): number {
-        return this._minMag;
-    }
-
-    /* SETTERS */
-    set minMag(min: number) {
-        this._minMag = min;
-    }
-
     private _maxMag: number;
 
-    get maxMag(): number {
-        return this._maxMag;
-    }
+    get timeShift(): number { return this._timeShift; }
+    set timeShift(shift: number) { this._timeShift = shift; }
 
-    set maxMag(max: number) {
-        this._maxMag = max;
-    }
+    get eventShift(): number { return this._eventShift; }
+    set eventShift(shift: number) { this._eventShift = shift; }
+
+    get minMag(): number { return this._minMag; }
+    set minMag(min: number) { this._minMag = min; }
+
+    get maxMag(): number { return this._maxMag; }
+    set maxMag(max: number) { this._maxMag = max; }
 
     initialize() {
         const ctx = (document.getElementById("myChart") as HTMLCanvasElement)
@@ -168,9 +143,8 @@ export class TransientChart {
     /* MODEL METHODS */
     updateModel(form: VariableLightCurveForm) {
         let tempData: Array<{ x: number, y: number }> = [];
-        // currently using min/max data, not visible
-        const visibleMin = this.getMinMJD();//this.getVisibleRange()[0];
-        const visibleMax = this.getMaxMJD();//this.getVisibleRange()[1];
+        const visibleMin = this.getVisibleRange()[0];
+        const visibleMax = this.getVisibleRange()[1];
         const buffer = (visibleMax - visibleMin) * 0.5;
         const range = [Math.max(visibleMin - buffer, 0.1), visibleMax + buffer];
 
@@ -202,10 +176,11 @@ export class TransientChart {
         const itr = data.keys();
 
         /* USE VISIBLE RANGES FOR MODEL */
-        let buffer = (this.getMaxMJD() - this.getMinMJD()) * 0.5;
-        let range = [Math.max(this.getMinMJD() - buffer, 0.1), this.getMaxMJD() + buffer];
+        // let buffer = (this.getMaxMJD() - this.getMinMJD()) * 0.5;
+        // let range = [Math.max(this.getMinMJD() - buffer, 0.1), this.getMaxMJD() + buffer];
+        const range = [Math.max(this.getVisibleRange()[0], 0.1), this.getVisibleRange()[1]];
         this.chart.options.scales["x"].max = range[1];
-
+        
         let model = new Model(modelForm);
         for (let i = 0; i < data.size; i++) {
             let key = itr.next().value;
@@ -234,8 +209,45 @@ export class TransientChart {
         }
     }
 
+    // update the chart with new data
+    updateChart(rows: Row[]) {
+        // extract the necessary data from the rows
+        const xData = rows.map(row => row.julianDate);
+        const yData = rows.map(row => row.magnitude);
+        // const errorBars = rows.map(row => ({ x: row.julianDate, y: row.magnitude, r: row.uncertainty }));
+        
+        // update the chart with the new data
+        this.chart.data.datasets[0].data = xData.map((value, index) => ({ x: value, y: yData[index] }));
+        // this.chart.data.datasets[0].errorBars = errorBars;
+        this.chart.update();
+    }
+
+    /**
+     * Updates the labels upon user input
+     * 
+     * @param myChart - ChartJS object
+     * @param form - 
+     */
+    updateLabels = (form: ChartInfoForm) => {
+        let labels = "";
+        this.getDatasets().forEach(dataset => {
+            let labelToBeAdded = dataset.label;
+            if (!labelToBeAdded.includes("model") && !labelToBeAdded.includes("error")) {
+                if (labels !== "") {
+                    labels += ", ";
+                }
+            labels += labelToBeAdded;
+            }
+        });
+        form.elements['data'].value = labels;
+        this.chart.options.plugins.title.text = form.elements['title'].value;
+        (this.chart.options.scales['x'] as LinearScaleOptions).title.text = form.elements['xAxis'].value;
+        (this.chart.options.scales['y'] as LinearScaleOptions).title.text = form.elements['yAxis'].value;
+        this.chart.update();
+    }
+    
     /* NON-MODEL METHODS */
-    addData(datapoints: Map<string, Array<Array<number>>>, xShift: number) {
+    addData(datapoints: Map<string, Array<Array<number>>>, xShift: number = 0) {
         const dataITR = datapoints.keys();
         const errorITR = datapoints.keys();
         let tmp: Array<{ x: number, y: number }> = [];
@@ -276,16 +288,19 @@ export class TransientChart {
 
             errors = [];
             for (let j = 0; j < dps.length; j++) {
+                console.log(typeof dps[j][1], typeof dps[j][2]);
                 errors.push({x: null, y: null});
                 errors.push({
                     x: dps[j][0] - xShift,
-                    y: dps[j][1] - 1,
+                    y: dps[j][1] - dps[j][2],
                 });
                 errors.push({
                     x: dps[j][0] - xShift,
-                    y: dps[j][1] + 1,
+                    y: dps[j][1] + dps[j][2],
                 });
             }
+            //this.chart.data.datasets.push(dataset);
+            //this.update();
             this.addDataset({
                 label: "error-bar-" + String(key),
                 data: errors,
@@ -333,6 +348,13 @@ export class TransientChart {
         if (axis === "x") {
             this.eventShift = shift;
         }
+    }
+
+    setBoundaries2(julianDates: number[], magnitudes: number[]) {
+        this.minMag = Math.min(...magnitudes);
+        this.maxMag = Math.max(...magnitudes);
+        this.setMinMJD(Math.min(...julianDates));
+        this.setMaxMJD(Math.max(...julianDates));
     }
 
     setBoundaries(data: any[]) {
