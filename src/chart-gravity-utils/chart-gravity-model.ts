@@ -2,6 +2,7 @@
 import { Chart, ScatterDataPoint } from "chart.js";
 import {baseUrl, httpGetAsync, httpPostAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
+import Handsontable from "handsontable";
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
@@ -9,67 +10,26 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
         let json = JSON.parse(response);
         let strainTable = json['strain_model'];
         let freqTable = json['freq_model']
-        let data = json['data']
-        updateChartCallback(strainTable, freqTable, data, totalMassDivGridMass)}, () => {})
+        updateChartCallback(strainTable, freqTable, totalMassDivGridMass)}, () => {})
         
 }
 
-// create another function that calls the data from the response string
-// it seems like we must do it in the same fashion as the file upload process
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
+// Here we want a function like updateGravModeldata that takes the same arguments as well as the whitened data stored in the table
+// and we will send that data to /gravity api call to be bandpassed and back again to update the strain data in the table
+////////////////////////////////////
+///////////////////////////////////
+export function updateRawStrain(gravityModelForm: GravityModelForm, sessionID: string, updateChartCallback: Function = () => {}) {
+    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
+    const url = generateURLData(totalMass, ratioMass, sessionID);
 
-
-export async function sendDataToPass(ratioMass: number, totalMass: number, whitenedStrain: string, time: string): Promise<any> {
-  try {
-    const response = await fetch('/gravdata', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        ratioMass: ratioMass,
-        totalMass: totalMass,
-        whitenedStrain: whitenedStrain,
-        time: time
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Request failed with status: ' + response.status);
-    }
-
-    const responseData = await response.json();
-    const processedData = responseData.data;
-
-    return processedData;
-  } catch (error) {
-    console.error(error);
-
-    return null;
-  }
-}
-
-
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
-export function updateRawStrainData(whitenedData: number[], time: number[]){
-    var data: number[][] = [];
-    httpPostAsync(generateURLData(25.000, 1.000, whitenedData, time), [whitenedData, time], (response: string) => {
+    httpPostAsync(url, {}, (response: string) => {
         let json = JSON.parse(response);
-        data = json['data']
-    },
-    (result: string) => {
-        console.log(result)
-        alert('Something went wrong updating strain bandpass!');
-    })
-    return data
+        let data = json['data'];
+        updateChartCallback(data);
+    }, () => {});
 }
-
+/////////////////////////////////////////////////
+////////////////////////////////////////////////
 //Extract strain model from the yellow model plotted over the spectogram :)
 export function extract_strain_model(specto: number[][], chart: Chart , x0: number, dx: number,y0: number,dy: number)
 : ScatterDataPoint[] 
@@ -143,13 +103,12 @@ function generateURL(totalMass: number, ratioMass: number) {
         + "&ratioMass=" + ratioMass.toString()
 }
 
-function generateURLData(totalMass: number, ratioMass: number, whitenedData: number[], time: number[]) {
+function generateURLData(totalMass: number, ratioMass: number, sessionID: string) {
 
     return baseUrl + "/gravitydata?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
-        + "&whitenedData=" + whitenedData.toString()
-        + "&time=" + time.toString()
+        + "&sessionID=" + sessionID
 }
 
 function fitValuesToGrid(gravityModelForm : GravityModelForm){

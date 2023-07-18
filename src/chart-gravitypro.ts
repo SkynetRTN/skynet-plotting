@@ -19,12 +19,13 @@ import {
   updateTableHeight,
 } from "./util";
 
-import {updateGravModelData, extract_strain_model, sendDataToPass} from "./chart-gravity-utils/chart-gravity-model";
+import {updateGravModelData, extract_strain_model, updateRawStrain} from "./chart-gravity-utils/chart-gravity-model";
 import {defaultModelData} from "./chart-gravity-utils/chart-gravity-defaultmodeldata";
 import { chart2Scale } from "./chart-cluster3";
 
 Chart.register(zoomPlugin);
 Chart.register(Filler);
+let sessionID: string
 /**
  *  This function is for the moon of a planet.
  *  @returns {[Handsontable, Chart[], gravityProClass]}:
@@ -196,7 +197,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
     container,
     Object.assign({}, tableCommonOptions, {
       data: tableData,
-      colHeaders: ["Time", "Strain", 'WhitenedStrain'],
+      colHeaders: ["Time", "Strain"],
       columns: [
         {
           data: "Time",
@@ -205,11 +206,6 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         },
         {
           data: "Strain",
-          type: "numeric",
-          numericFormat: { pattern: { mantissa: 2 } },
-        },
-        {
-          data: "WhitenedStrain",
           type: "numeric",
           numericFormat: { pattern: { mantissa: 2 } },
         },
@@ -466,7 +462,7 @@ console.log(colors['bright'])
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
-    updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], data : number[][], totalMassDivGrid : number) => {
+    updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
         gravClass.plotNewModel(myChart, mySpecto, gravityForm, strainData, freqData, totalMassDivGrid);
       })
     gravClass.fitChartToBounds(myChart)
@@ -481,9 +477,16 @@ console.log(colors['bright'])
   });
 
   gravityModelForm.oninput = throttle(
-    function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], data : number[][], totalMassDivGrid : number) => 
+    function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
       gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));},
      200);
+  
+  gravityModelForm.oninput = throttle(
+    function () {updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
+      updateTable(hot, data)
+   )},
+    200);
+    
 
   gravityForm.oninput = throttle(function () {
     gravClass.updateModelPlot(myChart, mySpecto, gravityForm)}, 100)
@@ -531,14 +534,14 @@ console.log(colors['bright'])
   return [hot, [myChart, mySpecto], gravClass];
 }
 
-function updateTable(table: Handsontable, data: number[][], whitenedStrain: number[]){
+function updateTable(table: Handsontable, data: number[][]){
   //table.populateFromArray(1, 1, data)
   let data_dict : {[key: string]: number }[] = [];
 
   let min = 100000000000;
   let max = 0;
   for (let i = 0; i < data.length; i++){
-    data_dict.push({'Time' : data[i][0], 'Strain' : data[i][1], 'WhitenedStrain' : whitenedStrain[i]})
+    data_dict.push({'Time' : data[i][0], 'Strain' : data[i][1]})
     if (data[i][0] < min){
       min = data[i][0]
     }
@@ -612,14 +615,9 @@ export function gravityProFileUpload(
   console.log("getting strain server...")
   get_grav_strain_server(file, (response: string) => {
     let json = JSON.parse(response);
-    let whitenedStrain = json['whitenedStrain'];
-    let time = json['time'];
-  
+    sessionID = json['sessionID'];
     // Combine time and whitenedStrain into a new dataset
-    let dataset: number[][] = [];
-    for (let i = 0; i < time.length; i++) {
-      dataset.push([time[i], whitenedStrain[i]]);
-    }
+    let dataset = json['dataSet']
   
     // Continue with the rest of the code using the combined dataset
     console.log('Combined dataset:', dataset);
@@ -632,7 +630,7 @@ export function gravityProFileUpload(
       dataset[i][0] = dataset[i][0] - timeZero;
     }
   
-    let [min, max] = updateTable(table, dataset, whitenedStrain);
+    let [min, max] = updateTable(table, dataset);
     let midpoint = (min + max) / 2;
     let view_buffer = (max - min) * 0.20;
     gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
