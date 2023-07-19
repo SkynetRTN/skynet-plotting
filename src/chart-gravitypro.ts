@@ -478,14 +478,10 @@ console.log(colors['bright'])
 
   gravityModelForm.oninput = throttle(
     function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
-      gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));},
+      gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));
+      updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
+      updateTable(hot, data))},
      200);
-  
-  gravityModelForm.oninput = throttle(
-    function () {updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
-      updateTable(hot, data)
-   )},
-    200);
     
 
   gravityForm.oninput = throttle(function () {
@@ -618,17 +614,19 @@ export function gravityProFileUpload(
     sessionID = json['sessionID'];
     // Combine time and whitenedStrain into a new dataset
     let dataset = json['dataSet']
-  
+    timeZero = json['timeZero']
+    console.log(timeZero)
     // Continue with the rest of the code using the combined dataset
     console.log('Combined dataset:', dataset);
   
-    let timeZero = Math.ceil(dataset[0][0]);
-    console.log('data[0][0]: ', dataset[0][0]);
+    // let timeZero = Math.ceil(dataset[0][0]);
+    // console.log('data[0][0]: ', dataset[0][0]);
   
-    // Change the scaling of time values to match the LIGO data site, starting from 0
-    for (let i = 0; i < dataset.length; i++) {
-      dataset[i][0] = dataset[i][0] - timeZero;
-    }
+    // // Change the scaling of time values to match the LIGO data site, starting from 0
+    // // this must be moved to the server so that it is constant now
+    // for (let i = 0; i < dataset.length; i++) {
+    //   dataset[i][0] = dataset[i][0] - timeZero;
+    // }
   
     let [min, max] = updateTable(table, dataset);
     let midpoint = (min + max) / 2;
