@@ -1,5 +1,6 @@
-import {formatFilterName, ZERO_POINT_VALUES} from "./chart-transient-util";
-import {baseUrl, calculateLambda, filterWavelength} from "../chart-cluster-utils/chart-cluster-util";
+import { formatFilterName, ZERO_POINT_VALUES } from "./../chart-transient-utils/chart-transient-util";
+import { baseUrl, calculateLambda, filterWavelength } from "../chart-cluster-utils/chart-cluster-util";
+import { Photometry } from "./photometry";
 
 const DEBUG = false;
 
@@ -27,7 +28,6 @@ export class Model {
     set temporalIndex(i: number) {
         if (isNaN(i) || i === null) {
             this._temporalIndex = -0.65;
-            console.log('temporal index set to -0.65');
         } else {
             this._temporalIndex = i;
         }
@@ -40,7 +40,6 @@ export class Model {
     set spectralIndex(i: number) {
         if (isNaN(i) || i === null) {
             this._spectralIndex = -0.5;
-            console.log('spectral index set to -0.5');
         } else {
             this._spectralIndex = i;
         }
@@ -53,7 +52,6 @@ export class Model {
     set referenceTime(t: number) {
         if (isNaN(t) || t === null) {
             this._referenceTime = 8.0;
-            console.log('reference time set to 8');
         } else {
             this._referenceTime = t;
         }
@@ -66,7 +64,6 @@ export class Model {
     set referenceMagn(m: number) {
         if (isNaN(m) || m === null) {
             this._referenceMagn = 10.0;
-            console.log('reference magnitude set to 10');
         } else {
             this._referenceMagn = m;
         }
@@ -79,7 +76,6 @@ export class Model {
     set atmExtinction(ae: number) {
         if (isNaN(ae) || ae === null) {
             this._atmExtinction = 0.0;
-            console.log('Atmospheric Extinction set to 8.0');
         } else {
             this._atmExtinction = ae;
         }
@@ -92,27 +88,26 @@ export class Model {
     set referenceFltr(f: string) {
         if (f === null || f === null) {
             this._referenceFltr = 'U';
-            console.log('reference filter set to \'U\'');
         } else {
             this._referenceFltr = f;
         }
     }
 
     /* METHODS */
-    calculate(filter: string, currentTime: number): number {
+    calculate(filter: string, currentTime: number, eventTime: number): number {
         const wavelength = filterWavelength;
-        const eventTime = 0;//parseFloat(this.form["time"].value);
         const f = wavelength[filter];
         const f0 = wavelength[this.referenceFltr];
         const Rv = 3.1;
 
         const FZP0 = ZERO_POINT_VALUES[this.referenceFltr];
         const FZP = ZERO_POINT_VALUES[filter];
-        const td = currentTime - eventTime;
         const Anu = calculateLambda(this.atmExtinction * Rv, wavelength[this.referenceFltr]);
 
+        // The event time is already factored into the current time. So, only need to subtract
+        // the event time from the reference time.
         const eq1 = Math.log10(FZP0 / FZP);
-        const eq2 = this.temporalIndex * Math.log10(td / this.referenceTime);
+        const eq2 = this.temporalIndex * Math.log10(currentTime / (this.referenceTime - eventTime));
         const eq3 = this.spectralIndex * Math.log10(f / f0);
         const eq4 = Anu / 2.5;
 
@@ -126,28 +121,40 @@ export class Model {
         }
         return this.referenceMagn - (2.5 * (eq1 + eq2 + eq3 - eq4));
     }
-
 }
+
 
 // algorithmic model
 export class NonLinearRegression extends Model {
     xdata: Array<number> = [];
     ydata: Array<number> = [];
-    filters: { [x: number]: string } = {};
+    filters: Array<string> = [];
 
-    constructor(form: VariableLightCurveForm, data: any[], eventTime: number, range?: Array<number>) {
+    private _minRange: number = -Infinity;
+    private _maxRange: number = Infinity;
+
+    get minRange(): number { return this._minRange; }
+    set minRange(m: number) { this._minRange = m; }
+
+    get maxRange(): number { return this._maxRange; }
+    set maxRange(m: number) { this._maxRange = m; }
+
+    constructor(form: VariableLightCurveForm) {
         super(form);
+    }
 
-        if (!range) {
-            range = [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY]
-        }
-
-        for (let i = 0; i < data.length; i++) {
-            // move this to main driver file. no need to do here.
-            if (data[i][0] - eventTime > range[0] && data[i][0] - eventTime < range[1]) {
-                this.xdata.push(data[i][0] - eventTime);
-                this.ydata.push(data[i][1]);
-                this.filters[(data[i][0] - eventTime)] = formatFilterName(data[i][2]);
+    /**
+     * Sets the modable data by removing data that is not within the 
+     * defined bounds.
+     * 
+     * @param photometry - Photometry data object
+     */
+    defineData(photometry: Photometry) {
+        for (let row of photometry.data) {
+            if (row.julianDate <= this.maxRange && row.julianDate >= this.minRange) {
+                this.xdata.push(row.julianDate);
+                this.ydata.push(row.magnitude - photometry.getMagnitudeOffset(row.filter));
+                this.filters.push(formatFilterName(row.filter));
             }
         }
     }
@@ -189,16 +196,15 @@ export class NonLinearRegression extends Model {
     }
 
     private LMSFormUpdate(response: any) {
-        const form = document
-            .getElementById('transient-form') as VariableLightCurveForm;
+        const form = document.getElementById('transient-form') as VariableLightCurveForm;
+
         // text entries
-        form['mag_num'].value = parseFloat(response['popt'][0]);
-        form['a_num'].value = parseFloat(response['popt'][1]);
-        form['b_num'].value = parseFloat(response['popt'][2]);
+        form['a_num'].value = parseFloat(response['popt'][0]);
+        form['b_num'].value = parseFloat(response['popt'][1]);
+
         // sliders
-        form['mag'].value = parseFloat(response['popt'][0]);
-        form['a'].value = parseFloat(response['popt'][1]);
-        form['b'].value = parseFloat(response['popt'][2]);
+        form['a'].value = parseFloat(response['popt'][0]);
+        form['b'].value = parseFloat(response['popt'][1]);
     }
 
     private LSMServerRequest() {
