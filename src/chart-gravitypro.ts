@@ -462,10 +462,14 @@ console.log(colors['bright'])
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
+
+    // Need to update table in a way that does not reset the graph orientation/zoom
     updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
         gravClass.plotNewModel(myChart, mySpecto, gravityForm, strainData, freqData, totalMassDivGrid);
+    updateRawStrain(gravityModelForm, sessionID, (data: number[][]) =>
+        updateTable(hot, data));
       })
-    gravClass.fitChartToBounds(myChart)
+    //gravClass.fitChartToBounds(myChart)
     console.log(mySpecto.data.datasets[0])
   };
 
@@ -478,9 +482,9 @@ console.log(colors['bright'])
 
   gravityModelForm.oninput = throttle(
     function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
-      gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid));
-      updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
-      updateTable(hot, data))},
+      gravClass.plotNewModel(myChart, mySpecto, gravityForm, modelData, freqData, totalMassDivGrid))},
+      //updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
+      //updateTable(hot, data))},
      200);
     
 
@@ -627,7 +631,6 @@ export function gravityProFileUpload(
     // for (let i = 0; i < dataset.length; i++) {
     //   dataset[i][0] = dataset[i][0] - timeZero;
     // }
-  
     let [min, max] = updateTable(table, dataset);
     let midpoint = (min + max) / 2;
     let view_buffer = (max - min) * 0.20;

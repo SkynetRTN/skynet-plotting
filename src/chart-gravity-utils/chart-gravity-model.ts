@@ -25,6 +25,8 @@ export function updateRawStrain(gravityModelForm: GravityModelForm, sessionID: s
     httpPostAsync(url, {}, (response: string) => {
         let json = JSON.parse(response);
         let data = json['data'];
+        let snrMax = json['snrMax']
+        // console.log('snrMax: ', snrMax)
         updateChartCallback(data);
     }, () => {});
 }
