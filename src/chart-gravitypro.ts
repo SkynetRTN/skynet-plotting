@@ -178,14 +178,15 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
 
   document.getElementById('myChart').hidden = true;
   document.getElementById('grav-charts').style.display = 'inline';
-  document.getElementById('axis-label1').style.display = 'inline';
-  document.getElementById('axis-label2').style.display = 'inline';
-  document.getElementById('axis-label3').style.display = 'inline';
-  document.getElementById('axis-label4').style.display = 'inline';
-  document.getElementById('axisSet1').className = 'col-sm-6';
-  document.getElementById('axisSet2').style.display = 'inline';
-  document.getElementById('xAxisPrompt').innerHTML = "X Axis";
-  document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
+  //document.getElementById('axis-label1').style.display = 'inline';
+  //document.getElementById('axis-label2').style.display = 'inline';
+  //document.getElementById('axis-label3').style.display = 'inline';
+  //document.getElementById('axis-label4').style.display = 'inline';
+  //document.getElementById('axisSet1').className = 'col-sm-6';
+  //document.getElementById('axisSet2').style.display = 'inline';
+  //document.getElementById('xAxisPrompt').innerHTML = "X Axis";
+  //document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
+  document.getElementById('title-data-col').hidden = true
   const container = document.getElementById("table-div");
         // unhide table whenever interface is selected
         document.getElementById("chart-type-form").addEventListener("click", () => {
@@ -234,7 +235,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           immutableLabel: true,
         },
         {
-          label: 'Data',
+          label: 'Strain',
           data: [],
           borderColor: colors['purple'],
           backgroundColor: colors['purple'],
@@ -271,7 +272,6 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
       },
       scales: {
         x: {
-          //label: 'time',
           type: "linear",
           position: "bottom",
           ticks:{
@@ -494,11 +494,11 @@ console.log(colors['bright'])
 
 
   update();
-  myChart.options.scales["x"].title.text = "x";
-  myChart.options.scales["y"].title.text = "y";
+  myChart.options.scales["x"].title.text = "Time [Seconds] from . . .";
+  myChart.options.scales["y"].title.text = "Relative Strain";
   mySpecto.options.plugins.title.text = "Title";
-  mySpecto.options.scales["x"].title.text = "x";
-  mySpecto.options.scales["y"].title.text = "y";
+  mySpecto.options.scales["x"].title.text = "Time [Seconds] from . . .";
+  mySpecto.options.scales["y"].title.text = "Frequency [Hz]";
   updateLabels(
     mySpecto,
     document.getElementById("chart-info-form") as ChartInfoForm,
@@ -622,7 +622,7 @@ export function gravityProFileUpload(
     console.log(timeZero)
     // Continue with the rest of the code using the combined dataset
     console.log('Combined dataset:', dataset);
-  
+    let timeOfRecord = json['timeOfRecord']
     // let timeZero = Math.ceil(dataset[0][0]);
     // console.log('data[0][0]: ', dataset[0][0]);
   
@@ -641,6 +641,9 @@ export function gravityProFileUpload(
     updateDataPlot(table, myCharts[0]);
     gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm);
+    myCharts[0].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
+    myCharts[1].options.plugins.title.text = "GW Wave Candidate Recieved on " + timeOfRecord + "UTC";
+    myCharts[1].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
   });
 
   console.log("getting spectrogram...")
