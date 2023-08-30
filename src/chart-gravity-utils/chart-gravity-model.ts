@@ -1,8 +1,8 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
-import {baseUrl, httpGetAsync} from "../chart-cluster-utils/chart-cluster-util";
+import {baseUrl, httpGetAsync, httpPostAsync} from "../chart-cluster-utils/chart-cluster-util";
 import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
-
+import Handsontable from "handsontable";
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
@@ -14,6 +14,24 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
         
 }
 
+// Here we want a function like updateGravModeldata that takes the same arguments as well as the whitened data stored in the table
+// and we will send that data to /gravity api call to be bandpassed and back again to update the strain data in the table
+////////////////////////////////////
+///////////////////////////////////
+export function updateRawStrain(gravityModelForm: GravityModelForm, sessionID: string, updateChartCallback: Function = () => {}) {
+    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
+    const url = generateURLData(totalMass, ratioMass, sessionID);
+
+    httpPostAsync(url, {}, (response: string) => {
+        let json = JSON.parse(response);
+        let data = json['data'];
+        let snrMax = json['snrMax']
+        // console.log('snrMax: ', snrMax)
+        updateChartCallback(data);
+    }, () => {});
+}
+/////////////////////////////////////////////////
+////////////////////////////////////////////////
 //Extract strain model from the yellow model plotted over the spectogram :)
 export function extract_strain_model(specto: number[][], chart: Chart , x0: number, dx: number,y0: number,dy: number)
 : ScatterDataPoint[] 
@@ -48,7 +66,7 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
             catch (err){ console.log(i)}//pro error handling
         }
         var avgMag = sumMag / (addressYUpper- (addressYLower>0?addressYLower:0))
-        return avgMag / 10.0;
+        return avgMag; //Whoever divided this by ten before, why?
     }
     //OLD VERSION
     // var strain_model: ScatterDataPoint[] = [];
@@ -85,6 +103,14 @@ function generateURL(totalMass: number, ratioMass: number) {
     return baseUrl + "/gravity?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
+}
+
+function generateURLData(totalMass: number, ratioMass: number, sessionID: string) {
+
+    return baseUrl + "/gravitydata?"
+        + "totalMass=" + totalMass.toString()
+        + "&ratioMass=" + ratioMass.toString()
+        + "&sessionID=" + sessionID
 }
 
 function fitValuesToGrid(gravityModelForm : GravityModelForm){
