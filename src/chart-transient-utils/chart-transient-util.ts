@@ -1,4 +1,10 @@
 /* METHODS */
+export const FILTERS: string[] = ['U', 'B', 'V', 'R', 'I',
+                                  'Y', 'J', 'H', 'K', "u\'",
+                                  "g\'", "r\'", "i\'", "z\'",
+                                  'uprime', 'gprime', 'rprime',
+                                  'iprime', 'zprime']
+
 export const findDelimiter = (s: string) => {
     let plus = false;
     let minus = false;
