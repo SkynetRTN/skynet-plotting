@@ -258,6 +258,18 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           hidden: true,
           immutableLabel: false,
         },
+        {
+          label: 'Magnitude2',
+          data: [],
+          borderColor: colors['red'],
+          backgroundColor: colors['red'],
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.1,
+          fill: false,
+          hidden: true,
+          immutableLabel: false,
+        },
       ],
       sonification:
       {
@@ -307,7 +319,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
               if(item.text.includes("Magnitude") && data.datasets[2].hidden === true)
                 return false
               else
-                return true
+                return true && !item.text.includes('Magnitude2');
             },
           },
         },
@@ -670,13 +682,22 @@ export function gravityProFileUpload(
       (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = true;
 
       setTimeout(function () {
-      myCharts[0].data.datasets[2].data =
+      const strainMagModelHigh =
         extract_strain_model(r.spec_array, 
         myCharts[1],
         parseFloat(r.x0) - timeZero, parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
+        myCharts[0].data.datasets[2].data = strainMagModelHigh
 
+        const strainMagModelLow: ScatterDataPoint[] = []
+        strainMagModelHigh.forEach(val => strainMagModelLow.push(Object.assign({}, val)));
+        for (let i = 0; i < strainMagModelLow.length; i++) {
+          strainMagModelLow[i].y = -1 * strainMagModelLow[i].y;  // Set the y-value to negative
+        }
+
+        myCharts[0].data.datasets[3].data = strainMagModelLow
         //myCharts[0].data.datasets[1].hidden = true;
         myCharts[0].data.datasets[2].hidden = false;
+        myCharts[0].data.datasets[3].hidden = false;
         myCharts[0].update();
         (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false;
         }, 100);

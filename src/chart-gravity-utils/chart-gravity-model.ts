@@ -66,7 +66,7 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
             catch (err){ console.log(i)}//pro error handling
         }
         var avgMag = sumMag / (addressYUpper- (addressYLower>0?addressYLower:0))
-        return avgMag / 10.0;
+        return avgMag; //Whoever divided this by ten before, why?
     }
     //OLD VERSION
     // var strain_model: ScatterDataPoint[] = [];
