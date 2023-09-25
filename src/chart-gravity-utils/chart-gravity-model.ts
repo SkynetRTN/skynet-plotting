@@ -1,16 +1,18 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
 import {baseUrl, httpGetAsync, httpPostAsync} from "../chart-cluster-utils/chart-cluster-util";
-import {ratioMassLogSpace, totalMassLogSpace} from "./chart-gravity-grid-dimension";
+import {ratioMassLogSpace, totalMassLogSpace, ratioMassLogSpaceStrain, totalMassLogSpaceStrain} from "./chart-gravity-grid-dimension";
 import Handsontable from "handsontable";
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
+    // these are split up because the frequency model had a different less dense grid than the strain one
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
-    httpGetAsync(generateURL(totalMass, ratioMass), (response: string) => {
+    const [totalMassStrain, ratioMassStrain, totalMassDivGridMassStrain] = fitValuesToGridStrain(gravityModelForm);
+    httpGetAsync(generateURL(totalMass, ratioMass, totalMassStrain, ratioMassStrain), (response: string) => {
         let json = JSON.parse(response);
         let strainTable = json['strain_model'];
         let freqTable = json['freq_model']
-        updateChartCallback(strainTable, freqTable, totalMassDivGridMass)}, () => {})
+        updateChartCallback(strainTable, freqTable, totalMassDivGridMassStrain)}, () => {})
         
 }
 
@@ -19,7 +21,7 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
 ////////////////////////////////////
 ///////////////////////////////////
 export function updateRawStrain(gravityModelForm: GravityModelForm, sessionID: string, updateChartCallback: Function = () => {}) {
-    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
+    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGridStrain(gravityModelForm);
     const url = generateURLData(totalMass, ratioMass, sessionID);
 
     httpPostAsync(url, {}, (response: string) => {
@@ -98,11 +100,13 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
  * @param totalMass
  * @param ratioMass
  */
-function generateURL(totalMass: number, ratioMass: number) {
-
+function generateURL(totalMass: number, ratioMass: number, totalMassStrain: number, ratioMassStrain: number) {
+    
     return baseUrl + "/gravity?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
+        + "&totalMassStrain=" + totalMassStrain.toString()
+        + "&ratioMassStrain=" + ratioMassStrain.toString()
 }
 
 function generateURLData(totalMass: number, ratioMass: number, sessionID: string) {
@@ -149,6 +153,46 @@ function fitValuesToGrid(gravityModelForm : GravityModelForm){
         }
     }
     let roundedTotalMass = totalMassLogSpace[argmin_tm];
+    let totalMassDivGridMass = totalMass / roundedTotalMass;
+    return [roundedTotalMass, roundedMassRatio, totalMassDivGridMass];
+}
+
+function fitValuesToGridStrain(gravityModelForm : GravityModelForm){
+    let totalMass = parseFloat(gravityModelForm["mass_num"].value);
+    let ratioMass = parseFloat(gravityModelForm["ratio_num"].value);
+
+    // Fitting the sliders to each logspace
+    //Mass Ratio
+    const differences_mr: number[] = [];
+    for (let i = 0; i < ratioMassLogSpaceStrain.length; i++){
+        differences_mr.push(Math.abs(ratioMass - ratioMassLogSpaceStrain[i]));
+    }
+
+    let min_mr: number = 251;
+    let argmin_mr = 0;
+    for (let i = 0; i < ratioMassLogSpaceStrain.length; i++){
+        if (differences_mr[i] < min_mr) {
+            min_mr = differences_mr[i];
+            argmin_mr = i;
+        }
+    }
+    let roundedMassRatio = ratioMassLogSpaceStrain[argmin_mr];
+
+    //Total Mass
+    const differences_tm: number[] = [];
+    for (let i = 0; i < totalMassLogSpaceStrain.length; i++){
+        differences_tm.push(Math.abs(totalMass - totalMassLogSpaceStrain[i]));
+    }
+
+    let min_tm: number = 251;
+    let argmin_tm = 0;
+    for (let i = 0; i < totalMassLogSpaceStrain.length; i++){
+        if (differences_tm[i] < min_tm) {
+            min_tm = differences_tm[i];
+            argmin_tm = i;
+        }
+    }
+    let roundedTotalMass = totalMassLogSpaceStrain[argmin_tm];
     let totalMassDivGridMass = totalMass / roundedTotalMass;
     return [roundedTotalMass, roundedMassRatio, totalMassDivGridMass];
 }
