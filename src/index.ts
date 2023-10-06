@@ -98,6 +98,11 @@ window.onload = function () {
         document.getElementById('no-signature-alert').style.display = 'none';
     }
 
+    document.getElementById('pledge-signed').onclick = (event) => {
+        event.preventDefault();
+        document.getElementById('pledge-submit-dummy').click();
+    }
+
     setChartDefaults();
     chartType((chartTypeForm.elements[0] as HTMLInputElement).value);
 

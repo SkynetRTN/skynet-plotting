@@ -313,15 +313,17 @@
               <p>REQUIRED FOR RECEIVING CREDIT</p>
               <p>Sign your name to attest to the fact that you made this graph yourself:</p>
               <input type="text" class="field" title="Sign your name here" name="signature" autocomplete="name">
+              <button style="display: none" id="pledge-submit-dummy"></button>
             </form>
           </div>
           <div class="modal-footer" style="flex-direction: row-reverse; justify-content: space-between">
-            <button type="button" id="pledge-signed" data-bs-dismiss="modal">Save Graph</button>
+            <button type="submit" id="pledge-signed">Save Graph</button>
             <div id="no-signature-alert" class="alert alert-warning" role="alert" style="display: none;">
               Please make sure to sign your name.
             </div>
           </div>
         </div>
+        <button style="display: none" id="dismiss-honor-modal" data-bs-dismiss="modal"></button>
       </div>
     </div>
 
