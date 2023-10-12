@@ -70,19 +70,21 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         // '<div class="col-sm-4 range"><input type="range" title="Phase" name="phase"></div>\n' +
         // '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="field"></div>\n' +
         // "</div>\n" +
-        "</form>"
+        "</form>\n" +
+        '<div class="row">\n' +
+        "<p>LVK Datasets can be found here: <a href='https://gwosc.org/eventapi/html/allevents/' style='color: #777;' target='_blank'>GWOSC Event Portal</a></p>" 
     );
       document.getElementById("below-table-column").insertAdjacentHTML("beforeend",
-      '<button id="extract-data-button" disabled>Extract Data</button>'
+      '<button id="extract-data-button" hidden>Extract Data</button>'
       )
 
     document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div class = "row" style="float: right;">\n' +
-      '<button class = "graphControl" id="panLeft" style = "position:relative; right:5px;"><class = "graphControl">&#8592;</></button>\n' +
-      '<button class = "graphControl" id="panRight" style = "position:relative; right:5px;"><class = "graphControl">&#8594;</></button>\n' +
-      '<button class = "graphControl" id="zoomIn" style = "position:relative; right:5px;"><class = "graphControl">&plus;</></button>\n' +
-      '<button class = "graphControl" id="zoomOut" style = "position:relative; right:5px;"><class = "graphControl">&minus;</></button>\n' +
-      '<button class = "graphControlAlt" id="Reset" style = "position:; top:1px; right:5px; padding: 0px;   width:50px; text-align: center;">Reset</button>\n'+
+      '<button class = "graphControl" id="panLeft" style = "position:relative; right:35px;"><class = "graphControl">&#8592;</></button>\n' +
+      '<button class = "graphControl" id="panRight" style = "position:relative; right:35px;"><class = "graphControl">&#8594;</></button>\n' +
+      '<button class = "graphControl" id="zoomIn" style = "position:relative; right:35px;"><class = "graphControl">&plus;</></button>\n' +
+      '<button class = "graphControl" id="zoomOut" style = "position:relative; right:35px;"><class = "graphControl">&minus;</></button>\n' +
+      '<button class = "graphControlAlt" id="Reset" style = "position:; top:1px; right:35px; padding: 0px;   width:50px; text-align: center;">Reset</button>\n'+
   '</div>\n')
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
   '<div style="float: right;">\n' +
@@ -341,7 +343,7 @@ console.log(colors['bright'])
           data: [] as {x: number, y: number}[], //define data format here so we can use it later
           borderColor: 'rgba(255, 238, 81, 0.5)',
           backgroundColor: 'rgba(255, 238, 81, 0.5)',
-          pointRadius: 0,
+          pointRadius: 1,
           borderWidth: 0,
           tension: 0.1,
           hidden: false,
@@ -734,7 +736,6 @@ export class gravityProClass {
   constructor(){
     this.currentModelData = defaultModelData;
     this.currentFreqData = defaultModelData;
-    this.totalMassDivGridMass = 1;
   }
 
   public updateModelPlot(
