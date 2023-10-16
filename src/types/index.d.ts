@@ -223,8 +223,8 @@ interface GravityForm extends HTMLFormElement {
     dist_num: HTMLInputElement
     inc: HTMLInputElement,
     inc_num: HTMLInputElement,
-    merge: HTMLInputElement,
-    merge_num: HTMLInputElement
+    phase: HTMLInputElement,
+    phase_num: HTMLInputElement
 }
 
 interface GravityModelForm extends HTMLFormElement {
@@ -232,6 +232,11 @@ interface GravityModelForm extends HTMLFormElement {
     ratio: HTMLInputElement,
     mass_num: HTMLInputElement,
     ratio_num: HTMLInputElement,
+}
+
+interface GravityTimeForm extends HTMLFormElement {
+    merge: HTMLInputElement,
+    merge_num: HTMLInputElement,
 }
 
 interface ClusterSimForm extends HTMLFormElement {
