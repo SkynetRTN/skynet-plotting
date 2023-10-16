@@ -93,6 +93,7 @@ export const initHTML = () => {
     document.getElementById('yAxisPrompt').innerHTML = "Y Axis";
 
     let HTML =
+        '<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@0.1.3/build/Chart.ErrorBars.min.js"></script>' + 
         '<form title="Transient" id="transient-form"' +
         'style="padding-bottom: .5em" onSubmit="return false;">\n' +
 
@@ -116,6 +117,7 @@ export const initHTML = () => {
     HTML += addSliderWithInput('mag<sub>0</sub>', 'magnitude', 'mag');
     HTML += addSliderWithInput('a', 'extinction', 'a');
 
+    // fitting button
     HTML +=
         '<div class="row">' +
         '<div style="width: 100%">' +

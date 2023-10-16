@@ -5,7 +5,7 @@ import 'bootstrap/js/dist/modal';
 import {saveAs} from 'file-saver';
 import * as piexif from 'piexif-ts';
 
-import {dataURLtoBlob, defaultLayout, formatTime, getDateString, percentToAbsolute, updateTableHeight} from './util';
+import {dataURLtoBlob, defaultLayout, formatTime, getDateString, updateTableHeight} from './util';
 import {curve} from './chart-curve';
 import {dual} from './chart-dual';
 import {moon} from './chart-moon';
@@ -20,9 +20,9 @@ import {cluster3} from './chart-cluster3';
 import {cluster3p} from "./chart-cluster3plus";
 import {round} from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-import { gravityPro, gravityProClass, gravityProFileUpload } from './chart-gravitypro';
-import { transient, transientFileUpload } from './chart-transient';
-import Chart, { LinearScaleOptions, AnimationSpec, ChartType } from 'chart.js/auto';
+import {gravityPro, gravityProFileUpload} from './chart-gravitypro';
+import {transient, transientFileUpload} from './chart-transient';
+import Chart, {AnimationSpec, ChartType, LinearScaleOptions} from 'chart.js/auto';
 import Handsontable from 'handsontable';
 import {pause} from './sonification';
 import {TransientChart} from './chart-transient-utils/chart-transient-chart';
@@ -30,7 +30,6 @@ import {clusterFileUpload} from "./chart-cluster-utils/chart-cluster-file";
 import {graphScale} from "./chart-cluster-utils/chart-cluster-scatter";
 import {updateClusterProLabels} from "./chart-cluster-utils/chart-cluster-interface";
 import {radio, radioFileUpload} from './chart-radio'
-import {transient, transientFileUpload} from "./chart-transient";
 
 /**
  *  Initializing the page when the website loads
@@ -192,7 +191,7 @@ function chartType(chart: string) {
         document.getElementById('file-upload').onchange = function (evt) {
             gravityFileUpload(evt, objects[0], objects[1] as Chart<'line'>, grav_objects[2]);
         }
-    }else if (chart === 'gravityPro') {
+    } else if (chart === 'gravityPro') {
         let grav_pro_objects = gravityPro();
         objects = [grav_pro_objects[0], grav_pro_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
@@ -206,6 +205,11 @@ function chartType(chart: string) {
         document.getElementById('file-upload-button').style.display = 'inline';
         document.getElementById('file-upload').onchange = function (evt) {
             transientFileUpload(evt, transientObjects[0], transientObjects[1]);
+        }
+    } else if (chart === 'radio') {
+        objects = radio();
+        document.getElementById('fits-upload').onchange = function (evt) {
+            radioFileUpload(evt);
         }
     }
     if (chart !== 'radio') {
@@ -363,10 +367,10 @@ function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.
         console.log(dx)
         dx -= canvases[canvases.length - 1].width;
         let dy = canvases[canvases.length - 1].height;
-        destCtx.font = dx/60 + 'px serif';
+        destCtx.font = dx / 60 + 'px serif';
         destCtx.fillStyle = 'black'
         for (const text of texts) {
-            dy += dx/60
+            dy += dx / 60
             destCtx.fillText(text, dx + 20, dy);
         }
     }
