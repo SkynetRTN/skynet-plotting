@@ -632,7 +632,7 @@ export function gravityProFileUpload(
   myCharts[1].startBuffer()
 
   console.log("getting strain server...")
-  get_grav_strain_server(file, (response: string) => {
+  get_grav_strain_server(file, 'false', (response: string) => {
     let json = JSON.parse(response);
     sessionID = json['sessionID'];
     // Combine time and whitenedStrain into a new dataset
@@ -666,7 +666,7 @@ export function gravityProFileUpload(
   });
 
   console.log("getting spectrogram...")
-  get_grav_spectrogram_server(file, (response: XMLHttpRequest) => {
+  get_grav_spectrogram_server(file, 'false', (response: XMLHttpRequest) => {
     //define graph bounds
     let r = response.response;
     let strarr = r.bounds.split(" ")
@@ -726,6 +726,108 @@ export function gravityProFileUpload(
   
 }
 
+export function gravityProDefaultFileUpload(
+  table: Handsontable,
+  myCharts: Chart<"line">[],
+  gravClass: gravityProClass
+) 
+{
+  myCharts[1].startBuffer()
+
+  console.log("getting strain server...")
+  get_grav_strain_server('Default Set Request', 'true',(response: string) => {
+    let json = JSON.parse(response);
+    sessionID = json['sessionID'];
+    // Combine time and whitenedStrain into a new dataset
+    let dataset = json['dataSet']
+    timeZero = json['timeZero']
+    console.log(timeZero)
+    // Continue with the rest of the code using the combined dataset
+    console.log('Combined dataset:', dataset);
+    let timeOfRecord = json['timeOfRecord']
+    // let timeZero = Math.ceil(dataset[0][0]);
+    // console.log('data[0][0]: ', dataset[0][0]);
+  
+    // // Change the scaling of time values to match the LIGO data site, starting from 0
+    // // this must be moved to the server so that it is constant now
+    // for (let i = 0; i < dataset.length; i++) {
+    //   dataset[i][0] = dataset[i][0] - timeZero;
+    // }
+    let [min, max] = updateTable(table, dataset);
+    let midpoint = (min + max) / 2;
+    let view_buffer = (max - min) * 0.20;
+    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
+    const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
+    // Continue with the remaining code for updating the plots, fitting the chart bounds, and updating the model plot
+    updateDataPlot(table, myCharts[0]);
+    gravClass.fitChartToBounds(myCharts[0]);
+    gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
+    myCharts[0].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
+    myCharts[1].options.plugins.title.text = "GW Wave Candidate Recieved on " + timeOfRecord + "UTC";
+    myCharts[1].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
+  });
+
+  console.log("getting spectrogram...")
+  get_grav_spectrogram_server('Default Set Request', 'true', (response: XMLHttpRequest) => {
+    //define graph bounds
+    let r = response.response;
+    let strarr = r.bounds.split(" ")
+    //can change the display of the spectrogram here like this, but i'm going to try to maniupulate the freq table data (actually, just subtract from x0)
+    //i believe these changes are good, should be fine to continue down the list
+    myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
+    myCharts[1].options.scales.x.max = parseFloat(strarr[1]) - timeZero
+    myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
+    myCharts[1].options.scales.y.max = parseFloat(strarr[3]);
+
+    let mergeLow = parseFloat(strarr[0].replace('(','')) - timeZero
+    let mergeHigh = parseFloat(strarr[1]) - timeZero
+    let mergeMid = (mergeLow + mergeHigh) / 2
+
+    const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
+    const gravityForm = document.getElementById("gravity-form") as GravityForm;
+    linkInputs(gravityTimeForm["merge"], gravityTimeForm["merge_num"], mergeLow, mergeHigh, 0.0005, mergeMid);
+
+    (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false
+    document.getElementById("extract-data-button").onclick = () => {
+      (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = true;
+
+      setTimeout(function () {
+      const strainMagModelHigh =
+        extract_strain_model(r.spec_array, 
+        myCharts[1],
+        parseFloat(r.x0) - timeZero, parseFloat(r.dx), parseFloat(r.y0), parseFloat(r.dy));
+        myCharts[0].data.datasets[2].data = strainMagModelHigh
+
+        const strainMagModelLow: ScatterDataPoint[] = []
+        strainMagModelHigh.forEach(val => strainMagModelLow.push(Object.assign({}, val)));
+        for (let i = 0; i < strainMagModelLow.length; i++) {
+          strainMagModelLow[i].y = -1 * strainMagModelLow[i].y;  // Set the y-value to negative
+        }
+
+        myCharts[0].data.datasets[3].data = strainMagModelLow
+        //myCharts[0].data.datasets[1].hidden = true;
+        myCharts[0].data.datasets[2].hidden = false;
+        myCharts[0].data.datasets[3].hidden = false;
+        myCharts[0].update();
+        (document.getElementById("extract-data-button") as HTMLButtonElement).disabled = false;
+        }, 100);
+    }
+
+    updateDataPlot(table, myCharts[0]);
+    gravClass.fitChartToBounds(myCharts[0]);
+    gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
+    //console.log("Implementing background")
+    //decode the spectogram
+    myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
+    myCharts[1].update()
+
+    myCharts[1].endBuffer()
+    //console.log("background complete")
+  })
+  console.log("success")
+  
+}
 export class gravityProClass {
   currentModelData : number[][];
   currentFreqData : number[][];
