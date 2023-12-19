@@ -39,31 +39,31 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Merger Time (sec):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Merger" name="merge"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Merger" name="merge_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Merger" name="merge_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
         "</form>\n" +
         '<form title="Gravity Model Form" id="gravity-model-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Total Mass (solar):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Mass" name="mass"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Mass" name="mass_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Mass" name="mass_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Mass Ratio:</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Ratio" name="ratio"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Ratio" name="ratio_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Ratio" name="ratio_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
         "</form>\n" +
         '<form title="Gravitational Wave Diagram" id="gravity-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (Mpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="dist"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Distance" name="dist_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Distance" name="dist_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Inclination (°):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Inclination" name="inc"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="field"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="spinboxnum field""></div>\n' +
         "</div>\n" +
         // '<div class="row">\n' +
         // '<div class="col-sm-5 des">Phase Shift:</div>\n' +
@@ -155,7 +155,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   const tableData = dummyData;
   let gravClass = new gravityProClass();
   gravClass.setXbounds(Math.min(...tableData.map(t => t.Time)), Math.max(...tableData.map(t => t.Time)));
-  let defaultMerge = (gravClass.getXbounds()[1] + gravClass.getXbounds()[0]) / 2;
+  let defaultMerge : number= +((gravClass.getXbounds()[1] + gravClass.getXbounds()[0]) / 2).toFixed(5);
 
   Reset.onclick = function(){
     myChart.options.scales = {
@@ -165,7 +165,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
       }
     }
 
-    let midpoint = (gravClass.getXbounds()[0] + gravClass.getXbounds()[1])/2
+    let midpoint: number = +((gravClass.getXbounds()[0] + gravClass.getXbounds()[1])/2).toFixed(5)
     gravityTimeForm["merge_num"].value = '' + midpoint
     gravityTimeForm["merge"].value = '' + midpoint
     gravClass.fitChartToBounds(myChart);
@@ -653,12 +653,12 @@ export function gravityProFileUpload(
     let [min, max] = updateTable(table, dataset);
     let midpoint = (min + max) / 2;
     let view_buffer = (max - min) * 0.20;
-    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
+    //gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
     const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
     // Continue with the remaining code for updating the plots, fitting the chart bounds, and updating the model plot
     updateDataPlot(table, myCharts[0]);
-    gravClass.fitChartToBounds(myCharts[0]);
+    //gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
     myCharts[0].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
     myCharts[1].options.plugins.title.text = "GW Wave Candidate Recieved on " + timeOfRecord + "UTC";
@@ -674,12 +674,14 @@ export function gravityProFileUpload(
     //i believe these changes are good, should be fine to continue down the list
     myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
     myCharts[1].options.scales.x.max = parseFloat(strarr[1]) - timeZero
+    myCharts[0].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
+    myCharts[0].options.scales.x.max = parseFloat(strarr[1]) - timeZero
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3]);
 
-    let mergeLow = parseFloat(strarr[0].replace('(','')) - timeZero
-    let mergeHigh = parseFloat(strarr[1]) - timeZero
-    let mergeMid = (mergeLow + mergeHigh) / 2
+    let mergeLow: number = +(parseFloat(strarr[0].replace('(','')) - timeZero).toFixed(5)
+    let mergeHigh: number = +(parseFloat(strarr[1]) - timeZero).toFixed(5)
+    let mergeMid: number = +((mergeLow + mergeHigh) / 2).toFixed(5)
 
     const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
@@ -712,7 +714,7 @@ export function gravityProFileUpload(
     }
 
     updateDataPlot(table, myCharts[0]);
-    gravClass.fitChartToBounds(myCharts[0]);
+    //gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
     //console.log("Implementing background")
     //decode the spectogram
@@ -756,12 +758,12 @@ export function gravityProDefaultFileUpload(
     let [min, max] = updateTable(table, dataset);
     let midpoint = (min + max) / 2;
     let view_buffer = (max - min) * 0.20;
-    gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
+    //gravClass.setXbounds(midpoint - view_buffer, midpoint + view_buffer);
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
     const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
     // Continue with the remaining code for updating the plots, fitting the chart bounds, and updating the model plot
     updateDataPlot(table, myCharts[0]);
-    gravClass.fitChartToBounds(myCharts[0]);
+    //gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
     myCharts[0].options.scales["x"].title.text = "Time [Seconds] from " + timeOfRecord + "UTC (" + timeZero + ".0)";
     myCharts[1].options.plugins.title.text = "GW Wave Candidate Recieved on " + timeOfRecord + "UTC";
@@ -777,12 +779,14 @@ export function gravityProDefaultFileUpload(
     //i believe these changes are good, should be fine to continue down the list
     myCharts[1].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
     myCharts[1].options.scales.x.max = parseFloat(strarr[1]) - timeZero
+    myCharts[0].options.scales.x.min = parseFloat(strarr[0].replace('(','')) - timeZero
+    myCharts[0].options.scales.x.max = parseFloat(strarr[1]) - timeZero
     myCharts[1].options.scales.y.min = parseFloat(strarr[2].replace('(',''))
     myCharts[1].options.scales.y.max = parseFloat(strarr[3]);
 
-    let mergeLow = parseFloat(strarr[0].replace('(','')) - timeZero
-    let mergeHigh = parseFloat(strarr[1]) - timeZero
-    let mergeMid = (mergeLow + mergeHigh) / 2
+    let mergeLow: number = +(parseFloat(strarr[0].replace('(','')) - timeZero).toFixed(5)
+    let mergeHigh: number = +(parseFloat(strarr[1]) - timeZero).toFixed(5)
+    let mergeMid: number = +((mergeLow + mergeHigh) / 2).toFixed(5)
 
     const gravityTimeForm = document.getElementById("gravity-time-form") as GravityTimeForm;
     const gravityForm = document.getElementById("gravity-form") as GravityForm;
@@ -815,7 +819,7 @@ export function gravityProDefaultFileUpload(
     }
 
     updateDataPlot(table, myCharts[0]);
-    gravClass.fitChartToBounds(myCharts[0]);
+    //gravClass.fitChartToBounds(myCharts[0]);
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
     //console.log("Implementing background")
     //decode the spectogram
