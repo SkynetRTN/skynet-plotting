@@ -92,7 +92,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   '<label style = "position:relative; right:163px;">Speed:</label>' +
   '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:295px; width: 52px;" >' +
   '<button id="saveSonification" style = "position:relative; right:40px;"/>Save Sonification</button>' +
-  '</div>\n'
+  '</div>\n' 
   );
 
   const audioCtx = new AudioContext();
@@ -282,6 +282,14 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
           audioSource: audioSource,
           audioControls: audioControls
       },
+      modeLabels: {
+        lc: {t: 'Title', x: 'x', y: 'y'},
+        ft: {t: 'Periodogram', x: 'Period (sec)', y: 'Power Spectrum'},
+        pf: {t: 'Title', x: 'x', y: 'y'},
+        pressto: {t: 'Title', x: 'x', y: 'y'},
+        gravity: {t: 'Title', x: 'x', y: 'y'},
+        lastMode: 'gravity'
+    },
     },
     options: {
       hover: {
@@ -630,7 +638,8 @@ export function gravityProFileUpload(
 //begin load animation
 //we stop these IN the functions, because they are asynchronus and the anim will stop instantly if we don't
   myCharts[1].startBuffer()
-
+  pause(myCharts[0]);
+  Set2DefaultSpeed(myCharts[0]);
   console.log("getting strain server...")
   get_grav_strain_server(file, 'false', (response: string) => {
     let json = JSON.parse(response);
@@ -735,7 +744,8 @@ export function gravityProDefaultFileUpload(
 ) 
 {
   myCharts[1].startBuffer()
-
+  pause(myCharts[0]);
+  Set2DefaultSpeed(myCharts[0]);
   console.log("getting strain server...")
   get_grav_strain_server('Default Set Request', 'true',(response: string) => {
     let json = JSON.parse(response);
