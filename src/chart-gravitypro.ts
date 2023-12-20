@@ -56,6 +56,11 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         "</form>\n" +
         '<form title="Gravitational Wave Diagram" id="gravity-form">\n' +
         '<div class="row">\n' +
+        '<div class="col-sm-5 des">Phase Shift:</div>\n' +
+        '<div class="col-sm-4 range"><input type="range" title="Phase" name="phase"></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="spinboxnum field"></div>\n' +
+        "</div>\n" +
+        '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (Mpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="dist"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Distance" name="dist_num" class="spinboxnum field"></div>\n' +
@@ -63,13 +68,16 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Inclination (°):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Inclination" name="inc"></div>\n' +
-        '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="spinboxnum field""></div>\n' +
+        '<div class="col-sm-3 text"><input type="number" title="Inclination" name="inc_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
-        // '<div class="row">\n' +
-        // '<div class="col-sm-5 des">Phase Shift:</div>\n' +
-        // '<div class="col-sm-4 range"><input type="range" title="Phase" name="phase"></div>\n' +
-        // '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="field"></div>\n' +
-        // "</div>\n" +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Final Mass (solar): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="final_mass" title="Final Mass" value=0></input></div>\n' +
+        '</div>\n' +
+        '<div class="row">\n' +
+        '<div class="col-sm-7">Mass Loss (solar): </div>\n' +
+        '<div class="col-sm-5"><input class="field" type="number" step="0.001" name="mass_loss" title="Mass Loss" value=0></input></div>\n' +
+        '</div>\n' +
         "</form>\n" +
         '<div class="row">\n' +
         "<p>LVK Datasets can be found here: <a href='https://gwosc.org/eventapi/html/allevents/' style='color: #777;' target='_blank'>GWOSC Event Portal</a></p>" 
@@ -177,7 +185,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   linkInputs(gravityTimeForm["merge"], gravityTimeForm["merge_num"], 10, 20, 0.0005, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
-  //linkInputs(gravityForm["phase"],gravityForm["phase_num"],0,360,0.001,0,false,false,0,360);
+  linkInputs(gravityForm["phase"],gravityForm["phase_num"],0,360,0.001,0,false,false,0,360);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1.000,10.000,0.001,1.000, true);
 
@@ -488,6 +496,7 @@ console.log(colors['bright'])
     //console.log(tableData);
     updateTableHeight(hot);
     updateDataPlot(hot, myChart);
+    findMassDiff(gravityModelForm, gravityForm)
 
     // Need to update table in a way that does not reset the graph orientation/zoom
     updateGravModelData(gravityModelForm, (strainData : number[][], freqData : number[][], totalMassDivGrid : number) => {
@@ -508,7 +517,7 @@ console.log(colors['bright'])
 
   gravityModelForm.oninput = throttle(
     function () {updateGravModelData(gravityModelForm, (modelData : number[][], freqData : number[][], totalMassDivGrid : number) => 
-      gravClass.plotNewModel(myChart, mySpecto, gravityForm, gravityTimeForm, modelData, freqData, totalMassDivGrid))},
+      gravClass.plotNewModel(myChart, mySpecto, gravityForm, gravityTimeForm, modelData, freqData, totalMassDivGrid)), findMassDiff(gravityModelForm, gravityForm)},
       //updateRawStrain(gravityModelForm, sessionID, (data: number[][]) => 
       //updateTable(hot, data))},
      200);
@@ -559,6 +568,20 @@ console.log(colors['bright'])
   }, {once: true} );
 
   return [hot, [myChart, mySpecto], gravClass];
+}
+
+function findMassDiff(gravityModelForm : GravityModelForm, gravityForm: GravityForm){
+  let totalMass = parseFloat(gravityModelForm["mass_num"].value);
+  let ratioMass = parseFloat(gravityModelForm["ratio_num"].value);
+
+  let mass_diff: number = +(((0.053073) - (0.016603 * Math.log(ratioMass))) * totalMass).toFixed(3)
+
+  if (mass_diff < 0){
+    mass_diff = 0
+  }
+
+  gravityForm["final_mass"].value = +(totalMass - mass_diff).toFixed(3)
+  gravityForm["mass_loss"].value = mass_diff
 }
 
 function updateTable(table: Handsontable, data: number[][]){
