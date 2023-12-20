@@ -480,7 +480,7 @@ console.log(colors['bright'])
           image: null
         },
         buffer: {
-          image: "./assets/waitbear.gif"
+          image: weightedRandomString()
         }
       },
     },
@@ -568,6 +568,32 @@ console.log(colors['bright'])
   }, {once: true} );
 
   return [hot, [myChart, mySpecto], gravClass];
+}
+//This is actually handled in buffer-anim.ts but im leaving it here cuz Im lazy
+function weightedRandomString(): string {
+  // Calculate the total weight
+  const weightedStrings = [
+    { value: "waitbear.gif", weight: 1 },
+    { value: "wizardtype.gif", weight: 33 },
+    { value: "wizardzap.gif", weight: 33 },
+    { value: "wizardmistify.gif", weight: 33 }
+  ];
+  const totalWeight = weightedStrings.reduce((sum, str) => sum + str.weight, 0);
+
+  // Generate a random number between 0 and totalWeight
+  const randomValue = Math.random() * totalWeight;
+
+  // Find the string with the corresponding weight
+  let cumulativeWeight = 0;
+  for (const weightedString of weightedStrings) {
+      cumulativeWeight += weightedString.weight;
+      if (randomValue <= cumulativeWeight) {
+          // Add the chosen string to the base string
+          return "./assets/" + weightedString.value;
+      }
+  }
+  // This should not happen, but if it does, return the original base string
+  return "./assets/waitbear.gif";
 }
 
 function findMassDiff(gravityModelForm : GravityModelForm, gravityForm: GravityForm){
