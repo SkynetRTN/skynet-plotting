@@ -53,13 +53,13 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
         '<div class="col-sm-4 range"><input type="range" title="Ratio" name="ratio"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Ratio" name="ratio_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
-        "</form>\n" +
-        '<form title="Gravitational Wave Diagram" id="gravity-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Phase Shift:</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Phase" name="phase"></div>\n' +
         '<div class="col-sm-3 text"><input type="number" title="Phase" name="phase_num" class="spinboxnum field"></div>\n' +
         "</div>\n" +
+        "</form>\n" +
+        '<form title="Gravitational Wave Diagram" id="gravity-form">\n' +
         '<div class="row">\n' +
         '<div class="col-sm-5 des">Distance (Mpc):</div>\n' +
         '<div class="col-sm-4 range"><input type="range" title="Distance" name="dist"></div>\n' +
@@ -185,7 +185,7 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   linkInputs(gravityTimeForm["merge"], gravityTimeForm["merge_num"], 10, 20, 0.0005, defaultMerge);
   linkInputs(gravityForm["dist"],gravityForm["dist_num"],10,10000,0.01,300,true,true,10,1000000000000);
   linkInputs(gravityForm["inc"], gravityForm["inc_num"], 0, 90, 0.01, 0);
-  linkInputs(gravityForm["phase"],gravityForm["phase_num"],0,360,0.001,0,false,false,0,360);
+  linkInputs(gravityModelForm["phase"],gravityModelForm["phase_num"],0,180,0.001,0,false,false,0,180);
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1.000,10.000,0.001,1.000, true);
 
