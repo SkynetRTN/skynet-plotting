@@ -95,11 +95,15 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
       '<button class = "graphControlAlt" id="Reset" style = "position:; top:1px; right:35px; padding: 0px;   width:50px; text-align: center;">Reset</button>\n'+
   '</div>\n')
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="float: right;">\n' +
-  '<button id="sonify" style = "position: relative; left:2px;"/>Sonify</button>' +
-  '<label style = "position:relative; right:163px;">Speed:</label>' +
-  '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:295px; width: 52px;" >' +
-  '<button id="saveSonification" style = "position:relative; right:40px;"/>Save Sonification</button>' +
+  '<div style="position: relative;">\n' +
+  '<label style = "position:relative; right:190px;">Dataset:</label>' +
+  '<select id="datasetSelector" name="Dataset" style="position: relative; right:180px" title="Sonification Dataset">' +
+              '<option value="strain" title="B filter">Strain</option>' +
+              '<option value="model" title="V filter" selected>Model</select>' +
+  '<button id="sonify" style = "position: relative; right:170px;"/>Sonify</button>' +
+  '<label style = "position:relative; right:160px;">Speed:</label>' +
+  '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:210px; width: 52px;">' +
+  '<button id="saveSonification" style = "position:relative; left:160px; top:-50px"/>Save Sonification</button>' +
   '</div>\n' 
   );
 
