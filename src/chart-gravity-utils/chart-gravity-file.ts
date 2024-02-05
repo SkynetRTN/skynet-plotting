@@ -2,11 +2,12 @@ import {baseUrl} from "../chart-cluster-utils/chart-cluster-util";
 
 
 
-export function get_grav_strain_server(file: File, callback: Function){
+export function get_grav_strain_server(file: File | string, default_set: string, callback: Function){
     let req = new XMLHttpRequest();
     let uploadUrl = baseUrl + "/gravfile"
     let formData = new FormData();
     formData.append("file", file)
+    formData.append("default_set", default_set)
     req.onreadystatechange = function () {
         if (req.readyState == 4 && req.status == 200){
             try {
@@ -32,11 +33,12 @@ export function get_grav_strain_server(file: File, callback: Function){
     req.send(formData);
 }
 
-export function get_grav_spectrogram_server(file: File, callback: Function){
+export function get_grav_spectrogram_server(file: File | string, default_set: string, callback: Function){
     let req = new XMLHttpRequest();
     let uploadUrl = baseUrl + "/gravprofile"
     let formData = new FormData();
     formData.append("file", file)
+    formData.append("default_set", default_set)
     req.responseType = "json"
     // Need to change this code to use an image response
 

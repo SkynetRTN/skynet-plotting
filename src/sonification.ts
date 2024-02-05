@@ -41,9 +41,16 @@ export function play(myChart: Chart) {
     setTimeout(() => {//so for some dumb idiot reason, the color of the button doesnt change to yellow until AFTER sonification unless you put a timeout on this
         //audioCtx.resume();
         if (myChart.data.modeLabels.lastMode == "gravity") {
+            const dropdown = document.getElementById("datasetSelector") as HTMLSelectElement;
             console.log("gravity mode played");
-            sonification.audioSource = sonify(myChart, [0], speed, false);
-            sonification.audioSource.onended = () => pause(myChart);
+            if (dropdown.value == 'model'){
+                sonification.audioSource = sonify(myChart, [0], speed, false);
+                sonification.audioSource.onended = () => pause(myChart);
+            }
+            if (dropdown.value == 'strain'){
+                sonification.audioSource = sonify(myChart, [1], speed, false);
+                sonification.audioSource.onended = () => pause(myChart);
+            }
         }
         if (myChart.data.modeLabels.lastMode === 'lc') {
             sonification.audioSource = sonify(myChart, [0, 1], speed, false);
@@ -133,9 +140,18 @@ export function saveSonify(myChart: Chart) {
 
 
     if (myChart.data.modeLabels.lastMode == "gravity") {
-        if (!sonification.audioSource.buffer)
+        const dropdown = document.getElementById("datasetSelector") as HTMLSelectElement;
+        if (dropdown.value == 'model'){
+            if (!sonification.audioSource.buffer)
             sonification.audioSource = sonify(myChart, [0], speed, false);
-        downloadBuffer(sonification.audioSource.buffer)
+        downloadBuffer(sonification.audioSource.buffer) 
+        }
+        if (dropdown.value == 'strain'){
+            if (!sonification.audioSource.buffer)
+            sonification.audioSource = sonify(myChart, [1], speed, false);
+        downloadBuffer(sonification.audioSource.buffer) 
+        }
+
     } else if (myChart.data.modeLabels.lastMode === 'lc') {
         if (!sonification.audioSource.buffer)
             sonification.audioSource = sonify(myChart, [0, 1], speed)
