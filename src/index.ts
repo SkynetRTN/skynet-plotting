@@ -89,7 +89,12 @@ window.onload = function () {
             } else if ('myChart3' in window) {
                 document.getElementById('no-signature-alert').style.display = 'none';
                 saveImage([3, 4, 2], signature, true, 1.0, true);
-            }
+            //for gravity
+            } else if ('myGrav2' in window) {
+                document.getElementById('no-signature-alert').style.display = 'none';
+                saveImage([1, 2], signature, true, 1.0, false, true);
+                }
+                
             document.getElementById('dismiss-honor-modal').click();
         }
     };
@@ -328,14 +333,19 @@ export function updateChartDataLabel(myChart: Chart, form: HTMLFormElement) {
     myChart.update('none');
 }
 
-function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3p: boolean = false) {
+function saveImage(chartNums: any[], signature: string, jpg = true, quality = 1.0, isCluster3p: boolean = false, isGrav: boolean = false) {
     const destCanvas = document.createElement('canvas');
     destCanvas.width = 0;
     destCanvas.height = 0;
     chartNums = chartNums.length === 0 ? [''] : chartNums;
     const canvases: HTMLCanvasElement[] = [];
     for (let c = 0; c < chartNums.length; c++) {
-        const graphName = 'myChart' + chartNums[c].toString();
+        let graphName: string;
+        if (isGrav){
+            graphName = 'myGrav' + chartNums[c].toString();
+        } else {
+            graphName = 'myChart' + chartNums[c].toString();
+        }    
         const canvas = document.getElementById(graphName) as HTMLCanvasElement;
         destCanvas.width += canvas.width;
         destCanvas.height = destCanvas.height < canvas.height ? canvas.height : destCanvas.height;

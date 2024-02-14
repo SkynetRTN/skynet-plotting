@@ -193,7 +193,9 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
   linkInputs(gravityModelForm["mass"],gravityModelForm["mass_num"],2.5,250,0.01,25,true);
   linkInputs(gravityModelForm["ratio"],gravityModelForm["ratio_num"],1.000,10.000,0.001,1.000, true);
 
-  document.getElementById('myChart').hidden = true;
+  document.getElementById('myChart').remove();
+  document.getElementById('myChart1').remove();
+  document.getElementById('myChart3').remove();
   document.getElementById('grav-charts').style.display = 'inline';
   //document.getElementById('axis-label1').style.display = 'inline';
   //document.getElementById('axis-label2').style.display = 'inline';
