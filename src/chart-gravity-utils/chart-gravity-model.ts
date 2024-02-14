@@ -1,14 +1,14 @@
 
 import { Chart, ScatterDataPoint } from "chart.js";
 import {baseUrl, httpGetAsync, httpPostAsync} from "../chart-cluster-utils/chart-cluster-util";
-import {ratioMassLogSpace, totalMassLogSpace, ratioMassLogSpaceStrain, totalMassLogSpaceStrain} from "./chart-gravity-grid-dimension";
+import {ratioMassLogSpace, totalMassLogSpace, ratioMassLogSpaceStrain, totalMassLogSpaceStrain, phaseList} from "./chart-gravity-grid-dimension";
 import Handsontable from "handsontable";
 
 export function updateGravModelData(gravityModelForm: GravityModelForm, updateChartCallback: Function = () => { }){
     // these are split up because the frequency model had a different less dense grid than the strain one
     const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGrid(gravityModelForm);
-    const [totalMassStrain, ratioMassStrain, totalMassDivGridMassStrain] = fitValuesToGridStrain(gravityModelForm);
-    httpGetAsync(generateURL(totalMass, ratioMass, totalMassStrain, ratioMassStrain), (response: string) => {
+    const [totalMassStrain, ratioMassStrain, phaseStrain, totalMassDivGridMassStrain] = fitValuesToGridStrain(gravityModelForm);
+    httpGetAsync(generateURL(totalMass, ratioMass, totalMassStrain, ratioMassStrain, phaseStrain), (response: string) => {
         let json = JSON.parse(response);
         let strainTable = json['strain_model'];
         let freqTable = json['freq_model']
@@ -21,8 +21,8 @@ export function updateGravModelData(gravityModelForm: GravityModelForm, updateCh
 ////////////////////////////////////
 ///////////////////////////////////
 export function updateRawStrain(gravityModelForm: GravityModelForm, sessionID: string, updateChartCallback: Function = () => {}) {
-    const [totalMass, ratioMass, totalMassDivGridMass] = fitValuesToGridStrain(gravityModelForm);
-    const url = generateURLData(totalMass, ratioMass, sessionID);
+    const [totalMass, ratioMass, phaseMass, totalMassDivGridMass] = fitValuesToGridStrain(gravityModelForm);
+    const url = generateURLData(totalMass, ratioMass, phaseMass, sessionID);
 
     httpPostAsync(url, {}, (response: string) => {
         let json = JSON.parse(response);
@@ -100,20 +100,22 @@ export function extract_strain_model(specto: number[][], chart: Chart , x0: numb
  * @param totalMass
  * @param ratioMass
  */
-function generateURL(totalMass: number, ratioMass: number, totalMassStrain: number, ratioMassStrain: number) {
+function generateURL(totalMass: number, ratioMass: number, totalMassStrain: number, ratioMassStrain: number, phaseStrain: number) {
     
     return baseUrl + "/gravity?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
         + "&totalMassStrain=" + totalMassStrain.toString()
         + "&ratioMassStrain=" + ratioMassStrain.toString()
+        + "&phaseStrain=" + phaseStrain.toString()
 }
 
-function generateURLData(totalMass: number, ratioMass: number, sessionID: string) {
+function generateURLData(totalMass: number, ratioMass: number, phaseMass: number, sessionID: string) {
 
     return baseUrl + "/gravitydata?"
         + "totalMass=" + totalMass.toString()
         + "&ratioMass=" + ratioMass.toString()
+        + "&phaseMass=" + phaseMass.toString()
         + "&sessionID=" + sessionID
 }
 
@@ -160,6 +162,7 @@ function fitValuesToGrid(gravityModelForm : GravityModelForm){
 function fitValuesToGridStrain(gravityModelForm : GravityModelForm){
     let totalMass = parseFloat(gravityModelForm["mass_num"].value);
     let ratioMass = parseFloat(gravityModelForm["ratio_num"].value);
+    let phase = parseFloat(gravityModelForm["phase_num"].value) * Math.PI / 180 ;
 
     // Fitting the sliders to each logspace
     //Mass Ratio
@@ -193,6 +196,22 @@ function fitValuesToGridStrain(gravityModelForm : GravityModelForm){
         }
     }
     let roundedTotalMass = totalMassLogSpaceStrain[argmin_tm];
+
+        //Total Mass
+        const differences_phase: number[] = [];
+        for (let i = 0; i < phaseList.length; i++){
+            differences_phase.push(Math.abs(phase - phaseList[i]));
+        }
+    
+        let min_phase: number = 4.000;
+        let argmin_phase = 0;
+        for (let i = 0; i < phaseList.length; i++){
+            if (differences_phase[i] < min_phase) {
+                min_phase = differences_phase[i];
+                argmin_phase = i;
+            }
+        }
+        let roundedPhase = phaseList[argmin_phase];
     let totalMassDivGridMass = totalMass / roundedTotalMass;
-    return [roundedTotalMass, roundedMassRatio, totalMassDivGridMass];
+    return [roundedTotalMass, roundedMassRatio, roundedPhase, totalMassDivGridMass];
 }

@@ -20,7 +20,7 @@ import {cluster3} from './chart-cluster3';
 import {cluster3p} from "./chart-cluster3plus";
 import {round} from './my-math';
 import {gravity, gravityClass, gravityFileUpload} from './chart-gravity';
-import {gravityPro, gravityProFileUpload} from './chart-gravitypro';
+import {gravityPro, gravityProFileUpload, gravityProDefaultFileUpload} from './chart-gravitypro';
 import {transient, transientFileUpload} from './chart-transient';
 import Chart, {AnimationSpec, ChartType, LinearScaleOptions} from 'chart.js/auto';
 import Handsontable from 'handsontable';
@@ -200,9 +200,16 @@ function chartType(chart: string) {
         let grav_pro_objects = gravityPro();
         objects = [grav_pro_objects[0], grav_pro_objects[1][0]]
         document.getElementById('file-upload-button').style.display = 'inline';
+        console.log('YAY')
         document.getElementById('file-upload').onchange = function (evt) {
             gravityProFileUpload(evt, grav_pro_objects[0], grav_pro_objects[1] as Chart<'line'>[], grav_pro_objects[2]);
+            // Trigger the file upload automatically after a short delay
         }
+        setTimeout(function () {
+            console.log('REKT')
+            // Replace this line with the new function and pass the default file directly
+            gravityProDefaultFileUpload(grav_pro_objects[0], grav_pro_objects[1] as Chart<'line'>[], grav_pro_objects[2]);
+        }, 100);
     } else if (chart === 'transient') {
         let transientObjects: [Handsontable, TransientChart];
         transientObjects = transient();
