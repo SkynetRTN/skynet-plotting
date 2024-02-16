@@ -95,11 +95,10 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
       '<button class = "graphControlAlt" id="Reset" style = "position:; top:1px; right:35px; padding: 0px;   width:50px; text-align: center;">Reset</button>\n'+
   '</div>\n')
   document.getElementById("extra-options").insertAdjacentHTML("beforeend",
-  '<div style="position: relative;">\n' +
   '<label style = "position:relative; right:190px;">Dataset:</label>' +
   '<select id="datasetSelector" name="Dataset" style="position: relative; right:180px" title="Sonification Dataset">' +
-              '<option value="strain" title="B filter">Strain</option>' +
-              '<option value="model" title="V filter" selected>Model</select>' +
+              '<option value="strain">Strain</option>' +
+              '<option value="model" selected>Model</select>' +
   '<button id="sonify" style = "position: relative; right:170px;"/>Sonify</button>' +
   '<label style = "position:relative; right:160px;">Speed:</label>' +
   '<input class="extraoptions" type="number" id="speed" min="0" placeholder = "1" value = "1" style="position:relative; right:210px; width: 52px;">' +
@@ -120,41 +119,62 @@ export function gravityPro(): [Handsontable, Chart[], gravityProClass] {
 
     // let standardViewRadio = document.getElementById("standardView") as HTMLInputElement;
     let Reset = document.getElementById("Reset") as HTMLInputElement;
+    // console.log(Reset)
     let panLeft = document.getElementById("panLeft") as HTMLInputElement;
     let panRight = document.getElementById("panRight") as HTMLInputElement;
     let zoomIn = document.getElementById('zoomIn') as HTMLInputElement;
     let zoomOut = document.getElementById('zoomOut') as HTMLInputElement;
 
-    
-    
+
     let pan: number;
-    panLeft.onmousedown = function() {
-        pan = setInterval( () => {myChart.pan(5)}, 20 )
+    panLeft.onmousedown = function () {
+        pan = setInterval(() => {
+            myChart.pan(5)
+        }, 20)
     }
-    panLeft.onmouseup = panLeft.onmouseleave = function() {
+    panLeft.onmouseup = panLeft.onmouseleave = function () {
         clearInterval(pan);
     }
-    panRight.onmousedown = function() {
-        pan = setInterval( () => {myChart.pan(-5)}, 20 )
-      }
-    panRight.onmouseup = panRight.onmouseleave = function() {
+    panRight.onmousedown = function () {
+        pan = setInterval(() => {
+            myChart.pan(-5)
+        }, 20)
+    }
+    panRight.onmouseup = panRight.onmouseleave = function () {
         clearInterval(pan);
     }
 
-      //handel zoom/pan buttons
-      let zoom: number;
-      zoomIn.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(1.03) }, 20);
-      }
-      zoomIn.onmouseup = zoomIn.onmouseleave = function () {
+
+    Reset.onclick = function () {
+        myChart.options.scales = {
+            x: {
+                type: 'linear',
+                position: 'bottom'
+            }
+        }
+        myChart.update();
+    }
+
+    //handel zoom/pan buttons
+    let zoom: number;
+    zoomIn.onmousedown = function () {
+        zoom = setInterval(() => {
+            myChart.zoom(1.03)
+        }, 20);
+
+    }
+    zoomIn.onmouseup = zoomIn.onmouseleave = function () {
         clearInterval(zoom);
-      }
-      zoomOut.onmousedown = function () {
-        zoom = setInterval(() => { myChart.zoom(0.97); }, 20);
-      }
-      zoomOut.onmouseup = zoomOut.onmouseleave = function () {
+    }
+    zoomOut.onmousedown = function () {
+        zoom = setInterval(() => {
+            myChart.zoom(0.97);
+        }, 20);
+
+    }
+    zoomOut.onmouseup = zoomOut.onmouseleave = function () {
         clearInterval(zoom);
-      }
+    }
   // Link each slider with corresponding text box
   const gravityForm = document.getElementById("gravity-form") as GravityForm;
 
