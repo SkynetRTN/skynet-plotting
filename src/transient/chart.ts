@@ -161,7 +161,7 @@ export class TransientChart {
      * @param modelForm - form containing the modelling parameters
      */
     updateModel(form: VariableLightCurveForm) {
-        const range = [Math.max(this.getVisibleRange()[0], 0.1), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
+        const range = [Math.max(this.getVisibleRange()[0], 0.0001), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
         const model = new Model(form);
 
         const eventTimeInput = document.getElementById('time') as HTMLInputElement;
@@ -196,6 +196,8 @@ export class TransientChart {
         this.chart.options.scales["x"].max = range[1];
 
         const model = new Model(modelForm);
+
+        console.log(range);
 
         photometry.groupByFilterName().forEach((_, key) => {
             if (FILTERS.includes(key)) {
