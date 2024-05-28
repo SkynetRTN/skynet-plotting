@@ -908,7 +908,11 @@ export function gravityProDefaultFileUpload(
     gravClass.updateModelPlot(myCharts[0], myCharts[1], gravityForm, gravityTimeForm);
     //console.log("Implementing background")
     //decode the spectogram
-    myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
+    //myCharts[1].options.plugins.background.image = b64toBlob(response.response.image.split("'")[1].slice(0,-2), "image/png")
+    // for default files we now have the image on the front end
+    const image = new Image();
+    image.src = '../assets/spectplot.png';
+    myCharts[1].options.plugins.background.image = image;
     myCharts[1].update()
 
     myCharts[1].endBuffer()

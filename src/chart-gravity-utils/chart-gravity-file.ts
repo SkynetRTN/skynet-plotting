@@ -29,8 +29,10 @@ export function get_grav_strain_server(file: File | string, default_set: string,
         }
     }
     req.open("POST", uploadUrl, true);
+    //console.log(uploadUrl);
     req.setRequestHeader("Content-Encoding", "multipart/form-data")
     req.send(formData);
+    //console.log(formData);
 }
 
 export function get_grav_spectrogram_server(file: File | string, default_set: string, callback: Function){
@@ -58,8 +60,10 @@ export function get_grav_spectrogram_server(file: File | string, default_set: st
     }
 
     req.open("POST", uploadUrl, true);
+    //console.log(uploadUrl);
     req.setRequestHeader("Content-Encoding", "multipart/form-data")
     req.send(formData);
+    //console.log(formData);
 }
 
 
