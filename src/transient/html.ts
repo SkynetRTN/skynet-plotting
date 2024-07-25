@@ -68,7 +68,7 @@ export class HTML {
         linkInputs(parameterForm["ebv"], parameterForm["ebv_num"], 0, 1, step, ebv,
             false, true, 0, 100);
         linkInputs(parameterForm["t"], parameterForm["t_num"], chart.getMinMJD(),
-            chart.getMaxMJD(), step, t, false, true, -10000, 10000);
+            chart.getMaxMJD(), step, t, false, true, -10000, 1000000);
         linkInputs(parameterForm["mag"], parameterForm["mag_num"], 0.,
             30., step, m, false, true, -1000, 1000);
     }

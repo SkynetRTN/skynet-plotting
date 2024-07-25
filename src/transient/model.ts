@@ -107,6 +107,7 @@ export class Model {
         // The event time is already factored into the current time. So, only need to subtract
         // the event time from the reference time.
         const eq1 = Math.log10(FZP0 / FZP);
+
         const eq2 = this.temporalIndex * Math.log10(currentTime / (this.referenceTime - eventTime));
         const eq3 = this.spectralIndex * Math.log10(f / f0);
         const eq4 = Anu / 2.5;
@@ -119,6 +120,7 @@ export class Model {
             console.log('Combined: ', this.referenceMagn - 2.5 * (eq1 + eq2 + eq3 - eq4));
             console.log('-');
         }
+
         return this.referenceMagn - (2.5 * (eq1 + eq2 + eq3 - eq4));
     }
 }

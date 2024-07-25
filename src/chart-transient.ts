@@ -30,12 +30,12 @@ declare global {
 export function transient(): [Handsontable, TransientChart] {
     window.photometry = new Photometry();
 
-    // initalize webpage components
+    // Initalize webpage components
     let components = initialize()
     const myTable = components.table;
     const myChart = components.chart;
 
-    // define all forms and inputs that the user can modify
+    // Define all forms and inputs that the user can modify
     const chartInfoForm = document.getElementById('chart-info-form') as ChartInfoForm;
     const modelForm = document.getElementById('transient-form') as VariableLightCurveForm;
     const eventTimeInput = document.getElementById('time') as HTMLInputElement;
@@ -378,7 +378,7 @@ const updateFittingMethodToAuto = (chart: TransientChart, form: VariableLightCur
     regression.maxRange = chart.getVisibleRange()[1];
     regression.defineData(window.photometry);
 
-    // asynchrounously call the fitting routine
+    // Asynchrounously call the fitting routine
     let status = regression.fit();
     status.then(result => {
         if (result === 'success') chart.updateModel(form);
@@ -406,7 +406,7 @@ export function transientFileUpload(evt: Event, table: Handsontable, chart: Tran
 
         let rows = window.photometry.
                     createRowsFromLists(uploadedData['mjd'].map((val: string) => parseFloat(val)),
-                                        uploadedData['mag'].map((val: string) => parseFloat(val)),
+                                        uploadedData['calibrated_mag'].map((val: string) => parseFloat(val)),
                                         uploadedData['mag_error'].map((val: string) => parseFloat(val)),
                                         uploadedData['filter']);
         window.photometry.update(rows); // update data object with uploaded data
