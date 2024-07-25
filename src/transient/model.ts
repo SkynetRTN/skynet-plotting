@@ -102,7 +102,7 @@ export class Model {
 
         const FZP0 = ZERO_POINT_VALUES[this.referenceFltr];
         const FZP = ZERO_POINT_VALUES[filter];
-        const Anu = calculateLambda(this.atmExtinction * Rv, wavelength[this.referenceFltr]);
+        const Anu = calculateLambda(this.atmExtinction * Rv, wavelength[filter]);
 
         // The event time is already factored into the current time. So, only need to subtract
         // the event time from the reference time.
