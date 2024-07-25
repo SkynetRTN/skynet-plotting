@@ -1,22 +1,73 @@
-# skynet-plotting
+# Skynet Plotting
 
 ## Getting Started
-First, make sure you have installed [node](https://nodejs.org/en/) using [nvm](https://github.com/nvm-sh/nvm). If you are using Windows, I recommend [setting up Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install). Then [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this repository. Once cloned, run the following command to install required Node.js packages.
+The Skynet Plotting project relies on `Node.js`. The installation varies
+depending on your operating system. However, once `Node.js` is installed,
+the project setup is independent of the operating system.
+
+### Installing Node.js on Windows
+Install [Fast Node Manager (fnm)](https://github.com/Schniz/fnm).
+```bash
+winget install Schniz.fnm
+```
+
+You may need to close and reopen your terminal before continuing.
+
+Environment variables need to be setup before you can start using fnm. 
+This is done by evaluating the output of fnm env.
+```bash
+eval "$(fnm env --use-on-cd)"
+```
+`Note: the above command assumes that you're using git bash. See the fnm 
+repo for instruction with other terminals.`
+
+Download and install Node.js
+```bash
+fnm use --install-if-missing 20
+```
+
+To verify that everything worked, run `node -v`. You should see the
+version output.
+
+### Installing Node.js on Linux or Mac
+Install [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm).
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+```
+
+Download and install Node.js
+```bash
+nvm install 20
+```
+
+To verify that everything worked, run `node -v`. You should see the
+version output.
+
+### Setup
+Clone the repository.
+
+```bash
+clone https://github.com/SkynetRTN/skynet-plotting.git
+```
+Install the required Node.js packages.
 ```bash
 $ npm install
 ```
-Now you can start a testing server that will automatically reload as you make changes.
+
+Start a testing server that will automatically reload as you make changes.
 ```bash
 $ npm start
 ```
-To build the site for production
+
+### Preparing for Production
+Build the site. This will place the bundled files in the `./dist` directory.
 ```bash
 $ npm run build
 ```
-which will place the bundled files in the `./dist` directory.
 
 _The API urls are different for development and production. The switch is handled automatically by vite environment variable._
 
+### Using the Server Companion
 To use functionalities that require our backend server, for example in Cluster and Gravity, check out [@RuideFu](https://github.com/RuideFu)'s [skynet-plotting-server](https://github.com/UNC-Skynet/skynet-plotting-server), forked from [@finnsjames](https://github.com/finnsjames)'s [skynet-plotting-server](https://github.com/finnsjames/skynet-plotting-server).
 
 *Note: `npm start` is a shortcut for `npm run start`. Any `npm run <your-script-name>` command (like the two we used here) is defined in the `scripts` section of `package.json`. Take a look by yourself! In other words, these are not some magic commands that npm has built-in, but rather some convenient "scripts" that we have defined.*

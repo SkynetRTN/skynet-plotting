@@ -106,7 +106,7 @@ export class TransientChart {
     }
 
     /**
-     * Returns the the min and max values of the x-axis as seen in the 
+     * Returns the min and max values of the x-axis as seen in the
      * viewport.
      * 
      * @returns tuple containing the min and max x values
@@ -158,7 +158,7 @@ export class TransientChart {
      * at two points and plots them by drawing a straight line between
      * them. 
      * 
-     * @param modelForm - form containing the modelling parameters
+     * @param form - form containing the modelling parameters
      */
     updateModel(form: VariableLightCurveForm) {
         const range = [Math.max(this.getVisibleRange()[0], 0.0001), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
@@ -187,7 +187,7 @@ export class TransientChart {
      * photometry data and plots them by drawing a straight line between 
      * them.
      * 
-     * @param data - updated photometry object
+     * @param photometry - updated photometry object
      * @param modelForm - form containing the modelling parameters
      */
     addModel(photometry: Photometry, modelForm: VariableLightCurveForm, eventTime: number) {
@@ -305,7 +305,8 @@ export class TransientChart {
 
     /**
      * Shifts the y-axis by the specified amount and updates the corresponding labels
-     * 
+     *
+     * @param filter
      * @param ros - signed relative offset (compared to previously applied offset)
      * @param aos - signed absolute offset (compared to the raw table data)
      */
@@ -421,8 +422,8 @@ export class TransientChart {
 
     /**
      * Sets the scale to either log or linear depending on the model
-     * 
-     * @param model - 'Power Law' or 'Exponential'
+     *
+     * @param scale
      */
     setScale(scale: string) {
         if (scale !== 'linear' && scale !== 'logarithmic') return;

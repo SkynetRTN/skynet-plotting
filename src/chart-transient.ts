@@ -148,10 +148,11 @@ const initialize = () => {
 }
 
 /**
- * Adds a new row to the photomtry data. Rows created from pasting or undoing are handled spearately.
- * The only way for the the logic to be executed is if a user manualy adds a row which can only be
- * done one at a time. Thus, the amount added is always 1. If the row contains invalid data, then it
- * will not be displayed in the chart.
+ * Adds a new row to the photometry data. Rows created from pasting or
+ * undoing are handled separately. The only way for the logic to be
+ * executed is if a user manually adds a row which can only be done one
+ * at a time. Thus, the amount added is always 1. If the row contains
+ * invalid data, then it will not be displayed in the chart.
  * 
  * @param chart - TransientChart object
  * @param table - Handsontable object
@@ -219,10 +220,11 @@ const update = (chart: TransientChart, table: Handsontable) => {
 }
 
 /**
- * Parses the user input from the 'data' entry field and shifts the 
+ * Parses the user input from the 'data' entry field and shifts the
  * corresponding magnitudes in the Photometry data and Chart. Ignores
  * user input that is not of the form 'filterName operator number'.
- * 
+ *
+ * @param chart -
  * @param form - ChartInfoForm object
  */
 const updateMagnitudes = (chart: TransientChart, form: ChartInfoForm) => {
@@ -244,9 +246,11 @@ const updateMagnitudes = (chart: TransientChart, form: ChartInfoForm) => {
 }
 
 /**
- * Shifts the julian dates (x-axis of the chart) by the value set in the event time field
- * 
+ * Shifts the julian dates (x-axis of the chart) by the value set in the
+ * event time field.
+ *
  * @param chart - ChartJS object
+ * @param eventTimeInput -
  */
 const updateJulianDates = (chart: TransientChart, eventTimeInput: HTMLInputElement) => {
     const eventTime = parseFloat(eventTimeInput.value);
@@ -378,7 +382,7 @@ const updateFittingMethodToAuto = (chart: TransientChart, form: VariableLightCur
     regression.maxRange = chart.getVisibleRange()[1];
     regression.defineData(window.photometry);
 
-    // Asynchrounously call the fitting routine
+    // Asynchronously call the fitting routine
     let status = regression.fit();
     status.then(result => {
         if (result === 'success') chart.updateModel(form);
@@ -392,7 +396,7 @@ const updateFittingMethodToAuto = (chart: TransientChart, form: VariableLightCur
  * 
  * @param evt - event handler for file upload
  * @param table - HandsOnTable object
- * @param myChart - ChartJS object
+ * @param chart - ChartJS object
  */
 export function transientFileUpload(evt: Event, table: Handsontable, chart: TransientChart) {
 
