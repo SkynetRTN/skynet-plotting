@@ -1,4 +1,4 @@
-import { FILTERS } from "../chart-transient-utils/chart-transient-util";
+import { FILTERS } from "./utils";
 import { pluralize } from "../utilities/string";
 
 /**
@@ -112,7 +112,7 @@ export class Photometry {
     /**
      * Returns mock data that is easily fitted to. This is purely for
      * show when loading in the page and will be overwritten when the 
-     * user uplaods their own dataset.
+     * user uploads their own dataset.
      * 
      * @returns list of Row data
      */
@@ -194,8 +194,10 @@ export class Photometry {
      * @param data list of Row data
      */
     update(data: Row[]) {
-        this.julianDates = [], this.magnitudes = [];
-        this.uncertainties = [], this.filters = [];
+        this.julianDates = []
+        this.magnitudes = [];
+        this.uncertainties = []
+        this.filters = [];
 
         for (let row of data) {
             this.julianDates.push(row.julianDate);
@@ -317,7 +319,7 @@ export class Photometry {
 
     /**
      * Removes all rows of photometry data that contain the property value
-     * that is outside of the provided bounds. One bound and not the other 
+     * that is outside the provided bounds. One bound and not the other
      * may be passed to filter via a floor or ceil
      * 
      * @param property - value to filter by: 'magnitude' | 'julianDate' | 'uncertainty'

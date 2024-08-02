@@ -18,10 +18,6 @@ declare global {
 }
 
 
-// TODO: ADD FILTER BY BUTTONS
-// TODO: Model doesn't account for eb-v
-// TODO: Want the model to be plotted across the entire dataset regardless of zoom
-
 /**
  * The Transient Plotting Tool is useful for viewing photometry data
  * and fitting magnitude curves for transient events such as GRBs and 
@@ -30,7 +26,7 @@ declare global {
 export function transient(): [Handsontable, TransientChart] {
     window.photometry = new Photometry();
 
-    // Initalize webpage components
+    // Initialize webpage components
     let components = initialize()
     const myTable = components.table;
     const myChart = components.chart;
@@ -88,9 +84,13 @@ export function transient(): [Handsontable, TransientChart] {
     // ===================================================================
     modelForm.addEventListener('input', (event: Event) => {
         const target = event.target as HTMLInputElement;
-        // temporal and spectral are handled separately above
-        if (target.name !== 'temporal' && target.name !== 'spectral' && 
-            target.name !== 'time' && target.name !== '') {
+
+        if (target.id !== '' && target.id !== '') {
+            // Reset bounds for parameters that adjust the boundaries
+            if (target.id === 'time' && target.id === 't_num') {
+                myChart.setBoundaries(window.photometry.julianDates, window.photometry.magnitudes);
+            }
+
             modelForm.oninput = () => {
                 myChart.updateModel(modelForm);
                 myChart.update();
@@ -101,12 +101,9 @@ export function transient(): [Handsontable, TransientChart] {
     // ===================================================================
     // =========================== Data Table ============================
     // ===================================================================
-    // myTable.addHook('afterChange', (changes, source) => updateAfterRowChange(myChart, myTable, changes, source));
-    myTable.addHook('afterChange', (_, __) => update(myChart, myTable));
+    myTable.addHook('afterChange', (_, __) => update(myChart, myTable, Number(eventTimeInput.value)));
     myTable.addHook('afterRemoveRow', (index, amount) => updateAfterRemoveRow(myChart, myTable, index, amount));
     myTable.addHook('afterCreateRow', (index, _, source) => updateAfterCreateRow(myChart, myTable, index, source));
-    // myTable.addHook('afterPaste', (data, coords) => updateAfterPaste(myChart, myTable, data, coords));
-    // myTable.addHook('afterUndo', (action) => updateAfterUndo(myChart, myTable, action));
 
     // ===================================================================
     // ============================== Chart ==============================
@@ -140,7 +137,7 @@ const initialize = () => {
     chart.addScatterData(window.photometry);
     chart.setBoundaries(window.photometry.julianDates, window.photometry.magnitudes);
     HTML.createModelSliders(chart);
-    chart.addModel(window.photometry, modelForm, eventTime);
+    chart.addModel(window.photometry, modelForm);
     chart.updateLegend(chartForm);
     chart.setReverseScale(true);
 
@@ -186,24 +183,22 @@ const updateAfterRemoveRow = (chart: TransientChart, table: Handsontable, index:
 
 /**
  * 
- * @param chart 
- * @param table 
+ * @param chart - chart object
+ * @param table - table object
+ * @param eventTime - event time in units of modified julian date
  */
-const update = (chart: TransientChart, table: Handsontable) => {
+const update = (chart: TransientChart, table: Handsontable, eventTime: number) => {
     let julianDates: number[] = [], magnitudes: number[] = []; 
     let uncertainties: number[] = [], filters: string[] = [];
 
     const data = table.getData();
     for (let i = 0; i < data.length; i++) {
-        julianDates.push(Number(data[i][0]));
+        julianDates.push(Number(data[i][0]) - eventTime);
         magnitudes.push(Number(data[i][1]));
         filters.push(data[i][2]);
         uncertainties.push(Number(data[i][3]));
     }
-    const rows = window.photometry.createRowsFromLists(julianDates, magnitudes,
-                                                       uncertainties, filters);
-
-    // cleanup start
+    const rows = window.photometry.createRowsFromLists(julianDates, magnitudes, uncertainties, filters);
     const tableFilters = [...new Set(filters)];
     const newFilters = findNewElements(tableFilters, window.photometry.getUniqueFilters());
     
@@ -212,11 +207,9 @@ const update = (chart: TransientChart, table: Handsontable) => {
     for (const filter of newFilters) {
         window.photometry.setMagnitudeOffset(filter, 0);
     }
-    // cleanup start
 
     chart.updateAfterTableChange(window.photometry);
     updateTableHeight(table);
-
 }
 
 /**

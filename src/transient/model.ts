@@ -1,4 +1,4 @@
-import { formatFilterName, ZERO_POINT_VALUES } from "./../chart-transient-utils/chart-transient-util";
+import { formatFilterName, ZERO_POINT_VALUES } from "./utils";
 import { baseUrl, calculateLambda, filterWavelength } from "../chart-cluster-utils/chart-cluster-util";
 import { Photometry } from "./photometry";
 
@@ -8,10 +8,12 @@ export class Model {
     constructor(form: VariableLightCurveForm) {
         this.temporalIndex = parseFloat(form["a_num"].value);
         this.spectralIndex = parseFloat(form["b_num"].value);
-        this.referenceTime = parseFloat(form["t_num"].value);
+        this.referenceTime = parseFloat(form["t_num"].value) - parseFloat(form["time"].value);
         this.referenceMagn = parseFloat(form["mag_num"].value);
         this.atmExtinction = parseFloat(form["ebv_num"].value);
         this.referenceFltr = form["filter"].value;
+        this.spectralModel = form["spectral"].value;
+        this.temporalModel = form["temporal"].value;
     }
 
     private _temporalIndex: number;
@@ -20,6 +22,8 @@ export class Model {
     private _referenceMagn: number;
     private _atmExtinction: number;
     private _referenceFltr: string;
+    private _spectralModel: string;
+    private _temporalModel: string;
 
     get temporalIndex(): number {
         return this._temporalIndex;
@@ -86,42 +90,52 @@ export class Model {
     }
 
     set referenceFltr(f: string) {
-        if (f === null || f === null) {
+        if (f === null) {
             this._referenceFltr = 'U';
         } else {
             this._referenceFltr = f;
         }
     }
 
-    /* METHODS */
-    calculate(filter: string, currentTime: number, eventTime: number): number {
-        const wavelength = filterWavelength;
-        const f = wavelength[filter];
-        const f0 = wavelength[this.referenceFltr];
-        const Rv = 3.1;
+    get spectralModel(): string {
+        return this._spectralModel;
+    }
 
+    set spectralModel(m: string) {
+        this._spectralModel = m;
+    }
+
+    get temporalModel(): string {
+        return this._temporalModel;
+    }
+
+    set temporalModel(m: string) {
+        this._temporalModel = m;
+    }
+
+    /* METHODS */
+    calculate(filter: string, currentTime: number): number {
+        const wavelength = filterWavelength;
+
+        let eqTime = 1.0;
         const FZP0 = ZERO_POINT_VALUES[this.referenceFltr];
         const FZP = ZERO_POINT_VALUES[filter];
-        const Anu = calculateLambda(this.atmExtinction * Rv, wavelength[filter]);
 
-        // The event time is already factored into the current time. So, only need to subtract
-        // the event time from the reference time.
-        const eq1 = Math.log10(FZP0 / FZP);
-
-        const eq2 = this.temporalIndex * Math.log10(currentTime / (this.referenceTime - eventTime));
-        const eq3 = this.spectralIndex * Math.log10(f / f0);
-        const eq4 = Anu / 2.5;
-
-        if (DEBUG) {
-            console.log('Flux term: ', eq1);
-            console.log('Time term: ', eq2);
-            console.log('Frequency term: ', eq3);
-            console.log('Extinction term: ', eq4);
-            console.log('Combined: ', this.referenceMagn - 2.5 * (eq1 + eq2 + eq3 - eq4));
-            console.log('-');
+        if (this.temporalModel == "Power Law") {
+            eqTime = Math.log10((currentTime / this.referenceTime)** this.temporalIndex);
+        }
+        else if (this.temporalModel == "Exponential") {
+            eqTime = Math.log10(Math.exp(1)) * this.temporalIndex * currentTime / this.referenceTime;
+        }
+        else {
+            console.log("Unsupported temporal model provided.");
         }
 
-        return this.referenceMagn - (2.5 * (eq1 + eq2 + eq3 - eq4));
+        const eqZP = Math.log10(FZP / FZP0);
+        const eqFreq = Math.log10((wavelength[this.referenceFltr] / wavelength[filter])** this.spectralIndex);
+        const eqExt = calculateLambda(3.1, wavelength[filter]);
+
+        return this.referenceMagn - 2.5 * (-eqZP + eqTime + eqFreq) + (eqExt * this.atmExtinction);
     }
 }
 
@@ -188,11 +202,14 @@ export class NonLinearRegression extends Model {
             'ydata': this.ydata,
             'filters': this.filters,
             'params': {
-                'm': this.referenceMagn,
-                'a': this.temporalIndex,
-                'b': this.spectralIndex,
-                't': this.referenceTime,
-                'filter': this.referenceFltr,
+                'ref_m': this.referenceMagn,
+                'ref_t': this.referenceTime,
+                'ref_f': this.referenceFltr,
+                'a_index': this.temporalIndex,
+                'b_index': this.spectralIndex,
+                'spectral': this.spectralModel,
+                'temporal': this.temporalModel,
+                'ebv': this.atmExtinction
             }
         };
     }
@@ -207,6 +224,12 @@ export class NonLinearRegression extends Model {
         // sliders
         form['a'].value = parseFloat(response['popt'][0]);
         form['b'].value = parseFloat(response['popt'][1]);
+
+        // Extinguished Power Law
+        if (response['popt'].length == 3) {
+            form['ebv_num'].value = parseFloat(response['popt'][2]);
+            form['ebv'].value = parseFloat(response['popt'][2]);
+        }
     }
 
     private LSMServerRequest() {

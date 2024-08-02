@@ -4,11 +4,11 @@ import "chartjs-chart-error-bars";
 import 'chartjs-plugin-zoom';
 
 import Chart from "chart.js/auto";
-import { round } from "./../my-math";
+import { round } from "../my-math";
 import { LinearScaleOptions } from "chart.js";
-import { FILTERCOLORS, FILTERS } from "./../chart-transient-utils/chart-transient-util";
-import { Photometry } from "../transient/photometry";
-import { Model } from "../transient/model";
+import { FILTERCOLORS, FILTERS } from "./utils";
+import { Photometry } from "./photometry";
+import { Model } from "./model";
 
 
 export class TransientChart {
@@ -145,27 +145,25 @@ export class TransientChart {
     updateAfterTableChange(photometry: Photometry) {
         const modelForm = document.getElementById('transient-form') as VariableLightCurveForm;
         const chartForm = document.getElementById('chart-info-form') as ChartInfoForm;
-        const eventTime = parseFloat((document.getElementById('time') as HTMLInputElement).value);
         this.setBoundaries(photometry.julianDates, photometry.magnitudes);
         this.addScatterData(photometry);
-        this.addModel(photometry, modelForm, eventTime);
+        this.addModel(photometry, modelForm);
         this.updateLegend(chartForm);
         this.update();
     }
 
     /**
-     * Calculates the magnitude due to a change in modelling parameters
+     * Calculates the magnitude due to a change in modeling parameters
      * at two points and plots them by drawing a straight line between
      * them. 
      * 
-     * @param form - form containing the modelling parameters
+     * @param form - form containing the modeling parameters
      */
     updateModel(form: VariableLightCurveForm) {
-        const range = [Math.max(this.getVisibleRange()[0], 0.0001), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
+        const range = [Math.max(this.getMinMJD(), 0.0001), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
         const model = new Model(form);
 
-        const eventTimeInput = document.getElementById('time') as HTMLInputElement;
-        const eventTime = parseFloat(eventTimeInput.value);
+        // console.log(range);
 
         for (let i = 0; i < this.chart.data.datasets.length; i++) {
             let data: {x: number, y: number}[] = [];
@@ -174,7 +172,7 @@ export class TransientChart {
                 for (let r of range) {
                     // fit to the raw data then shift by the offset
                     let offset = window.photometry.getMagnitudeOffset(label.split('-')[0]);
-                    data.push({x: r, y: model.calculate(label.split("-")[0], r, eventTime) + offset});
+                    data.push({x: r, y: model.calculate(label.split("-")[0], r) + offset});
                 }
                 this.chart.data.datasets[i].data = data;
             }
@@ -184,20 +182,18 @@ export class TransientChart {
 
     /**
      * Calculates the magnitude at two points due to a change in the
-     * photometry data and plots them by drawing a straight line between 
+     * photometry data and plots them by drawing a straight line between
      * them.
-     * 
+     *
      * @param photometry - updated photometry object
      * @param modelForm - form containing the modelling parameters
      */
-    addModel(photometry: Photometry, modelForm: VariableLightCurveForm, eventTime: number) {
+    addModel(photometry: Photometry, modelForm: VariableLightCurveForm) {
         const range = [Math.max(this.getVisibleRange()[0], this.getMinMJD()), Math.max(this.getVisibleRange()[1], this.getMaxMJD())];
         this.chart.options.scales["x"].min = range[0];
         this.chart.options.scales["x"].max = range[1];
 
         const model = new Model(modelForm);
-
-        console.log(range);
 
         photometry.groupByFilterName().forEach((_, key) => {
             if (FILTERS.includes(key)) {
@@ -205,7 +201,7 @@ export class TransientChart {
                 for (let r of range) {
                     // fit to the raw data then shift by the offset
                     let offset = window.photometry.getMagnitudeOffset(key);
-                    data.push({x: r, y: model.calculate(key, r, eventTime) + offset});
+                    data.push({x: r, y: model.calculate(key, r) + offset});
                 }
 
                 // add the model data points
