@@ -1,7 +1,7 @@
 # Skynet Plotting
 
 ## Description
-A graphing tool used by the OPIS! (Our Place In Space) and MWU! (The Multi-Wavelength Universe) [curricula](https://www.danreichart.com/curricula) at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).
+Skynet Plotting is a set of graphing tool designed to make data anlysis easy for the students taking the intro level astronony lab courses [Our Place In Space! (OPIS!)](https://www.danreichart.com/curricula) and [The Multi-Wavelength Universe (MWU!)](https://www.danreichart.com/curricula) curricula at UNC Chapel Hill and many other institutions. Developed under the guidance of [Dr. Dan Reichart](https://www.danreichart.com/news).
 
 ![Light Curve](./pics/light-curve.png)
 ![Periodogram](./pics/periodogram.png)
